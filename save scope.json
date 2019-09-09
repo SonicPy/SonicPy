@@ -1,0 +1,9 @@
+{
+    "Scope": {
+        "acquisition_type": "sample",
+        "channel": "CH1",
+        "instrument": "DPO5104",
+        "num_av": 999,
+        "vertical_scale": 0.95
+    }
+}

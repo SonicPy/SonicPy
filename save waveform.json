@@ -1,0 +1,11 @@
+{
+    "Waveform": {
+        "amplitude": 1.0,
+        "frequency": 29500000.0,
+        "function_shape": "sinusoid",
+        "instrument": "AFG3251",
+        "n_cycles": 3,
+        "operating_mode": "continuous",
+        "output_state": false
+    }
+}

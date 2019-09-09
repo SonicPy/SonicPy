@@ -1,6 +1,6 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
-*.py[cod]
+*.pyc
 *$py.class
 
 # C extensions
@@ -121,3 +121,38 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+
+# vscode and other
+.DS_Store
+.huskyrc.json
+out
+node_modules
+*.pyc
+*.vsix
+**/.vscode/.ropeproject/**
+**/testFiles/**/.cache/**
+*.noseids
+.nyc_output
+.vscode-test
+__pycache__
+npm-debug.log
+**/.mypy_cache/**
+!yarn.lock
+coverage/
+.vscode-test/**
+**/.venv*/
+precommit.hook
+pythonFiles/experimental/ptvsd/**
+pythonFiles/lib/**
+debug_coverage*/**
+languageServer/**
+languageServer.*/**
+bin/**
+obj/**
+.pytest_cache
+tmp/**
+.python-version
+.vs/
+.vscode/settings.json
+.vscode/launch.json

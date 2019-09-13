@@ -10,11 +10,27 @@ from functools import partial
 import json
 
 
-def get_arb():
+def make_wave(freq, total_time, points):
+    period = 1/freq
+    n_periods = total_time / period
+    points_per_period = round(points/n_periods)
+    delta_t = total_time/points
+    range_points = np.asarray(range(points))
+    time = range_points * delta_t
+    wave = np.sin(2*np.pi*freq*time)
+    return time, wave
 
-    desc = read_file_TEKAFG3000('/Users/ross/OneDrive/Documents/VSCodeProjects/tek_visa/3pulse.tfw')
+
+
+
+def get_arb():
+    '''
+    desc = read_file_TEKAFG3000('3pulse.tfw')
     data_length = desc['data_length']
     binary_waveform = desc['binary_waveform']
+    '''
+    time, binary_waveform = make_wave(69e6,50e-9,1000)
+
 
     #return binary_waveform
     #print(binary_waveform)
@@ -29,6 +45,7 @@ def get_arb():
     y = (data - av) * 2
     x = np.asarray(range(len(y))) * 1e-9
 
+    
     filtered = zero_phase_lowpass_filter([x,y], 4000000, 1)
     fy = filtered[1]
     fmx = max(fy)
@@ -43,7 +60,7 @@ def get_arb():
     return tuple(fy_scaled)
 
 
-y = get_arb()
+t, y = make_wave(30e6,50e-9,1000)
 
 from pyqtgraph.Qt import QtGui, QtCore
 import pyqtgraph as pg
@@ -53,7 +70,7 @@ app = QtGui.QApplication([])
 #mw = QtGui.QMainWindow()
 #mw.resize(800,800)
 
-win = pg.GraphicsLayoutWidget(show=True, title="binary_waveform")
+win = pg.GraphicsLayoutWidget()
 win.resize(1000,600)
 win.setWindowTitle('binary_waveform')
 
@@ -61,7 +78,9 @@ win.setWindowTitle('binary_waveform')
 pg.setConfigOptions(antialias=True)
 
 p2 = win.addPlot(title="Multiple curves")
-p2.plot(y, pen=(255,0,0), name="Red curve")
+p2.plot(t,y, pen=(255,0,0), name="Red curve")
+
+win.show()
 
 
 ## Start Qt event loop unless running in interactive mode or using pyside.

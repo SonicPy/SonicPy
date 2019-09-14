@@ -80,6 +80,21 @@ def zero_phase_bandstop_filter(data, lowcut, highcut, order):
         return x, y
     return None
 
+def zero_phase_bandpass_filter(data, lowcut, highcut, order):
+    x = data[0]
+    x_interval = x[1]-x[0]
+    if x_interval > 0:
+        fs = 1/(x_interval)
+        y = data[1]
+        nyq = 0.5 * fs
+        low = lowcut / nyq
+        high = highcut / nyq
+
+        i, u = signal.butter(order, [low, high], btype='bandpass')
+        y = signal.filtfilt(i, u, y)
+        return x, y
+    return None
+
 def bessel_lowpass_filter(data, lowcut,  order):
     x = data[0]
     x_interval = x[1]-x[0]

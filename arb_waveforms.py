@@ -22,16 +22,14 @@ def make_wave(freq, total_time, points):
 
 
 
-
+'''
 def get_arb():
-    '''
+    
     desc = read_file_TEKAFG3000('3pulse.tfw')
     data_length = desc['data_length']
     binary_waveform = desc['binary_waveform']
-    '''
-    time, binary_waveform = make_wave(69e6,50e-9,1000)
-
-
+    
+    
     #return binary_waveform
     #print(binary_waveform)
     period = int(data_length/3)
@@ -58,7 +56,7 @@ def get_arb():
     
 
     return tuple(fy_scaled)
-
+'''
 
 t, y = make_wave(30e6,50e-9,1000)
 

@@ -42,7 +42,7 @@ def get_arb():
 
     return tuple(fy_scaled)
 
-
+'''
 y = get_arb()
 
 from pyqtgraph.Qt import QtGui, QtCore
@@ -69,3 +69,4 @@ if __name__ == '__main__':
     import sys
     if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
         QtGui.QApplication.instance().exec_()
+'''

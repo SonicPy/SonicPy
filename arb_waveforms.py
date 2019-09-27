@@ -54,12 +54,12 @@ def filter(t, y, pad, tukey_alpha,points_per_period, highcut):
     return [t, data*tk_data], [t,fltrd],[t, data]
 
 points = 1000
-f = 67e6
-duration = 75e-9
+f = 15e6
+duration = 66.6e-9
 tukey_alpha = .15
-highcut = f * 1.1
-pad = .15
-symmetric = True
+highcut = f * 2
+pad = .2
+symmetric = False
 
 
 from pyqtgraph.Qt import QtGui, QtCore
@@ -82,10 +82,11 @@ p2 = win.addPlot()
 
 data = []
 
-for ind in range(60):
-    f = 10e6 + ind * 2e6
-    t, y, points_per_period, shift = make_wave(f,duration,points,symmetric)
-
+print (f)
+for ind in range(27):
+    fr = f + ind * 2e6
+    t, y, points_per_period, shift = make_wave(fr,duration,points,symmetric)
+    highcut = fr * 3
     expanded, filtered, padded = filter(t, y, pad, tukey_alpha,points_per_period,  highcut)  
     p2.plot(filtered[0],filtered[1], pen=(255,0,0))
     p2.plot(expanded[0],expanded[1], pen=(0,255,0))
@@ -93,7 +94,7 @@ for ind in range(60):
     for i in range(15):
         data.append(filtered[1])
 
-
+print(fr)
 data = np.asarray(data).T
 
 imv = pg.ImageView()

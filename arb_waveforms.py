@@ -10,11 +10,15 @@ from functools import partial
 import json
 
 
-def make_wave(freq, total_time, points, symmetric=True):
+def make_wave(freq, total_time, points, symmetric=True, quarter_shift = False):
     period = 1/freq
     n_periods = total_time / period
+    if quarter_shift:
+        offset = np.pi/2
+    else:
+        offset = 0
     if symmetric:
-        shift = np.pi*n_periods 
+        shift = np.pi*n_periods - offset
     else:
         shift = 0
     points_per_period = round(points/n_periods)
@@ -59,7 +63,8 @@ duration = 66.6e-9
 tukey_alpha = .15
 highcut = f * 2
 pad = .2
-symmetric = False
+symmetric = True
+quarter_shift = True
 
 
 from pyqtgraph.Qt import QtGui, QtCore
@@ -85,12 +90,12 @@ data = []
 print (f)
 for ind in range(27):
     fr = f + ind * 2e6
-    t, y, points_per_period, shift = make_wave(fr,duration,points,symmetric)
+    t, y, points_per_period, shift = make_wave(fr,duration,points,symmetric,quarter_shift)
     highcut = fr * 3
     expanded, filtered, padded = filter(t, y, pad, tukey_alpha,points_per_period,  highcut)  
-    p2.plot(filtered[0],filtered[1], pen=(255,0,0))
-    p2.plot(expanded[0],expanded[1], pen=(0,255,0))
-    p2.plot(padded[0],padded[1], pen=(0,255,255))
+    #p2.plot(filtered[0],filtered[1], pen=(255,0,0))
+    #p2.plot(expanded[0],expanded[1], pen=(0,255,0))
+    #p2.plot(padded[0],padded[1], pen=(0,255,255))
     for i in range(15):
         data.append(filtered[1])
 
@@ -107,7 +112,7 @@ imv.setImage(data )
 
 
 
-win.show()
+#win.show()
 
 
 ## Start Qt event loop unless running in interactive mode or using pyside.

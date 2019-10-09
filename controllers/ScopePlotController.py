@@ -21,9 +21,14 @@ from utilities.utilities import *
 class ScopePlotController(QObject):
     callbackSignal = pyqtSignal(dict)  
     stoppedSignal = pyqtSignal()
+    fastCursorMovedSignal = pyqtSignal(str)  
+    staticCursorMovedSignal = pyqtSignal(str) 
+
     def __init__(self, scope_controller=None, isMain = False):
         super().__init__()
         self.widget = scopeWidget()
+        self.pg = self.widget.plot_widget.fig.win
+        
         if scope_controller is None:
             scope_controller = ScopeController(self.widget, isMain=True)
         self.scope_controller = scope_controller
@@ -39,6 +44,8 @@ class ScopePlotController(QObject):
         self.scope_controller.runStateSignal.connect(self.run_state_callback)
         self.scope_controller.dataUpdatedSignal.connect(self.waveform_updated_signal_callback)
         self.scope_controller.dataBGUpdatedSignal.connect(self.bg_waveform_updated_signal_callback)
+
+        
     
     
     def start_stop_btn_callback(self, state):
@@ -159,3 +166,4 @@ class ScopePlotController(QObject):
 
     def show_widget(self):
         self.widget.raise_widget()
+

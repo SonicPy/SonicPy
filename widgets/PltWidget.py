@@ -27,6 +27,69 @@ class customWidget(QtWidgets.QWidget):
         self.fig = plotWindow(*fig_params)
         self._layout.addWidget(self.fig)
         self.cursor_fast = QLabel()
+        self.cursor_fast.setFixedWidth(70)
+        self.cursor = QLabel()
+        self.cursor.setFixedWidth(70)
+        self.cursor_widget = QWidget()
+        self._cursor_widget_layout = QtWidgets.QHBoxLayout()
+        self._cursor_widget_layout.setContentsMargins(0,0,0,0)
+        self._cursor_widget_layout.addSpacerItem(HorizontalSpacerItem())
+        self._cursor_widget_layout.addWidget(self.cursor_fast)
+        self._cursor_widget_layout.addWidget(self.cursor)
+        self._cursor_widget_layout.addSpacerItem(HorizontalSpacerItem())
+        self.cursor_widget.setLayout(self._cursor_widget_layout)
+        self._layout.addWidget(self.cursor_widget)
+        self.button_widget = QtWidgets.QWidget()
+        self._button_widget_layout = QtWidgets.QHBoxLayout()
+        self._button_widget_layout.setContentsMargins(0,0,0,0)
+        self.button_widget.setLayout(self._button_widget_layout)
+        self._layout.addWidget(self.button_widget)
+        self.setLayout(self._layout)
+        self.create_connections()
+
+    def add_button_widget_item(self, item):
+        self._button_widget_layout.addWidget(item)
+    
+    def add_button_widget_spacer(self):
+        self._button_widget_layout.addSpacerItem(HorizontalSpacerItem())
+
+    def create_connections(self):
+        self.fig.fast_cursor.connect(self.update_fast_cursor)
+        self.fig.cursor.connect(self.update_cursor)
+
+
+    def closeEvent(self, event):
+        # Overrides close event to let controller know that widget was closed by user
+        self.widget_closed.emit()
+
+    def update_fast_cursor(self, pos):
+        c = '%.3e' % (pos)
+        self.cursor_fast.setText(c)
+        self.fig.set_fast_cursor(pos)
+
+    def update_cursor(self, pos):
+        c = "<span style='color: #00CC00'>%0.3e</span>"  % (pos)
+        self.cursor.setText(c)
+        self.fig.set_cursor(pos)
+
+    def setText(self, text, plot_ind):
+        self.fig.set_plot_label(text,plot_ind)
+
+    def raise_widget(self):
+        self.show()
+        self.setWindowState(self.windowState() & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
+        self.activateWindow()
+        
+
+class customWidget_adv(QtWidgets.QWidget):
+    widget_closed = QtCore.pyqtSignal()
+    def __init__(self, fig_params):
+        super().__init__()
+        self._layout = QtWidgets.QVBoxLayout(self)
+        self._layout.setContentsMargins(0,0,0,0)
+        self.fig = plotWindow(*fig_params)
+        self._layout.addWidget(self.fig)
+        self.cursor_fast = QLabel()
         self.cursor_fast.setFixedWidth(140)
         self.cursor = QLabel()
         self.cursor.setFixedWidth(140)
@@ -224,6 +287,91 @@ class SimpleDisplayWidget(customWidget):
 class plotWindow(QtWidgets.QWidget):
     widget_closed = QtCore.pyqtSignal()
 
+    def __init__(self, title, left_label, bottom_label):
+        super().__init__()
+
+        self._layout = QtWidgets.QVBoxLayout()  
+        self._layout.setContentsMargins(0,0,0,0)
+        self.setWindowTitle(title)
+        self.win = PltWidget()
+        self.win.setLogMode(False,False)
+        #self.win.vLineFast.setObjectName(title+'vLineFast')
+        self.win.setWindowTitle(title)
+        self.win.setBackground(background=(0,0,0))
+        
+        self.win.setLabel('left',left_label)
+        self.win.setLabel('bottom', bottom_label)
+        
+        self._layout.addWidget(self.win)
+        self.setLayout(self._layout)
+        self.resize(600,400)
+        self.plots = []
+        self.fast_cursor = self.win.plotMouseMoveSignal
+        self.cursor = self.win.viewBox.plotMouseCursorSignal
+        self.win.create_graphics()
+        self.win.legend.setParentItem(self.win.viewBox)
+        self.win.legend.anchor(itemPos=(1, 0), parentPos=(1, 0), offset=(-10, -10))
+        self.legend_items = []
+
+
+    def set_plot_label(self, text, plot_ind):
+        self.win.legend.renameItem(plot_ind, text)
+    
+    def set_plot_label_color(self, color, plot_ind):
+        self.win.legend.setItemColor(plot_ind, color)
+
+    def set_fast_cursor(self, pos):
+        self.win.set_cursorFast_pos(pos)
+
+    def set_cursor(self, pos):
+        self.win.set_cursor_pos(pos)
+        
+
+    def add_line_plot(self, x=[],y=[],color = (0,0,0),Width = 1):
+        Pen=mkPen(color, width=Width)
+        Plot = self.win.plot(x,y, 
+                        pen= Pen, 
+                        antialias=True)
+        self.plots.append(Plot)
+
+        self.win.legend.addItem(self.plots[-1], '') # can display name in upper right corner in same color 
+        
+
+    def add_line_plot(self, x=[],y=[],color = (0,0,0),Width = 1,title=""):
+        Pen=mkPen(color, width=Width)
+        Plot = self.win.plot(x,y, 
+                        pen= Pen, 
+                        antialias=True)
+        self.plots.append(Plot)
+
+        self.win.legend.addItem(self.plots[-1], '') # can display name in upper right corner in same color 
+        return Plot
+        
+    def add_scatter_plot(self, x=[],y=[],color=(100, 100, 255),opacity=100,symbolSize=7):
+        sb = (color[0], color[1],color[2],opacity)
+        Plot = self.win.plot(x,y, 
+                                pen=None, symbol='o', \
+                                symbolPen=None, symbolSize=symbolSize, \
+                                symbolBrush=sb)
+        self.plots.append(Plot)
+         # can display name in upper right corner in same color 
+        self.win.legend.addItem(self.plots[-1], '')
+        return Plot
+            
+
+    def closeEvent(self, event):
+        # Overrides close event to let controller know that widget was closed by user
+        self.widget_closed.emit()
+
+    def raise_widget(self):
+        self.show()
+        self.setWindowState(self.windowState() & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
+        self.activateWindow()
+        self.raise_()
+
+class plotWindow_adv(QtWidgets.QWidget):
+    widget_closed = QtCore.pyqtSignal()
+
     def __init__(self, title='', left_label='', bottom_label=''):
         super().__init__()
 
@@ -347,7 +495,7 @@ class plotWindow(QtWidgets.QWidget):
         self.raise_()
         
 
-class CustomViewBox(pg.ViewBox):  
+class CustomViewBox_adv(pg.ViewBox):  
     plotMouseCursorSignal = pyqtSignal(float)
     plotMouseCursor2Signal = pyqtSignal(float)  
     def __init__(self, *args, **kwds):
@@ -408,9 +556,68 @@ class CustomViewBox(pg.ViewBox):
         sig = self.cursor_signals[ind]
         sig.emit(pos)
 
+class myLegendItem(LegendItem):
+    def __init__(self, size=None, offset=None, horSpacing=25, verSpacing=0, box=True, labelAlignment='center', showLines=True):
+        super().__init__(size=size, offset=offset, horSpacing=horSpacing, verSpacing=verSpacing, box=box, labelAlignment=labelAlignment, showLines=showLines)
+
+    def my_hoverEvent(self, ev):
+        pass
+
+    def mouseDragEvent(self, ev):
+        pass
+
+class myVLine(pg.InfiniteLine):
+    def __init__(self, pos=None, angle=90, pen=None, movable=False, bounds=None,
+                 hoverPen=None, label=None, labelOpts=None, span=(0, 1), markers=None, 
+                 name=None):
+        super().__init__(pos=pos, angle=angle, pen=pen, movable=movable, bounds=bounds,
+                 hoverPen=hoverPen, label=label, labelOpts=labelOpts,  
+                 name=name)
+
+class CustomViewBox(pg.ViewBox):  
+    plotMouseCursorSignal = pyqtSignal(float)
+    plotMouseCursor2Signal = pyqtSignal(float)  
+    def __init__(self, *args, **kwds):
+        super().__init__()
+        
+        self.cursor_signals = [self.plotMouseCursorSignal, self.plotMouseCursor2Signal]
+        self.vLine = myVLine(movable=False, pen=pg.mkPen(color=(0, 255, 0), width=2 , style=QtCore.Qt.DashLine))
+        
+        #self.vLine.sigPositionChanged.connect(self.cursor_dragged)
+        self.vLineFast = myVLine(movable=False,pen=mkPen({'color': '606060', 'width': 1, 'style':QtCore.Qt.DashLine}))
+        self.cursors = [self.vLine, self.vLineFast]
+        self.setMouseMode(self.RectMode)
+        self.addItem(self.vLine, ignoreBounds=True)
+        self.addItem(self.vLineFast, ignoreBounds=True)
+        self.enableAutoRange(self.XYAxes, True)
+        self.cursorPoint = 0
+        # Enable dragging and dropping onto the GUI 
+        self.setAcceptDrops(True) 
+
+    '''
+    def cursor_dragged(self, cursor):
+        ind = self.cursors.index(cursor)
+        pos = cursor.getXPos()
+        
+        sig = self.cursor_signals[ind]
+        sig.emit(pos)    
+    '''
+
+    ## reimplement right-click to zoom out
+    def mouseClickEvent(self, ev):
+        if ev.button() == QtCore.Qt.RightButton:
+            #self.enableAutoRange(self.XYAxes, True)    
+            
+            self.enableAutoRange(enable=1) 
+        elif ev.button() == QtCore.Qt.LeftButton: 
+            pos = ev.pos()  ## using signal proxy turns original arguments into a tuple
+            mousePoint = self.mapToView(pos)
+            self.cursorPoint=mousePoint.x()
+            self.plotMouseCursorSignal.emit(mousePoint.x())    
             
 
 class PltWidget(pg.PlotWidget):
+
     """
     Subclass of PlotWidget
     """
@@ -418,33 +625,50 @@ class PltWidget(pg.PlotWidget):
     range_changed = QtCore.Signal(list)
     auto_range_status_changed = QtCore.Signal(bool)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, colors = None):
         """
         Constructor of the widget
         """
         #app = pg.mkQApp()
         vb = CustomViewBox()  
+        
         super().__init__(parent, viewBox=vb)
-        # default colors
-        self.colors = { 'plot_background_color': '#101010',\
+        self.viewBox = self.getViewBox() # Get the ViewBox of the widget
+       
+        self.cursorPoints = [nan,nan]
+        # defined default colors
+        self.colors = { 'plot_background_color': '#ffffff',\
                         'data_color': '#2f2f2f',\
                         'rois_color': '#00b4ff', \
                         'roi_cursor_color': '#ff0000', \
                         'xrf_lines_color': '#969600', \
                         'mouse_cursor_color': '#00cc00', \
                         'mouse_fast_cursor_color': '#323232'}
+
+        # override default colors here:
+        if colors != None:
+            for c in colors:
+                if c in self.colors:
+                    self.colors[c] = colors[c]
+            
         plot_background_color = self.colors['plot_background_color']
         self.setBackground(background=plot_background_color)
-        self.xClip = 20
+        
+        #mouse_fast_cursor_color = self.colors['mouse_fast_cursor_color']
+
+        self.vLine = self.viewBox.vLine
+        self.vLineFast  = self.viewBox.vLineFast
+        #self.vLine.setPos(0)
+        #self.vLineFast.setPos(0)
+
         self.selectionMode = False # Selection mode used to mark histo data
-        self.viewBox = self.getViewBox() # Get the ViewBox of the widget
+        
         self.viewBox.setMouseMode(self.viewBox.RectMode) # Set mouse mode to rect for convenient zooming
         self.setMenuEnabled(enableMenu=False)
         # cursor
         
-        '''
+        
         self.proxy = pg.SignalProxy(self.scene().sigMouseMoved, rateLimit=60, slot=self.fastCursorMove)
-        '''
         # self.getViewBox().addItem(self.hLine, ignoreBounds=True)
         self.create_graphics()
         self.pattern_plot = self.plotItem
@@ -465,6 +689,23 @@ class PltWidget(pg.PlotWidget):
         self.xAxis = None
 
         
+    def set_cursorFast_pos(self, pos):
+        self.vLineFast.blockSignals(True)
+        self.vLineFast.setPos(pos)
+        self.cursorPoints[1] = pos
+        self.vLineFast.blockSignals(False)
+
+    def set_cursor_pos(self, pos):
+        self.vLine.blockSignals(True)
+        self.vLine.setPos(pos)
+        self.cursorPoints[0] = pos
+        self.vLine.blockSignals(False)
+
+    def get_cursor_pos(self):
+        return self.cursorPoints[0]
+
+    def get_cursorFast_pos(self):
+        return self.cursorPoints[1]
 
     def set_log_mode(self, x, y):
         self.LM = (x,y)
@@ -572,7 +813,6 @@ class PltWidget(pg.PlotWidget):
             mMode = pg.ViewBox.PanMode
         vb.setMouseMode(mMode)
         
-    '''
     def fastCursorMove(self, evt):
         pos = evt[0]  ## using signal proxy turns original arguments into a tuple
         if self.sceneBoundingRect().contains(pos):
@@ -581,7 +821,6 @@ class PltWidget(pg.PlotWidget):
             self.plotMouseMoveSignal.emit(index)
             
            # self.hLine.setPos(mousePoint.y())
-    '''
     
 
     ########### taken from DIOPTAS:

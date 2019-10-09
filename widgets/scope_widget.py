@@ -2,7 +2,7 @@ import os, os.path, sys, platform, copy
 from PyQt5 import uic, QtWidgets,QtCore
 from PyQt5.QtWidgets import QMainWindow, QInputDialog, QMessageBox, QErrorMessage
 from PyQt5.QtCore import QObject, pyqtSignal, Qt
-from widgets.PltWidget import SimpleDisplayWidget
+from widgets.PltWidget import SimpleDisplayWidget, customWidget
 import pyqtgraph as pg
 from pyqtgraph import QtCore, mkPen, mkColor, hsvColor, ViewBox
 from widgets.CustomWidgets import HorizontalSpacerItem, VerticalSpacerItem, FlatButton
@@ -14,8 +14,8 @@ class scopeWidget(QtWidgets.QWidget):
         super().__init__()
         self._layout = QtWidgets.QVBoxLayout()
         params = "plot title", 'Amplitude', 'Time'
-        self.plot_widget = SimpleDisplayWidget(params)
-        self.plot_widget.enable_cursors()
+        self.plot_widget = customWidget(params)
+        #self.plot_widget.enable_cursors()
 
         
         self.button_widget = QtWidgets.QWidget()

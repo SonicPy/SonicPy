@@ -16,6 +16,7 @@ from widgets.UltrasoundWidget_2 import UltrasoundWidget
 from controllers.SweepController import SweepController
 from controllers.AFGController import AFGController
 from controllers.ScopeController import ScopeController
+from controllers.ScopePlotController import ScopePlotController
 
 from models.WaveformModel import Waveform
 import math
@@ -41,6 +42,8 @@ class UltrasoundController(QObject):
         
         self.afg_controller = AFGController(self)
         self.scope_controller = ScopeController(self)
+        self.scope_plot_controller = ScopePlotController(self.scope_controller)
+        
         self.sweep_controller = SweepController(self,
                                                 self.scope_controller.model.pvs, 
                                                 self.afg_controller.model.pvs)
@@ -53,7 +56,7 @@ class UltrasoundController(QObject):
         self.display_window.insert_panel(afg_panel)
         self.display_window.insert_panel(sweep_widget)
 
-        scope_waveform_widget = self.scope_controller.widget
+        scope_waveform_widget = self.scope_plot_controller.widget
         self.display_window.scope_waveform_layout.addWidget(scope_waveform_widget)
 
         self.display_window.panelClosedSignal.connect(self.panel_closed_callback)
@@ -187,7 +190,7 @@ class UltrasoundController(QObject):
     def controls_setEnable(self, state):
         self.afg_controller.panelSetEnabled(state)
         self.scope_controller.panelSetEnabled(state)
-        self.scope_controller.widgetSetEnabled(state)
+        self.scope_plot_controller.widgetSetEnabled(state)
 
     def panel_closed_callback(self):
         self.afg_controller.exit()

@@ -80,21 +80,6 @@ class pvController(QObject):
 
     def panelSetEnabled(self, state):
         self.panel.setEnabled(state)
-
-    '''
-
-    def create_public_methods(self):
-        tasks = self.model.tasks
-        for key in tasks:
-            task = tasks[key]
-            if 'methods' in task:
-                for method in task['methods']:
-                    if task['methods'][method]:
-                        attr = method+'_'+ key
-                        if hasattr(self.model, attr):
-                            func = self.model.__getattribute__(attr)
-                            setattr(self, attr, func)
-    '''
     
     def show_widget(self):
         self.panel.raise_widget()

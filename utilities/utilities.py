@@ -80,6 +80,21 @@ def zero_phase_bandstop_filter(data, lowcut, highcut, order):
         return x, y
     return None
 
+def zero_phase_bandpass_filter(data, lowcut, highcut, order):
+    x = data[0]
+    x_interval = x[1]-x[0]
+    if x_interval > 0:
+        fs = 1/(x_interval)
+        y = data[1]
+        nyq = 0.5 * fs
+        low = lowcut / nyq
+        high = highcut / nyq
+
+        i, u = signal.butter(order, [low, high], btype='bandpass')
+        y = signal.filtfilt(i, u, y)
+        return x, y
+    return None
+
 def bessel_lowpass_filter(data, lowcut,  order):
     x = data[0]
     x_interval = x[1]-x[0]
@@ -152,34 +167,18 @@ def demodulate(x,y, freq=None, carrier_known=False):
     return amplitude_envelope, phase_shift, instantaneous_frequency
 
 def fft_sig(X, Y):
-
-    
     # Number of samplepoints
     N = len(X)
     # sample spacing
     T = X[1]-X[0]
-
     x = X/ (2*np.pi)
     y = Y
-
-    yf = scipy.fftpack.fft(y)
-    yf = 2.0/N * np.abs(yf[:N//2])
-    xf = np.linspace(0.0, 1.0/(2.0*T), N/2)
-    #fft end
-
-
-    f_signal = rfft(y)
-    W = fftfreq(y.size, d=x[1]-x[0]) 
-    return xf, yf
+    yf = fft(y)
+    xf = np.linspace(0.0, 1.0/(2.0*T), N//2)
+    xfr = 2.0/N * np.abs(yf[0:N//2])
+    return xf, xfr
 
 def cross_correlate_sig(sig, source):
-   
-    
     length = len(source)
     corr = signal.correlate(sig, source, mode='same') / length
-
-    
-
-    
-
     return corr

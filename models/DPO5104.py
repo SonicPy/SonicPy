@@ -139,7 +139,6 @@ class Scope_DPO5104(Scope, pvModel):
         self.pvs['bg_waveform'].set(self.bg_waveform)
 
 
-
     def read_file(self, filename):
         waveform = None
         if filename.endswith('.csv'):
@@ -147,7 +146,6 @@ class Scope_DPO5104(Scope, pvModel):
         if filename.endswith('.npz'):
             waveform = read_npy(filename)
 
-        
         self.bg_waveform = {'waveform':waveform}
         self.pvs['bg_waveform']._val = self.bg_waveform
         self.pvs['bg_waveform'].value_changed_signal.emit('bg_waveform',[self.bg_waveform])

@@ -37,6 +37,8 @@ class AFG_AFG3251(Afg, pvModel):
         self.instrument = 'AFG3251'
         self.settings_file_tag ='Waveform'
 
+        self.duration = 50
+
         self.visa_hostname = visa_hostname
         self.connected = False
         self.connected = self.connect(self.visa_hostname)
@@ -60,6 +62,10 @@ class AFG_AFG3251(Afg, pvModel):
                                 {'desc': 'Frequency (Hz)', 'val':30000000.0, 'min':0, 'max':120000000,'increment':500000, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'frequency','type':'f'}},
+                        'duration': 
+                                {'desc': 'Burst duration (ns)', 'val':50,'min':0.1,'max':1e9,'increment':.1, 
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'duration','type':'f'}},
                         'output_state':     
                                 {'desc': 'Output;ON', 'val':False, 
                                 'methods':{'set':True, 'get':True}, 
@@ -167,6 +173,15 @@ class AFG_AFG3251(Afg, pvModel):
         command = 'source1:Frequency?'
         ans = self.ask(command) # get frequency 
         ans = float(ans)
+        return ans
+
+    def _set_duration(self, duraton):
+        
+        self.duration = duration
+
+    def _get_duration(self):
+        
+        ans = self.duration
         return ans
     
     def _set_amplitude(self, amplitude):

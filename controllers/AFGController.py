@@ -15,6 +15,7 @@ class AFGController(pvController):
         self.panel_items =['instrument',
                       'function_shape',
                       'amplitude',
+                      'duration',
                       'operating_mode',
                       'n_cycles',
                       'frequency',

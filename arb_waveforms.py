@@ -4,11 +4,39 @@ from scipy.signal import tukey
 
 from models.tek_fileIO import *
 from utilities.utilities import *
-
-
+from pyqtgraph.Qt import QtGui, QtCore
+import pyqtgraph as pg
+import sys
 from functools import partial
 import json
 
+
+
+
+def g_wave(t_array, A, f_0,sigma,x,c,f_min, f_max):
+
+    psi = []
+    for t in t_array:
+        func =  partial(my_func,f_0,sigma,t,c,x)
+        integral_pts = 50
+        rng = f_max - f_min
+        step = rng / integral_pts
+        f_integral = []
+        for i in range (integral_pts):
+            f = i* step + f_min
+
+            ff = func(f) * step
+            f_integral.append(ff)
+        s = sum(f_integral) / (sigma * 2* np.pi)
+        psi.append(s)
+
+    return psi 
+
+
+def my_func(f_0,sigma, t,c,x,f):
+    f = np.cos(f*(t-x/c))*np.exp(-(1/2)*((f-f_0)/(sigma)**2))
+
+    return f
 
 def make_wave(freq, total_time, points, symmetric=True, quarter_shift = False):
     period = 1/freq
@@ -39,7 +67,7 @@ def scale_waveform(waveform):
     fy_scaled = fy_scaled.astype(int)
     return [waveform[0],waveform[1]]
 
-def filter(t, y, pad, tukey_alpha,points_per_period, highcut):
+def my_filter(t, y, pad, tukey_alpha,points_per_period, highcut):
     data_length = len(t)
     del_t = t[1]-t[0]
     mn = min(y)
@@ -57,66 +85,97 @@ def filter(t, y, pad, tukey_alpha,points_per_period, highcut):
     fltrd = fltrd / mx
     return [t, data*tk_data], [t,fltrd],[t, data]
 
-points = 1000
-f = 15e6
-duration = 66.6e-9
-tukey_alpha = .15
-highcut = f * 2
-pad = .2
-symmetric = True
-quarter_shift = True
 
 
-from pyqtgraph.Qt import QtGui, QtCore
-import pyqtgraph as pg
+def main():
+    points = 1000
+    f = 15e6
+    duration = 100e-9
+    tukey_alpha = .2
+    highcut = f * 1
+    pad = 3
+    symmetric = False
+    quarter_shift = False
 
-#QtGui.QApplication.setGraphicsSystem('raster')
-app = QtGui.QApplication([])
-#mw = QtGui.QMainWindow()
-#mw.resize(800,800)
+    app = QtGui.QApplication([])
+    
 
-win = pg.GraphicsLayoutWidget()
-win.resize(1000,600)
-win.setWindowTitle('burst_waveform')
+    
+    #mw = QtGui.QMainWindow()
+    #mw.resize(800,800)
 
-# Enable antialiasing for prettier plots
-pg.setConfigOptions(antialias=True)
+    win = pg.GraphicsLayoutWidget()
+    win.resize(1000,600)
+    win.setWindowTitle('burst_waveform')
+
+    # Enable antialiasing for prettier plots
+    pg.setConfigOptions(antialias=True)
 
 
-p2 = win.addPlot()
+    p2 = win.addPlot()
+    p3 = win.addPlot()
 
-data = []
+    data = []
 
-print (f)
-for ind in range(27):
-    fr = f + ind * 2e6
-    t, y, points_per_period, shift = make_wave(fr,duration,points,symmetric,quarter_shift)
-    highcut = fr * 3
-    expanded, filtered, padded = filter(t, y, pad, tukey_alpha,points_per_period,  highcut)  
-    #p2.plot(filtered[0],filtered[1], pen=(255,0,0))
-    #p2.plot(expanded[0],expanded[1], pen=(0,255,0))
-    #p2.plot(padded[0],padded[1], pen=(0,255,255))
-    for i in range(15):
+    print (f)
+
+    for ind in range(50):
+        fr = f + ind * 1e6
+        t, y, points_per_period, shift = make_wave(fr,duration,points,symmetric,quarter_shift)
+        highcut = fr * 3
+        expanded, filtered, padded = my_filter(t, y, pad, tukey_alpha,points_per_period,  highcut)  
+        #p2.plot(filtered[0],filtered[1], pen=(255,0,0))
+        #p2.plot(expanded[0],expanded[1], pen=(0,255,0))
+        #p2.plot(padded[0],padded[1], pen=(0,255,255))
         data.append(filtered[1])
 
-print(fr)
-data = np.asarray(data).T
-
-imv = pg.ImageView()
-win2 = QtGui.QMainWindow()
-win2.setCentralWidget(imv)
-win2.show()
-win2.setWindowTitle('pyqtgraph example: ImageView')
-
-imv.setImage(data )
+    s = np.sum(data,axis = 0)
 
 
+    t_0 = 0
+    t_max = 120e-9
+    pts = 1000
+    step = (t_max-t_0)/pts
+    t = np.asarray(range(pts)) * step
+    ss = g_wave(t,1,45e6, 20e6,100e-6,5000,.01e6,120e6)
 
-#win.show()
+
+    ss_fft = fft_sig(t,ss)
+
+
+    p2.plot(t,ss, pen=(0,255,0))
+    p3.plot(ss_fft[0],ss_fft[1], pen=(0,255,255))
+
+
+    '''
+    for ind in range(10):
+        fr = f + ind * 5e6
+        sf = zero_phase_bandpass_filter([filtered[0],s],fr-fr*0.05, fr+fr*0.05, 3)
+        p2.plot(sf[0],sf[1], pen=(255,0,0))
+    '''
+    print(fr)
+    data = np.asarray(data).T
+
+
+    imv = pg.ImageView()
+    win2 = QtGui.QMainWindow()
+    win2.setCentralWidget(imv)
+    win2.show()
+    win2.setWindowTitle('pyqtgraph example: ImageView')
+
+    imv.setImage(data )
+
+
+
+    win.show()
+    if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
+        QtGui.QApplication.instance().exec_()
 
 
 ## Start Qt event loop unless running in interactive mode or using pyside.
 if __name__ == '__main__':
-    import sys
-    if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
-        QtGui.QApplication.instance().exec_()
+    
+    main()
+   
+    
+        

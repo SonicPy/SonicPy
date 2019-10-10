@@ -37,7 +37,7 @@ def g_wave(t_array, A, f_0,sigma,x,c,f_min, f_max):
 
 
 def my_func(f_0,sigma, t,c,x,f):
-    f = np.cos(f*(t-x/c))*np.exp(-1*(f-f_0)**2/(2*sigma**2))
+    f = np.sin(f*(t-x/c))*np.exp(-1*(f-f_0)**2/(2*sigma**2))
 
     return f
 

@@ -16,25 +16,28 @@ import json
 def g_wave(t_array, A, f_0,sigma,x,c,f_min, f_max):
 
     psi = []
+    integral_pts = 50
+    rng = f_max - f_min
+    step = rng / integral_pts
+    f_0 = f_0 * 2*np.pi
+    sigma = sigma * 2*np.pi
     for t in t_array:
         func =  partial(my_func,f_0,sigma,t,c,x)
-        integral_pts = 50
-        rng = f_max - f_min
-        step = rng / integral_pts
+        
         f_integral = []
         for i in range (integral_pts):
             f = i* step + f_min
 
             ff = func(f) * step
             f_integral.append(ff)
-        s = sum(f_integral) / (sigma * 2* np.pi)
+        s = sum(f_integral) / (sigma * np.pi)
         psi.append(s)
 
     return psi 
 
 
 def my_func(f_0,sigma, t,c,x,f):
-    f = np.cos(f*(t-x/c))*np.exp(-(1/2)*((f-f_0)/(sigma)**2))
+    f = np.cos(f*(t-x/c))*np.exp(-1*(f-f_0)**2/(2*sigma**2))
 
     return f
 
@@ -133,11 +136,11 @@ def main():
 
 
     t_0 = 0
-    t_max = 120e-9
+    t_max = 180e-9
     pts = 1000
     step = (t_max-t_0)/pts
-    t = np.asarray(range(pts)) * step
-    ss = g_wave(t,1,45e6, 20e6,100e-6,5000,.01e6,120e6)
+    t = np.asarray(range(pts)) * step + t_0
+    ss = g_wave(t,1,45e6, 20e6,12e-4,5000,-1100e6,1100e6)
 
 
     ss_fft = fft_sig(t,ss)
@@ -147,12 +150,12 @@ def main():
     p3.plot(ss_fft[0],ss_fft[1], pen=(0,255,255))
 
 
-    '''
+    
     for ind in range(10):
         fr = f + ind * 5e6
-        sf = zero_phase_bandpass_filter([filtered[0],s],fr-fr*0.05, fr+fr*0.05, 3)
+        sf = zero_phase_bandpass_filter([t,ss],fr-fr*0.05, fr+fr*0.05, 1)
         p2.plot(sf[0],sf[1], pen=(255,0,0))
-    '''
+    
     print(fr)
     data = np.asarray(data).T
 

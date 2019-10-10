@@ -168,7 +168,7 @@ def demodulate(x,y, freq=None, carrier_known=False):
 
 def fft_sig(X, Y):
     # Number of samplepoints
-    N = len(X)*4
+    N = len(X)*2
     # sample spacing
     T = X[1]-X[0]
     x = X/ (2*np.pi)

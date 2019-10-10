@@ -137,7 +137,7 @@ class UltrasoundController(QObject):
 
     def scopeSaveAsCallback(self):
         start_folder = self.working_directories.savedata 
-        self.scope_controller.save_data_callback(folder=start_folder)
+        self.scope_plot_controller.save_data_callback(folder=start_folder)
 
     def preferences_module(self, *args, **kwargs):
         [ok, file_options] = mcaUtil.mcaFilePreferences.showDialog(self.display_window, self.file_options) 
@@ -171,7 +171,7 @@ class UltrasoundController(QObject):
     def saveFile(self, filename, params = {}):
         afg_pvs = self.afg_controller.model.pvs
         
-        saved_filename = self.scope_controller.save_data_callback(filename=filename, params=params)
+        saved_filename = self.scope_plot_controller.save_data_callback(filename=filename, params=params)
         new_folder = os.path.dirname(str(saved_filename))
         old_folder = self.working_directories.savedata
         if new_folder != old_folder:

@@ -81,8 +81,9 @@ class ScopePlotController(QObject):
             self.widget.save_btn.setDisabled(False)
         '''
         ch = data['ch']
-        filtered = zero_phase_bandstop_filter(waveform, 100000000, 340000000, 5)
-        ff = fft_sig(*filtered)
+        filtered = zero_phase_bandstop_filter(waveform, 100e6, 340e6, 5)
+        #filtered = zero_phase_bandpass_filter(filtered,30e6-30e6*0.05,30e6+30e6*0.05,1)
+        #ff = fft_sig(*filtered)
         self.update_plot(filtered)
         #self.update_bg_plot(waveform)
         elapsed = data['transfer_time']
@@ -92,6 +93,7 @@ class ScopePlotController(QObject):
         #status = 'Date/Time: ' + dt + '; Transfer time: ' + str(round(elapsed,3))
         #self.widget.status_lbl.setText(status)
         if self.widget.start_stop_btn.isChecked():
+            time.sleep(0.01)
             self.get_waveform()
             pass
 
@@ -101,6 +103,7 @@ class ScopePlotController(QObject):
         waveform  = data['waveform']
         start = time.time()
         filtered = zero_phase_bandstop_filter(waveform, 100000000, 340000000, 5)
+        
         end = time.time()
         elapsed = end - start
         self.update_bg_plot(filtered)

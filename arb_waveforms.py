@@ -13,16 +13,16 @@ import json
 
 
 
-def g_wave(t_array, A, f_0,sigma,x,c,f_min, f_max):
+def g_wave(t_array, A, f_0,sigma,x,c,f_min, f_max, opt=0):
 
     psi = []
     integral_pts = 50
     rng = f_max - f_min
     step = rng / integral_pts
-    f_0 = f_0 * 2*np.pi
-    sigma = sigma * 2*np.pi
+    f_0 = f_0 * 2 * np.pi
+    sigma = sigma * 2 * np.pi
     for t in t_array:
-        func =  partial(my_func,f_0,sigma,t,c,x)
+        func =  partial(my_func,f_0,sigma,t,c,x, opt)
         
         f_integral = []
         for i in range (integral_pts):
@@ -36,8 +36,10 @@ def g_wave(t_array, A, f_0,sigma,x,c,f_min, f_max):
     return psi 
 
 
-def my_func(f_0,sigma, t,c,x,f):
-    f = np.sin(f*(t-x/c))*np.exp(-1*(f-f_0)**2/(2*sigma**2))
+def my_func(f_0,sigma, t,c,x,opt, f ):
+    if opt==0:func = np.cos
+    else: func = np.sin
+    f = func(f*(t-x/c))*np.exp(-1*(f-f_0)**2/(2*sigma**2))
 
     return f
 
@@ -88,11 +90,33 @@ def my_filter(t, y, pad, tukey_alpha,points_per_period, highcut):
     fltrd = fltrd / mx
     return [t, data*tk_data], [t,fltrd],[t, data]
 
+def gaussin_wavelet(params):
+    t_min = params['t_min']
+    t_max = params['t_max']
+    center_f = params['center_f']
+    sigma = params['sigma']
+    pts = params['pts']
+    delay = params['delay']
+    opt = params['opt']
+    c = 5000
+    
+    
+    xc = delay / center_f
+    x =  c *(t_max-t_min)* delay
 
+
+    print(x)
+
+    step = (t_max-t_min)/pts
+    t = np.asarray(range(pts)) * step + t_min
+    ss = g_wave(t,1,center_f, sigma,x,c,-1*center_f*15,center_f*15, opt)
+    ss_fft = fft_sig(t,ss)
+    ans = {'t':t,'waveform':ss,'waveform_fft':ss_fft}
+    return ans
 
 def main():
     points = 1000
-    f = 15e6
+    f = 10e6
     duration = 100e-9
     tukey_alpha = .2
     highcut = f * 1
@@ -135,19 +159,25 @@ def main():
     s = np.sum(data,axis = 0)
 
 
-    t_0 = 0
-    t_max = 180e-9
-    pts = 1000
-    step = (t_max-t_0)/pts
-    t = np.asarray(range(pts)) * step + t_0
-    ss = g_wave(t,1,45e6, 20e6,12e-4,5000,-1100e6,1100e6)
+    params = {}
+    params ['t_min']=0
+    params['t_max'] = 120e-9
+    params['center_f'] = 45e6
+    params['sigma'] = 30e6
+    params['delay'] = .5
+    params['opt']=1
+ 
+    
+    params['pts'] = 1000
+    
+    ans = gaussin_wavelet(params)
+    ss = ans['waveform']
 
+    ss_fft = ans['waveform_fft']
 
-    ss_fft = fft_sig(t,ss)
-
-
+    t = ans['t']
     p2.plot(t,ss, pen=(0,255,0))
-    p3.plot(ss_fft[0],ss_fft[1], pen=(0,255,255))
+    p3.plot(ss_fft[0][:250],ss_fft[1][:250], pen=(0,255,255))
 
 
     

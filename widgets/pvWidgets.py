@@ -13,7 +13,9 @@ class pvQWidget(QWidget):
         super().__init__(self)
         self.pv = myPV
         self.val = None
-        current_value = self.pv.get()
+        if hasattr(self.pv,'get'):
+            current_value = self.pv.get()
+        else: current_value = None
         if current_value is not None:
             self.setValue( self.pv._pv_name, current_value)
         else:
@@ -23,7 +25,8 @@ class pvQWidget(QWidget):
         self.pv.value_changed_signal.connect(self.setValue)
         
     def valueChangedCallback(self,value):
-        self.pv.set(value)
+        if hasattr(self.pv,'set'):
+            self.pv.set(value)
 
     def setValue(self, tag, value):
         self.val = value[0]

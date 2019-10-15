@@ -34,7 +34,7 @@ class Scope_DPO5104(Scope, pvModel):
         self.visa_hostname = visa_hostname
         self.connected = False
         
-        #self.connected = self.connect(self.visa_hostname)
+        self.connected = self.connect(self.visa_hostname)
         
         self.file_name = ''
         self.file_settings = None
@@ -69,7 +69,7 @@ class Scope_DPO5104(Scope, pvModel):
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'channel_state','type':'b'}},
                         'run_state':     
-                                {'desc': 'Run state;ON', 'val':False, 
+                                {'desc': 'Run state;ON/OFF', 'val':False, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'output_state','type':'b'}},
                         'erase':     
@@ -301,8 +301,8 @@ class Scope_DPO5104(Scope, pvModel):
         return scale
 
     def _get_waveform(self): 
-        start = time.time()
-        wait_till = start+0.05
+        #start = time.time()
+        #wait_till = start+0.05
         
         data_stop = self.data_stop
         ch = self.selected_channel
@@ -310,16 +310,16 @@ class Scope_DPO5104(Scope, pvModel):
                                                         data_stop=data_stop,
                                                         x_axis_out=True)
         
-        end = time.time()
+        #end = time.time()
         
         # make sure set frame rate isn't exceeded
-        while time.time()< wait_till:
-                time.sleep(0.005)
+        #while time.time()< wait_till:
+        #        time.sleep(0.005)
         num_acq =self.DPO5000.num_acq
-        elapsed = end - start
+        #elapsed = end - start
         (dt, micro) = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f').split('.')
         dt = "%s.%03d" % (dt, int(micro) / 1000)
 
-        self.waveform = {'waveform':waveform,'ch':ch, 'time':dt, 'transfer_time':elapsed, 'num_acq':num_acq}
+        self.waveform = {'waveform':waveform,'ch':ch, 'time':dt, 'num_acq':num_acq}
         self.pvs['num_acq']._val = num_acq
         return self.waveform

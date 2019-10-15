@@ -5,7 +5,7 @@ import copy
 from PyQt5.QtCore import QThread, pyqtSignal
 import time
 from models.ScopeModel import Scope
-from models.ArbModel import ArbModel
+from models.ArbFilterModel import ArbFilterModel
 import json
 from widgets.scope_widget import scopeWidget
 
@@ -16,7 +16,7 @@ from controllers.pv_controller import pvController
 from utilities.utilities import *
 
 
-class ArbController(pvController):
+class ArbFilterController(pvController):
     callbackSignal = pyqtSignal(dict)  
     stoppedSignal = pyqtSignal()
     dataUpdatedSignal = pyqtSignal(dict)
@@ -24,12 +24,12 @@ class ArbController(pvController):
     runStateSignal = pyqtSignal(bool)
 
     def __init__(self, parent, isMain = False):
-        model = ArbModel
+        model = ArbFilterModel
         super().__init__(parent, model, isMain) 
         
-        self.panel_items =[ 'waveform_type',
+        self.panel_items =[ 'filter_type',
                             'edit_state']
-        self.init_panel("USER1 waveform", self.panel_items)
+        self.init_panel("Waveform filter", self.panel_items)
         self.make_connections()
         
         if isMain:
@@ -39,15 +39,15 @@ class ArbController(pvController):
         self.model.exit()
 
     def make_connections(self):
-        self.model.pvs['waveform_type'].value_changed_signal.connect(self.waveform_type_signal_callback)
+        self.model.pvs['filter_type'].value_changed_signal.connect(self.filter_type_signal_callback)
         self.model.pvs['variable_parameter'].value_changed_signal.connect(self.variable_parameter_signal_callback)
     
     def show_widget(self):
         self.panel.raise_widget()
 
-    def waveform_type_signal_callback(self, pv_name, data):
+    def filter_type_signal_callback(self, pv_name, data):
         data = data[0]
-        print('waveform_type_signal_callback ' + str(data))
+        print('filter_type_signal_callback ' + str(data))
 
     def variable_parameter_signal_callback(self, pv_name, data):
         data = data[0]

@@ -27,15 +27,15 @@ class frequencySweep(pvModel):
                         'frequency': 
                                 {'desc': 'Frequency (MHz)', 'val':30., 'increment':0.1, 'min':0.001,'max':120,
                                 'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'end_freq','type':'f'}},
+                                'param':{'tag':'frequency','type':'f'}},
                         'run_state':     
-                                {'desc': 'Run;ON', 'val':False, 
+                                {'desc': 'Run;ON/OFF', 'val':False, 
                                 'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'output_state','type':'b'}}
+                                'param':{'tag':'run_state','type':'b'}}
                                 
                                 }
         self.create_pvs(self.tasks)
-        self.offline = True
+        #self.offline = True
         
         self.start()           
 
@@ -91,7 +91,7 @@ class SweepModel(pvModel):
                                 'methods':{'set':True, 'get':True},  
                                 'param':{'tag':'step','type':'f'}},
                         'run_state':     
-                                {'desc': 'Run;ON', 'val':False, 
+                                {'desc': 'Run;ON/OFF', 'val':False, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'output_state','type':'b'}},
                         'frequency': 

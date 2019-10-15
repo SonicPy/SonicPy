@@ -16,7 +16,7 @@ import json
 from models.pv_model import pvModel
 
 
-class ArbModel(Scope, pvModel):
+class ArbFilterModel(Scope, pvModel):
     waveform_updated_signal = pyqtSignal(dict)
     channel_changed_signal = pyqtSignal()
     model_value_changed_signal = pyqtSignal(dict)
@@ -26,14 +26,14 @@ class ArbModel(Scope, pvModel):
         pvModel.__init__(self, parent)
         
      
-        self.wave_types = ['g_wavelet', 'burst_3-pulse', 'burst_fixed-time']
+        self.filter_types = ['none','tukey', 'lowpass']
         
-        self.vars = ['center_f', 'sigma']
+        self.vars = ['alpha']
 
-        self.tasks = {  'waveform_type': 
-                                {'desc': 'Waveform type', 'val':self.wave_types[0], 'list':self.wave_types, 
+        self.tasks = {  'filter_type': 
+                                {'desc': 'Filter type', 'val':self.filter_types[0], 'list':self.filter_types, 
                                 'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'waveform_type','type':'l'}},
+                                'param':{'tag':'filter_type','type':'l'}},
                         'variable_parameter': 
                                 {'desc': 'Variable', 'val':'center_f','list':self.vars,
                                 'methods':{'set':True, 'get':True}, 
@@ -61,14 +61,14 @@ class ArbModel(Scope, pvModel):
     def _exit_task(self):
         pass
 
-    def _get_waveform_type(self):
-        ans = self.pvs['waveform_type']._val
+    def _get_filter_type(self):
+        ans = self.pvs['filter_type']._val
         print('get ' + str(ans))
         return ans
 
-    def _set_waveform_type(self, param):
+    def _set_filter_type(self, param):
         print('set ' + str(param))
-        self.pvs['waveform_type']._val= param
+        self.pvs['filter_type']._val= param
 
     def _get_variable_parameter(self):
         ans = self.pvs['variable_parameter']._val

@@ -86,7 +86,7 @@ class ScopePlotController(QObject):
         #ff = fft_sig(*filtered)
         self.update_plot(filtered)
         #self.update_bg_plot(waveform)
-        elapsed = data['transfer_time']
+        #elapsed = data['transfer_time']
         num_acq = data['num_acq']
         self.widget.status_lbl.setText(str(num_acq))
         #dt = data['time']

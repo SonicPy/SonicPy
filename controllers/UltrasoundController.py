@@ -18,6 +18,7 @@ from controllers.AFGController import AFGController
 from controllers.ScopeController import ScopeController
 from controllers.ScopePlotController import ScopePlotController
 from controllers.ArbController import ArbController
+from controllers.ArbFilterController import ArbFilterController
 
 from models.WaveformModel import Waveform
 import math
@@ -43,6 +44,7 @@ class UltrasoundController(QObject):
         
         self.afg_controller = AFGController(self)
         self.arb_controller = ArbController(self)
+        self.arb_filter_controller = ArbFilterController(self)
         self.scope_controller = ScopeController(self)
         self.scope_plot_controller = ScopePlotController(self.scope_controller)
         
@@ -54,10 +56,12 @@ class UltrasoundController(QObject):
         scope_panel = self.scope_controller.get_panel()
         sweep_widget = self.sweep_controller.get_panel()
         arb_panel = self.arb_controller.get_panel()
+        arb_filter_panel = self.arb_filter_controller.get_panel()
 
         self.display_window.insert_panel(scope_panel)
         self.display_window.insert_panel(afg_panel)
         self.display_window.insert_panel(arb_panel)
+        self.display_window.insert_panel(arb_filter_panel)
         self.display_window.insert_panel(sweep_widget)
 
         scope_waveform_widget = self.scope_plot_controller.widget
@@ -223,6 +227,7 @@ class UltrasoundController(QObject):
         self.scope_controller.exit()
         self.sweep_controller.exit()
         self.arb_controller.exit()
+        self.arb_filter_controller.exit()
 
     def show_window(self):
         self.display_window.raise_widget()

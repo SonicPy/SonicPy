@@ -21,7 +21,7 @@ class AFGController(pvController):
                       'frequency',
                       'output_state']
 
-        self.init_panel("Source waveform", self.panel_items)
+        self.init_panel("Function generator", self.panel_items)
 
         
         

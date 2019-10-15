@@ -63,18 +63,27 @@ class ArbModel(Scope, pvModel):
 
     def _get_waveform_type(self):
         ans = self.pvs['waveform_type']._val
-        print('get ' + str(ans))
+        #print('get ' + str(ans))
         return ans
 
     def _set_waveform_type(self, param):
-        print('set ' + str(param))
+        #print('set ' + str(param))
         self.pvs['waveform_type']._val= param
 
     def _get_variable_parameter(self):
         ans = self.pvs['variable_parameter']._val
-        print('get ' + str(ans))
+        #print('get ' + str(ans))
         return ans
 
     def _set_variable_parameter(self, param):
-        print('set ' + str(param))
+        #print('set ' + str(param))
         self.pvs['variable_parameter']._val= param
+
+    def _get_edit_state(self):
+        ans = self.pvs['edit_state']._val
+        #print('get ' + str(ans))
+        return ans
+
+    def _set_edit_state(self, param):
+        #print('set ' + str(param))
+        self.pvs['edit_state']._val= param

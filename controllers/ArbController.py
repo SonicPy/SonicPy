@@ -9,6 +9,8 @@ from models.ArbModel import ArbModel
 import json
 from widgets.scope_widget import scopeWidget
 
+from controllers.ArbEditController import ArbEditController
+
 from widgets.panel import Panel
 from functools import partial
 from widgets.UtilityWidgets import save_file_dialog, open_file_dialog, open_files_dialog
@@ -26,6 +28,7 @@ class ArbController(pvController):
     def __init__(self, parent, isMain = False):
         model = ArbModel
         super().__init__(parent, model, isMain) 
+        self.arb_edit_controller = ArbEditController(self)
         
         self.panel_items =[ 'waveform_type',
                             'edit_state']
@@ -41,14 +44,23 @@ class ArbController(pvController):
     def make_connections(self):
         self.model.pvs['waveform_type'].value_changed_signal.connect(self.waveform_type_signal_callback)
         self.model.pvs['variable_parameter'].value_changed_signal.connect(self.variable_parameter_signal_callback)
+        self.model.pvs['edit_state'].value_changed_signal.connect(self.edit_state_signal_callback)
     
     def show_widget(self):
         self.panel.raise_widget()
 
     def waveform_type_signal_callback(self, pv_name, data):
         data = data[0]
-        print('waveform_type_signal_callback ' + str(data))
+        
 
     def variable_parameter_signal_callback(self, pv_name, data):
         data = data[0]
-        print('variable_parameter_signal_callback ' + str(data))
+        
+
+    def edit_state_signal_callback(self, pv_name, data):
+        data = data[0]
+        
+        if data:
+            self.arb_edit_controller.show_widget()
+        else: 
+            self.arb_edit_controller.hide_widget()

@@ -26,7 +26,7 @@ class ArbModel(Scope, pvModel):
         pvModel.__init__(self, parent)
         
      
-        self.wave_types = ['g_wavelet', 'burst_3-pulse', 'burst_fixed-time']
+        self.wave_types = ['g_wavelet', 'gx2_wavelet', 'burst_3-pulse', 'burst_fixed-time']
         
         self.vars = ['center_f', 'sigma']
 

@@ -54,7 +54,7 @@ class ScopePlotController(QObject):
         self.widget.blockSignals(False)
     
     def start_stop_btn_callback(self, state):
-        self.scope_controller.model.pvs['channel_state'].set(state)
+        self.scope_controller.model.pvs['run_state'].set(state)
             
 
     def get_waveform(self):

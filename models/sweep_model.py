@@ -40,6 +40,7 @@ class frequencySweep(pvModel):
         self.start()           
 
     def _set_frequency(self, param):
+        print('_set_frequency '+str(param))
         self.source_waveform_pvs['frequency'].set(param*1e6)
         self.scope_pvs['erase'].set(True)
         self.scope_pvs['run_state'].set(True)
@@ -57,7 +58,7 @@ class frequencySweep(pvModel):
 
     def _set_run_state(self, param):
         self.parent.pvs['run_state'].set(False)
-        #print('freq sweep done')
+        print('freq sweep done')
         
 
 class SweepModel(pvModel):

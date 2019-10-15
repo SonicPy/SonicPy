@@ -37,7 +37,11 @@ class ArbModel(Scope, pvModel):
                         'variable_parameter': 
                                 {'desc': 'Variable', 'val':'center_f','list':self.vars,
                                 'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'variable_parameter','type':'l'}}
+                                'param':{'tag':'variable_parameter','type':'l'}},
+                        'edit_state':     
+                                {'desc': ';Edit', 'val':False, 
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'edit_state','type':'b'}}
                                 
                       }       
 

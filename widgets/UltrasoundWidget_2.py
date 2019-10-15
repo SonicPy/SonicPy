@@ -41,10 +41,6 @@ class UltrasoundWidget(QMainWindow):
         self.controls_layout.addLayout(self.controls_grid_layout)
 
 
-        
-        
-        
-          
         self.control_panels = []
         
         self.controls_vertical_spacer = VerticalSpacerItem()
@@ -281,13 +277,13 @@ class UltrasoundWidget(QMainWindow):
         '''
 
         
-        #self.opts_menu = self.menuBar.addMenu('Setup')
+        self.opts_menu = self.menuBar.addMenu('Arb')
         self.ActionRecallSetup = QtWidgets.QAction('Recall setup', self)        
         self.ActionSaveSetup = QtWidgets.QAction('Save setup', self)   
-        self.ActionSetUserWaveform = QtWidgets.QAction('Set user waveform', self)   
+        self.ActionSetUserWaveform = QtWidgets.QAction('Edit user waveform', self)   
         #self.opts_menu.addAction(self.ActionRecallSetup)
         #self.opts_menu.addAction(self.ActionSaveSetup)
-        #self.opts_menu.addAction(self.ActionSetUserWaveform)
+        self.opts_menu.addAction(self.ActionSetUserWaveform)
         '''
 
         self.tools_menu = self.menuBar.addMenu('Tools')

@@ -90,7 +90,7 @@ def my_filter(t, y, pad, tukey_alpha,points_per_period, highcut):
     fltrd = fltrd / mx
     return [t, data*tk_data], [t,fltrd],[t, data]
 
-def gaussin_wavelet(params):
+def gaussian_wavelet(params):
     t_min = params['t_min']
     t_max = params['t_max']
     center_f = params['center_f']
@@ -163,14 +163,14 @@ def main():
     params ['t_min']=0
     params['t_max'] = 120e-9
     params['center_f'] = 45e6
-    params['sigma'] = 30e6
+    params['sigma'] = 18e6
     params['delay'] = .5
-    params['opt']=1
+    params['opt']=0
  
     
     params['pts'] = 1000
     
-    ans = gaussin_wavelet(params)
+    ans = gaussian_wavelet(params)
     ss = ans['waveform']
 
     ss_fft = ans['waveform_fft']
@@ -180,23 +180,24 @@ def main():
     p3.plot(ss_fft[0][:250],ss_fft[1][:250], pen=(0,255,255))
 
 
-    
-    for ind in range(10):
+    '''
+    for ind in range(20):
         fr = f + ind * 5e6
-        sf = zero_phase_bandpass_filter([t,ss],fr-fr*0.05, fr+fr*0.05, 1)
+        sf = zero_phase_bandpass_filter([t,ss],fr-fr*0.1, fr+fr*0.1, 2)
         p2.plot(sf[0],sf[1], pen=(255,0,0))
+    '''
     
-    print(fr)
-    data = np.asarray(data).T
+    #print(fr)
+    #data = np.asarray(data).T
 
 
-    imv = pg.ImageView()
-    win2 = QtGui.QMainWindow()
-    win2.setCentralWidget(imv)
-    win2.show()
-    win2.setWindowTitle('pyqtgraph example: ImageView')
+    #imv = pg.ImageView()
+    #win2 = QtGui.QMainWindow()
+    #win2.setCentralWidget(imv)
+    #win2.show()
+    #win2.setWindowTitle('pyqtgraph example: ImageView')
 
-    imv.setImage(data )
+    #imv.setImage(data )
 
 
 

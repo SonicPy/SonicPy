@@ -22,7 +22,7 @@ from controllers.ArbController import ArbController
 from models.WaveformModel import Waveform
 import math
 
-from models.arb_waveforms import get_arb
+from arb_waveforms import gaussian_wavelet
 
 from pyqtgraph.Qt import QtGui, QtCore
 import pyqtgraph as pg
@@ -105,21 +105,43 @@ class UltrasoundController(QObject):
 
 
     def SetUserWaveformCallback(self):
+
+        params = {}
+        params ['t_min']=0
+        params['t_max'] = 120e-9
+        params['center_f'] = 45e6
+        params['sigma'] = 20e6
+        params['delay'] = .5
+        params['opt']=0
+    
+        
+        params['pts'] = 1000
+        
+        ans = gaussian_wavelet(params)
+        ss = ans['waveform']
+
+        ss_fft = ans['waveform_fft']
+
+        t = ans['t']
+
+        self.win = pg.GraphicsLayoutWidget()
+        self.win.resize(1000,600)
+        self.win.setWindowTitle('burst_waveform')
+        # Enable antialiasing for prettier plots
+        pg.setConfigOptions(antialias=True)
+        self.p2 = self.win.addPlot()
+        self.p3 = self.win.addPlot()
+        self.p2.plot(t,ss, pen=(0,255,0))
+        self.p3.plot(ss_fft[0][:250],ss_fft[1][:250], pen=(0,255,255))
+        self.win.show()
+
+        '''
         arb = get_arb()
         waveform={}
         waveform['binary_waveform'] = arb
 
-        self.win = pg.GraphicsLayoutWidget(show=True, title="binary_waveform")
-        self.win.resize(1000,600)
-        self.win.setWindowTitle('binary_waveform')
-
-        # Enable antialiasing for prettier plots
-        pg.setConfigOptions(antialias=True)
-
-        self.p2 = self.win.addPlot(title="Multiple curves")
-        self.p2.plot(arb, pen=(255,0,0), name="Red curve")
-
         self.afg_controller.model.pvs['user1_waveform'].set(copy.deepcopy(waveform))
+        '''
 
     def RecallSetupCallback(self):
         print('RecallSetupCallback')

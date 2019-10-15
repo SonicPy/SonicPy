@@ -41,7 +41,7 @@ class AFG_AFG3251(Afg, pvModel):
 
         self.visa_hostname = visa_hostname
         self.connected = False
-        self.connected = self.connect(self.visa_hostname)
+        #self.connected = self.connect(self.visa_hostname)
         if self.connected:
             #print('connected')
             pass
@@ -67,7 +67,7 @@ class AFG_AFG3251(Afg, pvModel):
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'duration','type':'f'}},
                         'output_state':     
-                                {'desc': 'Output;ON', 'val':False, 
+                                {'desc': 'Output;ON/OFF', 'val':False, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'output_state','type':'b'}},
                         'n_cycles':  

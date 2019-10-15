@@ -34,10 +34,7 @@ class Scope_DPO5104(Scope, pvModel):
         self.visa_hostname = visa_hostname
         self.connected = False
         
-        self.connected = self.connect(self.visa_hostname)
-        if self.connected:
-            #print('connected')
-            pass
+        #self.connected = self.connect(self.visa_hostname)
         
         self.file_name = ''
         self.file_settings = None
@@ -68,7 +65,7 @@ class Scope_DPO5104(Scope, pvModel):
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'channel','type':'l'}},      
                         'channel_state': 
-                                {'desc': 'Channel state;ON', 'val':False, 
+                                {'desc': 'Channel state;ON/OFF', 'val':False, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'channel_state','type':'b'}},
                         'run_state':     

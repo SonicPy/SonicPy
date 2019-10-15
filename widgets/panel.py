@@ -52,7 +52,7 @@ class Panel(QtWidgets.QGroupBox):
                 if pv_type is int or pv_type is float:
                     ctrl = pvQDoubleSpinBox(pv)
                 if pv_type is bool:
-                    ctrl = pvQCheckBox(pv)
+                    ctrl = pvQPushButton(pv)
                     
                 self.controls[pv._pv_name] = ctrl
 

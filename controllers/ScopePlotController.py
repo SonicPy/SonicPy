@@ -46,28 +46,22 @@ class ScopePlotController(QObject):
         self.scope_controller.dataBGUpdatedSignal.connect(self.bg_waveform_updated_signal_callback)
 
         
-    
+    def run_state_callback(self, state):
+        self.widget.blockSignals(True)
+        self.widget.start_stop_btn.setChecked(state)
+        if state:
+            self.get_waveform()
+        self.widget.blockSignals(False)
     
     def start_stop_btn_callback(self, state):
-  
-        if state:
-            self.scope_controller.model.pvs['run_state'].set(True)
-            channel_state = self.scope_controller.model.pvs['channel_state']._val
-            if not channel_state:
-                self.scope_controller.model.pvs['channel_state'].set(True)
-            self.get_waveform()
-        else:
-            self.scope_controller.model.pvs['run_state'].set(False)
-            self.scope_controller.stoppedSignal.emit()
+        self.scope_controller.model.pvs['channel_state'].set(state)
+            
 
     def get_waveform(self):
         if self.scope_controller.model.connected:
             self.scope_controller.model.pvs['waveform'].get()
 
-    def run_state_callback(self, state):
-        self.widget.blockSignals(True)
-        self.widget.start_stop_btn.setChecked(state)
-        self.widget.blockSignals(False)
+    
 
     def widgetSetEnabled(self, state):
         self.widget.button_widget.setEnabled(state)

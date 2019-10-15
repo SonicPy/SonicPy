@@ -31,7 +31,8 @@ class ScopeController(pvController):
                             'channel',
                             'vertical_scale',
                             'acquisition_type',
-                            'num_av']
+                            'num_av',
+                            'run_state']
         self.init_panel("Scope", self.panel_items)
         self.make_connections()
         self.waveform_data = None

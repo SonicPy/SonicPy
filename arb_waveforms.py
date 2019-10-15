@@ -99,17 +99,10 @@ def gaussian_wavelet(params):
     delay = params['delay']
     opt = params['opt']
     c = 5000
-    
-    
-    xc = delay / center_f
     x =  c *(t_max-t_min)* delay
-
-
-    print(x)
-
     step = (t_max-t_min)/pts
     t = np.asarray(range(pts)) * step + t_min
-    ss = g_wave(t,1,center_f, sigma,x,c,-1*center_f*15,center_f*15, opt)
+    ss = g_wave(t,1,center_f, sigma,x,c,-1*900e6,900e6, opt)
     ss_fft = fft_sig(t,ss)
     ans = {'t':t,'waveform':ss,'waveform_fft':ss_fft}
     return ans
@@ -163,19 +156,19 @@ def main():
     params ['t_min']=0
     params['t_max'] = 120e-9
     params['center_f'] = 45e6
-    params['sigma'] = 18e6
+    params['sigma'] = 20e6
     params['delay'] = .5
     params['opt']=0
  
     
     params['pts'] = 1000
-    
     ans = gaussian_wavelet(params)
     ss = ans['waveform']
-
-    ss_fft = ans['waveform_fft']
-
+    
     t = ans['t']
+    ss_fft = fft_sig(t,ss)
+
+    
     p2.plot(t,ss, pen=(0,255,0))
     p3.plot(ss_fft[0][:250],ss_fft[1][:250], pen=(0,255,255))
 

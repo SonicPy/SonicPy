@@ -29,8 +29,6 @@ from widgets.CustomWidgets import FlatButton, DoubleSpinBoxAlignRight, VerticalS
     HorizontalSpacerItem, ListTableWidget, VerticalLine, DoubleMultiplySpinBoxAlignRight, HorizontalLine
 from widgets.PltWidget import CustomViewBox, PltWidget
 
-
-
 class PopUpWidget(QtWidgets.QWidget):
     widget_closed = QtCore.pyqtSignal()
     
@@ -50,7 +48,6 @@ class PopUpWidget(QtWidgets.QWidget):
         self._layout.addLayout(self._body_layout)
         
         self.button_2_widget = QtWidgets.QWidget(self)
-        self.button_2_widget.setObjectName('waveform_control_button_2_widget')
         self._button_2_layout = QtWidgets.QHBoxLayout()
         self._button_2_layout.setContentsMargins(0, 0, 0, 0)
         self._button_2_layout.setSpacing(6)
@@ -62,7 +59,6 @@ class PopUpWidget(QtWidgets.QWidget):
 
     def add_top_row_button(self, objectName, text):
         setattr(self, objectName, FlatButton(text))
-
         self._button_layout.addWidget(getattr(self,objectName))
 
     def add_bottom_row_button(self, objectName, text):
@@ -75,13 +71,10 @@ class PopUpWidget(QtWidgets.QWidget):
     def add_bottom_horizontal_spacer(self):
         self._button_2_layout.addSpacerItem(HorizontalSpacerItem())
         
-        
     def add_body_widget(self, widget):
-        
         self._body_layout.addSpacerItem(VerticalSpacerItem())
 
     def style_widgets(self):
-        
         self.setStyleSheet("""
             #rois_control_button_widget FlatButton {
                 max-width: 70;
@@ -92,24 +85,17 @@ class PopUpWidget(QtWidgets.QWidget):
                 min-width: 70;
             }
         """)
-
-
     
     def closeEvent(self, event):
         # Overrides close event to let controller know that widget was closed by user
         self.widget_closed.emit()
-        
-  
-
-
+    
     def raise_widget(self):
         self.show()
         self.setWindowState(self.windowState() & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
         self.activateWindow()
         self.raise_()
 
-
-    
 class plotWaveWindow(QtWidgets.QWidget):
     widget_closed = QtCore.Signal()
     def __init__(self):
@@ -178,11 +164,17 @@ class plotWaveWindow(QtWidgets.QWidget):
 class ArbEditWidget(PopUpWidget):
     def __init__(self):
         super().__init__(title='Waveform control')
+        self.plot_window = plotWaveWindow()
         self.add_top_row_button('plot_btn','Plot')
         self.add_top_horizontal_spacer()
         self.add_bottom_row_button('apply_btn','Apply')
         self.add_bottom_horizontal_spacer()
         self.add_body_widget(VerticalSpacerItem())
+        self.make_connections()
+
+    def make_connections(self):
+        self.plot_btn.clicked.connect(self.plot_window.raise_widget)
+
         
 class ArbEditFilterWidget(PopUpWidget):
     def __init__(self):

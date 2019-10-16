@@ -15,7 +15,7 @@ arb_waveforms = {'g_wavelet':{
                                      'desc':u'Number of points in waveform',
                                      'unit':u'',
                                      'default':1000}, 
-                        'center_f': {'symbol':u'f<sub>0</sub>/dT',
+                        'center_f': {'symbol':u'f<sub>0</sub>',
                                      'desc':u'Center frequency',
                                      'unit':u'Hz',
                                      'default':45e6}, 

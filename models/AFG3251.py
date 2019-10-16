@@ -41,7 +41,7 @@ class AFG_AFG3251(Afg, pvModel):
 
         self.visa_hostname = visa_hostname
         self.connected = False
-        self.connected = self.connect(self.visa_hostname)
+        #self.connected = self.connect(self.visa_hostname)
         if self.connected:
             #print('connected')
             pass

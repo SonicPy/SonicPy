@@ -331,11 +331,9 @@ class plotWaveWindow(QtWidgets.QWidget):
             self.vLineRight.setPos(roi_range[0])
             self.vLineLeft.setPos(roi_range[1])
     
-
-        
-class ArbEditWidget(PopUpWidget):
-    def __init__(self):
-        super().__init__(title='Waveform control')
+class EditWidget(PopUpWidget):
+    def __init__(self, title, definitions, default):
+        super().__init__(title)
         self.plot_window = plotWaveWindow()
 
         self.add_top_row_button('plot_btn','Plot')
@@ -343,27 +341,11 @@ class ArbEditWidget(PopUpWidget):
         self.add_bottom_row_button('apply_btn','Apply')
         self.add_bottom_horizontal_spacer()
         
-        self.afw_gb = AfwGroupbox(title="Waveform settings", definitions=arb_waveforms, default='g_wavelet')
+        self.afw_gb = AfwGroupbox(title=title, definitions=definitions, default=default)
         self.add_body_widget(self.afw_gb)
         
         self.make_connections()
 
     def make_connections(self):
         self.plot_btn.clicked.connect(self.plot_window.raise_widget)
-
         
-class ArbEditFilterWidget(PopUpWidget):
-    def __init__(self):
-        super().__init__(title='Filter control')
-        self.plot_window = plotWaveWindow()
-        self.add_top_row_button('plot_btn','Plot')
-        self.add_top_horizontal_spacer()
-        self.add_bottom_row_button('apply_btn','Apply')
-        self.add_bottom_horizontal_spacer()
-        self.filter_gb = AfwGroupbox(title="Filter settings", definitions=filters, default='none')
-        self.add_body_widget(self.filter_gb)
-        
-        self.make_connections()
-
-    def make_connections(self):
-        self.plot_btn.clicked.connect(self.plot_window.raise_widget)

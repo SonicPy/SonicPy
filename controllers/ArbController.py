@@ -9,7 +9,9 @@ from models.ArbModel import ArbModel
 import json
 from widgets.scope_widget import scopeWidget
 
-from controllers.ArbEditController import ArbEditController
+from controllers.EditController import EditController
+from models.ArbDefinitions import arb_waveforms
+
 
 from widgets.panel import Panel
 from functools import partial
@@ -28,7 +30,7 @@ class ArbController(pvController):
     def __init__(self, parent, isMain = False):
         model = ArbModel
         super().__init__(parent, model, isMain) 
-        self.arb_edit_controller = ArbEditController(self)
+        self.arb_edit_controller = EditController(self, title='Waveform control', definitions =arb_waveforms, default='g_wavelet')
         
         self.panel_items =[ 'waveform_type',
                             'edit_state']

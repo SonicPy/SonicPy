@@ -7,7 +7,7 @@ import time
 from models.ScopeModel import Scope
 from models.ArbModel import ArbModel
 import json
-from widgets.PopUpWidget import ArbEditWidget
+from widgets.PopUpWidget import EditWidget
 
 from widgets.panel import Panel
 from functools import partial
@@ -16,13 +16,13 @@ from controllers.pv_controller import pvController
 from utilities.utilities import *
 
 
-class ArbEditController(QObject):
+class EditController(QObject):
     callbackSignal = pyqtSignal(dict)  
 
         
-    def __init__(self, arb_controller, isMain = False):
+    def __init__(self, arb_controller, title, definitions, default,  isMain = False):
         super().__init__()
-        self.widget = ArbEditWidget()
+        self.widget = EditWidget(title, definitions, default)
 
         #self.pg = self.widget.plot_widget.fig.win
         

@@ -9,7 +9,8 @@ from models.ArbFilterModel import ArbFilterModel
 import json
 from widgets.scope_widget import scopeWidget
 
-from controllers.ArbEditFilterController import ArbEditFilterController
+from controllers.EditController import EditController
+from models.FilterDefinitions import filters
 
 from widgets.panel import Panel
 from functools import partial
@@ -28,7 +29,7 @@ class ArbFilterController(pvController):
     def __init__(self, parent, isMain = False):
         model = ArbFilterModel
         super().__init__(parent, model, isMain) 
-        self.arb_edit_filter_controller = ArbEditFilterController(self)
+        self.arb_edit_filter_controller = EditController(self, title='Filter control', definitions =filters, default='none')
         self.panel_items =[ 'filter_type',
                             'edit_state']
         self.init_panel("Waveform filter", self.panel_items)

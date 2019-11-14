@@ -34,7 +34,7 @@ class Scope_DPO5104(Scope, pvModel):
         self.visa_hostname = visa_hostname
         self.connected = False
         
-        #self.connected = self.connect(self.visa_hostname)
+        self.connected = self.connect(self.visa_hostname)
         
         self.file_name = ''
         self.file_settings = None

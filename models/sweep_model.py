@@ -27,19 +27,20 @@ class frequencySweep(pvModel):
                         'frequency': 
                                 {'desc': 'Frequency (MHz)', 'val':30., 'increment':0.1, 'min':0.001,'max':120,
                                 'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'end_freq','type':'f'}},
+                                'param':{'tag':'frequency','type':'f'}},
                         'run_state':     
-                                {'desc': 'Run;ON', 'val':False, 
+                                {'desc': 'Run;ON/OFF', 'val':False, 
                                 'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'output_state','type':'b'}}
+                                'param':{'tag':'run_state','type':'b'}}
                                 
                                 }
         self.create_pvs(self.tasks)
-        self.offline = True
+        #self.offline = True
         
         self.start()           
 
     def _set_frequency(self, param):
+        print('_set_frequency '+str(param))
         self.source_waveform_pvs['frequency'].set(param*1e6)
         self.scope_pvs['erase'].set(True)
         self.scope_pvs['run_state'].set(True)
@@ -57,7 +58,7 @@ class frequencySweep(pvModel):
 
     def _set_run_state(self, param):
         self.parent.pvs['run_state'].set(False)
-        #print('freq sweep done')
+        print('freq sweep done')
         
 
 class SweepModel(pvModel):
@@ -91,7 +92,7 @@ class SweepModel(pvModel):
                                 'methods':{'set':True, 'get':True},  
                                 'param':{'tag':'step','type':'f'}},
                         'run_state':     
-                                {'desc': 'Run;ON', 'val':False, 
+                                {'desc': 'Run;ON/OFF', 'val':False, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'output_state','type':'b'}},
                         'frequency': 

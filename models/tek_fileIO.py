@@ -1,5 +1,6 @@
 import struct
 import csv
+from pandas import read_csv
 import numpy as np
 import time
 from numpy import format_float_scientific
@@ -55,21 +56,24 @@ def read_file_TEKAFG3000( filename=''):
         except:
             return None
 
-def read_tek_csv(fname, return_x=True):
+def read_tek_csv(fname, return_x=True, subsample=1):
     sample_period = 0.0
     raw_samples = []
     with open(fname, 'rt',encoding='ascii') as csvfile:
+        s = lambda x: x%subsample
         c = csv.reader(csvfile, delimiter=',')
+        
         # Sample period is in cell B2 (1,1)
         for row_num, row in enumerate(c):
             if row_num == 1: # get the sample period
                 sample_period = float(row[1])
                 break
-        for row in c:
-            raw_samples.append(float(row[4]))
+        for row_num, row in enumerate(c):
+            if row_num%subsample == 0:
+                raw_samples.append(float(row[4]))
     y = np.array(raw_samples)
     if return_x:
-        x = np.array(range(len(y)))*sample_period
+        x = np.array(range(len(y)))*sample_period*subsample
         return x, y
     else: 
         return y

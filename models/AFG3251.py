@@ -62,12 +62,8 @@ class AFG_AFG3251(Afg, pvModel):
                                 {'desc': 'Frequency (Hz)', 'val':30000000.0, 'min':0, 'max':120000000,'increment':500000, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'frequency','type':'f'}},
-                        'duration': 
-                                {'desc': 'Burst duration (ns)', 'val':50,'min':0.1,'max':1e9,'increment':.1, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'duration','type':'f'}},
                         'output_state':     
-                                {'desc': 'Output;ON', 'val':False, 
+                                {'desc': 'Output;ON/OFF','val':False, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'output_state','type':'b'}},
                         'n_cycles':  

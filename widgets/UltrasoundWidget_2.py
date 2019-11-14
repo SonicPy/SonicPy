@@ -41,10 +41,6 @@ class UltrasoundWidget(QMainWindow):
         self.controls_layout.addLayout(self.controls_grid_layout)
 
 
-        
-        
-        
-          
         self.control_panels = []
         
         self.controls_vertical_spacer = VerticalSpacerItem()
@@ -255,14 +251,14 @@ class UltrasoundWidget(QMainWindow):
         #self.actionSave_As.setEnabled(False)
         self.actionPreferences = QtWidgets.QAction("Preferences", self)
 
-        self.actionBG = QtWidgets.QAction("Open overlay", self)
+        self.actionBG = QtWidgets.QAction("Overlay", self)
         self.actionBGclose = QtWidgets.QAction("Close overlay", self)
         
         #self.file_menu.addAction(self.actionSave_next)
         self.file_menu.addAction(self.actionSave_As)    
         self.file_menu.addAction(self.actionPreferences)  
         self.file_menu.addAction(self.actionBG) 
-        self.file_menu.addAction(self.actionBGclose) 
+        #self.file_menu.addAction(self.actionBGclose) 
         
         #self.file_menu.addAction(self.file_save_hdf5_act)
 
@@ -281,13 +277,13 @@ class UltrasoundWidget(QMainWindow):
         '''
 
         
-        #self.opts_menu = self.menuBar.addMenu('Setup')
+        self.opts_menu = self.menuBar.addMenu('Arb')
         self.ActionRecallSetup = QtWidgets.QAction('Recall setup', self)        
         self.ActionSaveSetup = QtWidgets.QAction('Save setup', self)   
-        self.ActionSetUserWaveform = QtWidgets.QAction('Set user waveform', self)   
+        self.ActionSetUserWaveform = QtWidgets.QAction('Edit user waveform', self)   
         #self.opts_menu.addAction(self.ActionRecallSetup)
         #self.opts_menu.addAction(self.ActionSaveSetup)
-        #self.opts_menu.addAction(self.ActionSetUserWaveform)
+        self.opts_menu.addAction(self.ActionSetUserWaveform)
         '''
 
         self.tools_menu = self.menuBar.addMenu('Tools')

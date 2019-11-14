@@ -10,10 +10,12 @@ from PyQt5.QtWidgets import QWidget, QLineEdit, QComboBox, QDoubleSpinBox, QChec
 
 class pvQWidget(QWidget):
     def __init__(self, myPV):
-        super().__init__(self)
+        #super().__init__(self)
         self.pv = myPV
         self.val = None
-        current_value = self.pv.get()
+        if hasattr(self.pv,'get'):
+            current_value = self.pv.get()
+        else: current_value = None
         if current_value is not None:
             self.setValue( self.pv._pv_name, current_value)
         else:
@@ -23,7 +25,8 @@ class pvQWidget(QWidget):
         self.pv.value_changed_signal.connect(self.setValue)
         
     def valueChangedCallback(self,value):
-        self.pv.set(value)
+        if hasattr(self.pv,'set'):
+            self.pv.set(value)
 
     def setValue(self, tag, value):
         self.val = value[0]
@@ -109,6 +112,7 @@ class pvQDoubleSpinBox(QDoubleSpinBox, pvQWidget):
 class pvQCheckBox(QCheckBox, pvQWidget):
     def __init__(self, myPV):
         desc = myPV._description.split(';')[1]
+        
         QCheckBox.__init__(self)
         QCheckBox.setText(self, desc)
         pvQWidget.__init__(self, myPV)
@@ -132,6 +136,7 @@ class pvQCheckBox(QCheckBox, pvQWidget):
 class pvQPushButton(QPushButton, pvQWidget):
     def __init__(self, myPV):
         desc = myPV._description.split(';')[1]
+
         QPushButton.__init__(self)
         QPushButton.setText(self, desc)
         pvQWidget.__init__(self, myPV)
@@ -140,12 +145,16 @@ class pvQPushButton(QPushButton, pvQWidget):
         self.clicked.connect(self.valueChangedCallback)
 
     def setValue(self, tag, value):
+        widget = self
+        
         pvQWidget.setValue(self, tag, value)
         value = self.val
         self.blockSignals(True)
-       
+        
+        
         widget = self
         current_value = widget.isChecked()
         if value != current_value:
             QPushButton.setChecked(widget, value)
+            
         self.blockSignals(False)  

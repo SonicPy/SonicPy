@@ -372,13 +372,13 @@ def get_base_name(filename):
 
 def calculate_color(ind):
     s = 1
-    v = 0.8
+    v = 1
     h = (0.19 * (ind + 2)) % 1
     return np.array(hsv_to_rgb(h, s, v)) * 255
 
 def make_color(hue):
     s = 1
-    v = 0.8
+    v = 0.9
     h = hue
     return np.array(hsv_to_rgb(h, s, v)) * 255
 

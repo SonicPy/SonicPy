@@ -20,6 +20,8 @@ from controllers.ScopePlotController import ScopePlotController
 from controllers.ArbController import ArbController
 from controllers.ArbFilterController import ArbFilterController
 
+from controllers.OverlayController import OverlayController
+
 from models.WaveformModel import Waveform
 import math
 
@@ -36,6 +38,13 @@ from utilities.HelperModule import increment_filename, increment_filename_extra
 class UltrasoundController(QObject):
     def __init__(self, app, _platform, theme):
         super().__init__()
+
+        self.scope_file_options_file='scope_file_settings.json'
+        self.scope_working_directories_file = 'scope_folder_settings.json'
+        self.working_directories = mcaUtil.restore_folder_settings(self.scope_working_directories_file)
+        self.file_options = mcaUtil.restore_file_settings(self.scope_file_options_file)
+        
+
         self.app = app
         
         self.setStyle(theme)
@@ -47,6 +56,7 @@ class UltrasoundController(QObject):
         self.arb_filter_controller = ArbFilterController(self)
         self.scope_controller = ScopeController(self)
         self.scope_plot_controller = ScopePlotController(self.scope_controller)
+        self.overlay_controller = OverlayController(self, self.scope_plot_controller)
         
         self.sweep_controller = SweepController(self,
                                                 self.scope_controller.model.pvs, 
@@ -88,10 +98,6 @@ class UltrasoundController(QObject):
         
         self.waveform_index = 0
         
-        self.scope_file_options_file='scope_file_settings.json'
-        self.scope_working_directories_file = 'scope_folder_settings.json'
-        self.working_directories = mcaUtil.restore_folder_settings(self.scope_working_directories_file)
-        self.file_options = mcaUtil.restore_file_settings(self.scope_file_options_file)
         
         self.make_connections()
 
@@ -101,8 +107,8 @@ class UltrasoundController(QObject):
         self.scope_controller.stoppedSignal.connect(self.scopeStoppedCallback)
         self.display_window.actionPreferences.triggered.connect(self.preferences_module)
         self.display_window.actionSave_As.triggered.connect(self.scopeSaveAsCallback)
-        self.display_window.actionBG.triggered.connect(self.load_background_callback)
-        self.display_window.actionBGclose.triggered.connect(self.close_background_callback)
+        self.display_window.actionBG.triggered.connect(self.overlay_btn_callback)
+        #self.display_window.actionBGclose.triggered.connect(self.close_background_callback)
         self.display_window.ActionRecallSetup.triggered.connect(self.RecallSetupCallback)
         self.display_window.ActionSaveSetup.triggered.connect(self.SaveSetupCallback)
         self.display_window.ActionSetUserWaveform.triggered.connect(self.SetUserWaveformCallback)
@@ -157,6 +163,10 @@ class UltrasoundController(QObject):
     def close_background_callback(self):
         
         self.scope_controller.close_background_callback()
+
+    def overlay_btn_callback(self):
+
+        self.overlay_controller.showWidget()
 
     def load_background_callback(self):
         start_folder = self.working_directories.savedata 
@@ -228,6 +238,7 @@ class UltrasoundController(QObject):
         self.sweep_controller.exit()
         self.arb_controller.exit()
         self.arb_filter_controller.exit()
+        self.overlay_controller.overlay_widget.close()
 
     def show_window(self):
         self.display_window.raise_widget()

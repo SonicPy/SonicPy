@@ -251,14 +251,14 @@ class UltrasoundWidget(QMainWindow):
         #self.actionSave_As.setEnabled(False)
         self.actionPreferences = QtWidgets.QAction("Preferences", self)
 
-        self.actionBG = QtWidgets.QAction("Open overlay", self)
+        self.actionBG = QtWidgets.QAction("Overlay", self)
         self.actionBGclose = QtWidgets.QAction("Close overlay", self)
         
         #self.file_menu.addAction(self.actionSave_next)
         self.file_menu.addAction(self.actionSave_As)    
         self.file_menu.addAction(self.actionPreferences)  
         self.file_menu.addAction(self.actionBG) 
-        self.file_menu.addAction(self.actionBGclose) 
+        #self.file_menu.addAction(self.actionBGclose) 
         
         #self.file_menu.addAction(self.file_save_hdf5_act)
 

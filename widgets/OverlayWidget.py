@@ -22,9 +22,8 @@ from functools import partial
 
 from PyQt5 import QtWidgets, QtCore
 
-from hpMCA.widgets.CustomWidgets import LabelAlignRight, FlatButton, CheckableFlatButton, DoubleSpinBoxAlignRight, \
-    VerticalSpacerItem, HorizontalSpacerItem, ListTableWidget, DoubleMultiplySpinBoxAlignRight
-from hpMCA.widgets.CustomWidgets import NoRectDelegate
+from widgets.CustomWidgets import LabelAlignRight, FlatButton, CheckableFlatButton, DoubleSpinBoxAlignRight, \
+    VerticalSpacerItem, HorizontalSpacerItem, ListTableWidget, DoubleMultiplySpinBoxAlignRight, NoRectDelegate
 
 
 class OverlayWidget(QtWidgets.QWidget):
@@ -94,7 +93,7 @@ class OverlayWidget(QtWidgets.QWidget):
 
         self._background_layout = QtWidgets.QHBoxLayout()
         self._background_layout.addSpacerItem(HorizontalSpacerItem())
-        self._background_layout.addWidget(self.set_as_bkg_btn)
+        #self._background_layout.addWidget(self.set_as_bkg_btn)
         self._parameter_layout.addLayout(self._background_layout, 6, 0, 1, 3)
         self.parameter_widget.setLayout(self._parameter_layout)
 
@@ -136,11 +135,11 @@ class OverlayWidget(QtWidgets.QWidget):
 
         self.offset_step_msb.setMaximum(100000.0)
         self.offset_step_msb.setMinimum(0.01)
-        self.offset_step_msb.setValue(100.0)
+        self.offset_step_msb.setValue(1.0)
 
         self.waterfall_separation_msb.setMaximum(100000.0)
         self.waterfall_separation_msb.setMinimum(0.01)
-        self.waterfall_separation_msb.setValue(100.0)
+        self.waterfall_separation_msb.setValue(1.0)
 
         self.setStyleSheet("""
             #overlay_control_widget QPushButton {

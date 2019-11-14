@@ -21,11 +21,11 @@ class scopeWidget(QtWidgets.QWidget):
         self.button_widget = QtWidgets.QWidget()
         
         self._button_layout = QtWidgets.QHBoxLayout()
-        self.start_stop_btn = QtWidgets.QPushButton("On")
+        self.start_stop_btn = FlatButton("On")
         self.start_stop_btn.setCheckable(True)
 
-        self.erase_btn = QtWidgets.QPushButton("Erase")
-        self.save_btn = QtWidgets.QPushButton("Save")
+        self.erase_btn = FlatButton("Erase")
+        self.save_btn = FlatButton("Save")
         #self.save_btn.setDisabled(True)
         
         self._status_layout = QtWidgets.QVBoxLayout()
@@ -53,6 +53,14 @@ class scopeWidget(QtWidgets.QWidget):
         self.CH1_plot = fig.add_line_plot([],[],color=(255,255,0))
         self.bg_plot = fig.add_line_plot([],[],color=(0,255,255))
         self.bg_plot_filtered = fig.add_line_plot([],[],color=(255,0,255))
+
+
+        self.setStyleSheet("""
+            #FlatButton {
+                min-width: 95;
+            }
+            
+        """)
 
     def plot(self,waveform):
         

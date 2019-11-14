@@ -22,9 +22,10 @@ import os
 
 import numpy as np
 from PyQt5 import QtWidgets
-from hpMCA.widgets.UtilityWidgets import open_files_dialog
-from hpMCA.widgets.OverlayWidget import OverlayWidget
-from hpMCA.models.OverlayModel import OverlayModel
+
+from widgets.UtilityWidgets import open_files_dialog
+from widgets.OverlayWidget import OverlayWidget
+from models.OverlayModel import OverlayModel
 
 # imports for type hinting in PyCharm -- DO NOT DELETE
 #from ...widgets.integration import IntegrationWidget
@@ -37,7 +38,7 @@ class OverlayController(object):
     the corresponding overlay data in the Pattern Model.
     """
 
-    def __init__(self, mcc, plot_controller, hpMcaWidget):
+    def __init__(self, mcc, plotWidget):
         """
         :param widget: Reference to IntegrationWidget object
         :param pattern_model: Reference to PatternModel object
@@ -45,14 +46,12 @@ class OverlayController(object):
         :type widget: IntegrationWidget
         :type dioptas_model: DioptasModel
         """
-        self.overlay_widget = None
+        
         self.overlay_widget = OverlayWidget()
         self.model = mcc
         self.overlay_model = OverlayModel()
-        self.pattern_widget = hpMcaWidget.pg
-        self.plotController = plot_controller
-        
-        
+        self.pattern_widget = plotWidget.pg
+      
         self.overlay_lw_items = []
         self.create_signals()
         self.active = False
@@ -91,7 +90,7 @@ class OverlayController(object):
         self.overlay_model.overlay_added.connect(self.overlay_added)
         self.overlay_model.overlay_changed.connect(self.overlay_changed)
 
-        self.plotController.unitUpdated.connect(self.update_x_scale)
+        
 
     def file_dragged_in(self,files):
         
@@ -112,8 +111,7 @@ class OverlayController(object):
     def update_x_scale(self,unit):
         self.overlay_model.set_x_scale(unit)
 
-    def update_log_scale(self):
-        self.overlay_model.set_log_scale(self.plotController.get_log_mode_y())
+    
 
     def add_overlay_btn_click_callback(self,**kwargs):
         """
@@ -127,11 +125,10 @@ class OverlayController(object):
 
         
         if len(filenames):
-            log_mode = self.plotController.logMode
-            x_scale = self.plotController.get_unit()
+            
             for filename in filenames:
                 filename = str(filename)
-                self.overlay_model.add_overlay_file(filename,x_scale,log_mode)
+                self.overlay_model.add_overlay_file(filename)
             self.model.working_directories.savedata = os.path.dirname(str(filenames[0]))
 
     def overlay_added(self):
@@ -324,9 +321,11 @@ class OverlayController(object):
                 self.overlay_widget.show_cb_set_checked(cur_ind, False)
 
     def set_current_pattern_as_overlay(self):
+        return
         self.overlay_model.add_overlay_pattern(self.model.pattern)
 
     def set_current_pattern_as_background(self):
+        return
         self.overlay_model.add_overlay_pattern(self.model.pattern)
         #self.model.pattern_model.background_pattern = self.overlay_model.overlays[-1]
 

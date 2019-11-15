@@ -87,3 +87,4 @@ arb_waveforms = {'g_wavelet':{
                                      'default':20e6}
                         }}
 }
+

@@ -25,7 +25,7 @@ class UltrasoundWidget(QMainWindow):
         self.setWindowTitle('sonicPy')
         self.Theme = Theme
         self.app = app  # app object
-        self.resize(1036, 700)
+        self.resize(1250, 700)
         self.centralwidget = QtWidgets.QWidget()
         self._layout = QtWidgets.QHBoxLayout()
         self.controls_sidebar = QtWidgets.QWidget()

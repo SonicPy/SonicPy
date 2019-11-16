@@ -18,12 +18,12 @@ from utilities.utilities import *
 
 class EditController(QObject):
     callbackSignal = pyqtSignal(dict)  
-
+    applyClickedSignal = pyqtSignal(str)
         
     def __init__(self, arb_controller, title, definitions, default,  isMain = False):
         super().__init__()
         self.widget = EditWidget(title, definitions, default)
-
+        self.definitions = definitions
         #self.pg = self.widget.plot_widget.fig.win
         
         self.arb_controller = arb_controller
@@ -34,12 +34,22 @@ class EditController(QObject):
             self.show_widget()
 
         self.make_connections()
+
+    
+    
+    def update_plot(self, data):
+        self.widget.update_plot(data)
         
     def exit(self):
         self.model.exit()
 
     def make_connections(self):
-        pass
+        self.widget.get_apply_btn().clicked.connect(self.edit_widget_apply_clicked_signal_callback)
+
+    def edit_widget_apply_clicked_signal_callback(self):
+        selected = self.widget.get_selected_choice()
+        self.applyClickedSignal.emit(selected)
+        
     
     def show_widget(self):
         self.widget.raise_widget()

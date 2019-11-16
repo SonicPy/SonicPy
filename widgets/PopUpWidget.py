@@ -30,8 +30,6 @@ from widgets.CustomWidgets import FlatButton, DoubleSpinBoxAlignRight, VerticalS
         CleanLooksComboBox, NumberTextField, LabelAlignRight
 from widgets.PltWidget import CustomViewBox, PltWidget
 
-from models.ArbDefinitions import arb_waveforms
-from models.FilterDefinitions import filters
 
 class AfwGroupbox(QtWidgets.QWidget):
     param_edited_signal = QtCore.pyqtSignal(dict)
@@ -43,8 +41,19 @@ class AfwGroupbox(QtWidgets.QWidget):
         self.awf_gb = QtWidgets.QGroupBox("Waveform settings")
         self._awf_gb_layout = QtWidgets.QVBoxLayout()
         
+        params = [ definitions[x].param for x in definitions]
+        names = [ x for x in definitions]
+        defs = {}
+        self.displayName2name = {}
+        self.name2displayName = {}
 
-        self.AFW_params = definitions
+
+        for i, param in enumerate(params):
+            name = names[i]
+            defs[name]=param
+            self.displayName2name[param['name']]=name
+            self.name2displayName[name] = param['name']
+        self.AFW_params = defs
         self.AFW_widgets = {}
         
 
@@ -56,8 +65,8 @@ class AfwGroupbox(QtWidgets.QWidget):
         self.awf_info = ''
         
 
-
-        self.awf_types = list(self.AFW_params.keys())
+        display_names = [ definitions[x].param['name'] for x in definitions]
+        self.awf_types = display_names
         self.awf_type_cb.addItems(self.awf_types)
         self._awf_type_cb_layout = QtWidgets.QHBoxLayout()
         self._awf_type_cb_layout.addWidget(QtWidgets.QLabel('Form:'))
@@ -70,6 +79,8 @@ class AfwGroupbox(QtWidgets.QWidget):
 
         
         for key in self.AFW_params:
+            
+
             awf = self.AFW_params[key]['params']
             awf_widget = QtWidgets.QWidget()
             _awf_layout = QtWidgets.QGridLayout()
@@ -77,24 +88,26 @@ class AfwGroupbox(QtWidgets.QWidget):
             row = 0
             txt_fields = {}
             for param_key in awf:
-                if param_key == 'V_0':
-                    continue
                 param = awf[param_key]
-                symbol = param['symbol']
-                
-                desc = param['desc']
-                unit = param['unit']
-                if unit == "Pa":
-                    unit = "GPa"
-                    self.scales[param_key]=1e9
+                hidden = False
+                if 'hidden' in param:
+                    hidden = param['hidden']
+                if not hidden:
+                    
+                    symbol = param['symbol']
+                    
+                    desc = param['desc']
+                    unit = param['unit']
+                    default = param['val']
+                    
 
-                text_field =  NumberTextField()
-                text_field.setText('0')
-                txt_fields[param_key]=text_field
-                self.add_field(_awf_layout, text_field, symbol+':', unit, row, 0)
-                text_field.returnPressed.connect(partial(self.text_field_edited_callback, {'awf':key,'param_key':param_key}))
-                
-                row = row + 1
+                    text_field =  NumberTextField()
+                    text_field.setText(str(default))
+                    txt_fields[param_key]=text_field
+                    self.add_field(_awf_layout, text_field, symbol+':', unit, row, 0)
+                    text_field.returnPressed.connect(partial(self.text_field_edited_callback, {'awf':key,'param_key':param_key}))
+                    
+                    row = row + 1
             self.txt_fields[key]=txt_fields
             awf_widget.setLayout(_awf_layout)    
             self.AFW_widgets[key] = awf_widget
@@ -118,11 +131,12 @@ class AfwGroupbox(QtWidgets.QWidget):
 
     
     def show_awf_info(self):
-        QtWidgets.QMessageBox.about(None, "AFW description", self.get_current_awf_info() )
+        QtWidgets.QMessageBox.about(None, "Description", self.get_current_awf_info() )
 
     def get_current_awf_info(self):
-        selected_awf = self.awf_type_cb.currentText()
-        awf_name = 'AFW: ' +self.AFW_params[selected_awf]['name']
+        display_name = self.awf_type_cb.currentText()
+        selected_awf = self.displayName2name[display_name]
+        awf_name = self.AFW_params[selected_awf]['name']
         ref = self.AFW_params[selected_awf]['reference']
         awf = self.AFW_params[selected_awf]['params']
         desc = awf_name + '<br><br>'
@@ -135,7 +149,7 @@ class AfwGroupbox(QtWidgets.QWidget):
         return desc
 
     def awf_type_edited(self, key):
-        
+        key = self.displayName2name[key]
         if key in self.AFW_widgets:
             self._change_awf_layout(key)
             if key in self.txt_fields:
@@ -246,6 +260,8 @@ class PopUpWidget(QtWidgets.QWidget):
     def add_body_widget(self, widget):
         self._body_layout.addWidget(widget)
 
+    
+
     def style_widgets(self):
         self.setStyleSheet("""
             #rois_control_button_widget FlatButton {
@@ -332,6 +348,7 @@ class plotWaveWindow(QtWidgets.QWidget):
             self.vLineLeft.setPos(roi_range[1])
     
 class EditWidget(PopUpWidget):
+    applyClickedSignal = QtCore.pyqtSignal(str)
     def __init__(self, title, definitions, default):
         super().__init__(title)
         self.plot_window = plotWaveWindow()
@@ -346,6 +363,27 @@ class EditWidget(PopUpWidget):
         
         self.make_connections()
 
+    def set_selected_choice(self, selection):
+        
+        self.afw_gb.awf_type_cb.setCurrentText(selection)
+    
+
+    def get_selected_choice(self):
+        display_name = self.afw_gb.awf_type_cb.currentText()
+        selected_awf = self.afw_gb.displayName2name[display_name]
+        return selected_awf
+
+    def get_apply_btn(self):
+        return getattr(self,'apply_btn')
+
     def make_connections(self):
         self.plot_btn.clicked.connect(self.plot_window.raise_widget)
+        self.afw_gb.awf_type_edited_signal.connect(self.awf_type_edited_callback)
+
+    def awf_type_edited_callback(self, d):
+        selection_key = d['arb_waveform']
+        self.applyClickedSignal.emit(selection_key)
+
+    def update_plot(self, data):
+        self.plot_window.set_data(data[0],data[1])
         

@@ -10,7 +10,7 @@ class AFGController(pvController):
     def __init__(self, parent, isMain = False):
 
         
-        model = AFG_AFG3251
+        model = AFG_AFG3251(parent)
         super().__init__(parent, model, isMain)  
         self.panel_items =['instrument',
                       'function_shape',

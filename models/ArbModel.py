@@ -21,39 +21,27 @@ class ArbModel(Scope, pvModel):
     channel_changed_signal = pyqtSignal()
     model_value_changed_signal = pyqtSignal(dict)
 
-    def __init__(self, parent):
+    def __init__(self, parent, definitions):
         
         pvModel.__init__(self, parent)
+        self.wave_types = [ definitions[x].param['name'] for x in definitions]
         
-     
-        self.wave_types = ['g_wavelet', 'gx2_wavelet', 'burst_3-pulse', 'burst_fixed-time']
-        
-        self.vars = ['center_f', 'sigma']
-
         self.tasks = {  'waveform_type': 
-                                {'desc': 'Waveform type', 'val':self.wave_types[0], 'list':self.wave_types, 
+                                {'desc': 'Wave type', 'val':self.wave_types[0], 'list':self.wave_types, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'waveform_type','type':'l'}},
-                        'variable_parameter': 
-                                {'desc': 'Variable', 'val':'center_f','list':self.vars,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'variable_parameter','type':'l'}},
                         'edit_state':     
                                 {'desc': ';Edit', 'val':False, 
                                 'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'edit_state','type':'b'}}
-                                
+                                'param':{'tag':'edit_state','type':'b'}},
+                        'arb_waveform':     
+                                {'desc': 'Waveform', 'val':None, 
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'waveform','type':'dict'}}
                       }       
-
-        self.g_wavelet = 'g_wavelet'
-        self.variable_parameter = 'center_f'
-
         self.create_pvs(self.tasks)
-
         self.start()
 
-
-    
     #####################################################################
     #  Private set/get functions. Should not be used by external calls  #
     #####################################################################    

@@ -27,9 +27,10 @@ class ArbFilterController(pvController):
     runStateSignal = pyqtSignal(bool)
 
     def __init__(self, parent, isMain = False):
-        model = ArbFilterModel
+        definitions = filters
+        model = ArbFilterModel(parent, definitions)
         super().__init__(parent, model, isMain) 
-        self.arb_edit_filter_controller = EditController(self, title='Filter control', definitions =filters, default='none')
+        self.arb_filter_edit_controller = EditController(self, title='Filter control', definitions =definitions, default='none')
         self.panel_items =[ 'filter_type',
                             'edit_state']
         self.init_panel("Waveform filter", self.panel_items)
@@ -43,8 +44,9 @@ class ArbFilterController(pvController):
 
     def make_connections(self):
         self.model.pvs['filter_type'].value_changed_signal.connect(self.filter_type_signal_callback)
-        self.model.pvs['variable_parameter'].value_changed_signal.connect(self.variable_parameter_signal_callback)
+        #self.model.pvs['variable_parameter'].value_changed_signal.connect(self.variable_parameter_signal_callback)
         self.model.pvs['edit_state'].value_changed_signal.connect(self.edit_state_signal_callback)
+        self.arb_filter_edit_controller.applyClickedSignal.connect(self.arb_filter_edited_apply_clicked_signal_callback)
     
     def show_widget(self):
         self.panel.raise_widget()
@@ -52,15 +54,20 @@ class ArbFilterController(pvController):
     def filter_type_signal_callback(self, pv_name, data):
         data = data[0]
         
+        self.arb_filter_edit_controller.widget.set_selected_choice(data)
 
+    def arb_filter_edited_apply_clicked_signal_callback(self, selected):
+        print(selected)
+
+    '''
     def variable_parameter_signal_callback(self, pv_name, data):
         data = data[0]
-        
+    '''    
 
     def edit_state_signal_callback(self, pv_name, data):
         data = data[0]
         
         if data:
-            self.arb_edit_filter_controller.show_widget()
+            self.arb_filter_edit_controller.show_widget()
         else: 
-            self.arb_edit_filter_controller.hide_widget()
+            self.arb_filter_edit_controller.hide_widget()

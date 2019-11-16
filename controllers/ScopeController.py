@@ -24,7 +24,7 @@ class ScopeController(pvController):
     runStateSignal = pyqtSignal(bool)
 
     def __init__(self, parent, isMain = False):
-        model = Scope_DPO5104
+        model = Scope_DPO5104(parent)
         super().__init__(parent, model, isMain) 
         
         self.panel_items =[ 'instrument',

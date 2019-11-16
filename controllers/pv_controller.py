@@ -17,7 +17,7 @@ class pvController(QObject):
     def __init__(self, parent, model, isMain = False):
         
         super().__init__()  
-        self.model = model(parent)
+        self.model = model
         self.isMain = isMain
         #self.create_public_methods()
         self.panel_items =[ ]

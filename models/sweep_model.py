@@ -21,6 +21,7 @@ class frequencySweep(pvModel):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent= parent
+        self.instrument = 'frequencySweep'
 
         ## device speficic:
         self.tasks = {  
@@ -70,8 +71,8 @@ class SweepModel(pvModel):
 
         ## device speficic:
         self.frequencySweepThread = frequencySweep(self)
-        self.instrument = 'SWEEP'
-        self.settings_file_tag ='Frequency sweep'
+        self.instrument = 'SweepModel'
+        
         
         # Task description markup. Aarbitrary default values ('val') are for type recognition in panel widget constructor
         # supported types are float, int, bool, string, and list of strings

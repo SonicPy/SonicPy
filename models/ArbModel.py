@@ -39,6 +39,8 @@ class ArbModel(Scope, pvModel):
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'waveform','type':'dict'}}
                       }       
+        self.instrument = 'ArbModel'
+
         self.create_pvs(self.tasks)
         self.start()
 

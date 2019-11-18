@@ -10,6 +10,7 @@ import json
 
 
 class PV(QObject):
+    
     value_changed_signal = pyqtSignal(str, list)
     def __init__(self, name, settings):
         super().__init__()
@@ -38,15 +39,15 @@ class PV(QObject):
 class pvModel(QThread):
 
     model_value_changed_signal = pyqtSignal(dict)
-
+    num_pvs = 0
     def __init__(self, parent):
         super().__init__(parent)
         self.my_queue = queue.Queue()
 
         # may use later for synchronous get:
         # self.get_queue = queue.Queue()
-        self.instrument = 'instrument name'
-        self.settings_file_tag ='instrument tag'
+        self.instrument = ''
+        self.settings_file_tag =''
 
         self.connected = False
         self.offline = False
@@ -95,6 +96,7 @@ class pvModel(QThread):
     def create_pvs(self, tasks):
 
         for tag in tasks:
+            self.num_pvs = self.num_pvs + 1
             
             task = tasks[tag]
             self.pvs[tag]=PV(tag,task)
@@ -103,13 +105,33 @@ class pvModel(QThread):
                     if task['methods'][method]:
                         private_attr ='_'+method+'_'+ tag
                         has_private = hasattr(self, private_attr)
-                        if has_private:
-                            attr = method+'_task'
-                            func = self.__getattribute__(attr)
-                            params = task['param']
-                            public_method = partial(func, method, tag, params)
-                            setattr(self.pvs[tag],method,public_method)
-                            #setattr(self, method+'_'+ tag, public_method)
+                        if not has_private:
+                            
+                            self._create_default_private_method(method, tag)
+                        
+                        attr = method+'_task'
+                        func = self.__getattribute__(attr)
+                        params = task['param']
+                        public_method = partial(func, method, tag, params)
+                        setattr(self.pvs[tag],method,public_method)
+                        #setattr(self, method+'_'+ tag, public_method)
+        #print(self.num_pvs)
+
+    def _default_set_task(self,tag, val):
+        self.pvs[tag]._val = val
+
+    def _default_set_task(self, tag):
+        return self.pvs[tag]._val
+
+    def _create_default_private_method(self, method, tag):
+        attr = '_'+method+'_'+ tag
+        if method == 'set':
+            func = partial(self._default_set_task,tag)
+        elif method == 'get':
+            func = partial(self._default_set_task,tag)
+
+        setattr(self, attr, func)
+        print('create private method: _' + method+ '_'+ tag + ' ('+self.instrument+')') 
 
     def get_task(self,  mode, task, get_params):
         if self.connected:

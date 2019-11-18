@@ -36,6 +36,8 @@ class EditController(QObject):
         self.make_connections()
 
     
+
+    
     
     def update_plot(self, data):
         self.widget.update_plot(data)

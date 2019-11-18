@@ -1,5 +1,6 @@
 from models.arb_waveforms import gaussian_wavelet
 
+from models.pv_model import pvModel
 
 class arb_waveform():
     def __init__(self):
@@ -20,6 +21,31 @@ class arb_waveform():
 
     def get_params(self):
         return self.param
+'''
+class g_wavelet(pvController):
+    
+    def __init__(self, parent, isMain = False):
+
+        
+        model = AFG_AFG3251(parent)
+        super().__init__(parent, model, isMain)  
+        self.panel_items =['instrument',
+                      'function_shape',
+                      'amplitude',
+                      'duration',
+                      'operating_mode',
+                      'n_cycles',
+                      'frequency',
+                      'output_state']
+
+        self.init_panel("Function generator", self.panel_items)
+
+        if isMain:
+            self.show_widget()
+     
+
+'''
+
 
 class g_wavelet(arb_waveform):
     def __init__(self):
@@ -129,3 +155,4 @@ arb3 = burst_fixed_time()
 arb_waveforms = {arb1.name:arb1, 
                 arb2.name:arb2, 
                 arb3.name:arb3}
+

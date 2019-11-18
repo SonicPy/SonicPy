@@ -30,7 +30,8 @@ class ArbController(pvController):
     runStateSignal = pyqtSignal(bool)
 
     def __init__(self, parent, isMain = False):
-        model = ArbModel(parent, ['Arb1', 'Arb2', 'Arb3'])
+        
+        model = ArbModel(parent, ['g_wavelet', 'gx2_wavelet', 'burst_fixed_time'])
 
         super().__init__(parent, model, isMain) 
 

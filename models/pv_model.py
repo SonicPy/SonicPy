@@ -122,11 +122,11 @@ class pvModel(QThread):
 
     def _default_set_task(self,tag, val):
         pass
-        print('set: '+ tag+ ' = ' + str(val))
+        #print('set: '+ tag+ ' = ' + str(val))
 
     def _default_get_task(self, tag):
         val = self.pvs[tag]._val
-        print('set: '+ tag+ ' = ' + str(val))
+        #print('set: '+ tag+ ' = ' + str(val))
         return val
 
     def _create_default_private_method(self, method, tag):
@@ -138,7 +138,7 @@ class pvModel(QThread):
 
         setattr(self, attr, func)
        
-        print('create private method: _' + method+ '_'+ tag + ' ('+self.instrument+')') 
+        #print('create private method: _' + method+ '_'+ tag + ' ('+self.instrument+')') 
 
     def get_task(self,  mode, task, get_params):
         if self.connected:

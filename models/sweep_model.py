@@ -200,7 +200,7 @@ class SweepModel(pvModel):
         else:
             self.frequencySweepThread.clear_queue()
 
-
+    '''
     def _get_start_freq(self):
         return self.pvs['start_freq']._val
     def _get_end_freq(self):
@@ -211,6 +211,7 @@ class SweepModel(pvModel):
         return self.pvs['step']._val
     def _get_run_state(self):
         return self.pvs['run_state']._val
+    '''
 
 def get_samples(start_freq, end_freq, step):
     samples = [start_freq]

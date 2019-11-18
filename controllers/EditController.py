@@ -16,28 +16,36 @@ from controllers.pv_controller import pvController
 from utilities.utilities import *
 
 
+
+
 class EditController(QObject):
     callbackSignal = pyqtSignal(dict)  
     applyClickedSignal = pyqtSignal(str)
         
-    def __init__(self, arb_controller, title, definitions, default,  isMain = False):
+    def __init__(self, parent_controller, title,  isMain = False):
         super().__init__()
-        self.widget = EditWidget(title, definitions, default)
-        self.definitions = definitions
+        self.widget = EditWidget(title)
+        #self.definitions = definitions
         #self.pg = self.widget.plot_widget.fig.win
         
-        self.arb_controller = arb_controller
+        self.parent_controller = parent_controller
         self.widget_shown = False
-        self.widget.widget_closed.connect(self.widget_closed_callback)
+        
+        self.controllers = []
 
         if isMain:
             self.show_widget()
 
         self.make_connections()
 
-    
+    def add_controller(self, name, controller):
 
+        self.controllers.append(controller)
+        panel = controller.get_panel()
+        self.widget.add_panel(name, panel)
     
+    def select_controller(self, name):
+        self.widget.select_panel(name)
     
     def update_plot(self, data):
         self.widget.update_plot(data)
@@ -47,6 +55,8 @@ class EditController(QObject):
 
     def make_connections(self):
         self.widget.get_apply_btn().clicked.connect(self.edit_widget_apply_clicked_signal_callback)
+        self.widget.widget_closed.connect(self.widget_closed_callback)
+        
 
     def edit_widget_apply_clicked_signal_callback(self):
         selected = self.widget.get_selected_choice()
@@ -62,6 +72,6 @@ class EditController(QObject):
         self.widget_shown = False
 
     def widget_closed_callback(self):
-        self.arb_controller.model.pvs['edit_state'].set(False)
+        self.parent_controller.model.pvs['edit_state'].set(False)
 
     

@@ -24,7 +24,7 @@ class ArbModel(Scope, pvModel):
     def __init__(self, parent, definitions):
         
         pvModel.__init__(self, parent)
-        self.wave_types = [ definitions[x].param['name'] for x in definitions]
+        self.wave_types = definitions
         
         self.tasks = {  'waveform_type': 
                                 {'desc': 'Wave type', 'val':self.wave_types[0], 'list':self.wave_types, 

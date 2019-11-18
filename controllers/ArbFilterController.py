@@ -30,7 +30,7 @@ class ArbFilterController(pvController):
         definitions = filters
         model = ArbFilterModel(parent, definitions)
         super().__init__(parent, model, isMain) 
-        self.arb_filter_edit_controller = EditController(self, title='Filter control', definitions =definitions, default='none')
+        self.arb_filter_edit_controller = EditController(self, title='Filter control')
         self.panel_items =[ 'filter_type',
                             'edit_state']
         self.init_panel("Waveform filter", self.panel_items)

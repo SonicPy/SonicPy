@@ -108,29 +108,36 @@ class pvModel(QThread):
                         if not has_private:
                             
                             self._create_default_private_method(method, tag)
-                        
-                        attr = method+'_task'
-                        func = self.__getattribute__(attr)
-                        params = task['param']
-                        public_method = partial(func, method, tag, params)
-                        setattr(self.pvs[tag],method,public_method)
+                        has_private = hasattr(self, private_attr)
+                        if not has_private:
+                            print('failed to create "'+ private_attr+ '" method')
+                        if has_private:
+                            attr = method+'_task'
+                            func = self.__getattribute__(attr)
+                            params = task['param']
+                            public_method = partial(func, method, tag, params)
+                            setattr(self.pvs[tag],method,public_method)
                         #setattr(self, method+'_'+ tag, public_method)
         #print(self.num_pvs)
 
     def _default_set_task(self,tag, val):
-        self.pvs[tag]._val = val
+        pass
+        print('set: '+ tag+ ' = ' + str(val))
 
-    def _default_set_task(self, tag):
-        return self.pvs[tag]._val
+    def _default_get_task(self, tag):
+        val = self.pvs[tag]._val
+        print('set: '+ tag+ ' = ' + str(val))
+        return val
 
     def _create_default_private_method(self, method, tag):
         attr = '_'+method+'_'+ tag
         if method == 'set':
             func = partial(self._default_set_task,tag)
         elif method == 'get':
-            func = partial(self._default_set_task,tag)
+            func = partial(self._default_get_task,tag)
 
         setattr(self, attr, func)
+       
         print('create private method: _' + method+ '_'+ tag + ' ('+self.instrument+')') 
 
     def get_task(self,  mode, task, get_params):

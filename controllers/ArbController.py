@@ -10,7 +10,7 @@ import json
 from widgets.scope_widget import scopeWidget
 
 from controllers.EditController import EditController
-from models.ArbDefinitions import arb_waveforms
+
 
 
 from widgets.panel import Panel
@@ -18,6 +18,8 @@ from functools import partial
 from widgets.UtilityWidgets import save_file_dialog, open_file_dialog, open_files_dialog
 from controllers.pv_controller import pvController
 from utilities.utilities import *
+
+from models.ArbDefinitions import g_wavelet_controller, gx2_wavelet_controller, burst_fixed_time_controller
 
 
 class ArbController(pvController):
@@ -28,14 +30,29 @@ class ArbController(pvController):
     runStateSignal = pyqtSignal(bool)
 
     def __init__(self, parent, isMain = False):
-        definitions = arb_waveforms
-        model = ArbModel(parent, definitions)
+        model = ArbModel(parent, ['Arb1', 'Arb2', 'Arb3'])
+
         super().__init__(parent, model, isMain) 
-        self.arb_edit_controller = EditController(self, title='Waveform control', definitions =definitions, default='g_wavelet')
+
+        arb1 = g_wavelet_controller(self)
+        arb2 = gx2_wavelet_controller(self)
+        arb3 = burst_fixed_time_controller(self)
+
+
+        self.arb_edit_controller = EditController(self, title='Waveform control')
+        self.arb_edit_controller.add_controller(arb1.model.instrument, arb1)
+        self.arb_edit_controller.add_controller(arb2.model.instrument, arb2)
+        self.arb_edit_controller.add_controller(arb3.model.instrument, arb3)
+
+        self.arb_edit_controller.select_controller(arb1.model.instrument)
         
         self.panel_items =[ 'waveform_type',
                             'edit_state']
         self.init_panel("USER1 waveform", self.panel_items)
+
+        
+
+
         self.make_connections()
         
         if isMain:
@@ -50,9 +67,14 @@ class ArbController(pvController):
         self.model.pvs['edit_state'].value_changed_signal.connect(self.edit_state_signal_callback)
         self.model.pvs['arb_waveform'].value_changed_signal.connect(self.arb_waveform_signal_callback)
         self.arb_edit_controller.applyClickedSignal.connect(self.arb_edited_apply_clicked_signal_callback)
+
+        self.arb_edit_controller.widget.controller_selection_edited_signal.connect(self.controller_selection_edited_signal_callback)
     
     def show_widget(self):
         self.panel.raise_widget()
+
+    def controller_selection_edited_signal_callback(self, key):
+        self.arb_edit_controller.select_controller(key)
 
     def arb_edited_apply_clicked_signal_callback(self, selected):
         print(selected)

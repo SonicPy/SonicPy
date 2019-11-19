@@ -43,7 +43,14 @@ def my_func(f_0,sigma, t,c,x,opt, f ):
 
     return f
 
-def make_wave(freq, total_time, points, symmetric=True, quarter_shift = False):
+def burst_fixed_time(params):
+    print(params)
+    freq = params['freq']
+    total_time = params['duration']
+    points = params['pts']
+    symmetric = params['symmetric']
+    quarter_shift = params['quarter_shift']
+
     period = 1/freq
     n_periods = total_time / period
     if quarter_shift:
@@ -59,7 +66,10 @@ def make_wave(freq, total_time, points, symmetric=True, quarter_shift = False):
     range_points = np.asarray(range(points))
     time = range_points * delta_t
     wave = np.sin(2*np.pi*freq*time - shift)
-    return time, wave, points_per_period, shift
+    ans = {'t':time, 'waveform':wave}
+    return ans
+
+
 
 def scale_waveform(waveform):
     fy = waveform[1]
@@ -104,8 +114,9 @@ def gaussian_wavelet(params):
     step = (t_max-t_min)/pts
     t = np.asarray(range(pts)) * step + t_min
     ss = g_wave(t,1,center_f, sigma,x,c,-1*900e6,900e6, opt)
-    ss_fft = fft_sig(t,ss)
-    ans = {'t':t,'waveform':ss,'waveform_fft':ss_fft}
+    #ss_fft = fft_sig(t,ss)
+    #ans = {'t':t,'waveform':ss,'waveform_fft':ss_fft}
+    ans = {'t':t,'waveform':ss}
     return ans
 
 def main():

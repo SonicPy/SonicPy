@@ -21,21 +21,21 @@ class ArbModel(Scope, pvModel):
     channel_changed_signal = pyqtSignal()
     model_value_changed_signal = pyqtSignal(dict)
 
-    def __init__(self, parent, definitions):
+    def __init__(self, parent):
         
         pvModel.__init__(self, parent)
-        self.wave_types = definitions
         
-        self.tasks = {  'waveform_type': 
-                                {'desc': 'Wave type', 'val':self.wave_types[0], 'list':self.wave_types, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'waveform_type','type':'l'}},
+        self.tasks = {  
                         'edit_state':     
                                 {'desc': ';Edit', 'val':False, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'edit_state','type':'b'}},
                         'arb_waveform':     
                                 {'desc': 'Waveform', 'val':None, 
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'waveform','type':'dict'}},
+                        'arb_waveform_params':     
+                                {'desc': 'Waveform parameters', 'val':None, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'waveform','type':'dict'}}
                       }       

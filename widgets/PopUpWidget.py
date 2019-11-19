@@ -165,16 +165,16 @@ class plotWaveWindow(QtWidgets.QWidget):
 
         self._layout = QtWidgets.QVBoxLayout()  
         self._layout.setContentsMargins(0,0,0,0)
-        self.setWindowTitle('E cut view')
+        self.setWindowTitle('Waveform plot')
         self.fitPlots = PltWidget(self)
         self.fitPlots.setLogMode(False,False)
         self.fitPlots.setMenuEnabled(enableMenu=False)
         self.viewBox = self.fitPlots.getViewBox() # Get the ViewBox of the widget
         self.viewBox.setMouseMode(self.viewBox.RectMode)
-        self.viewBox.enableAutoRange(0, False)
+        self.viewBox.enableAutoRange(True)
         
         self.fitPlot = self.fitPlots.plot([],[], 
-                        pen=(155,155,155), name="Fit", 
+                        pen=(0,122,122), name="Fit", 
                         antialias=True)
         self.fitPlot2 = self.fitPlots.plot([],[], 
                         pen=(100,100,255), name="Fit", 
@@ -224,13 +224,14 @@ class plotWaveWindow(QtWidgets.QWidget):
 class EditWidget(PopUpWidget):
     applyClickedSignal = QtCore.pyqtSignal(str)
     controller_selection_edited_signal = QtCore.pyqtSignal(str)
+    widget_closed = QtCore.Signal()
     def __init__(self, title ):
         super().__init__(title)
         self.plot_window = plotWaveWindow()
 
         self.add_top_row_button('plot_btn','Plot')
         self.add_top_horizontal_spacer()
-        self.add_bottom_row_button('apply_btn','Apply')
+        #self.add_bottom_row_button('apply_btn','Apply')
         self.add_bottom_horizontal_spacer()
         
         self.afw_gb = AfwGroupbox(title=title)
@@ -256,8 +257,8 @@ class EditWidget(PopUpWidget):
         display_name = self.afw_gb.awf_type_cb.currentText()
         return display_name
 
-    def get_apply_btn(self):
-        return getattr(self,'apply_btn')
+    #def get_apply_btn(self):
+    #    return getattr(self,'apply_btn')
 
     def make_connections(self):
         self.plot_btn.clicked.connect(self.plot_window.raise_widget)
@@ -270,3 +271,7 @@ class EditWidget(PopUpWidget):
     def update_plot(self, data):
         self.plot_window.set_data(data[0],data[1])
         
+    def closeEvent(self, event):
+        # Overrides close event to let controller know that widget was closed by user
+        self.plot_window.close()
+        self.widget_closed.emit()

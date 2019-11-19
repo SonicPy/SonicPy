@@ -54,7 +54,7 @@ class EditController(QObject):
         self.model.exit()
 
     def make_connections(self):
-        self.widget.get_apply_btn().clicked.connect(self.edit_widget_apply_clicked_signal_callback)
+        #self.widget.get_apply_btn().clicked.connect(self.edit_widget_apply_clicked_signal_callback)
         self.widget.widget_closed.connect(self.widget_closed_callback)
         
 

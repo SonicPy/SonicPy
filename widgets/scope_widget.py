@@ -16,7 +16,7 @@ class scopeWidget(QtWidgets.QWidget):
         params = "plot title", 'Amplitude', 'Time'
         self.plot_widget = customWidget(params)
         #self.plot_widget.enable_cursors()
-
+   
         
         self.button_widget = QtWidgets.QWidget()
         

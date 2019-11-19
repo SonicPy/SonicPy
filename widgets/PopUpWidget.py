@@ -37,6 +37,7 @@ class AfwGroupbox(QtWidgets.QWidget):
     def __init__(self, title):
         super().__init__()
         self._layout = QtWidgets.QVBoxLayout()
+        self._layout.setContentsMargins(0, 0, 0, 0)
         self.awf_type_cb = CleanLooksComboBox()    
         self._layout.addWidget(self.awf_type_cb)
         self._awf_type_info_btn = QtWidgets.QPushButton('i')
@@ -44,6 +45,7 @@ class AfwGroupbox(QtWidgets.QWidget):
         self.selected_panel = None
         self.panel = QtWidgets.QWidget()
         self._panel_layout = QtWidgets.QVBoxLayout()
+        self._panel_layout.setContentsMargins(0, 0, 0, 0)
         self.panel.setLayout(self._panel_layout)
         self._layout.addWidget(self.panel)
         self.setLayout(self._layout)
@@ -273,5 +275,9 @@ class EditWidget(PopUpWidget):
         
     def closeEvent(self, event):
         # Overrides close event to let controller know that widget was closed by user
+        self.plot_window.close()
+        self.widget_closed.emit()
+
+    def hideEvent(self, event):
         self.plot_window.close()
         self.widget_closed.emit()

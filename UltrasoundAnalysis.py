@@ -23,6 +23,7 @@ def load_file():
     filename = open_file_dialog(None, "Load File(s).", None) 
     if len(filename):
         t, spectrum = read_tek_csv(filename, subsample=1)
+        t, spectrum = zero_phase_highpass_filter([t,spectrum],1e4,1)
         return t,spectrum
     else:
         return None, None
@@ -133,6 +134,7 @@ plot_win_detail2.sigXRangeChanged.connect(updateRegion2)
 updatePlot2()
 
 def update_data():
+    global t, spectrum
     t, spectrum = load_file()
     if t is not None and spectrum is not None:
         main_plot.setData(t, spectrum)
@@ -186,7 +188,7 @@ def calculate_data():
         for n in range(5):
             x_max = (2*np.pi * (n-2) -c )/b
             if x_max >= 0 and x_max <= len(cross_corr):
-                print(x_max)
+                #print(x_max)
                 max_found = True
                 break
         if max_found:
@@ -195,7 +197,7 @@ def calculate_data():
             for n in range(5):
                 x_max = (2*np.pi *(n-2) -c + np.pi)/b
                 if x_max >= 0 and x_max <= len(cross_corr):
-                    print(x_max)
+                    #print(x_max)
                     neg_factor = -1
                     break
             p_val = x_max - shift_range/2
@@ -204,7 +206,7 @@ def calculate_data():
         for n in range(5):
             x_max = (2*np.pi *(n-2) -c + np.pi)/b
             if x_max >= 0 and x_max <= len(cross_corr):
-                print(x_max)
+                #print(x_max)
                 max_found = True
                 break
         if max_found:
@@ -213,7 +215,7 @@ def calculate_data():
             for n in range(5):
                 x_max = (2*np.pi * (n-2) -c )/b
                 if x_max >= 0 and x_max <= len(cross_corr):
-                    print(x_max)
+                    #print(x_max)
                     neg_factor = -1
                     break
             p_val = x_max - shift_range/2

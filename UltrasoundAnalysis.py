@@ -29,9 +29,9 @@ def load_file():
     if len(filename):
         t, spectrum = read_tek_csv(filename, subsample=4)
         t, spectrum = zero_phase_highpass_filter([t,spectrum],1e4,1)
-        return t,spectrum
+        return t,spectrum, filename
     else:
-        return None, None
+        return None, None, filename
 
 def make_widget():
     my_widget = QtWidgets.QWidget()
@@ -47,7 +47,9 @@ def make_widget():
     _buttons_layout_bottom = QtWidgets.QHBoxLayout()
     _buttons_layout_bottom.setContentsMargins(0, 0, 0, 0)
     open_btn = QtWidgets.QPushButton("Open")
+    fname_lbl = QtWidgets.QLabel('')
     _buttons_layout_top.addWidget(open_btn)
+    _buttons_layout_top.addWidget(fname_lbl)
     _buttons_layout_top.addSpacerItem(HorizontalSpacerItem())
     buttons_widget_top.setLayout(_buttons_layout_top)
     _layout.addWidget(buttons_widget_top)
@@ -71,7 +73,7 @@ def make_widget():
     buttons_widget_bottom.setLayout(_buttons_layout_bottom)
     _layout.addWidget(buttons_widget_bottom)
     my_widget.setLayout(_layout)
-    return my_widget, win, detail_win1, detail_win2, open_btn, calc_btn, output_ebx
+    return my_widget, win, detail_win1, detail_win2, open_btn, calc_btn, output_ebx, fname_lbl
 
 def get_initial_lr_positions(t):
     mn = min(t)
@@ -129,7 +131,7 @@ def init_region_items(t, lr1, lr2, plot_win, plot_win_detail1, plot_win_detail2,
 
 app = QApplication(sys.argv)
 app.aboutToQuit.connect(app.deleteLater)
-my_widget, win, detail_win1, detail_win2, open_btn, calc_btn, output_ebx = make_widget()
+my_widget, win, detail_win1, detail_win2, open_btn, calc_btn, output_ebx, fname_lbl = make_widget()
 #t,spectrum = load_file()
 
 ### linear retions
@@ -173,9 +175,9 @@ lr2.setZValue(-10)
 
 
 def update_data():
-    global lr1, lr2, plot_win,plot_win_detail1, plot_win_detail2,detail_plot1,detail_plot2
+    global lr1, lr2, plot_win,plot_win_detail1, plot_win_detail2,detail_plot1,detail_plot2, fname_lbl
     global t, spectrum, initialized
-    t, spectrum = load_file()
+    t, spectrum, fname = load_file()
     if t is not None and spectrum is not None:
         main_plot.setData(t, spectrum)
         detail_plot1.setData(t, spectrum)
@@ -185,7 +187,7 @@ def update_data():
         if not initialized:
 
             init_region_items(t,lr1, lr2, plot_win,plot_win_detail1, plot_win_detail2,detail_plot1,detail_plot2)
-            
+        fname_lbl.setText(fname)
 
 def fit_func(x, a, b,c,d):
     return a * np.cos(b * x+c)+d

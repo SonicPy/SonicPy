@@ -25,7 +25,7 @@ from functools import partial
 initialized = False
 
 def load_file():
-    filename = open_file_dialog(None, "Load File(s).", None) 
+    filename = open_file_dialog(None, "Load File(s).",filter='*.csv')
     if len(filename):
         t, spectrum = read_tek_csv(filename, subsample=4)
         t, spectrum = zero_phase_highpass_filter([t,spectrum],1e4,1)
@@ -249,8 +249,8 @@ def get_local_optimum(x, xData, yData, optima_type=None):
             optima_x = array([optima_x])
             optima_y = array([optima_y[optima_pind]])
         
-        print (optima_x)
-        print (optima_type)
+        #print (optima_x)
+        #print (optima_type)
         return (optima_x, optima_y), optima_type
 
 def snap_cursors_to_optimum(c1, c2, t, spectrum):
@@ -277,14 +277,17 @@ def snap_cursors_to_optimum(c1, c2, t, spectrum):
 
 
 def calculate_data():
-
+    t_f, spectrum_f = zero_phase_lowpass_filter([t,spectrum],60e6,1)
+    #pg.plot(np.asarray(spectrum_f), title="spectrum_f")
+    
     c1 = plot_win_detail1.get_cursor_pos()
     c2 = plot_win_detail2.get_cursor_pos()
 
-    optima_x_1, optima_x_2, optima_y_1, optima_y_2 = snap_cursors_to_optimum(c1, c2,t, spectrum)
+    optima_x_1, optima_x_2, optima_y_1, optima_y_2 = snap_cursors_to_optimum(c1, c2,t_f, spectrum_f)
 
     plot_win_detail1.set_cursor_pos(optima_x_1[0])
     plot_win_detail2.set_cursor_pos(optima_x_2[0])
+    
 
     c1 = plot_win_detail1.get_cursor_pos()
     c2 = plot_win_detail2.get_cursor_pos()
@@ -293,9 +296,20 @@ def calculate_data():
     
     pilo1 = int(get_partial_index(t,c1))-int(cor_range/2)
     pihi1 = int(get_partial_index(t,c1))+int(cor_range/2)
+
+    pilo2 = int(get_partial_index(t,c2))-int(cor_range/2)
+    pihi2 = int(get_partial_index(t,c2))+int(cor_range/2)
+    
+
     picenter2 = int(get_partial_index(t,c2))
 
     slice1 = np.asarray(spectrum)[pilo1:pihi1]
+    slice2 = np.asarray(spectrum)[pilo2:pihi2]
+    slice1_max = max(slice1)
+    slice2_max = max(slice2)
+    max_ratio = slice1_max/slice2_max
+    
+
     #pg.plot(np.asarray(slice1), title="slice1")
     t1 = np.asarray(t)[pilo1:pihi1]
   
@@ -305,16 +319,17 @@ def calculate_data():
         pilo2 = picenter2 - int(cor_range/2) + int((shift-shift_range/2))
         pihi2 = picenter2 + int(cor_range/2) + int((shift-shift_range/2))
         slice2 = np.asarray(spectrum)[pilo2:pihi2]
-        c = np.correlate(slice1, slice2)[0]
+        c = np.correlate(slice1/slice1_max, slice2/slice2_max)[0]/cor_range
         cross_corr.append(c)
 
+    #pg.plot(np.asarray(cross_corr), title="cross_corr")
     
     y_data=np.asarray(cross_corr)
     n = np.asarray(range(len(cross_corr)))
     params, params_covariance = optimize.curve_fit(fit_func, n, y_data,p0=[.99,.011,.1, .1])
     fitted = fit_func(n, params[0], params[1], params[2], params[3])
 
-    #pg.plot(np.asarray(cross_corr), title="cross_corr")
+    
     #pg.plot(np.asarray(fitted), title="fit")
 
     #print (params)
@@ -325,7 +340,7 @@ def calculate_data():
     neg_factor = 1
     max_found = False
     
-    print (params)
+    #print (params)
     if a >= 0:
         for n in range(15):
             x_max = (2*np.pi * (n-7) -c )/b

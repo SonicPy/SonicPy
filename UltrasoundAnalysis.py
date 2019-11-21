@@ -20,6 +20,9 @@ from widgets.CustomWidgets import HorizontalSpacerItem
 
 from scipy import optimize
 from scipy.signal import argrelextrema
+from functools import partial
+
+initialized = False
 
 def load_file():
     filename = open_file_dialog(None, "Load File(s).", None) 
@@ -80,68 +83,109 @@ def get_initial_lr_positions(t):
     p2r = 0.75 * r 
     return p1l, p1r, p2l, p2r
 
+def updatePlot1(lr1, plot_win_detail1):
+    lr1r = lr1.getRegion()
+    plot_win_detail1.setXRange(*lr1r, padding=0)
+
+def updateRegion1(lr1, detail_plot1):
+    lr1.setRegion(detail_plot1.getViewBox().viewRange()[0])
+    
+
+def updatePlot2(lr2, plot_win_detail2):
+    lr2r = lr2.getRegion()
+    plot_win_detail2.setXRange(*lr2r, padding=0)
+
+def updateRegion2(lr2, detail_plot2):
+    lr2.setRegion(detail_plot2.getViewBox().viewRange()[0])
+
+def init_region_items(t, lr1, lr2, plot_win, plot_win_detail1, plot_win_detail2, detail_plot1,detail_plot2):
+    
+    plot_win.addItem(lr1)
+    plot_win.addItem(lr2) 
+    p1l, p1r, p2l, p2r = get_initial_lr_positions(t)
+
+    lr1.setRegion([p1l, p1r])
+    lr2.setRegion([p2l, p2r])
+    
+    
+    #updatePlot1(lr1, plot_win_detail1)
+    lr1r = lr1.getRegion()
+    plot_win_detail1.setXRange(*lr1r, padding=0)
+
+    
+    #updatePlot2(lr2, plot_win_detail2)
+    lr2r = lr2.getRegion()
+    plot_win_detail2.setXRange(*lr2r, padding=0)
+
+    lr1.sigRegionChanged.connect(partial(updatePlot1,lr1, plot_win_detail1))
+    plot_win_detail1.sigXRangeChanged.connect(partial(updateRegion1,lr1, detail_plot1))
+
+    lr2.sigRegionChanged.connect(partial(updatePlot2,lr2, plot_win_detail2))
+    plot_win_detail2.sigXRangeChanged.connect(partial(updateRegion2,lr2, detail_plot2))
+
+    plot_win_detail1.setXRange(*lr1r, padding=0)
+    plot_win_detail2.setXRange(*lr2r, padding=0)
+    
+
 app = QApplication(sys.argv)
 app.aboutToQuit.connect(app.deleteLater)
 my_widget, win, detail_win1, detail_win2, open_btn, calc_btn, output_ebx = make_widget()
-t,spectrum = load_file()
+#t,spectrum = load_file()
 
 ### linear retions
 plot_win = win.fig.win
 plot_win_detail1 = detail_win1.fig.win
 plot_win_detail2 = detail_win2.fig.win
-x2 = t
-data2 = spectrum
-main_plot = pg.PlotDataItem(t, spectrum, title="",
+
+main_plot = pg.PlotDataItem([], [], title="",
                 antialias=True, pen=pg.mkPen(color=(255,255,0), width=1), connect="finite" )
 plot_win.addItem(main_plot)
 
-p1l, p1r, p2l, p2r = get_initial_lr_positions(t)
 
-lr1 = pg.LinearRegionItem([p1l,p1r])
-lr1.setZValue(-10)
-plot_win.addItem(lr1)
 
-lr2 = pg.LinearRegionItem([p2l,p2r])
-lr2.setZValue(-10)
-plot_win.addItem(lr2)
 
-detail_plot1 = pg.PlotDataItem(t, spectrum, title="",
+detail_plot1 = pg.PlotDataItem([],[], title="",
                 antialias=True, pen=pg.mkPen(color=(255,255,0), width=1), connect="finite" )
 detail_plot1_bg = pg.PlotDataItem([], [], title="",
                 antialias=True, pen=pg.mkPen(color=(0,255,255), width=1), connect="finite" )
 
+
 plot_win_detail1.addItem(detail_plot1)
 plot_win_detail1.addItem(detail_plot1_bg)
-def updatePlot1():
-    plot_win_detail1.setXRange(*lr1.getRegion(), padding=0)
-def updateRegion1():
-    lr1.setRegion(detail_plot1.getViewBox().viewRange()[0])
-lr1.sigRegionChanged.connect(updatePlot1)
-plot_win_detail1.sigXRangeChanged.connect(updateRegion1)
-updatePlot1()
 
-detail_plot2 = pg.PlotDataItem(t, spectrum, title="",
+
+
+detail_plot2 = pg.PlotDataItem([], [], title="",
                 antialias=True, pen=pg.mkPen(color=(255,255,0), width=1), connect="finite" )
 detail_plot2_bg = pg.PlotDataItem([], [], title="",
                 antialias=True, pen=pg.mkPen(color=(0,255,255), width=1), connect="finite" )
 
+
 plot_win_detail2.addItem(detail_plot2)
 plot_win_detail2.addItem(detail_plot2_bg)
-def updatePlot2():
-    plot_win_detail2.setXRange(*lr2.getRegion(), padding=0)
-def updateRegion2():
-    lr2.setRegion(detail_plot2.getViewBox().viewRange()[0])
-lr2.sigRegionChanged.connect(updatePlot2)
-plot_win_detail2.sigXRangeChanged.connect(updateRegion2)
-updatePlot2()
+
+lr1 = pg.LinearRegionItem()
+lr1.setZValue(-10)
+
+
+lr2 = pg.LinearRegionItem()
+lr2.setZValue(-10)
+
 
 def update_data():
-    global t, spectrum
+    global lr1, lr2, plot_win,plot_win_detail1, plot_win_detail2,detail_plot1,detail_plot2
+    global t, spectrum, initialized
     t, spectrum = load_file()
     if t is not None and spectrum is not None:
         main_plot.setData(t, spectrum)
         detail_plot1.setData(t, spectrum)
         detail_plot2.setData(t, spectrum)
+        
+
+        if not initialized:
+
+            init_region_items(t,lr1, lr2, plot_win,plot_win_detail1, plot_win_detail2,detail_plot1,detail_plot2)
+            
 
 def fit_func(x, a, b,c,d):
     return a * np.cos(b * x+c)+d
@@ -286,8 +330,8 @@ def calculate_data():
         for n in range(15):
             x_max = (2*np.pi * (n-7) -c )/b
             if x_max >= 0 and x_max <= len(cross_corr):
-                print(x_max)
-                print(n)
+                #print(x_max)
+                #print(n)
                 max_found = True
                 break
         if max_found:
@@ -296,8 +340,8 @@ def calculate_data():
             for n in range(15):
                 x_max = (2*np.pi *(n-7) -c + np.pi)/b
                 if x_max >= 0 and x_max <= len(cross_corr):
-                    print(x_max)
-                    print(n)
+                    #print(x_max)
+                    #print(n)
                     neg_factor = -1
                     break
             p_val = x_max - shift_range/2
@@ -306,8 +350,8 @@ def calculate_data():
         for n in range(15):
             x_max = (2*np.pi *(n-7) -c + np.pi)/b
             if x_max >= 0 and x_max <= len(cross_corr):
-                print(x_max)
-                print(n)
+                #print(x_max)
+                #print(n)
                 max_found = True
                 break
         if max_found:
@@ -316,15 +360,16 @@ def calculate_data():
             for n in range(15):
                 x_max = (2*np.pi * (n-7) -c )/b
                 if x_max >= 0 and x_max <= len(cross_corr):
-                    print(x_max)
-                    print(n)
+                    #print(x_max)
+                    #print(n)
                     neg_factor = -1
                     break
             p_val = x_max - shift_range/2
         
     if not max_found:
-        print(x_max)
-        print(n)
+        #print(x_max)
+        #print(n)
+        pass
     t_step = t[1]-t[2]
     t_max_shift = p_val * t_step
 
@@ -356,6 +401,8 @@ def calculate_data():
     #print(c_shift)
     #plot_win_detail1.set_cursor_pos(c1_new_pos)
     
+
+
     
 open_btn.clicked.connect(update_data)
 calc_btn.clicked.connect(calculate_data)

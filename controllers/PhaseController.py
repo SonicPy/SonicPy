@@ -68,8 +68,9 @@ class PhaseController(object):
      
         self.phase_lw_items = []
         self.create_signals()
-        self.update_temperature_step()
-        self.update_pressure_step()
+        self.update_vs_step()
+        self.update_vp_step()
+        self.update_d_step()
         
         self.phases = []
         
@@ -91,11 +92,12 @@ class PhaseController(object):
         self.connect_click_function(self.phase_widget.load_list_btn, self.load_btn_clicked_callback)
 
         # P-T callbacks
-        self.phase_widget.pressure_step_msb.editingFinished.connect(self.update_pressure_step)
-        self.phase_widget.temperature_step_msb.editingFinished.connect(self.update_temperature_step)
-        self.phase_widget.pressure_sb_value_changed.connect(self.phase_model.set_pressure)
-        self.phase_widget.temperature_sb_value_changed.connect(self.phase_model.set_temperature)
-        
+        self.phase_widget.vp_step_msb.editingFinished.connect(self.update_vp_step)
+        self.phase_widget.vs_step_msb.editingFinished.connect(self.update_vs_step)
+        self.phase_widget.d_step_msb.editingFinished.connect(self.update_d_step)
+        self.phase_widget.vp_sb_value_changed.connect(self.phase_model.set_vp)
+        self.phase_widget.vs_sb_value_changed.connect(self.phase_model.set_vs)
+        self.phase_widget.d_sb_value_changed.connect(self.phase_model.set_d)
         
         
         # File drag and drop
@@ -126,8 +128,8 @@ class PhaseController(object):
         Loads a new phase from vpvs file.
         :return:
         """
-        
-
+        self._add_phase('file1.vpvs')
+        '''
         filenames = kwargs.get('filenames', None)
 
         if filenames is None:
@@ -155,6 +157,7 @@ class PhaseController(object):
                     break
             progress_dialog.close()
             QtWidgets.QApplication.processEvents()
+        '''
 
     def _add_phase(self, filename):
         #try:
@@ -186,10 +189,10 @@ class PhaseController(object):
         if self.phase_model.phases[ind].params['modified']:
             phase_name += '*'
         self.phase_widget.rename_phase(ind, phase_name)
-        self.phase_widget.set_phase_pressure(ind, self.phase_model.phases[ind].params['pressure'])
-        self.phase_widget.set_phase_temperature(ind, self.phase_model.phases[ind].params['temperature'])
+        self.phase_widget.set_phase_vp(ind, self.phase_model.phases[ind].params['vp'])
+        self.phase_widget.set_phase_vs(ind, self.phase_model.phases[ind].params['vs'])
         
-        #self.phase_widget.temperature_sbs[ind].setEnabled(self.phase_model.phases[ind].has_thermal_expansion())
+        #self.phase_widget.vs_sbs[ind].setEnabled(self.phase_model.phases[ind].has_thermal_expansion())
 
 
     def add_phase_plot(self):
@@ -240,7 +243,7 @@ class PhaseController(object):
                 return
             for line in phase_file.readlines():
                 line = line.replace('\n', '')
-                phase, use_flag, color, name, pressure, temperature = line.split(',')
+                phase, use_flag, color, name, vp, vs = line.split(',')
                 self.add_btn_click_callback(filenames=[phase])
                 row = self.phase_widget.phase_tw.rowCount() - 1
                 self.phase_widget.phase_show_cbs[row].setChecked(bool(use_flag))
@@ -248,13 +251,13 @@ class PhaseController(object):
                 btn.setStyleSheet('background-color:' + color)
                 self.phase_model.set_color(row,color)
                 self.phase_widget.phase_tw.item(row, 2).setText(name)
-                self.phase_widget.set_phase_pressure(row, float(pressure))
-                self.phase_model.set_pressure(row, float(pressure))
-                temperature = float(temperature)
+                self.phase_widget.set_phase_vp(row, float(vp))
+                self.phase_model.set_vp(row, float(vp))
+                vs = float(vs)
 
-                if temperature is not '':
-                    self.phase_widget.set_phase_temperature(row, temperature)
-                    self.phase_model.set_temperature(row, temperature)
+                if vs is not '':
+                    self.phase_widget.set_phase_vs(row, vs)
+                    self.phase_model.set_vs(row, vs)
 
 
     def save_btn_clicked_callback(self):
@@ -286,36 +289,38 @@ class PhaseController(object):
             self.remove_btn_click_callback()
             
 
-    def update_pressure_step(self):
-        value = self.phase_widget.pressure_step_msb.value()
-        self.phase_widget.pressure_sb.setSingleStep(value)
+    def update_vp_step(self):
+        value = self.phase_widget.vp_step_msb.value()
+        self.phase_widget.vp_sb.setSingleStep(value)
 
-    def update_tth_step(self):
-        value = self.phase_widget.tth_step.value()
-        self.phase_widget.tth_lbl.setSingleStep(value)    
+  
 
-    def update_temperature_step(self):
-        value = self.phase_widget.temperature_step_msb.value()
-        self.phase_widget.temperature_sb.setSingleStep(value)
+    def update_vs_step(self):
+        value = self.phase_widget.vs_step_msb.value()
+        self.phase_widget.vs_sb.setSingleStep(value)
+
+    def update_d_step(self):
+        value = self.phase_widget.d_step_msb.value()
+        self.phase_widget.d_sb.setSingleStep(value)
 
 
     def phase_selection_changed(self, row, col, prev_row, prev_col):
         cur_ind = row
-        pressure = self.phase_model.phases[cur_ind].params['pressure']
-        temperature = self.phase_model.phases[cur_ind].params['temperature']
+        vp = self.phase_model.phases[cur_ind].params['vp']
+        vs = self.phase_model.phases[cur_ind].params['vs']
 
-        self.phase_widget.pressure_sb.blockSignals(True)
-        self.phase_widget.pressure_sb.setValue(pressure)
-        self.phase_widget.pressure_sb.blockSignals(False)
+        self.phase_widget.vp_sb.blockSignals(True)
+        self.phase_widget.vp_sb.setValue(vp)
+        self.phase_widget.vp_sb.blockSignals(False)
 
-        self.phase_widget.temperature_sb.blockSignals(True)
-        self.phase_widget.temperature_sb.setValue(temperature)
-        self.phase_widget.temperature_sb.blockSignals(False)
-        self.update_temperature_control_visibility(row)
+        self.phase_widget.vs_sb.blockSignals(True)
+        self.phase_widget.vs_sb.setValue(vs)
+        self.phase_widget.vs_sb.blockSignals(False)
+        self.update_vs_control_visibility(row)
 
         
 
-    def update_temperature_control_visibility(self, row_ind=None):
+    def update_vs_control_visibility(self, row_ind=None):
         if row_ind is None:
             row_ind = self.phase_widget.get_selected_phase_row()
 
@@ -323,11 +328,11 @@ class PhaseController(object):
             return
 
         if self.phase_model.phases[row_ind-1].has_thermal_expansion():
-            self.phase_widget.temperature_sb.setEnabled(True)
-            self.phase_widget.temperature_step_msb.setEnabled(True)
+            self.phase_widget.vs_sb.setEnabled(True)
+            self.phase_widget.vs_step_msb.setEnabled(True)
         else:
-            self.phase_widget.temperature_sb.setDisabled(True)
-            self.phase_widget.temperature_step_msb.setDisabled(True)
+            self.phase_widget.vs_sb.setDisabled(True)
+            self.phase_widget.vs_step_msb.setDisabled(True)
 
     def color_btn_clicked(self, ind, button):
         previous_color = button.palette().color(1)

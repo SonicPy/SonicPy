@@ -87,10 +87,10 @@ class PhaseModel(QtCore.QObject):
         self.phase_visible.append(True)
         PhaseModel.num_phases += 1
         if self.same_conditions and len(self.phases) > 2:
-            self.phases[-1].compute_d(self.phases[-2].params['pressure'], self.phases[-2].params['temperature'])
+            self.phases[-1].compute_r(self.phases[-2].params['vp'], self.phases[-2].params['vs'])
         else:
-            self.phases[-1].compute_d()
-        self.get_lines_d(-1)
+            self.phases[-1].compute_r()
+        self.get_lines_r(-1)
         self.phase_added.emit()
         self.phase_changed.emit(len(self.phases) - 1)
 
@@ -120,52 +120,69 @@ class PhaseModel(QtCore.QObject):
         self.phases[ind].reload_file()
         for _ in range(len(self.phases[ind].reflections)):
             self.reflection_added.emit(ind)
-        self.get_lines_d(ind)
+        self.get_lines_r(ind)
         self.phase_changed.emit(ind)
 
-    def set_pressure(self, ind, pressure):
+    def set_vp(self, ind, vp):
         """
-        Sets the pressure of a phase with index ind. In case same_conditions is true, all phase pressures will be
+        Sets the vp of a phase with index ind. In case same_conditions is true, all phase vps will be
         updated.
         """
         if self.same_conditions:
             for j in range(len(self.phases)):
-                self._set_pressure(j, pressure)
+                self._set_vp(j, vp)
                 self.phase_changed.emit(j)
         else:
-            self._set_pressure(ind, pressure)
+            self._set_vp(ind, vp)
             self.phase_changed.emit(ind)
 
-    def _set_pressure(self, ind, pressure):
-        self.phases[ind].compute_d(pressure=pressure)
-        self.get_lines_d(ind)
+    def _set_vp(self, ind, vp):
+        self.phases[ind].compute_r(vp=vp)
+        self.get_lines_r(ind)
 
-    def set_temperature(self, ind, temperature):
+    def set_vs(self, ind, vs):
         """
-        Sets the temperature of a phase with index ind. In case same_conditions is true, all phase temperatures will be
+        Sets the vs of a phase with index ind. In case same_conditions is true, all phase vss will be
         updated.
         """
         if self.same_conditions:
             for j in range(len(self.phases)):
-                self._set_temperature(j, temperature)
+                self._set_vs(j, vs)
                 self.phase_changed.emit(j)
         else:
-            self._set_temperature(ind, temperature)
+            self._set_vs(ind, vs)
             self.phase_changed.emit(ind)
 
-    def _set_temperature(self, ind, temperature):
-        if self.phases[ind].has_thermal_expansion():
-            self.phases[ind].compute_d(temperature=temperature)
-            self.get_lines_d(ind)
+    def _set_vs(self, ind, vs):
+        
+        self.phases[ind].compute_r(vs=vs)
+        self.get_lines_r(ind)
 
-    def set_pressure_temperature(self, ind, pressure, temperature):
-        self.phases[ind].compute_d(temperature=temperature, pressure=pressure)
-        self.get_lines_d(ind)
+    def set_d(self, ind, d):
+        """
+        Sets the d of a phase with index ind. In case same_conditions is true, all phase vps will be
+        updated.
+        """
+        if self.same_conditions:
+            for j in range(len(self.phases)):
+                self._set_d(j, d)
+                self.phase_changed.emit(j)
+        else:
+            self._set_d(ind, d)
+            self.phase_changed.emit(ind)
+
+    def _set_d(self, ind, d):
+        self.phases[ind].compute_r(d=d)
+        self.get_lines_r(ind)
+
+    def set_vp_vs(self, ind, vp, vs):
+        self.phases[ind].compute_r(vs=vs, vp=vp)
+        self.get_lines_r(ind)
         self.phase_changed.emit(ind)
 
-    def set_pressure_all(self, P):
+    def set_vp_all(self, P):
         for phase in self.phases:
-            phase.compute_d(pressure=P)
+            phase.compute_r(vp=P)
 
     
 
@@ -177,9 +194,9 @@ class PhaseModel(QtCore.QObject):
 
         self.phases[ind].params[param] = value
         self.phases[ind].compute_v0()
-        self.phases[ind].compute_d0()
-        self.phases[ind].compute_d()
-        self.get_lines_d(ind)
+        self.phases[ind].compute_r0()
+        self.phases[ind].compute_r()
+        self.get_lines_r(ind)
         self.phase_changed.emit(ind)
 
     def set_color(self, ind, color):
@@ -198,25 +215,23 @@ class PhaseModel(QtCore.QObject):
         self.phase_visible[ind] = bool
         self.phase_changed.emit(ind)
 
-    def get_lines_d(self, ind):
+    def get_lines_r(self, ind):
         reflections = self.phases[ind].get_reflections()
-        res = np.zeros((len(reflections), 5))
+        res = np.zeros((len(reflections), 2))
         for i, reflection in enumerate(reflections):
-            res[i, 0] = reflection.d
-            res[i, 1] = reflection.intensity
-            res[i, 2] = reflection.h
-            res[i, 3] = reflection.k
-            res[i, 4] = reflection.l
+            res[i, 0] = reflection.r
+            res[i, 1] = 1
+            
         self.reflections[ind] = res
         return res
 
-    def set_temperature_all(self, T):
+    def set_vs_all(self, T):
         for phase in self.phases:
-            phase.compute_d(temperature=T)
+            phase.compute_r(vs=T)
 
     def update_all_phases(self):
         for ind in range(len(self.phases)):
-            self.get_lines_d(ind)
+            self.get_lines_r(ind)
 
     # need to modify this for EDXD mode
     def get_phase_line_positions(self, ind):
@@ -258,7 +273,7 @@ class PhaseModel(QtCore.QObject):
         Adds an empty reflection to the reflection table of a phase with index ind
         """
         self.phases[ind].add_reflection()
-        self.get_lines_d(ind)
+        self.get_lines_r(ind)
         self.reflection_added.emit(ind)
 
     def delete_reflection(self, phase_ind, reflection_ind):
@@ -267,7 +282,7 @@ class PhaseModel(QtCore.QObject):
         """
         reflection_ind = int(reflection_ind)
         self.phases[phase_ind].delete_reflection(reflection_ind)
-        self.get_lines_d(phase_ind)
+        self.get_lines_r(phase_ind)
         self.reflection_deleted.emit(phase_ind, reflection_ind)
         self.phase_changed.emit(phase_ind)
 
@@ -297,9 +312,9 @@ class PhaseModel(QtCore.QObject):
         """
         self.phases[phase_ind].reflections[reflection_ind] = reflection
         self.phases[phase_ind].params['modified'] = True
-        self.phases[phase_ind].compute_d0()
-        self.phases[phase_ind].compute_d()
-        self.get_lines_d(phase_ind)
+        self.phases[phase_ind].compute_r0()
+        self.phases[phase_ind].compute_r()
+        self.get_lines_r(phase_ind)
         self.phase_changed.emit(phase_ind)    
 
     def reset(self):

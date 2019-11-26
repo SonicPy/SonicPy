@@ -254,7 +254,7 @@ class UltrasoundWidget(QMainWindow):
         self.actionBG = QtWidgets.QAction("Overlay", self)
         self.actionBGclose = QtWidgets.QAction("Close overlay", self)
 
-        self.actionCursors = QtWidgets.QAction("Curosrs", self)
+        self.actionCursors = QtWidgets.QAction("Phase", self)
         
         #self.file_menu.addAction(self.actionSave_next)
         self.file_menu.addAction(self.actionSave_As)    
@@ -286,7 +286,7 @@ class UltrasoundWidget(QMainWindow):
         self.ActionSetUserWaveform = QtWidgets.QAction('Edit user waveform', self)   
         #self.opts_menu.addAction(self.ActionRecallSetup)
         #self.opts_menu.addAction(self.ActionSaveSetup)
-        self.opts_menu.addAction(self.ActionSetUserWaveform)
+        #self.opts_menu.addAction(self.ActionSetUserWaveform)
         '''
 
         self.tools_menu = self.menuBar.addMenu('Tools')

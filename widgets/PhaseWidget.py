@@ -40,8 +40,9 @@ class PhaseWidget(QtWidgets.QWidget):
     show_cb_state_changed = QtCore.pyqtSignal(int, bool)
     file_dragged_in = QtCore.pyqtSignal(list)
 
-    pressure_sb_value_changed = QtCore.Signal(int, float)
-    temperature_sb_value_changed = QtCore.Signal(int, float)
+    vp_sb_value_changed = QtCore.Signal(int, float)
+    vs_sb_value_changed = QtCore.Signal(int, float)
+    d_sb_value_changed = QtCore.Signal(int, float)
 
     def __init__(self):
         super(PhaseWidget, self).__init__()
@@ -58,7 +59,7 @@ class PhaseWidget(QtWidgets.QWidget):
         self.edit_btn = QtWidgets.QPushButton('Edit')
         self.delete_btn = QtWidgets.QPushButton('Delete')
         self.clear_btn = QtWidgets.QPushButton('Clear')
-        self.rois_btn = QtWidgets.QPushButton('Add ROIs')
+        #self.rois_btn = QtWidgets.QPushButton('Add ROIs')
         self.save_list_btn = QtWidgets.QPushButton('Save List')
         self.load_list_btn = QtWidgets.QPushButton('Load List')
 
@@ -66,7 +67,7 @@ class PhaseWidget(QtWidgets.QWidget):
         self._button_layout.addWidget(self.edit_btn,0)
         self._button_layout.addWidget(self.delete_btn,0)
         self._button_layout.addWidget(self.clear_btn,0)
-        self._button_layout.addWidget(self.rois_btn,0)
+        #self._button_layout.addWidget(self.rois_btn,0)
         self._button_layout.addWidget(VerticalLine())
         self._button_layout.addSpacerItem(HorizontalSpacerItem())
         self._button_layout.addWidget(VerticalLine())
@@ -78,33 +79,32 @@ class PhaseWidget(QtWidgets.QWidget):
         self.parameter_widget = QtWidgets.QWidget()
 
         self._parameter_layout = QtWidgets.QGridLayout()
-        self.pressure_sb = DoubleSpinBoxAlignRight()
-        self.temperature_sb = DoubleSpinBoxAlignRight()
-        self.pressure_step_msb = DoubleMultiplySpinBoxAlignRight()
-        self.temperature_step_msb = DoubleMultiplySpinBoxAlignRight()
+        self.vp_sb = DoubleSpinBoxAlignRight()
+        self.vs_sb = DoubleSpinBoxAlignRight()
+        self.d_sb = DoubleSpinBoxAlignRight()
+        self.vp_step_msb = DoubleMultiplySpinBoxAlignRight()
+        self.vs_step_msb = DoubleMultiplySpinBoxAlignRight()
+        self.d_step_msb = DoubleMultiplySpinBoxAlignRight()
         self.apply_to_all_cb = QtWidgets.QCheckBox('Apply to all phases')
-        self.show_in_pattern_cb = QtWidgets.QCheckBox('Show in Pattern')
-        self.tth_lbl = DoubleSpinBoxAlignRight()
-        
-        self.tth_step = DoubleMultiplySpinBoxAlignRight()
-
-        self.get_tth_btn = QtWidgets.QPushButton('Get')
-        
+        self.apply_to_all_cb.setChecked(False)
+        self.show_in_pattern_cb = QtWidgets.QCheckBox('Show in Pattern')        
 
         self._parameter_layout.addWidget(QtWidgets.QLabel('Parameter'), 0, 1)
         self._parameter_layout.addWidget(QtWidgets.QLabel('Step'), 0, 3)
-        self._parameter_layout.addWidget(QtWidgets.QLabel('P:'), 1, 0)
-        self._parameter_layout.addWidget(QtWidgets.QLabel('T:'), 2, 0)
-        self._parameter_layout.addWidget(QtWidgets.QLabel('GPa'), 1, 2)
-        self._parameter_layout.addWidget(QtWidgets.QLabel('K'), 2, 2)
+        self._parameter_layout.addWidget(QtWidgets.QLabel('Vp:'), 1, 0)
+        self._parameter_layout.addWidget(QtWidgets.QLabel('Vs:'), 2, 0)
+        self._parameter_layout.addWidget(QtWidgets.QLabel('d:'), 3, 0)
+        self._parameter_layout.addWidget(QtWidgets.QLabel('m/s'), 1, 2)
+        self._parameter_layout.addWidget(QtWidgets.QLabel('m/s'), 2, 2)
+        self._parameter_layout.addWidget(QtWidgets.QLabel('m'), 3, 2)
 
-        self._parameter_layout.addWidget(self.pressure_sb, 1, 1)
-        self._parameter_layout.addWidget(self.pressure_step_msb, 1, 3)
-        self._parameter_layout.addWidget(self.temperature_sb, 2, 1)
-        self._parameter_layout.addWidget(self.temperature_step_msb, 2, 3)
+        self._parameter_layout.addWidget(self.vp_sb, 1, 1)
+        self._parameter_layout.addWidget(self.vp_step_msb, 1, 3)
+        self._parameter_layout.addWidget(self.vs_sb, 2, 1)
+        self._parameter_layout.addWidget(self.vs_step_msb, 2, 3)
+        self._parameter_layout.addWidget(self.d_sb, 3, 1)
+        self._parameter_layout.addWidget(self.d_step_msb, 3, 3)
 
-        self._parameter_layout.addWidget(self.apply_to_all_cb, 3, 0, 1, 5)
-        
         
 
         
@@ -114,6 +114,7 @@ class PhaseWidget(QtWidgets.QWidget):
         self.phase_tw = ListTableWidget(columns=5)
         self._body_layout.addWidget(self.phase_tw )
         self._body_layout.addWidget(self.parameter_widget, 0)
+
 
         self._layout.addLayout(self._body_layout)
 
@@ -135,57 +136,64 @@ class PhaseWidget(QtWidgets.QWidget):
         header_view.hide()
         self.phase_tw.setItemDelegate(NoRectDelegate())
 
-        self.pressure_sb.valueChanged.connect(self.pressure_sb_changed)
-        self.temperature_sb.valueChanged.connect(self.temperature_sb_changed)
-
+        self.vp_sb.valueChanged.connect(self.vp_sb_changed)
+        self.vs_sb.valueChanged.connect(self.vs_sb_changed)
+        self.d_sb.valueChanged.connect(self.d_sb_changed)
      
         self.setAcceptDrops(True) 
 
-    def pressure_sb_changed(self):
+    def vp_sb_changed(self):
         cur_ind = self.get_selected_phase_row()
-        pressure = self.pressure_sb.value()
-        self.pressure_sb_value_changed.emit(cur_ind, pressure)
+        vp = self.vp_sb.value()
+        self.vp_sb_value_changed.emit(cur_ind, vp)
 
-    def temperature_sb_changed(self):
+    def vs_sb_changed(self):
         cur_ind = self.get_selected_phase_row()
-        temperature = self.temperature_sb.value()
-        self.temperature_sb_value_changed.emit(cur_ind, temperature)
+        vs = self.vs_sb.value()
+        self.vs_sb_value_changed.emit(cur_ind, vs)
+
+    def d_sb_changed(self):
+        cur_ind = self.get_selected_phase_row()
+        d = self.d_sb.value()
+        self.d_sb_value_changed.emit(cur_ind, d)
 
     def style_widgets(self):
         self.phase_tw.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.MinimumExpanding)
         self.parameter_widget.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         self.phase_tw.setMinimumHeight(120)
 
-        self.temperature_step_msb.setMaximumWidth(75)
-        self.pressure_step_msb.setMaximumWidth(75)
-        self.tth_step.setMaximumWidth(75)
-        self.get_tth_btn.setMaximumWidth(75)
+        self.vs_step_msb.setMaximumWidth(75)
+        self.vp_step_msb.setMaximumWidth(75)
+        self.d_step_msb.setMaximumWidth(75)
         
-        self.pressure_sb.setMinimumWidth(100)
+       
+        self.vp_sb.setMinimumWidth(100)
 
-        self.pressure_sb.setMaximum(9999999)
-        self.pressure_sb.setMinimum(-9999999)
-        self.pressure_sb.setValue(0)
+        self.vp_sb.setMaximum(9999999)
+        self.vp_sb.setMinimum(0)
+        self.vp_sb.setValue(5000)
 
-        self.pressure_step_msb.setMaximum(1000.0)
-        self.pressure_step_msb.setMinimum(0.01)
-        self.pressure_step_msb.setValue(0.2)
+        self.vp_step_msb.setMaximum(1000.0)
+        self.vp_step_msb.setMinimum(1.0)
+        self.vp_step_msb.setValue(50)
 
-        self.temperature_sb.setMaximum(99999999)
-        self.temperature_sb.setMinimum(0)
-        self.temperature_sb.setValue(298)
+        self.vs_sb.setMaximum(99999999)
+        self.vs_sb.setMinimum(0)
+        self.vs_sb.setValue(3000)
 
-        self.temperature_step_msb.setMaximum(1000.0)
-        self.temperature_step_msb.setMinimum(1.0)
-        self.temperature_step_msb.setValue(50.0)
+        self.vs_step_msb.setMaximum(1000.0)
+        self.vs_step_msb.setMinimum(1.0)
+        self.vs_step_msb.setValue(50)
 
-        self.tth_lbl.setMaximum(179.0)
-        self.tth_lbl.setMinimum(1)
-        self.tth_lbl.setDecimals(5)
-        self.tth_step.setMaximum(180)
-        self.tth_step.setMinimum(0.001)
-        self.tth_step.setValue(1)
-        self.tth_step.setDecimals(3)
+        self.d_sb.setMaximum(1000)
+        self.d_sb.setMinimum(0)
+        self.d_sb.setValue(1)
+
+        self.d_step_msb.setMaximum(1.0)
+        self.d_step_msb.setMinimum(0.001)
+        self.d_step_msb.setValue(0.05)
+
+        
 
         self.setStyleSheet("""
             #phase_control_button_widget QPushButton {
@@ -226,15 +234,15 @@ class PhaseWidget(QtWidgets.QWidget):
         name_item.setTextAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         self.phase_tw.setItem(current_rows, 2, name_item)
 
-        pressure_item = QtWidgets.QTableWidgetItem('0 GPa')
-        pressure_item.setFlags(pressure_item.flags() & ~QtCore.Qt.ItemIsEditable)
-        pressure_item.setTextAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.phase_tw.setItem(current_rows, 3, pressure_item)
+        vp_item = QtWidgets.QTableWidgetItem('0 GPa')
+        vp_item.setFlags(vp_item.flags() & ~QtCore.Qt.ItemIsEditable)
+        vp_item.setTextAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.phase_tw.setItem(current_rows, 3, vp_item)
 
-        temperature_item = QtWidgets.QTableWidgetItem('298 K')
-        temperature_item.setFlags(temperature_item.flags() & ~QtCore.Qt.ItemIsEditable)
-        temperature_item.setTextAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.phase_tw.setItem(current_rows, 4, temperature_item)
+        vs_item = QtWidgets.QTableWidgetItem('298 K')
+        vs_item.setFlags(vs_item.flags() & ~QtCore.Qt.ItemIsEditable)
+        vs_item.setTextAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.phase_tw.setItem(current_rows, 4, vs_item)
 
         self.phase_tw.setColumnWidth(0, 35)
         self.phase_tw.setColumnWidth(1, 25)
@@ -274,32 +282,32 @@ class PhaseWidget(QtWidgets.QWidget):
         name_item = self.phase_tw.item(ind, 2)
         name_item.setText(name)
 
-    def set_phase_temperature(self, ind, T):
-        temperature_item = self.phase_tw.item(ind, 4)
+    def set_phase_vs(self, ind, T):
+        vs_item = self.phase_tw.item(ind, 4)
         try:
-            temperature_item.setText("{0:.2f} K".format(T))
+            vs_item.setText("{0:.2f} K".format(T))
         except ValueError:
-            temperature_item.setText("{0} K".format(T))
+            vs_item.setText("{0} K".format(T))
 
-    def get_phase_temperature(self, ind):
-        temperature_item = self.phase_tw.item(ind, 4)
+    def get_phase_vs(self, ind):
+        vs_item = self.phase_tw.item(ind, 4)
         try:
-            temperature = float(str(temperature_item.text()).split()[0])
+            vs = float(str(vs_item.text()).split()[0])
         except:
-            temperature = None
-        return temperature
+            vs = None
+        return vs
 
-    def set_phase_pressure(self, ind, P):
-        pressure_item = self.phase_tw.item(ind, 3)
+    def set_phase_vp(self, ind, P):
+        vp_item = self.phase_tw.item(ind, 3)
         try:
-            pressure_item.setText("{0:.2f} GPa".format(P))
+            vp_item.setText("{0:.2f} GPa".format(P))
         except ValueError:
-            pressure_item.setText("{0} GPa".format(P))
+            vp_item.setText("{0} GPa".format(P))
 
-    def get_phase_pressure(self, ind):
-        pressure_item = self.phase_tw.item(ind, 3)
-        pressure = float(str(pressure_item.text()).split()[0])
-        return pressure
+    def get_phase_vp(self, ind):
+        vp_item = self.phase_tw.item(ind, 3)
+        vp = float(str(vp_item.text()).split()[0])
+        return vp
 
     def phase_color_btn_click(self, button):
         self.color_btn_clicked.emit(self.phase_color_btns.index(button), button)

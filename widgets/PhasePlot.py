@@ -16,7 +16,7 @@ class PhasePlot(object):
         self.line_visible = []
         self.pattern_x_range = []
         self.index = PhasePlot.num_phases
-        if color == None:
+        if color is None:
             self.color = calculate_color(self.index + 9)
             PhasePlot.num_phases += 1
         else:

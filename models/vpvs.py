@@ -127,6 +127,8 @@ class vpvs(object):
     def name(self, value):
         self._name = value
 
+    def compute_v0(self):
+        pass
     
     def compute_r0(self):
         """
@@ -138,13 +140,21 @@ class vpvs(object):
         for ind in range(len(self.reflections)):
             self.reflections[ind].r0 = r_spacings[ind]
 
-    def compute_r(self, shift=0):
+    def compute_r(self, **kwargs):
         """
         
         """
-        
+        vp = kwargs.get('vp', None)
+        if vp is not None:
+            self.params['vp']=vp
+        vs = kwargs.get('vs', None)
+        if vs is not None:
+            self.params['vs']=vs
+        d = kwargs.get('d', None)
+        if d is not None:
+            self.params['d']=d
         self.compute_r0()
-        
+        print(self.params)
 
         r_spacings = [ 1.1e-6, 2.1e-6, 4.1e-6]
         for ind in range(len(self.reflections)):

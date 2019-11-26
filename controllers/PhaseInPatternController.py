@@ -120,12 +120,12 @@ class PhaseInPatternController(object):
     def update_phase_legend(self, ind):
         name = self.phase_model.phases[ind].name
         parameter_str = ''
-        pressure = self.phase_model.phases[ind].params['pressure']
-        temperature = self.phase_model.phases[ind].params['temperature']
-        if pressure != 0:
-            parameter_str += '{:0.2f} GPa '.format(pressure)
-        if temperature != 0 and temperature != 298 and temperature is not None:
-            parameter_str += '{:0.2f} K '.format(temperature)
+        vp = self.phase_model.phases[ind].params['vp']
+        vs = self.phase_model.phases[ind].params['vs']
+        if vp != 0:
+            parameter_str += '{:0.2f} m/s '.format(vp)
+        if vs != 0:
+            parameter_str += '{:0.2f} m/s '.format(vs)
         self.pattern_widget.rename_phase(ind, parameter_str + name)
 
     def update_phase_color(self, ind):

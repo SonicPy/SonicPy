@@ -593,6 +593,7 @@ class CustomViewBox(pg.ViewBox):
         self.cursorPoint = 0
         # Enable dragging and dropping onto the GUI 
         self.setAcceptDrops(True) 
+        
 
     '''
     def cursor_dragged(self, cursor):
@@ -634,6 +635,7 @@ class PltWidget(pg.PlotWidget):
         
         super().__init__(parent, viewBox=vb)
         self.viewBox = self.getViewBox() # Get the ViewBox of the widget
+        
        
         self.cursorPoints = [nan,nan]
         # defined default colors
@@ -958,3 +960,45 @@ class PltWidget(pg.PlotWidget):
 
     ##########  END OF OVERLAY STUFF  ##################
 
+
+    #### control phases #### 
+
+    def add_phase(self, name, positions, intensities, baseline, color):
+        self.phases.append(PhasePlot(self.pattern_plot, \
+                        self.phases_legend, positions, intensities, \
+                        name, baseline, line_width=2,color=color))
+        
+
+    def set_phase_color(self, ind, color):
+        self.phases[ind].set_color(color)
+        self.phases_legend.setItemColor(ind, color)
+
+    def hide_phase(self, ind):
+        self.phases[ind].hide()
+        self.phases_legend.hideItem(ind)
+
+    def show_phase(self, ind):
+        self.phases[ind].show()
+        self.phases_legend.showItem(ind)
+
+    def rename_phase(self, ind, name):
+        self.phases_legend.renameItem(ind, name)
+
+    def update_phase_intensities(self, ind, positions, intensities, baseline=.5):
+        if len(self.phases):
+            self.phases[ind].update_intensities(positions, intensities, baseline)
+
+    def update_phase_line_visibility(self, ind):
+        x_range = self.plotForeground.dataBounds(0)
+        self.phases[ind].update_visibilities(x_range)
+
+    def update_phase_line_visibilities(self):
+        x_range = self.plotForeground.dataBounds(0)
+        for phase in self.phases:
+            phase.update_visibilities(x_range)
+
+    def del_phase(self, ind):
+        self.phases[ind].remove()
+        del self.phases[ind]
+
+    #### END control phases ####

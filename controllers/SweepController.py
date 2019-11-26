@@ -15,7 +15,7 @@ class SweepController(pvController):
     
     def __init__(self, parent, scope_pvs, source_waveform_pvs, isMain = False):
         
-        model = SweepModel
+        model = SweepModel(parent)
         super().__init__(parent, model, isMain)  
 
         

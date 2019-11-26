@@ -9,13 +9,17 @@ from models.ArbModel import ArbModel
 import json
 from widgets.scope_widget import scopeWidget
 
-from controllers.ArbEditController import ArbEditController
+from controllers.EditController import EditController
+
+
 
 from widgets.panel import Panel
 from functools import partial
 from widgets.UtilityWidgets import save_file_dialog, open_file_dialog, open_files_dialog
 from controllers.pv_controller import pvController
 from utilities.utilities import *
+
+from models.ArbDefinitions import g_wavelet_controller, gx2_wavelet_controller, burst_fixed_time_controller
 
 
 class ArbController(pvController):
@@ -26,13 +30,40 @@ class ArbController(pvController):
     runStateSignal = pyqtSignal(bool)
 
     def __init__(self, parent, isMain = False):
-        model = ArbModel
+        
+        model = ArbModel(parent)
+
         super().__init__(parent, model, isMain) 
-        self.arb_edit_controller = ArbEditController(self)
+
+        self.arb1 = g_wavelet_controller(self)
+        self.arb2 = gx2_wavelet_controller(self)
+        self.arb3 = burst_fixed_time_controller(self)
+
+
+        self.arb_edit_controller = EditController(self, title='Waveform control')
+        self.arb_edit_controller.add_controller(self.arb1.model.instrument, self.arb1)
+        self.arb_edit_controller.add_controller(self.arb2.model.instrument, self.arb2)
+        self.arb_edit_controller.add_controller(self.arb3.model.instrument, self.arb3)
+
+        self.arb_edit_controller.select_controller(self.arb1.model.instrument)
+
+        w_types = [self.arb1.model.instrument, self.arb2.model.instrument, self.arb3.model.instrument]
+
+        waveforms_task = {  'waveform_type': 
+                                {'desc': 'Wave type', 'val':w_types[0], 'list':w_types, 
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'waveform_type','type':'l'}}}
+        self.model.create_pvs(waveforms_task)
+
+        
         
         self.panel_items =[ 'waveform_type',
                             'edit_state']
         self.init_panel("USER1 waveform", self.panel_items)
+
+        
+
+
         self.make_connections()
         
         if isMain:
@@ -43,19 +74,45 @@ class ArbController(pvController):
 
     def make_connections(self):
         self.model.pvs['waveform_type'].value_changed_signal.connect(self.waveform_type_signal_callback)
-        self.model.pvs['variable_parameter'].value_changed_signal.connect(self.variable_parameter_signal_callback)
+        #self.model.pvs['variable_parameter'].value_changed_signal.connect(self.variable_parameter_signal_callback)
         self.model.pvs['edit_state'].value_changed_signal.connect(self.edit_state_signal_callback)
+        self.model.pvs['arb_waveform'].value_changed_signal.connect(self.arb_waveform_signal_callback)
+        self.arb_edit_controller.applyClickedSignal.connect(self.arb_edited_apply_clicked_signal_callback)
+
+        self.arb_edit_controller.widget.controller_selection_edited_signal.connect(self.controller_selection_edited_signal_callback)
+
+        for controller in self.arb_edit_controller.controllers:
+            controller.model.pvs['waveform'].value_changed_signal.connect(self.waveform_changed_signal_callback)
+            controller.model.pvs['waveform'].value_changed_signal.connect(self.waveform_changed_signal_callback)
+            controller.model.pvs['waveform'].value_changed_signal.connect(self.waveform_changed_signal_callback)
     
     def show_widget(self):
         self.panel.raise_widget()
 
+    def waveform_changed_signal_callback(self, pv_name, data):
+        data = data[0]
+        t = data['t']
+        waveform = data['waveform']
+        self.arb_edit_controller.widget.update_plot([t,waveform])
+
+    def controller_selection_edited_signal_callback(self, key):
+        self.arb_edit_controller.select_controller(key)
+
+    def arb_edited_apply_clicked_signal_callback(self, selected):
+        print(selected)
+
     def waveform_type_signal_callback(self, pv_name, data):
         data = data[0]
-        
+        self.arb_edit_controller.widget.set_selected_choice(data)
 
+    def arb_waveform_signal_callback(self, pv_name, data):
+        data = data[0]['plot']
+        self.arb_edit_controller.update_plot(data)
+
+    '''
     def variable_parameter_signal_callback(self, pv_name, data):
         data = data[0]
-        
+    '''    
 
     def edit_state_signal_callback(self, pv_name, data):
         data = data[0]

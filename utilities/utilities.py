@@ -20,6 +20,8 @@ def read_multiple_spectra(filenames, ):
     return spectra, X
 
 
+
+
 def butter_bandstop_filter(data, lowcut, highcut, order):
     x = data[0]
     x_interval = x[1]-x[0]
@@ -61,6 +63,21 @@ def zero_phase_lowpass_filter(data, lowcut, order):
         
 
         i, u = signal.butter(order, low, btype='low')
+        y = signal.filtfilt(i, u, y)
+        return x, y
+    return None
+
+def zero_phase_highpass_filter(data, highcut, order):
+    x = data[0]
+    x_interval = x[1]-x[0]
+    if x_interval > 0:
+        fs = 1/(x_interval)
+        y = data[1]
+        nyq = 0.5 * fs
+        high = highcut / nyq
+        
+
+        i, u = signal.butter(order, high, btype='high')
         y = signal.filtfilt(i, u, y)
         return x, y
     return None

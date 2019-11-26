@@ -25,7 +25,7 @@ from controllers.OverlayController import OverlayController
 from models.WaveformModel import Waveform
 import math
 
-from arb_waveforms import gaussian_wavelet
+
 
 from pyqtgraph.Qt import QtGui, QtCore
 import pyqtgraph as pg
@@ -70,8 +70,8 @@ class UltrasoundController(QObject):
 
         self.display_window.insert_panel(scope_panel)
         self.display_window.insert_panel(afg_panel)
-        self.display_window.insert_panel(arb_panel)
-        self.display_window.insert_panel(arb_filter_panel)
+        #self.display_window.insert_panel(arb_panel)
+        #self.display_window.insert_panel(arb_filter_panel)
         self.display_window.insert_panel(sweep_widget)
 
         scope_waveform_widget = self.scope_plot_controller.widget
@@ -126,7 +126,7 @@ class UltrasoundController(QObject):
     
         
         params['pts'] = 1000
-        
+        '''
         ans = gaussian_wavelet(params)
         ss = ans['waveform']
 
@@ -145,7 +145,7 @@ class UltrasoundController(QObject):
         self.p3.plot(ss_fft[0][:250],ss_fft[1][:250], pen=(0,255,255))
         self.win.show()
 
-        '''
+        
         arb = get_arb()
         waveform={}
         waveform['binary_waveform'] = arb

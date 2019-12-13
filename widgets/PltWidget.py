@@ -325,6 +325,10 @@ class plotWindow(QtWidgets.QWidget):
 
     def set_cursor(self, pos):
         self.win.set_cursor_pos(pos)
+
+    def create_plots(self):
+        self.win.create_plots([],[],[],[],'Time (s)')
+        self.win.set_colors({'data_color':'FFFF00','rois_color': '#00b4ff'})
         
 
     def add_line_plot(self, x=[],y=[],color = (0,0,0),Width = 1):
@@ -779,8 +783,9 @@ class PltWidget(pg.PlotWidget):
         self.legend.addItem(self.plotRoi, '')
         self.setLabel('bottom', xLabel) 
 
-    def plotData(self, xAxis,data,roiHorz,roiData, xLabel, dataLabel=''):
+    def plotData(self, xAxis,data,roiHorz=[],roiData=[], xLabel='', dataLabel=''):
         self.xAxis = xAxis
+        self.data = data
         if self.plotForeground == None:
             self.create_plots(xAxis,data,roiHorz,roiData, xLabel)
         else:
@@ -989,13 +994,19 @@ class PltWidget(pg.PlotWidget):
             self.phases[ind].update_intensities(positions, intensities, baseline)
 
     def update_phase_line_visibility(self, ind):
-        x_range = self.plotForeground.dataBounds(0)
-        self.phases[ind].update_visibilities(x_range)
+        if self.plotForeground is not None:
+            if self.xAxis is not None:
+                if len(self.xAxis):
+                    x_range = [min(self.xAxis),max(self.xAxis)]
+                    self.phases[ind].update_visibilities(x_range)
 
     def update_phase_line_visibilities(self):
-        x_range = self.plotForeground.dataBounds(0)
-        for phase in self.phases:
-            phase.update_visibilities(x_range)
+        if self.plotForeground is not None:
+            if self.xAxis is not None:
+                if len(self.xAxis):
+                    x_range = [min(self.xAxis),max(self.xAxis)]
+                    for phase in self.phases:
+                        phase.update_visibilities(x_range)
 
     def del_phase(self, ind):
         self.phases[ind].remove()

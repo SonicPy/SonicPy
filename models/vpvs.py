@@ -140,7 +140,7 @@ class vpvs(object):
         for ind in range(len(self.reflections)):
             self.reflections[ind].r0 = r_spacings[ind]
 
-    def compute_r(self, **kwargs):
+    def compute_r(self, *args, **kwargs):
         """
         
         """

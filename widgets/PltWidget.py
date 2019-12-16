@@ -994,19 +994,19 @@ class PltWidget(pg.PlotWidget):
             self.phases[ind].update_intensities(positions, intensities, baseline)
 
     def update_phase_line_visibility(self, ind):
-        if self.plotForeground is not None:
-            if self.xAxis is not None:
-                if len(self.xAxis):
-                    x_range = [min(self.xAxis),max(self.xAxis)]
-                    self.phases[ind].update_visibilities(x_range)
+        axis_range = self.getViewBox().viewRange()
+
+        
+        x_range = axis_range[0]
+        self.phases[ind].update_visibilities(x_range)
 
     def update_phase_line_visibilities(self):
-        if self.plotForeground is not None:
-            if self.xAxis is not None:
-                if len(self.xAxis):
-                    x_range = [min(self.xAxis),max(self.xAxis)]
-                    for phase in self.phases:
-                        phase.update_visibilities(x_range)
+        axis_range = self.getViewBox().viewRange()
+
+        
+        x_range = axis_range[0]
+        for phase in self.phases:
+            phase.update_visibilities(x_range)
 
     def del_phase(self, ind):
         self.phases[ind].remove()

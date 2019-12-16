@@ -41,13 +41,13 @@ class vpvs_reflection:
         self.r = r
         
     def __str__(self):
-        return "{:2d},{:2d},{:2d}\t{:.2f}\t{:.3f}".format(self.r, self.r*2,self.r*3, self.d, self.v)
+        return "{:2d},{:2d}\t{:.2f}\t{:.3f}".format(self.r, self.r*2, self.d, self.v)
 
     def get_r(self):
-        return "%f %f %f"%(self.r,self.r*2,self.r*3)
+        return "%f %f %f"%(self.r,self.r*2)
 
     def get_r_list(self):
-        return [self.r,self.r*2,self.r*3]
+        return [self.r,self.r*2]
 
 
 
@@ -58,7 +58,7 @@ class MyDict(dict):
 
 
     def __setitem__(self, key, value):
-        if key in ['comments',  'reflections', ]:
+        if key in ['comments',  't0_p', 't0_s', 'vp', 'vs','d']:
             self.__setitem__('modified', True)
         super(MyDict, self).__setitem__(key, value)
 
@@ -68,6 +68,8 @@ class vpvs(object):
         self._name = ''
         self.params = MyDict()
         self.params['comments'] = []
+        self.params['t0_p'] = 0.
+        self.params['t0_s'] = 0.
         self.params['vp'] = 0.
         self.params['vs'] = 0.
         self.params['d'] = 0.
@@ -92,14 +94,14 @@ class vpvs(object):
         
         self._name = 'name'
         self.params['comments'] = ['comment']
-        self.reflections = [vpvs_reflection(),vpvs_reflection(),vpvs_reflection()]
+        self.reflections = [vpvs_reflection()]
 
         
         self.params['vp'] = 5000
         self.params['vs'] = 3000
+        self.params['d'] = 1
         self.compute_r()
-        for reflection in self.reflections:
-            reflection.r = reflection.r
+        
 
         self.params['modified'] = False
 
@@ -107,10 +109,10 @@ class vpvs(object):
 
     @property
     def filename(self):
-        if self.params['modified']:
-            return self._filename + '*'
-        else:
-            return self._filename
+        #if self.params['modified']:
+        #    return self._filename + '*'
+        #else:
+        return self._filename
 
     @filename.setter
     def filename(self, value):
@@ -118,10 +120,10 @@ class vpvs(object):
 
     @property
     def name(self):
-        if self.params['modified']:
-            return self._name + '*'
-        else:
-            return self._name
+        #if self.params['modified']:
+        #    return self._name + '*'
+        #else:
+        return self._name
 
     @name.setter
     def name(self, value):
@@ -135,7 +137,7 @@ class vpvs(object):
         computes d0 values for the based on the the current lattice parameters
         """
         
-        r_spacings = [ 1e-6, 2e-6, 4e-6]
+        r_spacings = [  self.params['d']/1000/self.params['vp']]
 
         for ind in range(len(self.reflections)):
             self.reflections[ind].r0 = r_spacings[ind]
@@ -144,6 +146,12 @@ class vpvs(object):
         """
         
         """
+        t0_p = kwargs.get('t0_p', None)
+        if t0_p is not None:
+            self.params['t0_p']=t0_p
+        t0_s = kwargs.get('t0_s', None)
+        if t0_s is not None:
+            self.params['t0_s']=t0_s
         vp = kwargs.get('vp', None)
         if vp is not None:
             self.params['vp']=vp
@@ -153,22 +161,16 @@ class vpvs(object):
         d = kwargs.get('d', None)
         if d is not None:
             self.params['d']=d
+
         self.compute_r0()
-        print(self.params)
+        r_spacings = []
+        for r in self.reflections:
+            r_spacings.append(r.r0)
 
-        r_spacings = [ 1.1e-6, 2.1e-6, 4.1e-6]
-        for ind in range(len(self.reflections)):
+        for ind in range(len(r_spacings)):
+            self.reflections[ind].r = r_spacings[ind] + self.params['t0_p']
 
-            self.reflections[ind].r = r_spacings[ind]
-
-    def add_reflection(self, r=0, d = 0, v = 0):
-        new_reflection = vpvs_reflection(r,d,v)
-        self.reflections.append(new_reflection)
-        self.params['modified'] = True
-
-    def delete_reflection(self, ind):
-        del self.reflections[ind]
-        self.params['modified'] = True
+    
 
     def get_reflections(self):
         """
@@ -177,26 +179,6 @@ class vpvs(object):
         """
         return self.reflections
 
-    
-
-    def reorder_reflections_by_index(self, ind_list, reversed_toggle=False):
-        if reversed_toggle:
-            ind_list = ind_list[::-1]
-        new_reflections = []
-        for ind in ind_list:
-            new_reflections.append(self.reflections[ind])
-
-        modified_flag = self.params['modified']
-        self.reflections = new_reflections
-        self.params['modified'] = modified_flag
-
- 
-    def sort_reflections_by_r(self, reversed_toggle=False):
-        r_list = []
-        for reflection in self.reflections:
-            r_list.append(reflection.r)
-        sorted_ind = np.argsort(r_list)
-        self.reorder_reflections_by_index(sorted_ind, reversed_toggle)
 
    
 

@@ -68,8 +68,9 @@ class ScopePlotController(QObject):
 
     def getRange(self):
         plt = self.get_pattern_widget().plotForeground
-        x_range = [0,10e-6]
-        y_range = [-1,1]
+        plt_range = plt.getViewBox().viewRange()
+        x_range = plt_range[0]
+        y_range = plt_range[1]
         return [x_range, y_range]
 
     def widgetSetEnabled(self, state):

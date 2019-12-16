@@ -56,7 +56,7 @@ class PhaseModel(QtCore.QObject):
         self.phase_colors = []
         self.phase_visible = []
 
-        self.same_conditions = True
+        self.same_conditions = False
 
     def send_added_signal(self):
         self.phase_added.emit()
@@ -86,11 +86,9 @@ class PhaseModel(QtCore.QObject):
         self.phase_colors.append(calculate_color(PhaseModel.num_phases + 9))
         self.phase_visible.append(True)
         PhaseModel.num_phases += 1
-        if self.same_conditions and len(self.phases) > 2:
-            self.phases[-1].compute_r(self.phases[-2].params['vp'], self.phases[-2].params['vs'])
-        else:
-            self.phases[-1].compute_r()
-        self.get_lines_r(-1)
+        #self.phases[-1].compute_r()
+        #self.get_lines_r(-1)
+        self.recalculate_reflections()
         self.phase_added.emit()
         self.phase_changed.emit(len(self.phases) - 1)
 
@@ -125,66 +123,51 @@ class PhaseModel(QtCore.QObject):
 
     def set_vp(self, ind, vp):
         """
-        Sets the vp of a phase with index ind. In case same_conditions is true, all phase vps will be
+        Sets the vp of a phase with index ind. 
         updated.
         """
-        if self.same_conditions:
-            for j in range(len(self.phases)):
-                self._set_vp(j, vp)
-                self.phase_changed.emit(j)
-        else:
-            self._set_vp(ind, vp)
-            self.phase_changed.emit(ind)
+        
+        self._set_vp(ind, vp)
+        
 
     def _set_vp(self, ind, vp):
-        self.phases[ind].compute_r(vp=vp)
-        self.get_lines_r(ind)
+      
+        self.set_param(ind,'vp',vp)
+  
 
     def set_vs(self, ind, vs):
         """
-        Sets the vs of a phase with index ind. In case same_conditions is true, all phase vss will be
+        Sets the vs of a phase with index ind. 
         updated.
         """
-        if self.same_conditions:
-            for j in range(len(self.phases)):
-                self._set_vs(j, vs)
-                self.phase_changed.emit(j)
-        else:
-            self._set_vs(ind, vs)
-            self.phase_changed.emit(ind)
-
-    def _set_vs(self, ind, vs):
+        self._set_vs(ind, vs)
         
-        self.phases[ind].compute_r(vs=vs)
-        self.get_lines_r(ind)
+    def _set_vs(self, ind, vs):
+        self.set_param(ind,'vs',vs)
+    
 
     def set_d(self, ind, d):
         """
-        Sets the d of a phase with index ind. In case same_conditions is true, all phase vps will be
-        updated.
+        Sets the d of a phase with index ind. 
         """
-        if self.same_conditions:
-            for j in range(len(self.phases)):
-                self._set_d(j, d)
-                self.phase_changed.emit(j)
-        else:
-            self._set_d(ind, d)
-            self.phase_changed.emit(ind)
+        self._set_d(ind, d)
+           
 
     def _set_d(self, ind, d):
-        self.phases[ind].compute_r(d=d)
-        self.get_lines_r(ind)
-
-    def set_vp_vs(self, ind, vp, vs):
-        self.phases[ind].compute_r(vs=vs, vp=vp)
-        self.get_lines_r(ind)
-        self.phase_changed.emit(ind)
-
-    def set_vp_all(self, P):
-        for phase in self.phases:
-            phase.compute_r(vp=P)
-
+        self.set_param(ind,'d',d)
     
+
+  
+
+    def set_t0(self, ind, t0):
+        """
+        Changes t0 of the phase with index ind.
+        :param ind: index of phase
+        :param t0: list [t0_p, t0_s]
+        """
+        self.phases[ind].setT0(t0)
+
+
 
     def set_param(self, ind, param, value):
         """
@@ -192,12 +175,33 @@ class PhaseModel(QtCore.QObject):
         phase_changed signal.
         """
 
+        # This may be a good place to insert code to sequentially update t0 for each phase
+        
         self.phases[ind].params[param] = value
-        self.phases[ind].compute_v0()
-        self.phases[ind].compute_r0()
+        
         self.phases[ind].compute_r()
-        self.get_lines_r(ind)
-        self.phase_changed.emit(ind)
+        
+        # now we update all the phases downstream
+        self.recalculate_reflections()
+        for i in range(len(self.phases)):
+            self.phase_changed.emit(i)
+
+        
+        
+
+    def recalculate_reflections(self):
+        
+        
+        for i in range(len(self.phases)):
+            
+            if i-1 >= 0:
+                reflections = self.phases[i-1].get_reflections()
+                self.phases[i].params['t0_p'] = reflections[0].r
+            self.phases[i].compute_r()
+            
+            r = self.get_lines_r(i)
+            self.reflections[i] = r   
+            
 
     def set_color(self, ind, color):
         """
@@ -207,6 +211,8 @@ class PhaseModel(QtCore.QObject):
         """
         self.phase_colors[ind] = color
         self.phase_changed.emit(ind)
+
+    
 
     def set_phase_visible(self, ind, bool):
         """
@@ -225,16 +231,17 @@ class PhaseModel(QtCore.QObject):
         self.reflections[ind] = res
         return res
 
-    def set_vs_all(self, T):
+    def set_vs_all(self, vs):
         for phase in self.phases:
-            phase.compute_r(vs=T)
+            phase.compute_r(vs=vs)
 
     def update_all_phases(self):
         for ind in range(len(self.phases)):
             self.get_lines_r(ind)
 
-    # need to modify this for EDXD mode
+    
     def get_phase_line_positions(self, ind):
+        
         positions = self.reflections[ind][:, 0]
 
         return positions
@@ -244,7 +251,7 @@ class PhaseModel(QtCore.QObject):
         
         max_pattern_intensity = y_range[1]
 
-        baseline = 1
+        baseline = 0
         phase_line_intensities = self.reflections[ind][:, 1]
         # search for reflections within current pattern view range
         phase_line_intensities_in_range = phase_line_intensities[(positions > x_range[0]) & (positions < x_range[1])]
@@ -267,55 +274,6 @@ class PhaseModel(QtCore.QObject):
         intensities, baseline = self.get_phase_line_intensities(ind, positions, pattern, x_range, y_range)
         return positions, intensities, baseline
 
-    
-    def add_reflection(self, ind):
-        """
-        Adds an empty reflection to the reflection table of a phase with index ind
-        """
-        self.phases[ind].add_reflection()
-        self.get_lines_r(ind)
-        self.reflection_added.emit(ind)
-
-    def delete_reflection(self, phase_ind, reflection_ind):
-        """
-        Deletes a reflection from a phase with index phase index.
-        """
-        reflection_ind = int(reflection_ind)
-        self.phases[phase_ind].delete_reflection(reflection_ind)
-        self.get_lines_r(phase_ind)
-        self.reflection_deleted.emit(phase_ind, reflection_ind)
-        self.phase_changed.emit(phase_ind)
-
-    def delete_multiple_reflections(self, phase_ind, indices):
-        """
-        Deletes multiple reflection from a phase with index phase index.
-        """
-        indices = np.array(sorted(indices))
-        for reflection_ind in indices:
-            self.delete_reflection(phase_ind, reflection_ind)
-            indices -= 1
-
-    def clear_reflections(self, phase_ind):
-        """
-        Deletes all reflections from a phase with index phase_ind
-        """
-        for ind in range(len(self.phases[phase_ind].reflections)):
-            self.delete_reflection(phase_ind, 0)
-
-    def update_reflection(self, phase_ind, reflection_ind, reflection):
-        """
-        Updates the reflection of a phase with a new vpvs_reflection
-        :param phase_ind: index of the phase
-        :param reflection_ind: index of the refection
-        :param reflection: updated reflection
-        :type reflection: vpvs_reflection
-        """
-        self.phases[phase_ind].reflections[reflection_ind] = reflection
-        self.phases[phase_ind].params['modified'] = True
-        self.phases[phase_ind].compute_r0()
-        self.phases[phase_ind].compute_r()
-        self.get_lines_r(phase_ind)
-        self.phase_changed.emit(phase_ind)    
 
     def reset(self):
         """

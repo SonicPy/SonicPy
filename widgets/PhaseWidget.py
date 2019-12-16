@@ -86,7 +86,6 @@ class PhaseWidget(QtWidgets.QWidget):
         self.vs_step_msb = DoubleMultiplySpinBoxAlignRight()
         self.d_step_msb = DoubleMultiplySpinBoxAlignRight()
         self.apply_to_all_cb = QtWidgets.QCheckBox('Apply to all phases')
-        self.apply_to_all_cb.setChecked(False)
         self.show_in_pattern_cb = QtWidgets.QCheckBox('Show in Pattern')        
 
         self._parameter_layout.addWidget(QtWidgets.QLabel('Parameter'), 0, 1)
@@ -96,7 +95,7 @@ class PhaseWidget(QtWidgets.QWidget):
         self._parameter_layout.addWidget(QtWidgets.QLabel('d:'), 3, 0)
         self._parameter_layout.addWidget(QtWidgets.QLabel('m/s'), 1, 2)
         self._parameter_layout.addWidget(QtWidgets.QLabel('m/s'), 2, 2)
-        self._parameter_layout.addWidget(QtWidgets.QLabel('m'), 3, 2)
+        self._parameter_layout.addWidget(QtWidgets.QLabel('mm'), 3, 2)
 
         self._parameter_layout.addWidget(self.vp_sb, 1, 1)
         self._parameter_layout.addWidget(self.vp_step_msb, 1, 3)
@@ -111,7 +110,7 @@ class PhaseWidget(QtWidgets.QWidget):
         self.parameter_widget.setLayout(self._parameter_layout)
 
         self._body_layout = QtWidgets.QHBoxLayout()
-        self.phase_tw = ListTableWidget(columns=5)
+        self.phase_tw = ListTableWidget(columns=6)
         self._body_layout.addWidget(self.phase_tw )
         self._body_layout.addWidget(self.parameter_widget, 0)
 
@@ -157,10 +156,26 @@ class PhaseWidget(QtWidgets.QWidget):
         d = self.d_sb.value()
         self.d_sb_value_changed.emit(cur_ind, d)
 
+    def set_vp_sb(self, value):
+        self.blockSignals(True)
+        self.vp_sb.setValue(value)
+        self.blockSignals(False)
+
+    def set_vs_sb(self, value):
+        self.blockSignals(True)
+        self.vs_sb.setValue(value)
+        self.blockSignals(False)
+
+    def set_d_sb(self, value):
+        self.blockSignals(True)
+        self.d_sb.setValue(value)
+        self.blockSignals(False)
+
     def style_widgets(self):
         self.phase_tw.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.MinimumExpanding)
         self.parameter_widget.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         self.phase_tw.setMinimumHeight(120)
+        self.phase_tw.setMinimumWidth(500)
 
         self.vs_step_msb.setMaximumWidth(75)
         self.vp_step_msb.setMaximumWidth(75)
@@ -190,7 +205,7 @@ class PhaseWidget(QtWidgets.QWidget):
         self.d_sb.setValue(1)
 
         self.d_step_msb.setMaximum(1.0)
-        self.d_step_msb.setMinimum(0.001)
+        self.d_step_msb.setMinimum(0.0001)
         self.d_step_msb.setValue(0.05)
 
         
@@ -201,7 +216,7 @@ class PhaseWidget(QtWidgets.QWidget):
             }
         """)
 
-        self.apply_to_all_cb.setChecked(True)
+        self.apply_to_all_cb.setChecked(False)
         self.show_in_pattern_cb.setChecked(True)
 
     # ###############################################################################################
@@ -234,15 +249,20 @@ class PhaseWidget(QtWidgets.QWidget):
         name_item.setTextAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         self.phase_tw.setItem(current_rows, 2, name_item)
 
-        vp_item = QtWidgets.QTableWidgetItem('0 GPa')
+        vp_item = QtWidgets.QTableWidgetItem('5000 m/s')
         vp_item.setFlags(vp_item.flags() & ~QtCore.Qt.ItemIsEditable)
         vp_item.setTextAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         self.phase_tw.setItem(current_rows, 3, vp_item)
 
-        vs_item = QtWidgets.QTableWidgetItem('298 K')
+        vs_item = QtWidgets.QTableWidgetItem('3000 m/s')
         vs_item.setFlags(vs_item.flags() & ~QtCore.Qt.ItemIsEditable)
         vs_item.setTextAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         self.phase_tw.setItem(current_rows, 4, vs_item)
+
+        d_item = QtWidgets.QTableWidgetItem('10 mm')
+        d_item.setFlags(d_item.flags() & ~QtCore.Qt.ItemIsEditable)
+        d_item.setTextAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.phase_tw.setItem(current_rows, 5, d_item)
 
         self.phase_tw.setColumnWidth(0, 35)
         self.phase_tw.setColumnWidth(1, 25)
@@ -282,12 +302,14 @@ class PhaseWidget(QtWidgets.QWidget):
         name_item = self.phase_tw.item(ind, 2)
         name_item.setText(name)
 
-    def set_phase_vs(self, ind, T):
+    def set_phase_vs(self, ind, vs):
+        self.blockSignals(True)
         vs_item = self.phase_tw.item(ind, 4)
         try:
-            vs_item.setText("{0:.2f} K".format(T))
+            vs_item.setText("{0:.2f} m/s".format(vs))
         except ValueError:
-            vs_item.setText("{0} K".format(T))
+            vs_item.setText("{0} m/s".format(vs))
+        self.blockSignals(False)
 
     def get_phase_vs(self, ind):
         vs_item = self.phase_tw.item(ind, 4)
@@ -297,17 +319,36 @@ class PhaseWidget(QtWidgets.QWidget):
             vs = None
         return vs
 
-    def set_phase_vp(self, ind, P):
+    def set_phase_vp(self, ind, vp):
+        self.blockSignals(True)
         vp_item = self.phase_tw.item(ind, 3)
         try:
-            vp_item.setText("{0:.2f} GPa".format(P))
+            vp_item.setText("{0:.2f} m/s".format(vp))
         except ValueError:
-            vp_item.setText("{0} GPa".format(P))
+            vp_item.setText("{0} m/s".format(vp))
+        self.blockSignals(False)
 
     def get_phase_vp(self, ind):
         vp_item = self.phase_tw.item(ind, 3)
         vp = float(str(vp_item.text()).split()[0])
         return vp
+
+    def set_phase_d(self, ind, d):
+        self.blockSignals(True)
+        d_item = self.phase_tw.item(ind, 5)
+        try:
+            d_item.setText("{0:.4f} mm".format(d))
+        except ValueError:
+            d_item.setText("{0} mm".format(d))
+        self.blockSignals(False)
+
+    def get_phase_d(self, ind):
+        d_item = self.phase_tw.item(ind, 5)
+        try:
+            d = float(str(d_item.text()).split()[0])
+        except:
+            d = None
+        return d
 
     def phase_color_btn_click(self, button):
         self.color_btn_clicked.emit(self.phase_color_btns.index(button), button)

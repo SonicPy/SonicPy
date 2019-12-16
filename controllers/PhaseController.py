@@ -110,11 +110,20 @@ class PhaseController(object):
 
         # TableWidget
         self.phase_widget.phase_tw.horizontalHeader().sectionClicked.connect(self.phase_tw_header_section_clicked)
+        self.phase_widget.phase_tw.itemSelectionChanged.connect(self.phase_tw_selection_changed)
         
         # Signals from phase model
         self.phase_model.phase_added.connect(self.phase_added)
         self.phase_model.phase_removed.connect(self.phase_removed)
         self.phase_model.phase_changed.connect(self.phase_changed)
+
+    def phase_tw_selection_changed(self):
+        selection = self.phase_widget.get_selected_phase_row()
+        phase = self.phase_model.phases[selection]
+        self.phase_widget.set_vs_sb(phase.params['vs'])
+        self.phase_widget.set_vp_sb(phase.params['vp'])
+        self.phase_widget.set_d_sb(phase.params['d'])
+        #print(selection)
         
     def file_dragged_in(self,files):
         self.add_btn_click_callback(filenames=files)
@@ -182,15 +191,19 @@ class PhaseController(object):
         color = self.phase_model.phase_colors[-1]
         self.phase_widget.add_phase(get_base_name(self.phase_model.phase_files[-1]),
                                     '#%02x%02x%02x' % (int(color[0]), int(color[1]), int(color[2])))
-
+        phase = self.phase_model.phases[-1]
+        self.phase_widget.set_vs_sb(phase.params['vs'])
+        self.phase_widget.set_vp_sb(phase.params['vp'])
+        self.phase_widget.set_d_sb(phase.params['d'])
 
     def phase_changed(self, ind):
         phase_name = get_base_name(self.phase_model.phases[ind].filename)
-        if self.phase_model.phases[ind].params['modified']:
-            phase_name += '*'
+        #if self.phase_model.phases[ind].params['modified']:
+        #    phase_name += '*'
         self.phase_widget.rename_phase(ind, phase_name)
         self.phase_widget.set_phase_vp(ind, self.phase_model.phases[ind].params['vp'])
         self.phase_widget.set_phase_vs(ind, self.phase_model.phases[ind].params['vs'])
+        self.phase_widget.set_phase_d(ind, self.phase_model.phases[ind].params['d'])
         
         #self.phase_widget.vs_sbs[ind].setEnabled(self.phase_model.phases[ind].has_thermal_expansion())
 

@@ -173,6 +173,8 @@ class PhaseController(object):
         if filename.endswith("vpvs"):
             self.phase_model.add_vpvs(filename)
 
+        
+
         '''    
         elif filename.endswith(".cif"):
             self.cif_conversion_dialog.exec_()

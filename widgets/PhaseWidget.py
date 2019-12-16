@@ -64,7 +64,7 @@ class PhaseWidget(QtWidgets.QWidget):
         self.load_list_btn = QtWidgets.QPushButton('Load List')
 
         self._button_layout.addWidget(self.add_btn,0)
-        self._button_layout.addWidget(self.edit_btn,0)
+        #self._button_layout.addWidget(self.edit_btn,0)
         self._button_layout.addWidget(self.delete_btn,0)
         self._button_layout.addWidget(self.clear_btn,0)
         #self._button_layout.addWidget(self.rois_btn,0)

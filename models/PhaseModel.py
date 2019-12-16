@@ -89,6 +89,7 @@ class PhaseModel(QtCore.QObject):
         #self.phases[-1].compute_r()
         #self.get_lines_r(-1)
         self.recalculate_reflections()
+        self.phases[-1]._index = len(self.phases)-1
         self.phase_added.emit()
         self.phase_changed.emit(len(self.phases) - 1)
 

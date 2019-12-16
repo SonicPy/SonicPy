@@ -89,10 +89,11 @@ class vpvs(object):
         """
         self.__init__()
         # Initialize variables
-        self._filename = 'filename'
+        self._filename = 'R'
+        self._index = 0
         # Construct base name = file without path and without extension
         
-        self._name = 'name'
+        self._name = 'R'
         self.params['comments'] = ['comment']
         self.reflections = [vpvs_reflection()]
 
@@ -112,7 +113,7 @@ class vpvs(object):
         #if self.params['modified']:
         #    return self._filename + '*'
         #else:
-        return self._filename
+        return self._filename + str(self._index)
 
     @filename.setter
     def filename(self, value):
@@ -123,7 +124,7 @@ class vpvs(object):
         #if self.params['modified']:
         #    return self._name + '*'
         #else:
-        return self._name
+        return self._name + str(self._index)
 
     @name.setter
     def name(self, value):

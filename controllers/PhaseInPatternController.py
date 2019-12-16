@@ -122,11 +122,11 @@ class PhaseInPatternController(object):
         parameter_str = ''
         vp = self.phase_model.phases[ind].params['vp']
         vs = self.phase_model.phases[ind].params['vs']
-        if vp != 0:
-            parameter_str += '{:0.2f} m/s '.format(vp)
-        if vs != 0:
-            parameter_str += '{:0.2f} m/s '.format(vs)
-        self.pattern_widget.rename_phase(ind, parameter_str + name)
+        d = self.phase_model.phases[ind].params['d']
+        parameter_str += 'Vp {:0.2f} m/s, '.format(vp)
+        parameter_str += 'Vs {:0.2f} m/s, '.format(vs)
+        parameter_str += 'd {:0.4f} mm'.format(d)
+        self.pattern_widget.rename_phase(ind, name + ': ' + parameter_str )
 
     def update_phase_color(self, ind):
         self.pattern_widget.set_phase_color(ind, self.phase_model.phase_colors[ind])

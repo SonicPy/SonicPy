@@ -138,7 +138,7 @@ class vpvs(object):
         computes d0 values for the based on the the current lattice parameters
         """
         
-        r_spacings = [  self.params['d']/1000/self.params['vp']]
+        r_spacings = [  self.params['d']/1000/self.params['vp']*2]
 
         for ind in range(len(self.reflections)):
             self.reflections[ind].r0 = r_spacings[ind]

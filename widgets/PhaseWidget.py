@@ -189,7 +189,7 @@ class PhaseWidget(QtWidgets.QWidget):
         self.vp_sb.setValue(5000)
 
         self.vp_step_msb.setMaximum(1000.0)
-        self.vp_step_msb.setMinimum(1.0)
+        self.vp_step_msb.setMinimum(.01)
         self.vp_step_msb.setValue(50)
 
         self.vs_sb.setMaximum(99999999)
@@ -197,16 +197,18 @@ class PhaseWidget(QtWidgets.QWidget):
         self.vs_sb.setValue(3000)
 
         self.vs_step_msb.setMaximum(1000.0)
-        self.vs_step_msb.setMinimum(1.0)
+        self.vs_step_msb.setMinimum(.01)
         self.vs_step_msb.setValue(50)
 
         self.d_sb.setMaximum(1000)
         self.d_sb.setMinimum(0)
         self.d_sb.setValue(1)
+        self.d_sb.setDecimals(4)
 
         self.d_step_msb.setMaximum(1.0)
         self.d_step_msb.setMinimum(0.0001)
         self.d_step_msb.setValue(0.05)
+        self.d_step_msb.setDecimals(4)
 
         
 

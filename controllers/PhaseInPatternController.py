@@ -123,8 +123,8 @@ class PhaseInPatternController(object):
         vp = self.phase_model.phases[ind].params['vp']
         vs = self.phase_model.phases[ind].params['vs']
         d = self.phase_model.phases[ind].params['d']
-        parameter_str += 'Vp {:0.2f} m/s, '.format(vp)
-        parameter_str += 'Vs {:0.2f} m/s, '.format(vs)
+        parameter_str += u'V<sub>P</sub> {:0.2f} m/s, '.format(vp)
+        parameter_str += u'V<sub>S</sub> {:0.2f} m/s, '.format(vs)
         parameter_str += 'd {:0.4f} mm'.format(d)
         self.pattern_widget.rename_phase(ind, name + ': ' + parameter_str )
 

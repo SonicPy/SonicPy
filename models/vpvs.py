@@ -27,28 +27,22 @@ import os
 import os.path
 
 
-class vpvs_reflection:
+class vpvs_reflection():
     """
     Class that defines a reflection.
     Attributes:
    
     """
 
-    def __init__(self, r = 0., d=0., v=0.):
-        self.r0 = r
+    def __init__(self, r = 0., d=0., v=0., mode='p',index = 0):
         self.d = d
         self.v = v
+        self.r0 = r
         self.r = r
+        self.mode = mode
         
     def __str__(self):
-        return "{:2d},{:2d}\t{:.2f}\t{:.3f}".format(self.r, self.r*2, self.d, self.v)
-
-    def get_r(self):
-        return "%f %f %f"%(self.r,self.r*2)
-
-    def get_r_list(self):
-        return [self.r,self.r*2]
-
+        return "{:2d}\t{:.2f}\t{:.3f}".format(self.r, self.d, self.v)
 
 
 class MyDict(dict):
@@ -58,7 +52,7 @@ class MyDict(dict):
 
 
     def __setitem__(self, key, value):
-        if key in ['comments',  't0_p', 't0_s', 'vp', 'vs','d']:
+        if key in ['comments',  't_0','t0_p', 't0_s', 'vp', 'vs','d']:
             self.__setitem__('modified', True)
         super(MyDict, self).__setitem__(key, value)
 
@@ -68,8 +62,11 @@ class vpvs(object):
         self._name = ''
         self.params = MyDict()
         self.params['comments'] = []
+        self.params['t_0'] = 0.
         self.params['t0_p'] = 0.
         self.params['t0_s'] = 0.
+        self.params['t0_p_2'] = 0.
+        self.params['t0_s_2'] = 0.
         self.params['vp'] = 0.
         self.params['vs'] = 0.
         self.params['d'] = 0.
@@ -95,7 +92,7 @@ class vpvs(object):
         
         self._name = 'R'
         self.params['comments'] = ['comment']
-        self.reflections = [vpvs_reflection(),vpvs_reflection()]
+        self.reflections = [vpvs_reflection(),vpvs_reflection(),vpvs_reflection(),vpvs_reflection()]
 
         
         self.params['vp'] = 5000
@@ -138,17 +135,30 @@ class vpvs(object):
         computes d0 values for the based on the the current lattice parameters
         """
         
-        vp_spacings = [  self.params['d']/1000/self.params['vp']*2]
-        vs_spacings = [  self.params['d']/1000/self.params['vs']*2]
+        try:
+            vp_t = self.params['d']/1000/self.params['vp']*2
+        except:
+            vp_t = 0    
+        try:
+            vs_t = self.params['d']/1000/self.params['vs']*2
+        except:
+            vs_t = 0
 
+        self.reflections[0].r0 = vp_t
+        self.reflections[1].r0 = vs_t
 
-        self.reflections[0].r0 = vp_spacings
-        self.reflections[1].r0 = vs_spacings
+        # "tripple transit" reflections:
+        self.reflections[2].r0 = vp_t * 2
+        self.reflections[3].r0 = vs_t * 2
+
 
     def compute_r(self, *args, **kwargs):
         """
         
         """
+        t_0 = kwargs.get('t_0', None)
+        if t_0 is not None:
+            self.params['t_0']=t_0
         t0_p = kwargs.get('t0_p', None)
         if t0_p is not None:
             self.params['t0_p']=t0_p
@@ -166,13 +176,15 @@ class vpvs(object):
             self.params['d']=d
 
         self.compute_r0()
-        r_spacings = [self.reflections[0].r0,self.reflections[1].r0]
+        r_spacings = [self.reflections[0].r0,self.reflections[1].r0,self.reflections[2].r0,self.reflections[3].r0]
         
 
-        self.reflections[0].r = r_spacings[0][0] + self.params['t0_p']
-        self.reflections[1].r = r_spacings[1][0] + self.params['t0_s']
+        self.reflections[0].r = r_spacings[0] + self.params['t0_p'] + self.params['t_0'] * 1e-6
+        self.reflections[1].r = r_spacings[1]+ self.params['t0_s'] + self.params['t_0'] * 1e-6
 
-    
+        self.reflections[2].r = self.reflections[0].r * 2  - self.params['t_0'] * 1e-6
+        self.reflections[3].r = self.reflections[1].r * 2 - self.params['t_0'] * 1e-6
+        #print(self.reflections)
 
     def get_reflections(self):
         """

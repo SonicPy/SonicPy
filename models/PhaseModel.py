@@ -158,16 +158,18 @@ class PhaseModel(QtCore.QObject):
         self.set_param(ind,'d',d)
     
 
-  
+    
 
-    def set_t0(self, ind, t0):
+    def set_t_0(self, ind, t_0):
         """
         Changes t0 of the phase with index ind.
         :param ind: index of phase
         :param t0: list [t0_p, t0_s]
         """
-        self.phases[ind].setT0(t0)
+        self._set_t_0(ind,t_0)
 
+    def _set_t_0(self, ind, t_0):
+        self.set_param(ind,'t_0',t_0)
 
 
     def set_param(self, ind, param, value):
@@ -176,16 +178,17 @@ class PhaseModel(QtCore.QObject):
         phase_changed signal.
         """
 
-        # This may be a good place to insert code to sequentially update t0 for each phase
+        if len(self.phases):
         
-        self.phases[ind].params[param] = value
         
-        self.phases[ind].compute_r()
-        
-        # now we update all the phases downstream
-        self.recalculate_reflections()
-        for i in range(len(self.phases)):
-            self.phase_changed.emit(i)
+            self.phases[ind].params[param] = value
+            
+            self.phases[ind].compute_r()
+            
+            # now we update all the phases downstream
+            self.recalculate_reflections()
+            for i in range(len(self.phases)):
+                self.phase_changed.emit(i)
 
         
         
@@ -199,6 +202,8 @@ class PhaseModel(QtCore.QObject):
                 reflections = self.phases[i-1].get_reflections()
                 self.phases[i].params['t0_p'] = reflections[0].r
                 self.phases[i].params['t0_s'] = reflections[1].r
+                self.phases[i].params['t0_p_2'] = reflections[2].r
+                self.phases[i].params['t0_s_2'] = reflections[3].r
             self.phases[i].compute_r()
             
             r = self.get_lines_r(i)

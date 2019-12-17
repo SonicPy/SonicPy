@@ -43,6 +43,7 @@ class PhaseWidget(QtWidgets.QWidget):
     vp_sb_value_changed = QtCore.Signal(int, float)
     vs_sb_value_changed = QtCore.Signal(int, float)
     d_sb_value_changed = QtCore.Signal(int, float)
+    t_0_sb_value_changed = QtCore.Signal(int, float)
 
     def __init__(self):
         super(PhaseWidget, self).__init__()
@@ -90,9 +91,9 @@ class PhaseWidget(QtWidgets.QWidget):
 
         self._parameter_layout.addWidget(QtWidgets.QLabel('Parameter'), 0, 1)
         self._parameter_layout.addWidget(QtWidgets.QLabel('Step'), 0, 3)
-        self._parameter_layout.addWidget(QtWidgets.QLabel('Vp:'), 1, 0)
-        self._parameter_layout.addWidget(QtWidgets.QLabel('Vs:'), 2, 0)
-        self._parameter_layout.addWidget(QtWidgets.QLabel('d:'), 3, 0)
+        self._parameter_layout.addWidget(QtWidgets.QLabel(u'V<sub>P</sub>:'), 1, 0)
+        self._parameter_layout.addWidget(QtWidgets.QLabel(u'V<sub>S</sub>:'), 2, 0)
+        self._parameter_layout.addWidget(QtWidgets.QLabel('Distance:'), 3, 0)
         self._parameter_layout.addWidget(QtWidgets.QLabel('m/s'), 1, 2)
         self._parameter_layout.addWidget(QtWidgets.QLabel('m/s'), 2, 2)
         self._parameter_layout.addWidget(QtWidgets.QLabel('mm'), 3, 2)
@@ -109,10 +110,33 @@ class PhaseWidget(QtWidgets.QWidget):
         
         self.parameter_widget.setLayout(self._parameter_layout)
 
+        self.side_widget = QtWidgets.QWidget()
+        self._side_widget_layout = QtWidgets.QVBoxLayout()
+        self._side_widget_layout.addWidget(self.parameter_widget)
+        self._side_widget_layout.addSpacerItem(VerticalSpacerItem())
+        self._side_widget_layout.addWidget(HorizontalLine())
+
+
+        
+        self.t_0_sb = DoubleSpinBoxAlignRight()
+        self.t_0_step_msb = DoubleMultiplySpinBoxAlignRight()
+        self.other_parameters_widget = QtWidgets.QWidget()
+        self._other_parameters_widget_layout = QtWidgets.QGridLayout()
+
+        self._other_parameters_widget_layout.addWidget(QtWidgets.QLabel(u'Time<sub>0</sub>:'),0,0)
+        self._other_parameters_widget_layout.addWidget(self.t_0_sb,0,1)
+        self._other_parameters_widget_layout.addWidget(QtWidgets.QLabel(u'us'),0,2)
+        self._other_parameters_widget_layout.addWidget(self.t_0_step_msb,0,3)
+        
+        self.other_parameters_widget.setLayout(self._other_parameters_widget_layout)
+        self._side_widget_layout.addWidget(self.other_parameters_widget)
+        self.side_widget.setLayout(self._side_widget_layout)
+
+
         self._body_layout = QtWidgets.QHBoxLayout()
         self.phase_tw = ListTableWidget(columns=6)
         self._body_layout.addWidget(self.phase_tw )
-        self._body_layout.addWidget(self.parameter_widget, 0)
+        self._body_layout.addWidget(self.side_widget)
 
 
         self._layout.addLayout(self._body_layout)
@@ -138,6 +162,7 @@ class PhaseWidget(QtWidgets.QWidget):
         self.vp_sb.valueChanged.connect(self.vp_sb_changed)
         self.vs_sb.valueChanged.connect(self.vs_sb_changed)
         self.d_sb.valueChanged.connect(self.d_sb_changed)
+        self.t_0_sb.valueChanged.connect(self.t_0_sb_changed)
      
         self.setAcceptDrops(True) 
 
@@ -155,6 +180,11 @@ class PhaseWidget(QtWidgets.QWidget):
         cur_ind = self.get_selected_phase_row()
         d = self.d_sb.value()
         self.d_sb_value_changed.emit(cur_ind, d)
+
+    def t_0_sb_changed(self):
+        cur_ind = self.get_selected_phase_row()
+        t_0 = self.t_0_sb.value()
+        self.t_0_sb_value_changed.emit(cur_ind, t_0)
 
     def set_vp_sb(self, value):
         self.blockSignals(True)
@@ -175,14 +205,15 @@ class PhaseWidget(QtWidgets.QWidget):
         self.phase_tw.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.MinimumExpanding)
         self.parameter_widget.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         self.phase_tw.setMinimumHeight(120)
-        self.phase_tw.setMinimumWidth(500)
+        self.phase_tw.setMinimumWidth(400)
 
         self.vs_step_msb.setMaximumWidth(75)
         self.vp_step_msb.setMaximumWidth(75)
         self.d_step_msb.setMaximumWidth(75)
-        
+        self.t_0_step_msb.setMaximumWidth(75)
        
         self.vp_sb.setMinimumWidth(100)
+        self.t_0_sb.setMinimumWidth(100)
 
         self.vp_sb.setMaximum(9999999)
         self.vp_sb.setMinimum(0)
@@ -200,15 +231,29 @@ class PhaseWidget(QtWidgets.QWidget):
         self.vs_step_msb.setMinimum(.01)
         self.vs_step_msb.setValue(50)
 
+        d_step = 0.05
         self.d_sb.setMaximum(1000)
         self.d_sb.setMinimum(0)
         self.d_sb.setValue(1)
         self.d_sb.setDecimals(4)
+        self.d_sb.setSingleStep(d_step)
 
         self.d_step_msb.setMaximum(1.0)
         self.d_step_msb.setMinimum(0.0001)
-        self.d_step_msb.setValue(0.05)
+        self.d_step_msb.setValue(d_step)
         self.d_step_msb.setDecimals(4)
+
+        t_0_step = 0.01
+        self.t_0_sb.setMaximum(1e6)
+        self.t_0_sb.setMinimum(-1e6)
+        self.t_0_sb.setValue(0)
+        self.t_0_sb.setDecimals(4)
+        self.t_0_sb.setSingleStep(t_0_step)
+
+        self.t_0_step_msb.setMaximum(1e6)
+        self.t_0_step_msb.setMinimum(0.0001)
+        self.t_0_step_msb.setValue(t_0_step)
+        self.t_0_step_msb.setDecimals(4)
 
         
 

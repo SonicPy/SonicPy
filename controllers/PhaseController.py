@@ -91,13 +91,15 @@ class PhaseController(object):
         self.connect_click_function(self.phase_widget.save_list_btn, self.save_btn_clicked_callback)
         self.connect_click_function(self.phase_widget.load_list_btn, self.load_btn_clicked_callback)
 
-        # P-T callbacks
+        # param callbacks
         self.phase_widget.vp_step_msb.editingFinished.connect(self.update_vp_step)
         self.phase_widget.vs_step_msb.editingFinished.connect(self.update_vs_step)
         self.phase_widget.d_step_msb.editingFinished.connect(self.update_d_step)
+        self.phase_widget.t_0_step_msb.editingFinished.connect(self.update_t_0_step)
         self.phase_widget.vp_sb_value_changed.connect(self.phase_model.set_vp)
         self.phase_widget.vs_sb_value_changed.connect(self.phase_model.set_vs)
         self.phase_widget.d_sb_value_changed.connect(self.phase_model.set_d)
+        self.phase_widget.t_0_sb_value_changed.connect(self.phase_model.set_t_0)
         
         
         # File drag and drop
@@ -317,6 +319,10 @@ class PhaseController(object):
     def update_d_step(self):
         value = self.phase_widget.d_step_msb.value()
         self.phase_widget.d_sb.setSingleStep(value)
+
+    def update_t_0_step(self):
+        value = self.phase_widget.t_0_step_msb.value()
+        self.phase_widget.t_0_sb.setSingleStep(value)
 
 
     def phase_selection_changed(self, row, col, prev_row, prev_col):

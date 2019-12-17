@@ -198,6 +198,7 @@ class PhaseModel(QtCore.QObject):
             if i-1 >= 0:
                 reflections = self.phases[i-1].get_reflections()
                 self.phases[i].params['t0_p'] = reflections[0].r
+                self.phases[i].params['t0_s'] = reflections[1].r
             self.phases[i].compute_r()
             
             r = self.get_lines_r(i)

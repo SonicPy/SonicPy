@@ -95,7 +95,7 @@ class vpvs(object):
         
         self._name = 'R'
         self.params['comments'] = ['comment']
-        self.reflections = [vpvs_reflection()]
+        self.reflections = [vpvs_reflection(),vpvs_reflection()]
 
         
         self.params['vp'] = 5000
@@ -138,10 +138,12 @@ class vpvs(object):
         computes d0 values for the based on the the current lattice parameters
         """
         
-        r_spacings = [  self.params['d']/1000/self.params['vp']*2]
+        vp_spacings = [  self.params['d']/1000/self.params['vp']*2]
+        vs_spacings = [  self.params['d']/1000/self.params['vs']*2]
 
-        for ind in range(len(self.reflections)):
-            self.reflections[ind].r0 = r_spacings[ind]
+
+        self.reflections[0].r0 = vp_spacings
+        self.reflections[1].r0 = vs_spacings
 
     def compute_r(self, *args, **kwargs):
         """
@@ -164,12 +166,11 @@ class vpvs(object):
             self.params['d']=d
 
         self.compute_r0()
-        r_spacings = []
-        for r in self.reflections:
-            r_spacings.append(r.r0)
+        r_spacings = [self.reflections[0].r0,self.reflections[1].r0]
+        
 
-        for ind in range(len(r_spacings)):
-            self.reflections[ind].r = r_spacings[ind] + self.params['t0_p']
+        self.reflections[0].r = r_spacings[0][0] + self.params['t0_p']
+        self.reflections[1].r = r_spacings[1][0] + self.params['t0_s']
 
     
 

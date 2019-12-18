@@ -330,7 +330,7 @@ class plotWindow(QtWidgets.QWidget):
         self.win.create_plots([],[],[],[],'Time (s)')
         self.win.set_colors({'data_color':'FFFF00','rois_color': '#00b4ff'})
         
-
+    '''
     def add_line_plot(self, x=[],y=[],color = (0,0,0),Width = 1):
         Pen=mkPen(color, width=Width)
         Plot = self.win.plot(x,y, 
@@ -339,7 +339,7 @@ class plotWindow(QtWidgets.QWidget):
         self.plots.append(Plot)
 
         self.win.legend.addItem(self.plots[-1], '') # can display name in upper right corner in same color 
-        
+    '''    
 
     def add_line_plot(self, x=[],y=[],color = (0,0,0),Width = 1,title=""):
         Pen=mkPen(color, width=Width)
@@ -585,7 +585,7 @@ class CustomViewBox(pg.ViewBox):
         super().__init__()
         
         self.cursor_signals = [self.plotMouseCursorSignal, self.plotMouseCursor2Signal]
-        self.vLine = myVLine(movable=False, pen=pg.mkPen(color=(0, 255, 0), width=2 , style=QtCore.Qt.DashLine))
+        self.vLine = myVLine(movable=False, pen=pg.mkPen(color=(255, 0, 0), width=2 , style=QtCore.Qt.DashLine))
         
         #self.vLine.sigPositionChanged.connect(self.cursor_dragged)
         self.vLineFast = myVLine(movable=False,pen=mkPen({'color': '606060', 'width': 1, 'style':QtCore.Qt.DashLine}))
@@ -648,7 +648,7 @@ class PltWidget(pg.PlotWidget):
                         'rois_color': '#00b4ff', \
                         'roi_cursor_color': '#ff0000', \
                         'xrf_lines_color': '#969600', \
-                        'mouse_cursor_color': '#00cc00', \
+                        'mouse_cursor_color': '#cc0000', \
                         'mouse_fast_cursor_color': '#323232'}
 
         # override default colors here:
@@ -969,9 +969,10 @@ class PltWidget(pg.PlotWidget):
     #### control phases #### 
 
     def add_phase(self, name, positions, intensities, baseline, color):
+        i = len(self.phases)
         self.phases.append(PhasePlot(self.pattern_plot, \
                         self.phases_legend, positions, intensities, \
-                        name, baseline, line_width=2,color=color))
+                        name, baseline, line_width=2,color=color,ind=i))
         
 
     def set_phase_color(self, ind, color):

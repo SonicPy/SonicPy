@@ -585,7 +585,7 @@ class CustomViewBox(pg.ViewBox):
         super().__init__()
         
         self.cursor_signals = [self.plotMouseCursorSignal, self.plotMouseCursor2Signal]
-        self.vLine = myVLine(movable=False, pen=pg.mkPen(color=(255, 0, 0), width=2 , style=QtCore.Qt.DashLine))
+        self.vLine = myVLine(movable=False, pen=pg.mkPen(color=(0, 255, 0), width=2 , style=QtCore.Qt.DashLine))
         
         #self.vLine.sigPositionChanged.connect(self.cursor_dragged)
         self.vLineFast = myVLine(movable=False,pen=mkPen({'color': '606060', 'width': 1, 'style':QtCore.Qt.DashLine}))
@@ -648,7 +648,7 @@ class PltWidget(pg.PlotWidget):
                         'rois_color': '#00b4ff', \
                         'roi_cursor_color': '#ff0000', \
                         'xrf_lines_color': '#969600', \
-                        'mouse_cursor_color': '#cc0000', \
+                        'mouse_cursor_color': '#00cc00', \
                         'mouse_fast_cursor_color': '#323232'}
 
         # override default colors here:
@@ -693,6 +693,7 @@ class PltWidget(pg.PlotWidget):
         
         self.set_log_mode(False,True)
         self.xAxis = None
+        self.yData = None
 
         
     def set_cursorFast_pos(self, pos):
@@ -785,7 +786,7 @@ class PltWidget(pg.PlotWidget):
 
     def plotData(self, xAxis,data,roiHorz=[],roiData=[], xLabel='', dataLabel=''):
         self.xAxis = xAxis
-        self.data = data
+        self.yData = data
         if self.plotForeground == None:
             self.create_plots(xAxis,data,roiHorz,roiData, xLabel)
         else:
@@ -995,17 +996,20 @@ class PltWidget(pg.PlotWidget):
             self.phases[ind].update_intensities(positions, intensities, baseline)
 
     def update_phase_line_visibility(self, ind):
-        axis_range = self.getViewBox().viewRange()
 
+        if self.xAxis is not None:
+            x_range = [min(self.xAxis), max(self.xAxis)]
+        else:
+            x_range = [0,10e-6]
         
-        x_range = axis_range[0]
+        
         self.phases[ind].update_visibilities(x_range)
 
     def update_phase_line_visibilities(self):
-        axis_range = self.getViewBox().viewRange()
-
-        
-        x_range = axis_range[0]
+        if self.xAxis is not None:
+            x_range = [min(self.xAxis), max(self.xAxis)]
+        else:
+            x_range = [0,10e-6]
         for phase in self.phases:
             phase.update_visibilities(x_range)
 

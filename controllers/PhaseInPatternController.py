@@ -56,6 +56,7 @@ class PhaseInPatternController(object):
         self.phase_model.phase_changed.connect(self.update_phase_legend)
         self.phase_model.phase_changed.connect(self.update_phase_color)
         self.phase_model.phase_changed.connect(self.update_phase_visible)
+        self.phase_model.phase_changed.connect(self.pattern_widget.update_phase_line_visibilities)
 
         self.phase_model.reflection_added.connect(self.reflection_added)
         self.phase_model.reflection_deleted.connect(self.reflection_deleted)

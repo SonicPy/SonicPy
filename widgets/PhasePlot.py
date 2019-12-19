@@ -106,7 +106,7 @@ class PhasePlot(object):
 
 
             self.line_visible.append(self.default_visible )
-        print(self.legend_items)
+        #print(self.legend_items)
 
         if name is not None:
             try:
@@ -160,6 +160,9 @@ class PhasePlot(object):
                         self.plot_item.addItem(line_item)
                         self.plot_item.addItem(legend_item)
                         self.line_visible[ind] = True
+                        self.legend_points[ind] = pg.CurvePoint(line_item) 
+                        self.legend_points[ind].setPos(1)
+                        legend_item.setParentItem(self.legend_points[ind])
                 else:
                     if self.line_visible[ind]:
                         self.plot_item.removeItem(line_item)
@@ -167,14 +170,16 @@ class PhasePlot(object):
                         self.line_visible[ind] = False
 
     def set_color(self, color):
+        self.color = color
         self.pen = pg.mkPen(color=color, width=self.width, style=self.line_style)
         self.ref_legend_line.setPen(self.pen)
         
-        for line_item in self.line_items:
+        for ind, line_item in enumerate(self.line_items):
             ind = self.line_items.index(line_item)
             pen = self.make_pen(ind)
 
             line_item.setPen(pen)
+            self.legend_items[ind].setColor(self.color)
         
 
     def hide(self):

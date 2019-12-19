@@ -115,7 +115,7 @@ class PhaseController(object):
         
         # Signals from phase model
         self.phase_model.phase_added.connect(self.phase_added)
-        self.phase_model.phase_removed.connect(self.phase_removed)
+        self.phase_model.phase_removed.connect(self.phase_removed_in_model_callback)
         self.phase_model.phase_changed.connect(self.phase_changed)
 
     def phase_tw_selection_changed(self):
@@ -139,6 +139,8 @@ class PhaseController(object):
         :return:
         """
         self._add_phase('file1.vpvs')
+
+        self.pattern_widget.update_phase_line_visibilities()
         '''
         filenames = kwargs.get('filenames', None)
 
@@ -242,7 +244,7 @@ class PhaseController(object):
         if cur_ind >= 0:
             self.phase_model.del_phase(cur_ind)
 
-    def phase_removed(self, ind):
+    def phase_removed_in_model_callback(self, ind):
         self.phase_widget.del_phase(ind)
         
        

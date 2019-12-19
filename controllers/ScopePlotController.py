@@ -23,6 +23,7 @@ class ScopePlotController(QObject):
     stoppedSignal = pyqtSignal()
     fastCursorMovedSignal = pyqtSignal(str)  
     staticCursorMovedSignal = pyqtSignal(str) 
+    dataPlotUpdated = pyqtSignal()
 
     def __init__(self, scope_controller=None, isMain = False):
         super().__init__()
@@ -61,7 +62,22 @@ class ScopePlotController(QObject):
         if self.scope_controller.model.connected:
             self.scope_controller.model.pvs['waveform'].get()
 
-    
+    def get_pattern_widget(self):
+        plt = self.widget.plot_widget.fig.win
+        return plt
+
+    def getRange(self):
+        plt = self.get_pattern_widget()
+        if plt.xAxis is not None:
+            x_range = [min(plt.xAxis), max(plt.xAxis)]
+        else:
+            x_range = [0, 10e-6]
+        if plt.yData is not None:
+            y_range = [min(plt.yData), max(plt.yData)]
+        else:
+            y_range = [-1,1]
+        
+        return [x_range, y_range]
 
     def widgetSetEnabled(self, state):
         self.widget.button_widget.setEnabled(state)
@@ -152,6 +168,7 @@ class ScopePlotController(QObject):
     def update_plot(self, waveform):
         if waveform is not None:
             self.widget.plot(waveform)
+            self.dataPlotUpdated.emit()
 
     def update_filtered_plot(self, waveform):
         if waveform is not None:

@@ -25,7 +25,7 @@ from controllers.OverlayController import OverlayController
 from models.WaveformModel import Waveform
 import math
 
-
+from controllers.PhaseController import PhaseController
 
 from pyqtgraph.Qt import QtGui, QtCore
 import pyqtgraph as pg
@@ -61,6 +61,10 @@ class UltrasoundController(QObject):
         self.sweep_controller = SweepController(self,
                                                 self.scope_controller.model.pvs, 
                                                 self.afg_controller.model.pvs)
+
+
+        self.phase_controller = PhaseController(self.scope_plot_controller.get_pattern_widget(),
+                                                self.scope_plot_controller, self.working_directories)
 
         afg_panel = self.afg_controller.get_panel()
         scope_panel = self.scope_controller.get_panel()
@@ -112,7 +116,11 @@ class UltrasoundController(QObject):
         self.display_window.ActionRecallSetup.triggered.connect(self.RecallSetupCallback)
         self.display_window.ActionSaveSetup.triggered.connect(self.SaveSetupCallback)
         self.display_window.ActionSetUserWaveform.triggered.connect(self.SetUserWaveformCallback)
+        self.display_window.actionCursors.triggered.connect(self.cursorsCallback)
 
+
+    def cursorsCallback(self):
+        self.phase_controller.show_view()
 
     def SetUserWaveformCallback(self):
 

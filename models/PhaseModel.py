@@ -166,10 +166,7 @@ class PhaseModel(QtCore.QObject):
         :param ind: index of phase
         :param t0: list [t0_p, t0_s]
         """
-        self._set_t_0(ind,t_0)
-
-    def _set_t_0(self, ind, t_0):
-        self.set_param(ind,'t_0',t_0)
+        self.set_param(0,'t_0',t_0)
 
 
     def set_param(self, ind, param, value):

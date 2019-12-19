@@ -86,11 +86,11 @@ class vpvs(object):
         """
         self.__init__()
         # Initialize variables
-        self._filename = 'R'
+        self._filename = 'Layer'
         self._index = 0
         # Construct base name = file without path and without extension
         
-        self._name = 'R'
+        self._name = 'Layer'
         self.params['comments'] = ['comment']
         self.reflections = [vpvs_reflection(),vpvs_reflection(),vpvs_reflection(),vpvs_reflection()]
 
@@ -182,8 +182,8 @@ class vpvs(object):
         self.reflections[0].r = r_spacings[0] + self.params['t0_p'] + self.params['t_0'] * 1e-6
         self.reflections[1].r = r_spacings[1]+ self.params['t0_s'] + self.params['t_0'] * 1e-6
 
-        self.reflections[2].r = self.reflections[0].r * 2  - self.params['t_0'] * 1e-6
-        self.reflections[3].r = self.reflections[1].r * 2 - self.params['t_0'] * 1e-6
+        self.reflections[2].r = r_spacings[2] + self.params['t0_p_2'] + self.params['t_0'] * 1e-6
+        self.reflections[3].r = r_spacings[3] + self.params['t0_s_2'] + self.params['t_0'] * 1e-6
         #print(self.reflections)
 
     def get_reflections(self):

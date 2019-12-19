@@ -108,8 +108,7 @@ class PhaseController(object):
         # Color and State
         self.phase_widget.color_btn_clicked.connect(self.color_btn_clicked)
         self.phase_widget.show_cb_state_changed.connect(self.phase_model.set_phase_visible)
-        self.phase_widget.apply_to_all_cb.stateChanged.connect(self.apply_to_all_callback)
-
+        
         # TableWidget
         self.phase_widget.phase_tw.horizontalHeader().sectionClicked.connect(self.phase_tw_header_section_clicked)
         self.phase_widget.phase_tw.itemSelectionChanged.connect(self.phase_tw_selection_changed)
@@ -260,8 +259,9 @@ class PhaseController(object):
                 return
             for line in phase_file.readlines():
                 line = line.replace('\n', '')
-                phase, use_flag, color, name, vp, vs = line.split(',')
-                self.add_btn_click_callback(filenames=[phase])
+                name, use_flag, color, vp, vs, d = line.split(',')
+                self.add_btn_click_callback()
+
                 row = self.phase_widget.phase_tw.rowCount() - 1
                 self.phase_widget.phase_show_cbs[row].setChecked(bool(use_flag))
                 btn = self.phase_widget.phase_color_btns[row]
@@ -270,6 +270,7 @@ class PhaseController(object):
                 self.phase_widget.phase_tw.item(row, 2).setText(name)
                 self.phase_widget.set_phase_vp(row, float(vp))
                 self.phase_model.set_vp(row, float(vp))
+                self.phase_model.set_d(row, float(d))
                 vs = float(vs)
 
                 if vs is not '':
@@ -292,11 +293,12 @@ class PhaseController(object):
                                                            self.phase_widget.phase_show_cbs,
                                                            self.phase_widget.phase_color_btns,
                                                            range(self.phase_widget.phase_tw.rowCount())):
-                phase_file.write(file_name + ',' + str(phase_cb.isChecked()) + ',' +
+                phase_file.write(self.phase_widget.phase_tw.item(row, 2).text() + ',' +
+                                 str(phase_cb.isChecked()) + ',' +
                                  color_btn.styleSheet().replace('background-color:', '').replace(' ', '') + ',' +
-                                 self.phase_widget.phase_tw.item(row, 2).text() + ',' +
                                  self.phase_widget.phase_tw.item(row, 3).text().split(' ')[0] + ',' +
-                                 self.phase_widget.phase_tw.item(row, 4).text().split(' ')[0] + '\n')
+                                 self.phase_widget.phase_tw.item(row, 4).text().split(' ')[0] + ',' +
+                                 self.phase_widget.phase_tw.item(row, 5).text().split(' ')[0] + '\n')
 
     def clear_phases(self):
         """

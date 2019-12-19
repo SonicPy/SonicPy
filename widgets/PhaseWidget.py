@@ -93,7 +93,7 @@ class PhaseWidget(QtWidgets.QWidget):
         self._parameter_layout.addWidget(QtWidgets.QLabel('Step'), 0, 3)
         self._parameter_layout.addWidget(QtWidgets.QLabel(u'V<sub>P</sub>:'), 1, 0)
         self._parameter_layout.addWidget(QtWidgets.QLabel(u'V<sub>S</sub>:'), 2, 0)
-        self._parameter_layout.addWidget(QtWidgets.QLabel('Distance:'), 3, 0)
+        self._parameter_layout.addWidget(QtWidgets.QLabel('D:'), 3, 0)
         self._parameter_layout.addWidget(QtWidgets.QLabel('m/s'), 1, 2)
         self._parameter_layout.addWidget(QtWidgets.QLabel('m/s'), 2, 2)
         self._parameter_layout.addWidget(QtWidgets.QLabel('mm'), 3, 2)
@@ -123,9 +123,9 @@ class PhaseWidget(QtWidgets.QWidget):
         self.other_parameters_widget = QtWidgets.QWidget()
         self._other_parameters_widget_layout = QtWidgets.QGridLayout()
 
-        self._other_parameters_widget_layout.addWidget(QtWidgets.QLabel(u'Time<sub>0</sub>:'),0,0)
+        self._other_parameters_widget_layout.addWidget(QtWidgets.QLabel(u'T<sub>0</sub>:'),0,0)
         self._other_parameters_widget_layout.addWidget(self.t_0_sb,0,1)
-        self._other_parameters_widget_layout.addWidget(QtWidgets.QLabel(u'us'),0,2)
+        self._other_parameters_widget_layout.addWidget(QtWidgets.QLabel(u'μs'),0,2)
         self._other_parameters_widget_layout.addWidget(self.t_0_step_msb,0,3)
         
         self.other_parameters_widget.setLayout(self._other_parameters_widget_layout)

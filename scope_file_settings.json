@@ -1,6 +1,6 @@
 {
     "autorestart": false,
-    "autosave": false,
+    "autosave": true,
     "debug": 0,
     "download_cal": 0,
     "download_data": 0,

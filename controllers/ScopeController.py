@@ -57,7 +57,10 @@ class ScopeController(pvController):
         
     def run_state_callback(self, tag, data):
         state = data[0]
+        #print('run state callback' + str(state))
         self.runStateSignal.emit(state)
+        if not state:
+            self.stoppedSignal.emit()
 
     def bg_waveform_updated_signal_callback(self, pv_name, data):
         data = data[0]

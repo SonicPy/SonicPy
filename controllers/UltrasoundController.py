@@ -84,22 +84,6 @@ class UltrasoundController(QObject):
         self.display_window.panelClosedSignal.connect(self.panel_closed_callback)
         
         
-        #self.display_window.hLine1.sigDragged.connect(self.cursor_dragged)
-        #self.display_window.hLine2.sigDragged.connect(self.cursor_dragged)
-        #self.display_window.up_down_signal.connect(self.up_down_signal_callback)
-
-        '''
-        X, Y = read_tek_csv('resources/ultrasonic/4000psi-300K_+30MHz000.csv')    
-        freq = 30.00
-        width=10  # data bin width to speed up calculations
-        xmin = 2.50e-6
-        xmax = None
-        x, y, _ = signal_region_by_x(X,Y,xmin,xmax)
-
-        x = rebin(x,width)
-        y = rebin(y,width)
-        '''
-        
         self.waveform_index = 0
         
         

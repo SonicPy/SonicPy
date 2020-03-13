@@ -20,22 +20,18 @@ class ArbFilterModel(Scope, pvModel):
     channel_changed_signal = pyqtSignal()
     model_value_changed_signal = pyqtSignal(dict)
 
-    def __init__(self, parent):
+    def __init__(self, parent, definitions):
         
         pvModel.__init__(self, parent)
         
-        self.filter_types = ['none','tukey', 'lowpass']
+        self.filter_types = [ definitions[x].param['name'] for x in definitions]
         
-        self.vars = ['alpha']
 
         self.tasks = {  'filter_type': 
                                 {'desc': 'Filter type', 'val':self.filter_types[0], 'list':self.filter_types, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'filter_type','type':'l'}},
-                        'variable_parameter': 
-                                {'desc': 'Variable', 'val':'center_f','list':self.vars,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'variable_parameter','type':'l'}},
+                        
                         'edit_state':     
                                 {'desc': ';Edit', 'val':False, 
                                 'methods':{'set':True, 'get':True}, 
@@ -43,9 +39,7 @@ class ArbFilterModel(Scope, pvModel):
                                 
                       }       
 
-        self.g_wavelet = 'g_wavelet'
-        self.variable_parameter = 'center_f'
-
+        
         self.create_pvs(self.tasks)
 
         self.start()

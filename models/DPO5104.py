@@ -74,7 +74,7 @@ class Scope_DPO5104(Scope, pvModel):
                                 'param':{'tag':'output_state','type':'b'}},
                         'erase':     
                                 {'desc': 'Erase;Erase', 'val':False, 
-                                'methods':{'set':True, 'get':True}, 
+                                'methods':{'set':True, 'get':False}, 
                                 'param':{'tag':'output_state','type':'b'}},
                         'vertical_scale':  
                                 {'desc': 'Vertical scale', 'val':1.0,'increment':0.05, 'min':1e-9,'max':10,

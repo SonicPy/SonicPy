@@ -16,7 +16,7 @@ class scopeWidget(QtWidgets.QWidget):
         params = "plot title", 'Amplitude', 'Time'
         self.plot_widget = customWidget(params)
         #self.plot_widget.enable_cursors()
-
+   
         
         self.button_widget = QtWidgets.QWidget()
         
@@ -50,9 +50,10 @@ class scopeWidget(QtWidgets.QWidget):
         self.setLayout(self._layout)
 
         fig = self.plot_widget.fig 
-        self.CH1_plot = fig.add_line_plot([],[],color=(255,255,0))
-        self.bg_plot = fig.add_line_plot([],[],color=(0,255,255))
-        self.bg_plot_filtered = fig.add_line_plot([],[],color=(255,0,255))
+        fig.create_plots()
+        self.CH1_plot = fig.win.plotForeground
+        self.bg_plot = fig.win.plotRoi
+        #self.bg_plot_filtered = fig.add_line_plot([],[],color=(255,0,255))
 
 
         self.setStyleSheet("""
@@ -65,36 +66,18 @@ class scopeWidget(QtWidgets.QWidget):
     def plot(self,waveform):
         
         
-        plot = self.CH1_plot
+        plot = self.plot_widget.fig.win
         
         if plot is not None:
-            plot.setData(waveform[0], waveform[1])
+            plot.plotData(waveform[0], waveform[1])
 
-    def plot_bg(self,waveform):
-        
-        plot = self.bg_plot
-        if plot is not None:
-            plot.setData(waveform[0], waveform[1])
-
-    def plot_filtered(self, filtered):
-        
-        plot_filtered = self.bg_plot_filtered
-        if plot_filtered is not None:
-            
-            plot_filtered.setData(filtered[0], filtered[1])
-
+    
 
     def clear_plot(self,):
         
-        self.CH1_plot.setData(np.asarray([]),np.asarray([]))
+        self.plot([np.asarray([]),np.asarray([])])
         self.status_lbl.setText(' ')
 
-    def clear_plot_bg(self,):
-        
-        self.bg_plot.setData(np.asarray([]),np.asarray([]))
-        
-
-    
 
     def raise_widget(self):
         self.show()

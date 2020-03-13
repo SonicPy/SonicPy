@@ -25,7 +25,7 @@ from controllers.OverlayController import OverlayController
 from models.WaveformModel import Waveform
 import math
 
-from arb_waveforms import gaussian_wavelet
+from controllers.PhaseController import PhaseController
 
 from pyqtgraph.Qt import QtGui, QtCore
 import pyqtgraph as pg
@@ -62,6 +62,10 @@ class UltrasoundController(QObject):
                                                 self.scope_controller.model.pvs, 
                                                 self.afg_controller.model.pvs)
 
+
+        self.phase_controller = PhaseController(self.scope_plot_controller.get_pattern_widget(),
+                                                self.scope_plot_controller, self.working_directories)
+
         afg_panel = self.afg_controller.get_panel()
         scope_panel = self.scope_controller.get_panel()
         sweep_widget = self.sweep_controller.get_panel()
@@ -70,8 +74,8 @@ class UltrasoundController(QObject):
 
         self.display_window.insert_panel(scope_panel)
         self.display_window.insert_panel(afg_panel)
-        self.display_window.insert_panel(arb_panel)
-        self.display_window.insert_panel(arb_filter_panel)
+        #self.display_window.insert_panel(arb_panel)
+        #self.display_window.insert_panel(arb_filter_panel)
         self.display_window.insert_panel(sweep_widget)
 
         scope_waveform_widget = self.scope_plot_controller.widget
@@ -79,22 +83,6 @@ class UltrasoundController(QObject):
 
         self.display_window.panelClosedSignal.connect(self.panel_closed_callback)
         
-        
-        #self.display_window.hLine1.sigDragged.connect(self.cursor_dragged)
-        #self.display_window.hLine2.sigDragged.connect(self.cursor_dragged)
-        #self.display_window.up_down_signal.connect(self.up_down_signal_callback)
-
-        '''
-        X, Y = read_tek_csv('resources/ultrasonic/4000psi-300K_+30MHz000.csv')    
-        freq = 30.00
-        width=10  # data bin width to speed up calculations
-        xmin = 2.50e-6
-        xmax = None
-        x, y, _ = signal_region_by_x(X,Y,xmin,xmax)
-
-        x = rebin(x,width)
-        y = rebin(y,width)
-        '''
         
         self.waveform_index = 0
         
@@ -112,7 +100,11 @@ class UltrasoundController(QObject):
         self.display_window.ActionRecallSetup.triggered.connect(self.RecallSetupCallback)
         self.display_window.ActionSaveSetup.triggered.connect(self.SaveSetupCallback)
         self.display_window.ActionSetUserWaveform.triggered.connect(self.SetUserWaveformCallback)
+        self.display_window.actionCursors.triggered.connect(self.cursorsCallback)
 
+
+    def cursorsCallback(self):
+        self.phase_controller.show_view()
 
     def SetUserWaveformCallback(self):
 
@@ -126,7 +118,7 @@ class UltrasoundController(QObject):
     
         
         params['pts'] = 1000
-        
+        '''
         ans = gaussian_wavelet(params)
         ss = ans['waveform']
 
@@ -145,7 +137,7 @@ class UltrasoundController(QObject):
         self.p3.plot(ss_fft[0][:250],ss_fft[1][:250], pen=(0,255,255))
         self.win.show()
 
-        '''
+        
         arb = get_arb()
         waveform={}
         waveform['binary_waveform'] = arb

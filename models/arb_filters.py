@@ -12,7 +12,7 @@ import json
 
 
 
-
+                        
 def g_wave(t_array, A, f_0,sigma,x,c,f_min, f_max, opt=0):
 
     psi = []

@@ -5,6 +5,9 @@ import numpy as np
 import time
 from numpy import format_float_scientific
 
+
+
+
 def read_file_TEKAFG3000( filename=''):
     #Filename for TFW to be read in from the PC
     if filename != '':

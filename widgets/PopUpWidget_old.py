@@ -33,39 +33,103 @@ from widgets.PltWidget import CustomViewBox, PltWidget
 
 class AfwGroupbox(QtWidgets.QWidget):
     param_edited_signal = QtCore.pyqtSignal(dict)
-    panel_selection_edited_signal = QtCore.pyqtSignal(str)
-    def __init__(self, title):
+    awf_type_edited_signal = QtCore.pyqtSignal(dict)
+    def __init__(self, title, definitions, default):
         super().__init__()
+        self.arb_waveform = default
         self._layout = QtWidgets.QVBoxLayout()
-        self._layout.setContentsMargins(0, 0, 0, 0)
-        self.awf_type_cb = CleanLooksComboBox()    
-        self._layout.addWidget(self.awf_type_cb)
+        self.awf_gb = QtWidgets.QGroupBox("Waveform settings")
+        self._awf_gb_layout = QtWidgets.QVBoxLayout()
+        
+        params = [ definitions[x].param for x in definitions]
+        names = [ x for x in definitions]
+        defs = {}
+        self.displayName2name = {}
+        self.name2displayName = {}
+
+
+        for i, param in enumerate(params):
+            name = names[i]
+            defs[name]=param
+            self.displayName2name[param['name']]=name
+            self.name2displayName[name] = param['name']
+        self.AFW_params = defs
+        self.AFW_widgets = {}
+        
+
+
+        self.txt_fields = {}
+        self.scales = {}
+        
+        self.awf_type_cb = CleanLooksComboBox()
+        self.awf_info = ''
+        
+
+        display_names = [ definitions[x].param['name'] for x in definitions]
+        self.awf_types = display_names
+        self.awf_type_cb.addItems(self.awf_types)
+        self._awf_type_cb_layout = QtWidgets.QHBoxLayout()
+        self._awf_type_cb_layout.addWidget(QtWidgets.QLabel('Form:'))
+        self._awf_type_cb_layout.addWidget(self.awf_type_cb)
         self._awf_type_info_btn = QtWidgets.QPushButton('i')
-        self.panels = {}
-        self.selected_panel = None
-        self.panel = QtWidgets.QWidget()
-        self._panel_layout = QtWidgets.QVBoxLayout()
-        self._panel_layout.setContentsMargins(0, 0, 0, 0)
-        self.panel.setLayout(self._panel_layout)
-        self._layout.addWidget(self.panel)
+        self._awf_type_cb_layout.addWidget(self._awf_type_info_btn)
+        self._awf_type_info_btn.clicked.connect(self.show_awf_info)
+
+        self._awf_gb_layout.addLayout(self._awf_type_cb_layout)
+
+        
+        for key in self.AFW_params:
+            
+
+            awf = self.AFW_params[key]['params']
+            awf_widget = QtWidgets.QWidget()
+            _awf_layout = QtWidgets.QGridLayout()
+            
+            row = 0
+            txt_fields = {}
+            for param_key in awf:
+                param = awf[param_key]
+                hidden = False
+                if 'hidden' in param:
+                    hidden = param['hidden']
+                if not hidden:
+                    
+                    symbol = param['symbol']
+                    
+                    desc = param['desc']
+                    unit = param['unit']
+                    default = param['val']
+                    
+
+                    text_field =  NumberTextField()
+                    text_field.setText(str(default))
+                    txt_fields[param_key]=text_field
+                    self.add_field(_awf_layout, text_field, symbol+':', unit, row, 0)
+                    text_field.returnPressed.connect(partial(self.text_field_edited_callback, {'awf':key,'param_key':param_key}))
+                    
+                    row = row + 1
+            self.txt_fields[key]=txt_fields
+            awf_widget.setLayout(_awf_layout)    
+            self.AFW_widgets[key] = awf_widget
+            awf_widget.setStyleSheet("""
+                    NumberTextField {
+                        min-width: 60;
+                    }
+                """)
+        
+        self.awf_widget = self.AFW_widgets[self.arb_waveform]
+        self._awf_gb_layout.addWidget(self.awf_widget)
+
+        
+            
+        self.awf_type_cb.setCurrentText(self.arb_waveform)
+        self.awf_gb.setLayout(self._awf_gb_layout)
+        self._layout.addWidget(self.awf_gb)
         self.setLayout(self._layout)
+        
         self.awf_type_cb.currentTextChanged.connect(self.awf_type_edited)
 
-    def add_panel(self, name, panel):
-        self.panels[name] = panel
-        self.awf_type_cb.addItem(name)
-
-    def select_panel(self, name):
-        if self.selected_panel is not None:
-            self._panel_layout.removeWidget(self.selected_panel)
-            self.selected_panel.setParent(None)
-        _widget = self.panels[name]
-        self.selected_panel = _widget
-        self._panel_layout.addWidget(self.selected_panel)
-        self.awf_type_cb.blockSignals(True)
-        self.awf_type_cb.setCurrentText(name)
-        self.awf_type_cb.blockSignals(False)
-
+    
     def show_awf_info(self):
         QtWidgets.QMessageBox.about(None, "Description", self.get_current_awf_info() )
 
@@ -85,8 +149,68 @@ class AfwGroupbox(QtWidgets.QWidget):
         return desc
 
     def awf_type_edited(self, key):
-        self.panel_selection_edited_signal.emit(key)
+        key = self.displayName2name[key]
+        if key in self.AFW_widgets:
+            self._change_awf_layout(key)
+            if key in self.txt_fields:
+                '''_txt_fields = self.txt_fields[key]
+                d = self.dictionarize_fields(_txt_fields)
+                '''
+                d = {}
+                d['arb_waveform']= key
+                self.awf_type_edited_signal.emit(d)
 
+    def _change_awf_layout(self, key):
+        _widget = self.AFW_widgets[key]
+        self._awf_gb_layout.removeWidget(self.awf_widget)
+        self.awf_widget.setParent(None)
+        self.awf_widget = _widget
+        self._awf_gb_layout.addWidget(self.awf_widget)
+            
+    def dictionarize_fields(self, fields):
+        d = {}
+        for key in fields:
+            field = fields[key]
+            val = float(str(field.text()))
+            if key in self.scales:
+                val = float(str(val)) * self.scales[key]     
+            d[key]= val
+        return d
+
+    def text_field_edited_callback(self, awf_param_key):
+        key = awf_param_key['param_key']
+        awf = awf_param_key['awf']
+        self.arb_waveform = awf
+        val = self.txt_fields[self.arb_waveform][key].text()
+        if key in self.scales:
+            val = float(str(val)) * self.scales[key]
+        self.param_edited_signal.emit({key:val})
+
+
+    def add_field(self, layout, widget, label_str, unit, x, y):
+        layout.addWidget(LabelAlignRight(label_str), x, y)
+        layout.addWidget(widget, x, y + 1)
+        if unit:
+            layout.addWidget(QtWidgets.QLabel(unit), x, y + 2)
+
+    def setAFWparams(self, params):
+        self.blockSignals(True)
+        awf = params['arb_waveform']
+        if self.arb_waveform != awf:
+            if awf in self.AFW_widgets:
+                self.awf_type_cb.setCurrentText(awf)
+                self._change_awf_layout(awf)
+            self.arb_waveform = awf
+
+        fields = self.txt_fields[self.arb_waveform]
+        for key in params:
+            param = params[key]
+            if key in fields:
+                param = params[key]
+                if key in self.scales:
+                    param = param / self.scales[key]
+                fields[key].setText(str(param))
+        self.blockSignals(False)
 
 class PopUpWidget(QtWidgets.QWidget):
     widget_closed = QtCore.pyqtSignal()
@@ -167,16 +291,16 @@ class plotWaveWindow(QtWidgets.QWidget):
 
         self._layout = QtWidgets.QVBoxLayout()  
         self._layout.setContentsMargins(0,0,0,0)
-        self.setWindowTitle('Waveform plot')
+        self.setWindowTitle('E cut view')
         self.fitPlots = PltWidget(self)
         self.fitPlots.setLogMode(False,False)
         self.fitPlots.setMenuEnabled(enableMenu=False)
         self.viewBox = self.fitPlots.getViewBox() # Get the ViewBox of the widget
         self.viewBox.setMouseMode(self.viewBox.RectMode)
-        self.viewBox.enableAutoRange(True)
+        self.viewBox.enableAutoRange(0, False)
         
         self.fitPlot = self.fitPlots.plot([],[], 
-                        pen=(0,122,122), name="Fit", 
+                        pen=(155,155,155), name="Fit", 
                         antialias=True)
         self.fitPlot2 = self.fitPlots.plot([],[], 
                         pen=(100,100,255), name="Fit", 
@@ -225,46 +349,39 @@ class plotWaveWindow(QtWidgets.QWidget):
     
 class EditWidget(PopUpWidget):
     applyClickedSignal = QtCore.pyqtSignal(str)
-    controller_selection_edited_signal = QtCore.pyqtSignal(str)
-    widget_closed = QtCore.Signal()
-    def __init__(self, title ):
+    def __init__(self, title, definitions, default):
         super().__init__(title)
         self.plot_window = plotWaveWindow()
 
         self.add_top_row_button('plot_btn','Plot')
         self.add_top_horizontal_spacer()
-        #self.add_bottom_row_button('apply_btn','Apply')
+        self.add_bottom_row_button('apply_btn','Apply')
         self.add_bottom_horizontal_spacer()
         
         self.afw_gb = AfwGroupbox(title=title)
-        
         self.add_body_widget(self.afw_gb)
         
         self.make_connections()
 
-    def add_panel(self, name, panel):
-        self.afw_gb.add_panel(name, panel)
+    def add_panel(self, panel):
 
-    def select_panel(self, name):
-        self.afw_gb.select_panel(name)
 
     def set_selected_choice(self, selection):
         
         self.afw_gb.awf_type_cb.setCurrentText(selection)
     
-    def panel_selection_edited_signal_callback(self, key):
-        self.controller_selection_edited_signal.emit(key)
 
     def get_selected_choice(self):
         display_name = self.afw_gb.awf_type_cb.currentText()
-        return display_name
+        selected_awf = self.afw_gb.displayName2name[display_name]
+        return selected_awf
 
-    #def get_apply_btn(self):
-    #    return getattr(self,'apply_btn')
+    def get_apply_btn(self):
+        return getattr(self,'apply_btn')
 
     def make_connections(self):
         self.plot_btn.clicked.connect(self.plot_window.raise_widget)
-        self.afw_gb.panel_selection_edited_signal.connect(self.panel_selection_edited_signal_callback)
+        self.afw_gb.awf_type_edited_signal.connect(self.awf_type_edited_callback)
 
     def awf_type_edited_callback(self, d):
         selection_key = d['arb_waveform']
@@ -273,11 +390,3 @@ class EditWidget(PopUpWidget):
     def update_plot(self, data):
         self.plot_window.set_data(data[0],data[1])
         
-    def closeEvent(self, event):
-        # Overrides close event to let controller know that widget was closed by user
-        self.plot_window.close()
-        self.widget_closed.emit()
-
-    def hideEvent(self, event):
-        self.plot_window.close()
-        self.widget_closed.emit()

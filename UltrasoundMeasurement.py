@@ -15,6 +15,8 @@ _platform = platform.system()
 Theme = 1
 
 def main():
+
+    
     app = QApplication([])
     app.aboutToQuit.connect(app.deleteLater)
     controller = UltrasoundController(app, _platform, Theme)

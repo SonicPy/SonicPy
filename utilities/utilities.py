@@ -5,7 +5,7 @@ from scipy.signal import hilbert
 from scipy.fftpack import rfft, irfft, fftfreq, fft
 import scipy.fftpack
 import csv
-from models.tek_fileIO import read_tek_csv
+from um.models.tek_fileIO import read_tek_csv
 
 def read_multiple_spectra(filenames, ):
     spectra = []

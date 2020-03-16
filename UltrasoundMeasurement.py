@@ -8,15 +8,15 @@
 
 import sys, platform
 from PyQt5 import QtWidgets
-from controllers.UltrasoundController import UltrasoundController
+from um.controllers.UltrasoundController import UltrasoundController
 from PyQt5.QtWidgets import QApplication
 
-_platform = platform.system()
-Theme = 1
+
 
 def main():
 
-    
+    _platform = platform.system()
+    Theme = 1
     app = QApplication([])
     app.aboutToQuit.connect(app.deleteLater)
     controller = UltrasoundController(app, _platform, Theme)

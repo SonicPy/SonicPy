@@ -3,7 +3,7 @@ import numpy as np
 from um.models.ScopeModel import Scope
 from um.models.tek_fileIO import *
 from utilities.utilities import *
-import visa, logging, os, struct, sys
+import  logging, os, struct, sys
 from um.models.PyTektronixScope import TektronixScope
 from PyQt5.QtCore import QThread, pyqtSignal
 import time

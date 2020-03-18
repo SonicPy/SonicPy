@@ -1,7 +1,7 @@
 
 # TODO asymmetric waveform
 
-import visa, time, logging, os, struct, sys, copy
+import time, logging, os, struct, sys, copy
 
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtGui, QtCore

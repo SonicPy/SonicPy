@@ -3,8 +3,6 @@ __version__ = "0.5.0"
 
 import sys
 import os
-import time
-
 
 
 resources_path = os.path.join(os.path.dirname(__file__), 'resources')
@@ -12,16 +10,23 @@ calibrants_path = os.path.join(resources_path, 'calibrants')
 icons_path = os.path.join(resources_path, 'icons')
 data_path = os.path.join(resources_path, 'data')
 style_path = os.path.join(resources_path, 'style')
-
+from pathlib import Path
+home_path = str(Path.home())
 
 import platform
 from PyQt5 import QtWidgets
+from PyQt5 import QtCore
+
 from um.controllers.UltrasoundController import UltrasoundController
 from PyQt5.QtWidgets import QApplication
 
 
-
 def main():
+    if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
+        QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+
+    if hasattr(QtCore.Qt, 'AA_UseHighDpiPixmaps'):
+        QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
     _platform = platform.system()
     Theme = 1
@@ -41,4 +46,4 @@ def main():
         menu.addMenu(pmenu)
     
     app.exec_()
-    del app
+    #del app

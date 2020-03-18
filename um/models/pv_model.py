@@ -1,6 +1,6 @@
 
 
-import visa, time, logging, os, struct, sys, copy
+import  time, logging, os, struct, sys, copy
 
 from pyqtgraph.Qt import QtCore
 from PyQt5.QtCore import QThread, pyqtSignal, QObject

@@ -3,8 +3,6 @@ __version__ = "0.5.0"
 
 import sys
 import os
-import time
-
 
 
 resources_path = os.path.join(os.path.dirname(__file__), 'resources')
@@ -16,7 +14,7 @@ style_path = os.path.join(resources_path, 'style')
 
 import platform
 from PyQt5 import QtWidgets
-from um.controllers.UltrasoundController import UltrasoundController
+from ua.controllers.UltrasoundAnalysisController import UltrasoundAnalysisController
 from PyQt5.QtWidgets import QApplication
 
 
@@ -27,7 +25,7 @@ def main():
     Theme = 1
     app = QApplication([])
     app.aboutToQuit.connect(app.deleteLater)
-    controller = UltrasoundController(app, _platform, Theme, offline= True)
+    controller = UltrasoundAnalysisController(app, _platform, Theme, offline= True)
     controller.show_window()
 
     if _platform == "Darwin":    #macOs has a 'special' way of handling preferences menu

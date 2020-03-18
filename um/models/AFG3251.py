@@ -29,7 +29,7 @@ class AFG_AFG3251(Afg, pvModel):
 
     model_value_changed_signal = pyqtSignal(dict)
 
-    def __init__(self, parent, visa_hostname='202'):
+    def __init__(self, parent, visa_hostname='202', offline = False):
         pvModel.__init__(self, parent)
         Afg.__init__(self)
 
@@ -41,7 +41,8 @@ class AFG_AFG3251(Afg, pvModel):
 
         self.visa_hostname = visa_hostname
         self.connected = False
-        #self.connected = self.connect(self.visa_hostname)
+        if not offline:
+            self.connected = self.connect(self.visa_hostname)
         if self.connected:
             #print('connected')
             pass

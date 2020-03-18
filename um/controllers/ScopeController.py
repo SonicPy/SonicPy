@@ -23,8 +23,9 @@ class ScopeController(pvController):
     dataBGUpdatedSignal = pyqtSignal(dict)
     runStateSignal = pyqtSignal(bool)
 
-    def __init__(self, parent, isMain = False):
-        model = Scope_DPO5104(parent)
+    def __init__(self, parent, isMain = False, offline = False):
+        visa_hostname='143' 
+        model = Scope_DPO5104(parent, visa_hostname=visa_hostname, offline = offline)
         super().__init__(parent, model, isMain) 
         
         self.panel_items =[ 'instrument',

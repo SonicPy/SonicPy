@@ -21,7 +21,7 @@ class Scope_DPO5104(Scope, pvModel):
     channel_changed_signal = pyqtSignal()
     model_value_changed_signal = pyqtSignal(dict)
 
-    def __init__(self, parent, visa_hostname='143'):
+    def __init__(self, parent, visa_hostname='143', offline = False):
         
         pvModel.__init__(self, parent)
         Scope.__init__(self)
@@ -34,7 +34,8 @@ class Scope_DPO5104(Scope, pvModel):
         self.visa_hostname = visa_hostname
         self.connected = False
         
-        #self.connected = self.connect(self.visa_hostname)
+        if not offline:
+            self.connected = self.connect(self.visa_hostname)
         
         self.file_name = ''
         self.file_settings = None

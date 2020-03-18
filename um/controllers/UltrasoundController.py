@@ -39,11 +39,12 @@ from .. import style_path
 ############################################################
 
 class UltrasoundController(QObject):
-    def __init__(self, app, _platform, theme):
+    def __init__(self, app, _platform, theme, offline = False):
         super().__init__()
     
         self.scope_file_options_file='scope_file_settings.json'
         self.scope_working_directories_file = 'scope_folder_settings.json'
+      
         self.working_directories = mcaUtil.restore_folder_settings(self.scope_working_directories_file)
         self.file_options = mcaUtil.restore_file_settings(self.scope_file_options_file)
         
@@ -55,10 +56,10 @@ class UltrasoundController(QObject):
         self.display_window = UltrasoundWidget(app, _platform, theme)
         #self.progress_bar = self.display_window.progress_bar
         
-        self.afg_controller = AFGController(self)
+        self.afg_controller = AFGController(self, offline = offline)
         self.arb_controller = ArbController(self)
         self.arb_filter_controller = ArbFilterController(self)
-        self.scope_controller = ScopeController(self)
+        self.scope_controller = ScopeController(self, offline = offline)
         self.scope_plot_controller = ScopePlotController(self.scope_controller)
         self.overlay_controller = OverlayController(self, self.scope_plot_controller)
         

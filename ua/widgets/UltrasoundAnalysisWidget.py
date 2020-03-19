@@ -5,7 +5,7 @@ import os, os.path, sys, platform, copy
 from PyQt5 import uic, QtWidgets,QtCore
 from PyQt5.QtWidgets import QMainWindow, QInputDialog, QMessageBox, QErrorMessage
 from PyQt5.QtCore import QObject, pyqtSignal, Qt
-from um.widgets.PltWidget import SimpleDisplayWidget
+
 import pyqtgraph as pg
 from pyqtgraph import QtCore, mkPen, mkColor, hsvColor, ViewBox
 from um.widgets.CustomWidgets import HorizontalSpacerItem, VerticalSpacerItem, FlatButton
@@ -47,37 +47,46 @@ class UltrasoundAnalysisWidget(QMainWindow):
     def create_plots(self):
 
         self.plot_win = self.win.fig.win
-        self.plot_win_detail1 = self.detail_win1.fig.win
-        self.plot_win_detail2 = self.detail_win2.fig.win
         self.main_plot = pg.PlotDataItem([], [], title="",
                         antialias=True, pen=pg.mkPen(color=(255,255,0), width=1), connect="finite" )
         self.plot_win.addItem(self.main_plot)
+        self.plot_win_detail1 = self.detail_win1.fig.win
+        self.plot_win_detail2 = self.detail_win2.fig.win
+        
 
         self.detail_plot1 = pg.PlotDataItem([],[], title="",
-                        antialias=True, pen=pg.mkPen(color=(255,255,0), width=1), connect="finite" )
+                        antialias=True, pen=pg.mkPen(color=(0,200,255), width=1), connect="finite" )
         self.detail_plot1_bg = pg.PlotDataItem([], [], title="",
-                        antialias=True, pen=pg.mkPen(color=(0,255,255), width=1), connect="finite" )
+                        antialias=True, pen=pg.mkPen(color=(255,0,100), width=1), connect="finite" )
         self.plot_win_detail1.addItem(self.detail_plot1)
         self.plot_win_detail1.addItem(self.detail_plot1_bg)
+
         self.detail_plot2 = pg.PlotDataItem([], [], title="",
-                        antialias=True, pen=pg.mkPen(color=(255,255,0), width=1), connect="finite" )
+                        antialias=True, pen=pg.mkPen(color=(0,255,100), width=1), connect="finite" )
         self.detail_plot2_bg = pg.PlotDataItem([], [], title="",
-                        antialias=True, pen=pg.mkPen(color=(0,255,255), width=1), connect="finite" )
+                        antialias=True, pen=None, symbolBrush=(255,0,255,70), symbolPen=None)
         self.plot_win_detail2.addItem(self.detail_plot2)
         self.plot_win_detail2.addItem(self.detail_plot2_bg)
+
         self.lr1 = pg.LinearRegionItem()
         self.lr1.setZValue(-10)
         self.lr2 = pg.LinearRegionItem()
         self.lr2.setZValue(-10)
 
+        
+
+        self.echo_bounds = [self.lr1, self.lr2]
+
+    def get_echo_bounds(self, i):
+        return self.echo_bounds[i].getRegion()
 
     def update_view(self, t, spectrum, fname):
         
         self.t, self.spectrum, self.fname = t, spectrum, fname
         if t is not None and spectrum is not None:
             self.main_plot.setData(self.t, self.spectrum,)
-            self.detail_plot1.setData(self.t, self.spectrum,)
-            self.detail_plot2.setData(self.t, self.spectrum,)
+            #self.detail_plot1.setData(self.t, self.spectrum,)
+            #self.detail_plot2.setData(self.t, self.spectrum,)
             
             if not self.initialized:
 
@@ -107,25 +116,10 @@ class UltrasoundAnalysisWidget(QMainWindow):
 
         self.lr1.setRegion([p1l, p1r])
         self.lr2.setRegion([p2l, p2r])
+
+        self.initialized = True
         
-        
-        #updatePlot1(lr1, plot_win_detail1)
-        self.lr1r = self.lr1.getRegion()
-        self.plot_win_detail1.setXRange(*self.lr1r, padding=0)
-
-        
-        #updatePlot2(lr2, plot_win_detail2)
-        self.lr2r = self.lr2.getRegion()
-        self.plot_win_detail2.setXRange(*self.lr2r, padding=0)
-
-        self.lr1.sigRegionChanged.connect(self.updatePlot1)
-        self.plot_win_detail1.sigXRangeChanged.connect(self.updateRegion1)
-
-        self.lr2.sigRegionChanged.connect(self.updatePlot2)
-        self.plot_win_detail2.sigXRangeChanged.connect(self.updateRegion2)
-
-        self.plot_win_detail1.setXRange(*self.lr1r, padding=0)
-        self.plot_win_detail2.setXRange(*self.lr2r, padding=0)
+       
 
     def get_initial_lr_positions(self, t):
         mn = min(t)
@@ -136,6 +130,13 @@ class UltrasoundAnalysisWidget(QMainWindow):
         p2l = 0.7 * r
         p2r = 0.75 * r 
         return p1l, p1r, p2l, p2r
+
+    def get_initial_lr_zoom_positions(self, region):
+        lr = region.getRegion()
+        rng = lr[1] - lr[0]
+        l = lr[0]+ rng*0.4
+        r = lr[1] + rng*0.6
+        return l, r
 
 
     def make_widget(self):
@@ -152,15 +153,31 @@ class UltrasoundAnalysisWidget(QMainWindow):
         _buttons_layout_bottom = QtWidgets.QHBoxLayout()
         _buttons_layout_bottom.setContentsMargins(0, 0, 0, 0)
         open_btn = QtWidgets.QPushButton("Open")
-        fname_lbl = QtWidgets.QLabel('')
+        fname_lbl = QtWidgets.QLineEdit('')
+        freq_lbl = QtWidgets.QLabel('   Frequency (MHz):')
+        self.freq_ebx = QtWidgets.QDoubleSpinBox()
+        self.freq_ebx.setMaximum(100)
+        self.freq_ebx.setMinimum(1)
+        self.freq_ebx.setValue(21)
+        self.N_cbx = QtWidgets.QCheckBox('+/-')
+        self.N_cbx.setChecked(True)
+        self.save_btn = QtWidgets.QPushButton('Save result')
+
+        
         _buttons_layout_top.addWidget(open_btn)
         _buttons_layout_top.addWidget(fname_lbl)
+        _buttons_layout_top.addWidget(freq_lbl)
+        _buttons_layout_top.addWidget(self.freq_ebx)
+        _buttons_layout_top.addWidget(self.N_cbx)
         _buttons_layout_top.addSpacerItem(HorizontalSpacerItem())
+        _buttons_layout_top.addWidget(self.save_btn)
+
         buttons_widget_top.setLayout(_buttons_layout_top)
         _layout.addWidget(buttons_widget_top)
         params = "Ultrasound echo analysis", 'Amplitude', 'Time'
         win = customWidget(params)
         _layout.addWidget(win)
+
         detail1 = "Ultrasound echo 1", 'Amplitude', 'Time'
         detail_win1 = customWidget(detail1)
         detail2 = "Ultrasound echo 2", 'Amplitude', 'Time'
@@ -170,10 +187,10 @@ class UltrasoundAnalysisWidget(QMainWindow):
         detail_widget.setLayout(_detail_layout)
         _layout.addWidget(detail_widget)
         calc_btn = QtWidgets.QPushButton('Correlate')
-        _buttons_layout_bottom.addWidget(calc_btn)
-        _buttons_layout_bottom.addWidget(QtWidgets.QLabel('2-way travel time:'))
+        #_buttons_layout_bottom.addWidget(calc_btn)
+        #_buttons_layout_bottom.addWidget(QtWidgets.QLabel('2-way travel time:'))
         output_ebx = QtWidgets.QLineEdit('')
-        _buttons_layout_bottom.addWidget(output_ebx)
+        #_buttons_layout_bottom.addWidget(output_ebx)
         _buttons_layout_bottom.addSpacerItem(HorizontalSpacerItem())
         buttons_widget_bottom.setLayout(_buttons_layout_bottom)
         _layout.addWidget(buttons_widget_bottom)
@@ -182,6 +199,7 @@ class UltrasoundAnalysisWidget(QMainWindow):
 
     def closeEvent(self, QCloseEvent, *event):
         self.panelClosedSignal.emit()
+        super().closeEvent(QCloseEvent, *event)
         
 
     def keyPressEvent(self, e):
@@ -229,10 +247,12 @@ class UltrasoundAnalysisWidget(QMainWindow):
         self.actionBG = QtWidgets.QAction("Overlay", self)
         self.actionBGclose = QtWidgets.QAction("Close overlay", self)
         self.actionCursors = QtWidgets.QAction("Phase", self)
+        self.actionArrowPlot = QtWidgets.QAction("Arrow Plot", self)
         self.file_menu.addAction(self.actionSave_As)    
         self.file_menu.addAction(self.actionPreferences)  
         self.file_menu.addAction(self.actionBG) 
         self.file_menu.addAction(self.actionCursors) 
+        self.file_menu.addAction(self.actionArrowPlot) 
         self.opts_menu = self.menuBar.addMenu('Arb')
         self.ActionRecallSetup = QtWidgets.QAction('Recall setup', self)        
         self.ActionSaveSetup = QtWidgets.QAction('Save setup', self)   

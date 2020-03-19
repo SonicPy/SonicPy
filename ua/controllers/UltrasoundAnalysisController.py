@@ -13,10 +13,12 @@ from pathlib import Path
 from numpy import arange
 from utilities.utilities import *
 from ua.widgets.UltrasoundAnalysisWidget import UltrasoundAnalysisWidget
+from ua.widgets.ArrowPlotWidget import ArrowPlotWidget
 from ua.models.UltrasoundAnalysisModel import get_local_optimum, UltrasoundAnalysisModel
 from utilities.HelperModule import move_window_relative_to_screen_center, get_partial_index, get_partial_value
 import math
 
+from ua.controllers.ArrowPlotController import ArrowPlotController
 
 
 from um.models.WaveformModel import Waveform
@@ -43,34 +45,70 @@ class UltrasoundAnalysisController(QObject):
         
         self.setStyle(theme)
         self.display_window = UltrasoundAnalysisWidget(app, _platform, theme)
+        self.arrow_plot_controller = ArrowPlotController()
         self.make_connections()
         self.display_window.raise_widget()
         
-       
+        '''filename='resources/ultrasonic/4000psi-300K_+21MHz000.csv'
+        self.update_data(filename=filename)'''
 
     def make_connections(self): 
         self.display_window.open_btn.clicked.connect(self.update_data)
-        self.display_window.calc_btn.clicked.connect(self.calculate_data)
+        self.display_window.freq_ebx.valueChanged.connect(self.calculate_data)
+        self.display_window.lr1.sigRegionChangeFinished.connect(self.calculate_data)
+        self.display_window.lr2.sigRegionChangeFinished.connect(self.calculate_data)
+        self.display_window.N_cbx.stateChanged.connect(self.calculate_data)
+
+        self.display_window.win.cursor_changed_singal.connect(self.sync_cursors)
+        self.display_window.detail_win1.cursor_changed_singal.connect(self.sync_cursors)
+
+        self.display_window.save_btn.clicked.connect(self.save_result)
+
+        ### menu items
+        self.display_window.actionArrowPlot.triggered.connect(self.ArrowPlotShow)
+
+    def ArrowPlotShow(self):
+        self.arrow_plot_controller.arrow_plot_window.raise_widget()
+
+    def save_result(self):
+        filename = self.fname + '.json'
+        self.model.save_result(filename)
+
+
+    def sync_cursors(self, pos):
+        self.display_window.win.fig.set_cursor(pos)
+        self.display_window.detail_win1.fig.set_cursor(pos)
 
     def calculate_data(self):
+
+        freq = self.display_window.freq_ebx.value()*1e6
         t = self.model.t
         spectrum = self.model.spectrum
         t_f, spectrum_f = zero_phase_lowpass_filter([t,spectrum],60e6,1)
+
+        [l1, r1] = self.display_window.get_echo_bounds(0)
+        [l2, r2] = self.display_window.get_echo_bounds(1)
+
         #pg.plot(np.asarray(spectrum_f), title="spectrum_f")
-        c1 = self.display_window.plot_win_detail1.get_cursor_pos()
-        c2 = self.display_window.plot_win_detail2.get_cursor_pos()
-        optima_x_1, optima_x_2, optima_y_1, optima_y_2 = self.snap_cursors_to_optimum(c1, c2,t_f, spectrum_f)
-        self.display_window.plot_win_detail1.set_cursor_pos(optima_x_1[0])
-        self.display_window.plot_win_detail2.set_cursor_pos(optima_x_2[0])
-        c1 = self.display_window.plot_win_detail1.get_cursor_pos()
-        c2 = self.display_window.plot_win_detail2.get_cursor_pos()
-
-        self.model.calculate_data(c1,c2)
-
-        self.display_window.detail_plot1_bg.setData(*self.model.plot1_bg)
-        self.display_window.detail_plot2_bg.setData(*self.model.plot2_bg)
         
-        self.display_window.output_ebx.setText('%.5e' % (self.model.c_diff_optimized))
+        
+        self.model.filter_echoes(l1, r1, l2, r2, freq)
+
+        self.model.cross_correlate()
+        self.model.exract_optima()
+
+
+        self.display_window.detail_plot1.setData(*self.model.filtered1)
+        self.display_window.detail_plot1_bg.setData(*self.model.filtered2)
+        self.display_window.detail_plot2.setData(self.model.cross_corr_shift, self.model.cross_corr)
+
+        N = self.display_window.N_cbx.isChecked()
+        if N:
+            out = self.model.maxima
+        else:
+            out = self.model.minima
+        self.display_window.detail_plot2_bg.setData(*out)
+        #self.display_window.output_ebx.setText('%.5e' % (self.model.c_diff_optimized))
 
 
     def snap_cursors_to_optimum(self, c1, c2, t, spectrum):
@@ -109,25 +147,21 @@ class UltrasoundAnalysisController(QObject):
         pass
 
  
-    def load_file(self):
-        filename = open_file_dialog(None, "Load File(s).",filter='*.csv')
-        if len(filename):
-            t, spectrum = read_tek_csv(filename, subsample=4)
-            t, spectrum = zero_phase_highpass_filter([t,spectrum],1e4,1)
-            return t,spectrum, filename
-        else:
-            return None, None, filename
-
-
-
-    def update_data(self):
+    def load_file(self, filename):
         
-        self.model.t, self.model.spectrum, self.fname = self.load_file()
-        self.display_window.update_view(self.model.t, self.model.spectrum, self.fname)
-    
+        t, spectrum = read_tek_csv(filename, subsample=4)
+        t, spectrum = zero_phase_highpass_filter([t,spectrum],1e4,1)
+        return t,spectrum, filename
+        
+    def update_data(self, *args, **kwargs):
+        filename = kwargs.get('filename', None)
+        if filename is None:
+            filename = open_file_dialog(None, "Load File(s).",filter='*.csv')
+        if len(filename):
+            self.model.t, self.model.spectrum, self.fname = self.load_file(filename)
+            self.display_window.update_view(self.model.t, self.model.spectrum, self.fname)
 
-    def panel_closed_callback(self):
-        pass
+    
 
     def show_window(self):
         self.display_window.raise_widget()
@@ -153,11 +187,7 @@ class UltrasoundAnalysisController(QObject):
         self.show_waveform(new_ind, update_cursor_pos=True)
                 
     def show_latest_waveform(self):
-        freqs = sorted(list(self.model.sweep.keys()))
-        freq = freqs[-1]
-        ind = freqs.index(freq)
-        self.show_waveform(ind, update_cursor_pos=True)
-
+        pass
     
 
     def setStyle(self, Style):

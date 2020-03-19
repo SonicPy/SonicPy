@@ -16,10 +16,9 @@ home_path = str(Path.home())
 import platform
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
+
+
 from ua.controllers.UltrasoundAnalysisController import UltrasoundAnalysisController
-from PyQt5.QtWidgets import QApplication
-
-
 
 def main():
     if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
@@ -29,8 +28,9 @@ def main():
 
     _platform = platform.system()
     Theme = 1
-    app = QApplication([])
+    app = QtWidgets.QApplication([])
     app.aboutToQuit.connect(app.deleteLater)
+    
     controller = UltrasoundAnalysisController(app, _platform, Theme, offline= True)
     controller.show_window()
 
@@ -44,5 +44,4 @@ def main():
         menu = window.menuBar
         menu.addMenu(pmenu)
     
-    app.exec_()
-    #del app
+    return app.exec_()

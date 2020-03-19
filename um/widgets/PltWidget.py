@@ -20,6 +20,8 @@ from scipy.signal import argrelextrema
 
 class customWidget(QtWidgets.QWidget):
     widget_closed = QtCore.pyqtSignal()
+    fast_cursor_changed_singal = QtCore.pyqtSignal(float)
+    cursor_changed_singal = QtCore.pyqtSignal(float)
     def __init__(self, fig_params):
         super().__init__()
         self._layout = QtWidgets.QVBoxLayout(self)
@@ -66,11 +68,13 @@ class customWidget(QtWidgets.QWidget):
         c = '%.3e' % (pos)
         self.cursor_fast.setText(c)
         self.fig.set_fast_cursor(pos)
+        self.fast_cursor_changed_singal.emit(pos)
 
     def update_cursor(self, pos):
         c = "<span style='color: #00CC00'>%0.3e</span>"  % (pos)
         self.cursor.setText(c)
         self.fig.set_cursor(pos)
+        self.cursor_changed_singal.emit(pos)
 
     def setText(self, text, plot_ind):
         self.fig.set_plot_label(text,plot_ind)

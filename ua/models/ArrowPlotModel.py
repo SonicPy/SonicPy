@@ -14,9 +14,73 @@ import pyqtgraph as pg
 from utilities.utilities import zero_phase_bandpass_filter
 import json
 
+class optima():
+    def __init__(self, data):
+        self.freq = data['frequency']
+        self.minima = data['minima']
+        self.maxima = data['maxima']
+        self.minima_t = data['minima_t']
+        self.maxima_t = data['maxima_t']
+
+        self.center_opt={}
+        self.other_opt={}
+        self.center_opt['min'] = self.minima_t[argmin(self.minima)]
+        self.center_opt['max'] = self.maxima_t[argmax(self.maxima)]
+
+        other_min = []
+        for mn in self.minima_t:
+            if mn != self.center_opt['min']:
+                other_min.append(mn)
+        self.other_opt['min']=other_min  
+        other_max = []
+        for mx in self.maxima_t:
+            if mx != self.center_opt['max']:
+                other_max.append(mx)
+        self.other_opt['max']=other_max
+        
+    def get_optimum(self, opt, ind):
+        if self.center_opt[opt] is None:
+            return None
+        if ind == 0:
+            return self.center_opt[opt]
+        else:
+            out = None
+            if ind < 0:
+                outs = sorted(i for i in self.other_opt[opt] if i < self.center_opt[opt])
+                if abs(ind )<len(outs):
+                    out = outs[ind]
+            if ind > 0:
+                outs = sorted(i for i in self.other_opt[opt] if i > self.center_opt[opt])
+                if abs(ind )<len(outs):
+                    out = outs[ind-1]
+            return out
+
+    def set_optimum(self, opt, t ):
+        if t == self.center_opt[opt]:
+            self.center_opt[opt] = None
+            temp_other_opt = self.other_opt[opt]
+            temp_other_opt.append(t)
+            self.other_opt[opt] = sorted(temp_other_opt)
+        else:
+            temp_opt = self.center_opt[opt]
+            if not temp_opt is None:
+                temp_other_opt = self.other_opt[opt]
+                other_opt_ind = np.argmin(abs(np.asarray(temp_other_opt)-t))
+                self.other_opt[opt].pop(other_opt_ind)
+                self.center_opt[opt]= t
+                self.other_opt[opt].append(temp_opt)
+                temp_other = self.other_opt[opt]
+                self.other_opt[opt] = sorted(temp_other)
+            else:
+                self.center_opt[opt] = t
+                temp_other_opt = self.other_opt[opt]
+                other_opt_ind = np.argmin(abs(np.asarray(temp_other_opt)-t))
+                self.other_opt[opt].pop(other_opt_ind)
+
+
 class ArrowPlotModel():
     def __init__(self):
-        self.frequencies = {}
+        
         self.optima = {}
 
 
@@ -26,27 +90,25 @@ class ArrowPlotModel():
 
     def get_other_data_points(self, opt):
         optima = self.optima
-        
         xData = []
         yData = []
         for freq in optima:
-            pt  = optima[freq][opt]
+            pt  = optima[freq].other_opt[opt]
             for p in pt:
                 xData.append(1/freq)
                 yData.append(p)
 
         return xData, yData
 
-    def get_opt_data_points(self, opt):
+    def get_opt_data_points(self, opt, ind=0):
         optima = self.optima
         xData = []
         yData = []
         for freq in optima:
-            pt  = optima[freq][opt]
-            
-            xData.append(1/freq)
-            yData.append(pt)
-
+            pt  = optima[freq].get_optimum(opt,ind)
+            if pt is not None:
+                xData.append(1/freq)
+                yData.append(pt)
         return xData, yData
 
     def clear(self):
@@ -59,8 +121,8 @@ class ArrowPlotModel():
 
         return data
 
-    def get_max_line(self, opt):
-        xMax,yMax = self.get_opt_data_points(opt)
+    def get_line(self, opt, ind=0):
+        xMax,yMax = self.get_opt_data_points(opt,ind)
         
         fit = self.fit_line(xMax,yMax)
         zero = fit[1]
@@ -78,55 +140,18 @@ class ArrowPlotModel():
         freqs = abs(np.asarray(keys) - 1/f_inv)
         ind = np.argmin(freqs)
         freq = keys[ind]
-        temp_opt = self.optima[freq][opt]
-        temp_other_opt = self.optima[freq]['other_'+opt]
-        other_opt_ind = np.argmin(abs(np.asarray(temp_other_opt)-t))
-        self.optima[freq]['other_'+opt].pop(other_opt_ind)
-
-
-        self.optima[freq][opt]= t
-        self.optima[freq]['other_'+opt].append(temp_opt)
-        
-
-        temp_other = self.optima[freq]['other_'+opt]
-        self.optima[freq]['other_'+opt] = sorted(temp_other)
+        self.optima[freq].set_optimum(opt, t)
 
     def fit_line(self, X, Y):
         fit = np.polyfit(X,Y,1)
         return fit
 
-                
-
+            
     def add_freq(self, data):
         freq = data['frequency']
+        data_pt = optima(data)
+        self.optima[freq]=data_pt
         
-        minima = data['minima']
-        maxima = data['maxima']
-        minima_t = data['minima_t']
-        maxima_t = data['maxima_t']
-
-        min_min = minima_t[argmin(minima)]
-        max_max = maxima_t[argmax(maxima)]
-        self.optima[freq] = {'min': min_min, 'max': max_max}
-        other_min = []
-        for mn in minima_t:
-            if mn != min_min:
-                other_min.append(mn)
-        other_max = []
-        for mx in maxima_t:
-            if mx != max_max:
-                other_max.append(mx)
-        self.optima[freq]['other_min']= other_min
-        self.optima[freq]['other_max']= other_max
-
-
-        self.frequencies[freq]= {'minima_t':data['minima_t'],
-                                'minima':data['minima'],
-                                'maxima_t':data['maxima_t'],
-                                'maxima':data['maxima']}
-        
-
-    
 
     def save_result(self, filename):
         

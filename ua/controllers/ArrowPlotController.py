@@ -79,13 +79,24 @@ class ArrowPlotController(QObject):
 
         xMax, yMax = self.model.get_opt_data_points(opt)
         
-        xData, yData = self.model.get_other_data_points('other_'+opt)
+        xData, yData = self.model.get_other_data_points(opt)
         self.arrow_plot_window.update_view(xData,yData)
 
         self.arrow_plot_window.update_maximums(np.asarray(xMax),np.asarray(yMax))
 
-        X, Y = self.model.get_max_line(opt)
-        self.arrow_plot_window.update_max_line(X,Y)
+        indexes = [-4,-3,-2,-1,0,1,2,3,4]
+        X = []
+        Y = []
+        for i in indexes:
+            try:
+                x, y = self.model.get_line(opt,i)
+                X = X +x
+                Y = Y+y
+                X = X +[np.nan]
+                Y = Y+[np.nan]
+            except:
+                pass
+        self.arrow_plot_window.update_max_line(np.asarray(X),np.asarray(Y))
  
     def load_file(self, filename):
         

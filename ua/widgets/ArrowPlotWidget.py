@@ -35,12 +35,13 @@ class ArrowPlotWidget(QWidget):
     def create_plots(self):
         self.plot_win = self.win.fig.win
         self.main_plot = pg.PlotDataItem([], [], title="",
-                        antialias=True, pen=None, symbolBrush=(255,0,100), symbolPen=None, symbolSize = 8)
+                        antialias=True, pen=None, symbolBrush=(255,0,100), symbolPen=None, symbolSize = 10)
         self.maximums = pg.PlotDataItem([], [], title="",
-                        antialias=True, pen=None, symbolBrush=(0,100,255), symbolPen=None, symbolSize = 8)
+                        antialias=True, pen=None, symbolBrush=(0,100,255), symbolPen=None, symbolSize = 10)
         self.max_line_plot = pg.PlotDataItem([], [], title="",
                         antialias=True, pen=pg.mkPen(color=(255,255,255,150), width=2), connect="finite" )
         self.main_plot.sigPointsClicked.connect(self.point_clicked)
+        self.maximums.sigPointsClicked.connect(self.point_clicked)
         self.plot_win.addItem(self.max_line_plot)
         self.plot_win.addItem(self.main_plot)
         self.plot_win.addItem(self.maximums)

@@ -15,7 +15,6 @@ from utilities.utilities import zero_phase_bandpass_filter
 import json
 
 
-
 class optima():
     def __init__(self, data):
         self.freq = data['frequency']
@@ -23,11 +22,19 @@ class optima():
         self.maxima = data['maxima']
         self.minima_t = data['minima_t']
         self.maxima_t = data['maxima_t']
-
+        self.num_opt = {}
+        self.all_optima = {}
+        self.init_optima()
+        
+    def init_optima(self):
         self.center_opt={}
         self.other_opt={}
         self.center_opt['min'] = self.minima_t[argmin(self.minima)]
         self.center_opt['max'] = self.maxima_t[argmax(self.maxima)]
+        self.num_opt['min'] = len(self.minima)
+        self.num_opt['max'] = len(self.maxima)
+        self.all_optima['max'] = self.maxima_t
+        self.all_optima['min'] = self.minima_t
 
         other_min = []
         for mn in self.minima_t:
@@ -39,6 +46,9 @@ class optima():
             if mx != self.center_opt['max']:
                 other_max.append(mx)
         self.other_opt['max']=other_max
+
+    def get_num_optima(self, opt):
+        return self.num_opt[opt]
         
     def get_optimum(self, opt, ind):
         if self.center_opt[opt] is None:
@@ -56,6 +66,14 @@ class optima():
                 if abs(ind )<len(outs):
                     out = outs[ind-1]
             return out
+
+    def get_optimum_abs_ind(self, opt, ind):
+        return self.all_optima[opt][ind]
+
+    def reset_optimum(self):
+        self.init_optima()
+
+    
 
     def set_optimum(self, opt, t ):
         if t == self.center_opt[opt]:
@@ -108,10 +126,51 @@ class ArrowPlotModel():
         yData = []
         for freq in optima:
             pt  = optima[freq].get_optimum(opt,ind)
+            
             if pt is not None:
                 xData.append(1/freq)
                 yData.append(pt)
         return xData, yData
+
+    def auto_sort_optima(self, opt):
+        '''
+        finds the line with the lowest slope, sets the points on that line as the center optima
+        '''
+        freqs = list(self.optima.keys())
+        
+        self.optima[freqs[0]].reset_optimum()
+        t = self.optima[freqs[0]].get_optimum(opt,0)
+
+        for freq in freqs:
+            if not self.optima[freq].get_optimum(opt,0) is None:
+
+                scan_range = range(self.optima[freq].get_num_optima(opt))
+                actual_range = []
+                next_t = []
+                for i in scan_range:
+                    o = self.optima[freq].get_optimum_abs_ind(opt,i)
+                    if o is not None:
+                        next_t.append(o)
+                        actual_range.append(i)
+                diff = abs(np.asarray(next_t)-t)
+                min_diff_ind = np.argmin(diff)
+                t = next_t[min_diff_ind]
+                current_opt_t = self.optima[freq].get_optimum(opt, 0)
+                if t != current_opt_t:
+                    self.optima[freq].set_optimum(opt, t)
+        
+        lines_ind = [0,-1,1]
+        line_slopes = []
+        for line_ind in lines_ind:
+            x, y, fit= self.get_line(opt,line_ind)
+            line_slopes.append(fit[0])
+        min_slope_ind = lines_ind[np.argmin(abs(np.asarray(line_slopes)))]
+        #print(min_slope_ind)
+        if min_slope_ind != 0:
+            for freq in freqs:
+                best_opt = self.optima[freq].get_optimum(opt, min_slope_ind)
+                self.optima[freq].set_optimum(opt, best_opt)
+
 
     def clear(self):
         self.__init__()
@@ -123,6 +182,7 @@ class ArrowPlotModel():
 
         return data
 
+    
 
     def get_line(self, opt, ind=0):
         '''
@@ -140,7 +200,7 @@ class ArrowPlotModel():
         Ymin = zero+Xmin*fit[0]
         X = [Xmin, Xmax]
         Y = [Ymin, Ymax]
-        return X, Y
+        return X, Y, fit
 
 
     def set_optimum(self, opt, t, f_inv):

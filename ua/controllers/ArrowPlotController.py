@@ -35,70 +35,100 @@ class ArrowPlotController(QObject):
             self.setStyle(app)
         self.arrow_plot_window = ArrowPlotWidget()
         self.make_connections()
+        self.line_plots = {}
         
-       
-
     def make_connections(self): 
         self.arrow_plot_window.open_btn.clicked.connect(self.update_data)
+        self.arrow_plot_window.auto_btn.clicked.connect(self.auto_data)
+        self.arrow_plot_window.calc_btn.clicked.connect(self.calc_callback)
         self.arrow_plot_window.clear_btn.clicked.connect(self.clear_data)
-        self.arrow_plot_window.N_cbx.stateChanged.connect(self.calculate_data)
+        self.arrow_plot_window.N_cbx.stateChanged.connect(self.update_plot)
         self.arrow_plot_window.point_clicked_signal.connect(self.point_clicked_callback)
-        self.arrow_plot_window.save_btn.clicked.connect(self.save_result)
+        #self.arrow_plot_window.save_btn.clicked.connect(self.save_result)
 
+    def calc_callback(self):
+        self.calculate_data()
+        self.update_plot()
+
+    def auto_data(self):
+        num_pts = len(self.model.optima)
+        if num_pts > 2:
+            opt = self.get_opt()
+            self.model.auto_sort_optima(opt)
+            self.calculate_data()
+            self.update_plot()
+        else: self.error_not_enough_datapoints()
  
     def point_clicked_callback(self, pt):
         f = pt[0]
         t = pt[1]
-        N = self.arrow_plot_window.N_cbx.checkState()
-        if N:
-            opt = 'max'
-        else: 
-            opt = 'min'
+        opt = self.get_opt()
         self.model.set_optimum(opt, t,f)
-        self.calculate_data()
+        self.update_plot()
+        #self.calculate_data()
 
     def clear_data(self):
+        self.line_plots = {}
         self.model.clear()
-        self.calculate_data()
+        self.update_plot()
+        self.arrow_plot_window.update_max_line([],[])
 
     def save_result(self):
-        filename = self.fname + '.json'
-        self.model.save_result(filename)
-
+        pass
+        #filename = self.fname + '.json'
+        #self.model.save_result(filename)
 
     def sync_cursors(self, pos):
         self.display_window.win.fig.set_cursor(pos)
         self.display_window.detail_win1.fig.set_cursor(pos)
 
-    def calculate_data(self):
+    def get_opt(self):
         N = self.arrow_plot_window.N_cbx.checkState()
         if N:
             opt = 'max'
         else: 
             opt = 'min'
+        return opt
 
+    def update_plot(self):
+        opt = self.get_opt()
         xMax, yMax = self.model.get_opt_data_points(opt)
-        
         xData, yData = self.model.get_other_data_points(opt)
         self.arrow_plot_window.update_view(xData,yData)
-
         self.arrow_plot_window.update_maximums(np.asarray(xMax),np.asarray(yMax))
+        if opt in self.line_plots:
+            self.arrow_plot_window.update_max_line(*self.line_plots[opt])
+        else:
+            self.arrow_plot_window.update_max_line([],[])
 
-        indexes = [-3,-2,-1,0,1,2,3]
-        X = []
-        Y = []
-        for i in indexes:
-            
-                x, y = self.model.get_line(opt,i)
+    def error_not_enough_datapoints(self):
+        print('Not enough datapoints')
+
+    def calculate_data(self):
+        
+        num_pts = len(self.model.optima)
+        if num_pts > 2:
+            opt = self.get_opt()
+
+            indexes = [-3,-2,-1,0,1,2,3]
+            X = []
+            Y = []
+            fits = []
+            for i in indexes:
+                x, y, fit = self.model.get_line(opt,i)
+                fits.append(fit[1])
                 X = X +x
                 Y = Y+y
                 X = X +[np.nan]
                 Y = Y+[np.nan]
+            self.line_plots[opt] = (np.asarray(X),np.asarray(Y))
             
-        self.arrow_plot_window.update_max_line(np.asarray(X),np.asarray(Y))
- 
+            s = np.std(np.asarray(fits))
+            print('Time delay = ' + str(round(sum(np.asarray(fits))/len(fits)*1e6,5)) + ' microseconds, st.dev. = ' + str(round(s*1e6,5)) +' microseconds')
+        else:
+            self.error_not_enough_datapoints()
+
     def load_file(self, filename):
-        
         t, spectrum = read_tek_csv(filename, subsample=4)
         t, spectrum = zero_phase_highpass_filter([t,spectrum],1e4,1)
         return t,spectrum, filename
@@ -110,8 +140,8 @@ class ArrowPlotController(QObject):
         if len(filenames):
             for fname in filenames:
                 self.model.add_result_from_file(fname)
-
-            self.calculate_data()
+            #self.auto_data()
+            self.update_plot()
 
     def show_window(self):
         self.arrow_plot_window.raise_widget()
@@ -136,10 +166,6 @@ class ArrowPlotController(QObject):
             new_ind = self.waveform_index - 1
         self.show_waveform(new_ind, update_cursor_pos=True)
                 
-    def show_latest_waveform(self):
-        pass
-    
-
     def setStyle(self, app):
         from .. import theme 
         from .. import style_path

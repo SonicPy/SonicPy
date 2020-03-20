@@ -129,8 +129,10 @@ class ArrowPlotModel():
         
         Xmax = max(1/np.asarray(list(self.optima)))
         Ymax = zero+Xmax*fit[0]
-        X = [0, Xmax]
-        Y = [zero, Ymax]
+        Xmin = Xmax* -0.05
+        Ymin = zero+Xmin*fit[0]
+        X = [Xmin, Xmax]
+        Y = [Ymin, Ymax]
         return X, Y
 
 

@@ -84,7 +84,7 @@ class ArrowPlotController(QObject):
 
         self.arrow_plot_window.update_maximums(np.asarray(xMax),np.asarray(yMax))
 
-        indexes = [-4,-3,-2,-1,0,1,2,3,4]
+        indexes = [-3,-2,-1,0,1,2,3]
         X = []
         Y = []
         for i in indexes:

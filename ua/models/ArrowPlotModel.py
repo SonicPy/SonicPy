@@ -14,6 +14,8 @@ import pyqtgraph as pg
 from utilities.utilities import zero_phase_bandpass_filter
 import json
 
+
+
 class optima():
     def __init__(self, data):
         self.freq = data['frequency']
@@ -121,7 +123,12 @@ class ArrowPlotModel():
 
         return data
 
+
     def get_line(self, opt, ind=0):
+        '''
+        opt: 'min' or 'max
+        ind: -n to n, with 0 being the most horizontal line in the arrow plot
+        '''
         xMax,yMax = self.get_opt_data_points(opt,ind)
         
         fit = self.fit_line(xMax,yMax)

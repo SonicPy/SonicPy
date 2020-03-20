@@ -88,14 +88,13 @@ class ArrowPlotController(QObject):
         X = []
         Y = []
         for i in indexes:
-            try:
+            
                 x, y = self.model.get_line(opt,i)
                 X = X +x
                 Y = Y+y
                 X = X +[np.nan]
                 Y = Y+[np.nan]
-            except:
-                pass
+            
         self.arrow_plot_window.update_max_line(np.asarray(X),np.asarray(Y))
  
     def load_file(self, filename):

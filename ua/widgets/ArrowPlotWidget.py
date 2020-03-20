@@ -19,6 +19,7 @@ class ArrowPlotWidget(QWidget):
 
     up_down_signal = pyqtSignal(str)
     panelClosedSignal = pyqtSignal()
+    point_clicked_signal = pyqtSignal(list)
 
     def __init__(self):
         super().__init__()
@@ -34,13 +35,32 @@ class ArrowPlotWidget(QWidget):
     def create_plots(self):
         self.plot_win = self.win.fig.win
         self.main_plot = pg.PlotDataItem([], [], title="",
-                        antialias=True, pen=None, symbolBrush=(255,0,255), symbolPen=None, symbolSize = 5)
+                        antialias=True, pen=None, symbolBrush=(255,0,100), symbolPen=None, symbolSize = 8)
+        self.maximums = pg.PlotDataItem([], [], title="",
+                        antialias=True, pen=None, symbolBrush=(0,100,255), symbolPen=None, symbolSize = 8)
+        self.max_line_plot = pg.PlotDataItem([], [], title="",
+                        antialias=True, pen=pg.mkPen(color=(255,255,255,150), width=2), connect="finite" )
+        self.main_plot.sigPointsClicked.connect(self.point_clicked)
+        self.plot_win.addItem(self.max_line_plot)
         self.plot_win.addItem(self.main_plot)
+        self.plot_win.addItem(self.maximums)
+
+    def point_clicked(self, item, pt):
+        point = [pt[0].pos().x(),pt[0].pos().y()]
+        self.point_clicked_signal.emit(point)
+
+    def update_max_line(self, xData, yData):
+        if xData is not None and yData is not None:
+            self.max_line_plot.setData(xData, yData)
 
     def update_view(self, xData, yData):
-        self.xData, self.yData = xData, yData
+        
         if xData is not None and yData is not None:
-            self.main_plot.setData(self.xData, self.yData)
+            self.main_plot.setData(xData, yData)
+    def update_maximums(self, xData, yData):
+        
+        if xData is not None and yData is not None:
+            self.maximums.setData(xData, yData)
          
     def make_widget(self):
         my_widget = self
@@ -76,7 +96,7 @@ class ArrowPlotWidget(QWidget):
 
         buttons_widget_top.setLayout(_buttons_layout_top)
         _layout.addWidget(buttons_widget_top)
-        params = "Ultrasound echo analysis", 'Amplitude', 'Time'
+        params = "Arrow Plot", 'Lag', '1/Frequency'
         self.win = customWidget(params)
         _layout.addWidget(self.win)
 

@@ -29,22 +29,20 @@ from um.controllers.PhaseController import PhaseController
 import utilities.hpMCAutilities as mcaUtil
 from utilities.HelperModule import increment_filename, increment_filename_extra
 from um.widgets.UtilityWidgets import open_file_dialog
-from .. import style_path
+
 
 
 ############################################################
 
 class UltrasoundAnalysisController(QObject):
-    def __init__(self, app, _platform, theme, offline = False):
+    def __init__(self, app=None, offline = False):
         super().__init__()
         self.model = UltrasoundAnalysisModel()
         
-        self.style_path = style_path
-
-        self.app = app
-        
-        self.setStyle(theme)
-        self.display_window = UltrasoundAnalysisWidget(app, _platform, theme)
+    
+        if app is not None:
+            self.setStyle(app)
+        self.display_window = UltrasoundAnalysisWidget()
         self.arrow_plot_controller = ArrowPlotController()
         self.make_connections()
         self.display_window.raise_widget()
@@ -190,11 +188,13 @@ class UltrasoundAnalysisController(QObject):
         pass
     
 
-    def setStyle(self, Style):
-        print('style:  ' + str(Style))
-        if Style==1:
+    def setStyle(self, app):
+        from .. import theme 
+        from .. import style_path
+        self.app = app
+        if theme==1:
             WStyle = 'plastique'
-            file = open(os.path.join(self.style_path, "stylesheet.qss"))
+            file = open(os.path.join(style_path, "stylesheet.qss"))
             stylesheet = file.read()
             self.app.setStyleSheet(stylesheet)
             file.close()

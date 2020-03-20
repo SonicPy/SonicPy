@@ -28,10 +28,11 @@ from um.widgets.UtilityWidgets import open_file_dialog, open_files_dialog
 ############################################################
 
 class ArrowPlotController(QObject):
-    def __init__(self):
+    def __init__(self, app = None):
         super().__init__()
         self.model = ArrowPlotModel()
-       
+        if app is not None:
+            self.setStyle(app)
         self.arrow_plot_window = ArrowPlotWidget()
         self.make_connections()
         
@@ -41,13 +42,24 @@ class ArrowPlotController(QObject):
         self.arrow_plot_window.open_btn.clicked.connect(self.update_data)
         self.arrow_plot_window.clear_btn.clicked.connect(self.clear_data)
         self.arrow_plot_window.N_cbx.stateChanged.connect(self.calculate_data)
-
+        self.arrow_plot_window.point_clicked_signal.connect(self.point_clicked_callback)
         self.arrow_plot_window.save_btn.clicked.connect(self.save_result)
+
+ 
+    def point_clicked_callback(self, pt):
+        f = pt[0]
+        t = pt[1]
+        N = self.arrow_plot_window.N_cbx.checkState()
+        if N:
+            opt = 'max'
+        else: 
+            opt = 'min'
+        self.model.set_optimum(opt, t,f)
+        self.calculate_data()
 
     def clear_data(self):
         self.model.clear()
-        xData, yData = self.model.get_data_points(None)
-        self.arrow_plot_window.update_view(xData,yData)
+        self.calculate_data()
 
     def save_result(self):
         filename = self.fname + '.json'
@@ -64,9 +76,16 @@ class ArrowPlotController(QObject):
             opt = 'max'
         else: 
             opt = 'min'
-        xData, yData = self.model.get_data_points(opt)
+
+        xMax, yMax = self.model.get_opt_data_points(opt)
+        
+        xData, yData = self.model.get_other_data_points('other_'+opt)
         self.arrow_plot_window.update_view(xData,yData)
- 
+
+        self.arrow_plot_window.update_maximums(np.asarray(xMax),np.asarray(yMax))
+
+        X, Y = self.model.get_max_line(opt)
+        self.arrow_plot_window.update_max_line(X,Y)
  
     def load_file(self, filename):
         
@@ -75,7 +94,9 @@ class ArrowPlotController(QObject):
         return t,spectrum, filename
         
     def update_data(self, *args, **kwargs):
-        filenames = open_files_dialog(self.arrow_plot_window, 'Open files',filter='*.json')
+        filenames = kwargs.get('filenames', None)
+        if filenames is None:
+            filenames = open_files_dialog(self.arrow_plot_window, 'Open files',filter='*.json')
         if len(filenames):
             for fname in filenames:
                 self.model.add_result_from_file(fname)
@@ -83,7 +104,7 @@ class ArrowPlotController(QObject):
             self.calculate_data()
 
     def show_window(self):
-        self.display_window.raise_widget()
+        self.arrow_plot_window.raise_widget()
 
     def cursor_dragged(self, cursor):
         pos = cursor.getYPos()
@@ -109,11 +130,13 @@ class ArrowPlotController(QObject):
         pass
     
 
-    def setStyle(self, Style):
-        print('style:  ' + str(Style))
-        if Style==1:
+    def setStyle(self, app):
+        from .. import theme 
+        from .. import style_path
+        self.app = app
+        if theme==1:
             WStyle = 'plastique'
-            file = open(os.path.join(self.style_path, "stylesheet.qss"))
+            file = open(os.path.join(style_path, "stylesheet.qss"))
             stylesheet = file.read()
             self.app.setStyleSheet(stylesheet)
             file.close()

@@ -20,7 +20,7 @@ class UltrasoundAnalysisWidget(QMainWindow):
     up_down_signal = pyqtSignal(str)
     panelClosedSignal = pyqtSignal()
 
-    def __init__(self,app,_platform,Theme):
+    def __init__(self):
         super().__init__()
         self.initialized = False
         self.t = None
@@ -28,8 +28,7 @@ class UltrasoundAnalysisWidget(QMainWindow):
 
 
         self.setWindowTitle('Ultrasound Analysis')
-        self.Theme = Theme
-        self.app = app  # app object
+
         self.resize(1250, 800)
         
 

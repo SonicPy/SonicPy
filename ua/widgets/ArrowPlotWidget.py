@@ -106,14 +106,15 @@ class ArrowPlotWidget(QWidget):
         self.win = customWidget(params)
         _layout.addWidget(self.win)
 
+
        
         detail_widget.setLayout(_detail_layout)
         _layout.addWidget(detail_widget)
         
         #_buttons_layout_bottom.addWidget(QtWidgets.QLabel('2-way travel time:'))
         self.output_ebx = QtWidgets.QLineEdit('')
-        #_buttons_layout_bottom.addWidget(output_ebx)
-        _buttons_layout_bottom.addSpacerItem(HorizontalSpacerItem())
+        _buttons_layout_bottom.addWidget(self.output_ebx)
+        #_buttons_layout_bottom.addSpacerItem(HorizontalSpacerItem())
         buttons_widget_bottom.setLayout(_buttons_layout_bottom)
         _layout.addWidget(buttons_widget_bottom)
         my_widget.setLayout(_layout)

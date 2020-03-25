@@ -16,6 +16,7 @@ home_path = str(Path.home())
 import platform
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
+import pyqtgraph
 
 
 from PyQt5.QtWidgets import QApplication

@@ -124,7 +124,11 @@ class ArrowPlotController(QObject):
             self.line_plots[opt] = (np.asarray(X),np.asarray(Y))
             
             s = np.std(np.asarray(fits))
-            print('Time delay = ' + str(round(sum(np.asarray(fits))/len(fits)*1e6,5)) + ' microseconds, st.dev. = ' + str(round(s*1e6,5)) +' microseconds')
+            out = 'Time delay = ' + \
+                str(round(sum(np.asarray(fits))/len(fits)*1e6,5)) + \
+                    ' microseconds, st.dev. = ' + \
+                        str(round(s*1e6,5)) +' microseconds'
+            self.arrow_plot_window.output_ebx.setText(out)
         else:
             self.error_not_enough_datapoints()
 

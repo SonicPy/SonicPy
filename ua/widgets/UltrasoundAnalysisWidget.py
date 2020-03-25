@@ -161,15 +161,17 @@ class UltrasoundAnalysisWidget(QMainWindow):
         self.N_cbx = QtWidgets.QCheckBox('+/-')
         self.N_cbx.setChecked(True)
         self.save_btn = QtWidgets.QPushButton('Save result')
-
+        self.arrow_plt_btn = QtWidgets.QPushButton('Arrow plot')
         
         _buttons_layout_top.addWidget(open_btn)
         _buttons_layout_top.addWidget(fname_lbl)
         _buttons_layout_top.addWidget(freq_lbl)
         _buttons_layout_top.addWidget(self.freq_ebx)
         _buttons_layout_top.addWidget(self.N_cbx)
-        _buttons_layout_top.addSpacerItem(HorizontalSpacerItem())
+        
         _buttons_layout_top.addWidget(self.save_btn)
+        _buttons_layout_top.addSpacerItem(HorizontalSpacerItem())
+        _buttons_layout_top.addWidget(self.arrow_plt_btn)
 
         buttons_widget_top.setLayout(_buttons_layout_top)
         _layout.addWidget(buttons_widget_top)
@@ -198,7 +200,6 @@ class UltrasoundAnalysisWidget(QMainWindow):
 
     def closeEvent(self, QCloseEvent, *event):
         self.panelClosedSignal.emit()
-        super().closeEvent(QCloseEvent, *event)
         
 
     def keyPressEvent(self, e):
@@ -238,7 +239,7 @@ class UltrasoundAnalysisWidget(QMainWindow):
 
         self.menuBar = QtWidgets.QMenuBar(self)
         self.menuBar.setGeometry(QtCore.QRect(0, 0, 793, 22))
-        self.file_menu = self.menuBar.addMenu('File')
+        #self.file_menu = self.menuBar.addMenu('Tools')
         self.file_save_hdf5_act = QtWidgets.QAction('Save to HDF5', self)    
         self.actionSave_next = QtWidgets.QAction("Save", self)
         self.actionSave_As = QtWidgets.QAction("Save as...", self)
@@ -247,12 +248,12 @@ class UltrasoundAnalysisWidget(QMainWindow):
         self.actionBGclose = QtWidgets.QAction("Close overlay", self)
         self.actionCursors = QtWidgets.QAction("Phase", self)
         self.actionArrowPlot = QtWidgets.QAction("Arrow Plot", self)
-        self.file_menu.addAction(self.actionSave_As)    
-        self.file_menu.addAction(self.actionPreferences)  
-        self.file_menu.addAction(self.actionBG) 
-        self.file_menu.addAction(self.actionCursors) 
-        self.file_menu.addAction(self.actionArrowPlot) 
-        self.opts_menu = self.menuBar.addMenu('Arb')
+        #self.file_menu.addAction(self.actionSave_As)    
+        #self.file_menu.addAction(self.actionPreferences)  
+        #self.file_menu.addAction(self.actionBG) 
+        #self.file_menu.addAction(self.actionCursors) 
+        #self.file_menu.addAction(self.actionArrowPlot) 
+        #self.opts_menu = self.menuBar.addMenu('Arb')
         self.ActionRecallSetup = QtWidgets.QAction('Recall setup', self)        
         self.ActionSaveSetup = QtWidgets.QAction('Save setup', self)   
         self.ActionSetUserWaveform = QtWidgets.QAction('Edit user waveform', self)   

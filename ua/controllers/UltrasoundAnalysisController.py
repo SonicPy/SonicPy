@@ -38,7 +38,7 @@ class UltrasoundAnalysisController(QObject):
     def __init__(self, app=None, offline = False):
         super().__init__()
         self.model = UltrasoundAnalysisModel()
-        
+        self.fname = None
     
         if app is not None:
             self.setStyle(app)
@@ -62,15 +62,16 @@ class UltrasoundAnalysisController(QObject):
 
         self.display_window.save_btn.clicked.connect(self.save_result)
 
-        ### menu items
-        self.display_window.actionArrowPlot.triggered.connect(self.ArrowPlotShow)
+       
+        self.display_window.arrow_plt_btn.clicked.connect(self.ArrowPlotShow)
 
     def ArrowPlotShow(self):
         self.arrow_plot_controller.arrow_plot_window.raise_widget()
 
     def save_result(self):
-        filename = self.fname + '.json'
-        self.model.save_result(filename)
+        if self.fname is not None:
+            filename = self.fname + '.json'
+            self.model.save_result(filename)
 
 
     def sync_cursors(self, pos):
@@ -80,33 +81,36 @@ class UltrasoundAnalysisController(QObject):
     def calculate_data(self):
 
         freq = self.display_window.freq_ebx.value()*1e6
+        
         t = self.model.t
         spectrum = self.model.spectrum
-        t_f, spectrum_f = zero_phase_lowpass_filter([t,spectrum],60e6,1)
+        if t is not None and spectrum is not None:
 
-        [l1, r1] = self.display_window.get_echo_bounds(0)
-        [l2, r2] = self.display_window.get_echo_bounds(1)
+            t_f, spectrum_f = zero_phase_lowpass_filter([t,spectrum],60e6,1)
 
-        #pg.plot(np.asarray(spectrum_f), title="spectrum_f")
-        
-        
-        self.model.filter_echoes(l1, r1, l2, r2, freq)
+            [l1, r1] = self.display_window.get_echo_bounds(0)
+            [l2, r2] = self.display_window.get_echo_bounds(1)
 
-        self.model.cross_correlate()
-        self.model.exract_optima()
+            #pg.plot(np.asarray(spectrum_f), title="spectrum_f")
+            
+            
+            self.model.filter_echoes(l1, r1, l2, r2, freq)
+
+            self.model.cross_correlate()
+            self.model.exract_optima()
 
 
-        self.display_window.detail_plot1.setData(*self.model.filtered1)
-        self.display_window.detail_plot1_bg.setData(*self.model.filtered2)
-        self.display_window.detail_plot2.setData(self.model.cross_corr_shift, self.model.cross_corr)
+            self.display_window.detail_plot1.setData(*self.model.filtered1)
+            self.display_window.detail_plot1_bg.setData(*self.model.filtered2)
+            self.display_window.detail_plot2.setData(self.model.cross_corr_shift, self.model.cross_corr)
 
-        N = self.display_window.N_cbx.isChecked()
-        if N:
-            out = self.model.maxima
-        else:
-            out = self.model.minima
-        self.display_window.detail_plot2_bg.setData(*out)
-        #self.display_window.output_ebx.setText('%.5e' % (self.model.c_diff_optimized))
+            N = self.display_window.N_cbx.isChecked()
+            if N:
+                out = self.model.maxima
+            else:
+                out = self.model.minima
+            self.display_window.detail_plot2_bg.setData(*out)
+            #self.display_window.output_ebx.setText('%.5e' % (self.model.c_diff_optimized))
 
 
     def snap_cursors_to_optimum(self, c1, c2, t, spectrum):

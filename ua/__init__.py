@@ -19,11 +19,8 @@ from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 import pyqtgraph
 
-
-from ua.controllers.UltrasoundAnalysisController import UltrasoundAnalysisController
-from ua.controllers.ArrowPlotController import ArrowPlotController
-
 def main():
+    from ua.controllers.UltrasoundAnalysisController import UltrasoundAnalysisController
     if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
         QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
     if hasattr(QtCore.Qt, 'AA_UseHighDpiPixmaps'):
@@ -50,6 +47,7 @@ def main():
     return app.exec_()
 
 def arrow_plot():
+    from ua.controllers.ArrowPlotController import ArrowPlotController
     if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
         QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
     if hasattr(QtCore.Qt, 'AA_UseHighDpiPixmaps'):

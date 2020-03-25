@@ -17,11 +17,12 @@ import platform
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 
-from um.controllers.UltrasoundController import UltrasoundController
+
 from PyQt5.QtWidgets import QApplication
 
 
 def main():
+    from um.controllers.UltrasoundController import UltrasoundController
     if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
         QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 

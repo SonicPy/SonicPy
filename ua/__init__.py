@@ -17,6 +17,7 @@ home_path = str(Path.home())
 import platform
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
+import pyqtgraph
 
 
 from ua.controllers.UltrasoundAnalysisController import UltrasoundAnalysisController
@@ -61,7 +62,7 @@ def arrow_plot():
     
     controller = ArrowPlotController(app = app)
     controller.show_window()
-
+    '''
     controller.update_data( filenames=
                             ['resources/ultrasonic/4000psi-300K_+15MHz000.csv.json',
                             'resources/ultrasonic/4000psi-300K_+18MHz000.csv.json',
@@ -76,6 +77,6 @@ def arrow_plot():
                             'resources/ultrasonic/4000psi-300K_+39MHz000.csv.json',
                             'resources/ultrasonic/4000psi-300K_+42MHz000.csv.json']
                             )                            
-
+    '''
     
     return app.exec_()

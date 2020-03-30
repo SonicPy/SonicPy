@@ -40,23 +40,29 @@ class Panel(QtWidgets.QGroupBox):
         for i, pv in enumerate(pvs):
             
             desc = pv._description.split(';')[0]
-            self._grid.addWidget(QtWidgets.QLabel(desc), i, 0)
+            
             
             ctrl = None
             if pv is not None:
                 pv_type = pv._type
+              
                 if pv_type is list:
                     ctrl = pvQComboBox(pv) 
                 if pv_type is str:    
                     ctrl = pvQLineEdit(pv)
                 if pv_type is int or pv_type is float:
                     ctrl = pvQDoubleSpinBox(pv)
+                    unit = pv._unit
+                    if unit != '':
+                        desc = desc + ' (' + pv._unit + ')'
                 if pv_type is bool:
                     ctrl = pvQPushButton(pv)
                     
                 self.controls[pv._pv_name] = ctrl
 
                 if ctrl is not None:
+                    label = QtWidgets.QLabel(desc)
+                    self._grid.addWidget(label, i, 0)
                     self._grid.addWidget(ctrl, i, 1)
                 self.i = i
         

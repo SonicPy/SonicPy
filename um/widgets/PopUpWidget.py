@@ -272,6 +272,7 @@ class EditWidget(PopUpWidget):
 
     def update_plot(self, data):
         self.plot_window.set_data(data[0],data[1])
+        print('updated plot')
         
     def closeEvent(self, event):
         # Overrides close event to let controller know that widget was closed by user

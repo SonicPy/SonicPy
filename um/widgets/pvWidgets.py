@@ -89,6 +89,7 @@ class pvQDoubleSpinBox(QDoubleSpinBox, pvQWidget):
             QDoubleSpinBox.setDecimals(widget, 0)
         else:
             increment = myPV._increment
+        
             QDoubleSpinBox.setDecimals(widget, 3)
             QDoubleSpinBox.setSingleStep(widget, increment) 
         QDoubleSpinBox.setKeyboardTracking(widget, False)

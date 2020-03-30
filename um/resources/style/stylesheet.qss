@@ -259,7 +259,7 @@ QComboBox:disabled {
 }
 
 QComboBox::down-arrow {
-    image: url(resources/angle-down.png);
+    image: url(um/resources/style/angle-down.png);
     width: 12px;
     height: 12px;
  

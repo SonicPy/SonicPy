@@ -25,6 +25,10 @@ class PV(QObject):
             self._type = types[settings['param']['type']]
             if self._type == list:
                 self._items = settings['list']
+            if self._type == int or self._type == float:
+                if 'val_scale' in settings:
+                    self._val_scale = self._val_scale = settings['val_scale']
+                else : self._val_scale = 1
         if 'methods' in settings:
             self._get_enabled = settings['methods']['get']
             self._set_enabled = settings['methods']['set']
@@ -34,6 +38,12 @@ class PV(QObject):
             self._min = settings['min']
         if 'max' in settings:
             self._max = settings['max']    
+        if 'format' in settings:
+            self._format = settings['format']   
+        else: self._format = ''
+        if 'unit' in settings:
+            self._unit = settings['unit']
+        else: self._unit = ''
     
 
 class pvModel(QThread):
@@ -254,7 +264,15 @@ class pvModel(QThread):
         data = {}
         
         for setting in settings_list:
-            data[setting] = self.pvs[setting]._val
+            pv = self.pvs[setting]
+            val = pv._val
+            
+            t = pv._type
+            if t == int or t == float:
+                f = pv._val_scale
+                if f != 1:
+                    val = f * val
+            data[setting] = val
         
         tag = self.settings_file_tag
         data_out = {tag:data}

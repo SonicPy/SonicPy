@@ -79,8 +79,8 @@ class UltrasoundController(QObject):
 
         self.display_window.insert_panel(scope_panel)
         self.display_window.insert_panel(afg_panel)
-        #self.display_window.insert_panel(arb_panel)
-        #self.display_window.insert_panel(arb_filter_panel)
+        self.display_window.insert_panel(arb_panel)
+        self.display_window.insert_panel(arb_filter_panel)
         self.display_window.insert_panel(sweep_widget)
 
         scope_waveform_widget = self.scope_plot_controller.widget

@@ -268,10 +268,7 @@ class pvModel(QThread):
             val = pv._val
             
             t = pv._type
-            if t == int or t == float:
-                f = pv._val_scale
-                if f != 1:
-                    val = f * val
+            
             data[setting] = val
         
         tag = self.settings_file_tag

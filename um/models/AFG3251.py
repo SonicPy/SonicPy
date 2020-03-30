@@ -56,11 +56,11 @@ class AFG_AFG3251(Afg, pvModel):
         # Task description markup. Aarbitrary default values ('val') are for type recognition in panel widget constructor
         # supported types are float, int, bool, string, and list of strings
         self.tasks = {  'amplitude': 
-                                {'desc': 'Amplitude', 'unit':'Vp-p', 'val':1.0,'min':0.05,'max':9,'increment':0.05, 
+                                {'desc': 'Amplitude', 'unit':u'V<sub>p-p</sub>', 'val':1.0,'min':0.05,'max':9,'increment':0.05, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'amplitude','type':'f'}},
                         'frequency': 
-                                {'desc': 'Frequency', 'unit':'Hz','val':30000000.0, 'min':0, 'max':120000000,'increment':500000, 
+                                {'desc': 'Frequency', 'unit':'MHz','val':30000000.0,'val_scale':1e6, 'min':0, 'max':1000e6,'increment':.5, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'frequency','type':'f'}},
                         'output_state':     
@@ -172,7 +172,7 @@ class AFG_AFG3251(Afg, pvModel):
         ans = float(ans)
         return ans
 
-    def _set_duration(self, duraton):
+    def _set_duration(self, duration):
         
         self.duration = duration
 

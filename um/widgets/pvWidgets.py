@@ -13,6 +13,11 @@ class pvQWidget(QWidget):
         #super().__init__(self)
         self.pv = myPV
         self.val = None
+        
+        if hasattr(self.pv,'_val_scale'):
+            self.scale = self.pv._val_scale
+        else:
+            self.scale = 1
         if hasattr(self.pv,'get'):
             current_value = self.pv.get()
         else: current_value = None
@@ -26,10 +31,15 @@ class pvQWidget(QWidget):
         
     def valueChangedCallback(self,value):
         if hasattr(self.pv,'set'):
+            if self.scale !=1:
+                value = value * self.scale
             self.pv.set(value)
 
     def setValue(self, tag, value):
-        self.val = value[0]
+        value = value[0]
+        if self.scale !=1:
+                value = value / self.scale
+        self.val = value
 
 class pvQLineEdit(QLineEdit, pvQWidget):
     def __init__(self, myPV):
@@ -75,16 +85,20 @@ class pvQDoubleSpinBox(QDoubleSpinBox, pvQWidget):
     def __init__(self, myPV):
         QDoubleSpinBox.__init__(self)
         pvQWidget.__init__(self, myPV)
+        
 
         widget = self
         QDoubleSpinBox.setGroupSeparatorShown(widget, True)
         minimum = myPV._min
         maximum = myPV._max
+        
                     
         QDoubleSpinBox.setMinimum(widget, minimum)
         QDoubleSpinBox.setMaximum(widget, maximum)
-        value = myPV._val            
-        QDoubleSpinBox.setValue(widget, value)
+        val = myPV._val            
+       
+
+        self.setValue(widget, [val])
         if myPV._type is int:
             QDoubleSpinBox.setDecimals(widget, 0)
         else:
@@ -97,11 +111,16 @@ class pvQDoubleSpinBox(QDoubleSpinBox, pvQWidget):
 
     def valueChangedCallbackPreTreat(self, val):
         val = round(val,5)
-        self.valueChangedCallback(val)
+        
+        self.valueChangedCallback(val )
 
     def setValue(self, tag, value):
+        
         pvQWidget.setValue(self, tag, value)
-        value = self.val
+        
+        value = self.val 
+        
+
         self.blockSignals(True)
         
         widget = self

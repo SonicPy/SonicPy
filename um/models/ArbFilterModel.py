@@ -20,22 +20,26 @@ class ArbFilterModel(Scope, pvModel):
     channel_changed_signal = pyqtSignal()
     model_value_changed_signal = pyqtSignal(dict)
 
-    def __init__(self, parent, definitions):
+    def __init__(self, parent):
         
         pvModel.__init__(self, parent)
-        
-        self.filter_types = [ definitions[x].param['name'] for x in definitions]
+      
         
 
-        self.tasks = {  'filter_type': 
-                                {'desc': 'Filter type', 'val':self.filter_types[0], 'list':self.filter_types, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'filter_type','type':'l'}},
+        self.tasks = {  
                         
                         'edit_state':     
                                 {'desc': ';Edit', 'val':False, 
                                 'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'edit_state','type':'b'}}
+                                'param':{'tag':'edit_state','type':'b'}},
+                        'filtered_waveform':     
+                                {'desc': 'Waveform', 'val':None, 
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'waveform','type':'dict'}},
+                        'filter_params':     
+                                {'desc': 'Waveform parameters', 'val':None, 
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'waveform','type':'dict'}}
                                 
                       }       
 
@@ -53,23 +57,15 @@ class ArbFilterModel(Scope, pvModel):
     def _exit_task(self):
         pass
 
-    def _get_filter_type(self):
+    '''    def _get_filter_type(self):
         ans = self.pvs['filter_type']._val
         #print('get ' + str(ans))
         return ans
 
     def _set_filter_type(self, param):
         #print('set ' + str(param))
-        self.pvs['filter_type']._val= param
+        self.pvs['filter_type']._val= param'''
 
-    def _get_variable_parameter(self):
-        ans = self.pvs['variable_parameter']._val
-        #print('get ' + str(ans))
-        return ans
-
-    def _set_variable_parameter(self, param):
-        #print('set ' + str(param))
-        self.pvs['variable_parameter']._val= param
 
     def _get_edit_state(self):
         ans = self.pvs['edit_state']._val

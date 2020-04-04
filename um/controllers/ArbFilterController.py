@@ -10,27 +10,49 @@ import json
 from um.widgets.scope_widget import scopeWidget
 
 from um.controllers.EditController import EditController
-from um.models.FilterDefinitions import filters
+#from um.models.FilterDefinitions import filters
 
 from um.widgets.panel import Panel
 from functools import partial
 from um.widgets.UtilityWidgets import save_file_dialog, open_file_dialog, open_files_dialog
 from um.controllers.pv_controller import pvController
 from utilities.utilities import *
-
+from um.models.FilterDefinitions import no_filter_controller
 
 class ArbFilterController(pvController):
     callbackSignal = pyqtSignal(dict)  
-    stoppedSignal = pyqtSignal()
-    dataUpdatedSignal = pyqtSignal(dict)
-    dataBGUpdatedSignal = pyqtSignal(dict)
-    runStateSignal = pyqtSignal(bool)
+    #stoppedSignal = pyqtSignal()
+    #dataUpdatedSignal = pyqtSignal(dict)
+    #dataBGUpdatedSignal = pyqtSignal(dict)
+    #runStateSignal = pyqtSignal(bool)
 
     def __init__(self, parent, isMain = False):
-        definitions = filters
-        model = ArbFilterModel(parent, definitions)
+        #definitions = filters
+        model = ArbFilterModel(parent)
         super().__init__(parent, model, isMain) 
         self.arb_filter_edit_controller = EditController(self, title='Filter control')
+
+        self.arb_filter_1 = no_filter_controller(self)
+        #self.arb_filter_2 = burst_fixed_time_controller(self)
+
+        self.arb_filter_edit_controller.add_controller(self.arb_filter_1.model.instrument, self.arb_filter_1)
+        #self.arb_filter_edit_controller.add_controller(self.arb3.model.instrument, self.arb3)
+
+        self.arb_filter_edit_controller.select_controller(self.arb_filter_1.model.instrument)
+
+
+        f_types = [self.arb_filter_1.model.instrument]
+
+
+
+        filters_task = {  'filter_type': 
+                                {'desc': 'Wave type', 'val':f_types[0], 'list':f_types, 
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'waveform_type','type':'l'}}}
+        self.model.create_pvs(filters_task)
+
+
+
         self.panel_items =[ 'filter_type',
                             'edit_state']
         self.init_panel("Waveform filter", self.panel_items)

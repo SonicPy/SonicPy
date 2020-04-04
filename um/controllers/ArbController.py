@@ -24,10 +24,10 @@ from um.models.ArbDefinitions import g_wavelet_controller, gx2_wavelet_controlle
 
 class ArbController(pvController):
     callbackSignal = pyqtSignal(dict)  
-    stoppedSignal = pyqtSignal()
-    dataUpdatedSignal = pyqtSignal(dict)
-    dataBGUpdatedSignal = pyqtSignal(dict)
-    runStateSignal = pyqtSignal(bool)
+    #stoppedSignal = pyqtSignal()
+    #dataUpdatedSignal = pyqtSignal(dict)
+    #dataBGUpdatedSignal = pyqtSignal(dict)
+    #runStateSignal = pyqtSignal(bool)
 
     def __init__(self, parent, isMain = False):
         
@@ -36,18 +36,16 @@ class ArbController(pvController):
         super().__init__(parent, model, isMain) 
 
         self.arb1 = g_wavelet_controller(self)
-        self.arb2 = gx2_wavelet_controller(self)
+        
         self.arb3 = burst_fixed_time_controller(self)
 
 
         self.arb_edit_controller = EditController(self, title='Waveform control')
         self.arb_edit_controller.add_controller(self.arb1.model.instrument, self.arb1)
-        self.arb_edit_controller.add_controller(self.arb2.model.instrument, self.arb2)
         self.arb_edit_controller.add_controller(self.arb3.model.instrument, self.arb3)
-
         self.arb_edit_controller.select_controller(self.arb1.model.instrument)
 
-        w_types = [self.arb1.model.instrument, self.arb2.model.instrument, self.arb3.model.instrument]
+        w_types = [self.arb1.model.instrument,  self.arb3.model.instrument]
 
         waveforms_task = {  'waveform_type': 
                                 {'desc': 'Wave type', 'val':w_types[0], 'list':w_types, 
@@ -61,9 +59,6 @@ class ArbController(pvController):
                             'edit_state']
         self.init_panel("USER1 waveform", self.panel_items)
 
-        
-
-
         self.make_connections()
         
         if isMain:
@@ -74,7 +69,7 @@ class ArbController(pvController):
 
     def make_connections(self):
         self.model.pvs['waveform_type'].value_changed_signal.connect(self.waveform_type_signal_callback)
-        #self.model.pvs['variable_parameter'].value_changed_signal.connect(self.variable_parameter_signal_callback)
+        
         self.model.pvs['edit_state'].value_changed_signal.connect(self.edit_state_signal_callback)
         self.model.pvs['arb_waveform'].value_changed_signal.connect(self.arb_waveform_signal_callback)
         self.arb_edit_controller.applyClickedSignal.connect(self.arb_edited_apply_clicked_signal_callback)
@@ -83,8 +78,7 @@ class ArbController(pvController):
 
         for controller in self.arb_edit_controller.controllers:
             controller.model.pvs['waveform'].value_changed_signal.connect(self.waveform_changed_signal_callback)
-            controller.model.pvs['waveform'].value_changed_signal.connect(self.waveform_changed_signal_callback)
-            controller.model.pvs['waveform'].value_changed_signal.connect(self.waveform_changed_signal_callback)
+        
     
     def show_widget(self):
         self.panel.raise_widget()

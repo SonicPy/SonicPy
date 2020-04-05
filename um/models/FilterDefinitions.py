@@ -1,5 +1,5 @@
 
-from um.models.arb_filters import my_filter, no_filter
+from um.models.arb_filters import my_filter, no_filter, tukey_filter
 
 from PyQt5.QtCore import QThread, pyqtSignal
 from um.models.pv_model import pvModel
@@ -27,15 +27,15 @@ class no_filter_model(pvModel):
                         'comment':''}
         
         # Task description markup. Aarbitrary default values ('val') are for type recognition in panel widget constructor
-        # supported types are float, int, bool, string, and list of strings
+        # supported types are float, int, bool, string, list of strings, dict
         self.tasks = {  'waveform_in':
                                 {'desc': 'Waveform IN', 'val':{}, 
                                 'methods':{'set':True, 'get':False}, 
-                                'param':{'tag':'user1_waveform','type':'dict'}},
+                                'param':{'tag':'waveform_in','type':'dict'}},
                         'waveform_out':
                                 {'desc': 'Waveform OUT', 'val':{}, 
                                 'methods':{'set':True, 'get':False}, 
-                                'param':{'tag':'user1_waveform','type':'dict'}},
+                                'param':{'tag':'waveform_out','type':'dict'}},
                         'apply':     
                                 {'desc': ';Apply', 'val':False, 
                                 'methods':{'set':True, 'get':True}, 
@@ -51,6 +51,7 @@ class no_filter_model(pvModel):
         settings = self.get_settings(['waveform_in'])[self.settings_file_tag]
         print(settings)
         ans = func(settings)
+        #print (ans)
         self.pvs['waveform_out'].set(ans)
        
 
@@ -59,56 +60,65 @@ class no_filter_model(pvModel):
             self.compute_waveform()
             self.pvs['apply'].set(False)
 
+class tukey_filter_controller(pvController):
+    def __init__(self, parent, isMain = False):
+        model = tukey_filter_model(parent)
+        super().__init__(parent, model, isMain)  
+        self.panel_items =['alpha',
+                      'apply']
+        self.init_panel("Tukey", self.panel_items)
+        if isMain:
+            self.show_widget()
 
-class arb_filter():
-      def __init__(self):
-            self.name = ''
-            self.param = {  }
-            self.func = None
-
-      def get_params(self):
-            return self.param
-
-
-
-class fltr_none(arb_filter):
-      def __init__(self):
-            self.name = 'none'
-            self.func = lambda x: x 
-            self.param = {
-                        'name': 'No filter',
+class tukey_filter_model(pvModel):
+    model_value_changed_signal = pyqtSignal(dict)
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.offline = True
+        ## model speficic:
+        self.instrument = 'tukey_filter'
+        self.param = {  'name': 'Tukey filter',
                         'reference':'',
-                        'comment':'',
-                        'params':{ 
-                        }}
+                        'comment':''}
+        
+        # Task description markup. Aarbitrary default values ('val') are for type recognition in panel widget constructor
+        # supported types are float, int, bool, string, and list of strings
+        self.tasks = {  'waveform_in':
+                                {'desc': 'Waveform IN', 'val':{}, 
+                                'methods':{'set':True, 'get':False}, 
+                                'param':{'tag':'waveform_in','type':'dict'}},
+                        'waveform_out':
+                                {'desc': 'Waveform OUT', 'val':{}, 
+                                'methods':{'set':True, 'get':False}, 
+                                'param':{'tag':'waveform_out','type':'dict'}},
+                        'alpha':{'symbol':u'α',
+                                'desc':u'α',
+                                'unit':u'',
+                                'val':0.1, 
+                                'increment':0.05,'min':0,'max':1 ,
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'alpha','type':'f'}},
+                        'apply':     
+                                {'desc': ';Apply', 'val':False, 
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'apply','type':'b'}},
+                                }
 
-class fltr_tukey(arb_filter):
-      def __init__(self):
-            self.name = 'fltr_tukey'
-            self.func = my_filter
-            self.param = {
-                        'name': 'Tukey',
-                        'reference':'',
-                        'comment':u'The Tukey window, also known as the cosine-tapered window, can be regarded as a cosine lobe of width α(N + 1)/2 that is convolved with a rectangular window of width (1 − α/2)(N + 1)',
-                        'params':{ 
-                        'alpha':      {'symbol':u'α',
-                                     'desc':u'At α = 0 it becomes rectangular, and at α = 1 it becomes a Hann window',
-                                     'unit':'',
-                                     'val':.1}
-                        }}
+        self.create_pvs(self.tasks)
+        
+        self.start()
 
-class fltr_lowpass(arb_filter):
-      def __init__(self):
-            self.name = 'fltr_lowpass'
-            self.func = my_filter
-            self.param = {
-                        'name': 'Lowpass',
-                        'reference':'',
-                        'comment':u'',
-                        'params':{ 
-                        'f_lowcut':  {'symbol':u'f<sub>L</sub>',
-                                     'desc':u'Low-cut frequency',
-                                     'unit':'Hz',
-                                     'val':30e6}
-                        }}
+    def compute_waveform(self):
+        func = tukey_filter
+        settings = self.get_settings(['waveform_in','alpha'])[self.settings_file_tag]
+        print(settings)
+        ans = func(settings)
+        #print(ans)
+        self.pvs['waveform_out'].set(ans)
+       
+
+    def _set_apply(self, val):
+        if val:
+            self.compute_waveform()
+            self.pvs['apply'].set(False)
 

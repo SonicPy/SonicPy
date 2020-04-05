@@ -17,8 +17,7 @@ from um.models.pv_model import pvModel
 
 
 class ArbModel(Scope, pvModel):
-    waveform_updated_signal = pyqtSignal(dict)
-    channel_changed_signal = pyqtSignal()
+ 
     model_value_changed_signal = pyqtSignal(dict)
 
     def __init__(self, parent):

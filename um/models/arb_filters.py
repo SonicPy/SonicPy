@@ -12,11 +12,18 @@ import json
 
 
 def no_filter(params):
-    if 'waveform_in' in params:
-        waveform_in = params['waveform_in']
-        return waveform_in
-    else:
-        return None
+    waveform_in = params['waveform_in']
+    return waveform_in
+    
+def tukey_filter(params):
+    alpha = params['alpha']
+    waveform_in = params['waveform_in']
+    t = waveform_in['t']
+    waveform = waveform_in['waveform']
+    tk = tukey(len(waveform), alpha)
+    waveform = waveform * tk
+    waveform_out = {'t':t,'waveform':waveform}
+    return waveform_out
                         
 def g_wave(t_array, A, f_0,sigma,x,c,f_min, f_max, opt=0):
 
@@ -76,6 +83,8 @@ def scale_waveform(waveform):
     fy_scaled = fy_scaled/mx * 16000
     fy_scaled = fy_scaled.astype(int)
     return [waveform[0],waveform[1]]
+
+
 
 def my_filter(t, y, pad, tukey_alpha,points_per_period, highcut):
     data_length = len(t)

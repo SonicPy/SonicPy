@@ -24,10 +24,7 @@ from um.models.ArbDefinitions import g_wavelet_controller, gx2_wavelet_controlle
 
 class ArbController(pvController):
     callbackSignal = pyqtSignal(dict)  
-    #stoppedSignal = pyqtSignal()
-    #dataUpdatedSignal = pyqtSignal(dict)
-    #dataBGUpdatedSignal = pyqtSignal(dict)
-    #runStateSignal = pyqtSignal(bool)
+
 
     def __init__(self, parent, isMain = False):
         
@@ -85,9 +82,10 @@ class ArbController(pvController):
 
     def waveform_changed_signal_callback(self, pv_name, data):
         data = data[0]
-        t = data['t']
-        waveform = data['waveform']
-        self.arb_edit_controller.widget.update_plot([t,waveform])
+        if len(data):
+            t = data['t']
+            waveform = data['waveform']
+            self.arb_edit_controller.widget.update_plot([t,waveform])
 
     def controller_selection_edited_signal_callback(self, key):
         self.arb_edit_controller.select_controller(key)

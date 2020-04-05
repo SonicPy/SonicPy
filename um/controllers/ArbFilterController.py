@@ -17,14 +17,11 @@ from functools import partial
 from um.widgets.UtilityWidgets import save_file_dialog, open_file_dialog, open_files_dialog
 from um.controllers.pv_controller import pvController
 from utilities.utilities import *
-from um.models.FilterDefinitions import no_filter_controller
+from um.models.FilterDefinitions import no_filter_controller, tukey_filter_controller
 
 class ArbFilterController(pvController):
     callbackSignal = pyqtSignal(dict)  
-    #stoppedSignal = pyqtSignal()
-    #dataUpdatedSignal = pyqtSignal(dict)
-    #dataBGUpdatedSignal = pyqtSignal(dict)
-    #runStateSignal = pyqtSignal(bool)
+
 
     def __init__(self, parent, isMain = False):
         #definitions = filters
@@ -33,15 +30,15 @@ class ArbFilterController(pvController):
         self.arb_filter_edit_controller = EditController(self, title='Filter control')
 
         self.arb_filter_1 = no_filter_controller(self)
-        #self.arb_filter_2 = burst_fixed_time_controller(self)
+        self.arb_filter_2 = tukey_filter_controller(self)
 
         self.arb_filter_edit_controller.add_controller(self.arb_filter_1.model.instrument, self.arb_filter_1)
-        #self.arb_filter_edit_controller.add_controller(self.arb3.model.instrument, self.arb3)
+        self.arb_filter_edit_controller.add_controller(self.arb_filter_2.model.instrument, self.arb_filter_2)
 
         self.arb_filter_edit_controller.select_controller(self.arb_filter_1.model.instrument)
 
 
-        f_types = [self.arb_filter_1.model.instrument]
+        f_types = [self.arb_filter_1.model.instrument, self.arb_filter_2.model.instrument]
 
 
 
@@ -69,7 +66,11 @@ class ArbFilterController(pvController):
         #self.model.pvs['variable_parameter'].value_changed_signal.connect(self.variable_parameter_signal_callback)
         self.model.pvs['edit_state'].value_changed_signal.connect(self.edit_state_signal_callback)
         self.arb_filter_edit_controller.applyClickedSignal.connect(self.arb_filter_edited_apply_clicked_signal_callback)
-    
+        self.arb_filter_edit_controller.widget.controller_selection_edited_signal.connect(self.controller_selection_edited_signal_callback)
+
+        for controller in self.arb_filter_edit_controller.controllers:
+            controller.model.pvs['waveform_out'].value_changed_signal.connect(self.waveform_changed_signal_callback)
+        
     def show_widget(self):
         self.panel.raise_widget()
 
@@ -78,13 +79,20 @@ class ArbFilterController(pvController):
         
         self.arb_filter_edit_controller.widget.set_selected_choice(data)
 
+    def waveform_changed_signal_callback(self, pv_name, data):
+        data = data[0]
+        print('filtered_waveform_changed_signal_callback: '+ str(data))
+        if len(data):
+            t = data['t']
+            waveform = data['waveform_out']
+            self.arb_filter_edit_controller.widget.update_plot([t,waveform])
+
+    def controller_selection_edited_signal_callback(self, key):
+        self.arb_filter_edit_controller.select_controller(key)
+
     def arb_filter_edited_apply_clicked_signal_callback(self, selected):
         print(selected)
 
-    '''
-    def variable_parameter_signal_callback(self, pv_name, data):
-        data = data[0]
-    '''    
 
     def edit_state_signal_callback(self, pv_name, data):
         data = data[0]

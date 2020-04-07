@@ -24,7 +24,7 @@ from um.models.ArbDefinitions import g_wavelet_controller, gx2_wavelet_controlle
 
 class ArbController(pvController):
     callbackSignal = pyqtSignal(dict)  
-
+    waveformComputedSignal = pyqtSignal(dict)
 
     def __init__(self, parent, isMain = False):
         
@@ -33,6 +33,7 @@ class ArbController(pvController):
         super().__init__(parent, model, isMain) 
 
         self.arb1 = g_wavelet_controller(self)
+        
         
         self.arb3 = burst_fixed_time_controller(self)
 
@@ -57,6 +58,10 @@ class ArbController(pvController):
         self.init_panel("USER1 waveform", self.panel_items)
 
         self.make_connections()
+
+        self.arb1.model.pvs['output_channel']._val = self.model.pvs['arb_waveform']
+        self.arb3.model.pvs['output_channel']._val = self.model.pvs['arb_waveform']
+
         
         if isMain:
             self.show_widget()
@@ -73,8 +78,7 @@ class ArbController(pvController):
 
         self.arb_edit_controller.widget.controller_selection_edited_signal.connect(self.controller_selection_edited_signal_callback)
 
-        for controller in self.arb_edit_controller.controllers:
-            controller.model.pvs['waveform'].value_changed_signal.connect(self.waveform_changed_signal_callback)
+        
         
     
     def show_widget(self):
@@ -82,10 +86,12 @@ class ArbController(pvController):
 
     def waveform_changed_signal_callback(self, pv_name, data):
         data = data[0]
-        if len(data):
+        print('waveform_changed_signal_callback. pv: '+ str(pv_name))
+        #self.waveformComputedSignal.emit(data)
+        '''if len(data):
             t = data['t']
             waveform = data['waveform']
-            self.arb_edit_controller.widget.update_plot([t,waveform])
+            self.arb_edit_controller.widget.update_plot([t,waveform])'''
 
     def controller_selection_edited_signal_callback(self, key):
         self.arb_edit_controller.select_controller(key)
@@ -95,11 +101,13 @@ class ArbController(pvController):
 
     def waveform_type_signal_callback(self, pv_name, data):
         data = data[0]
-        self.arb_edit_controller.widget.set_selected_choice(data)
+        print('waveform_type_signal_callback. pv: '+ str(pv_name))
+        #self.arb_edit_controller.widget.set_selected_choice(data)
 
     def arb_waveform_signal_callback(self, pv_name, data):
-        data = data[0]['plot']
-        self.arb_edit_controller.update_plot(data)
+        data = data[0]
+        self.waveformComputedSignal.emit(data)
+        #self.arb_edit_controller.update_plot(data)
 
     '''
     def variable_parameter_signal_callback(self, pv_name, data):

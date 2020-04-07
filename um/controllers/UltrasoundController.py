@@ -107,7 +107,10 @@ class UltrasoundController(QObject):
         self.display_window.ActionSetUserWaveform.triggered.connect(self.SetUserWaveformCallback)
         self.display_window.actionCursors.triggered.connect(self.cursorsCallback)
 
+        # User waveform events
+        self.arb_controller.waveformComputedSignal.connect(self.waveform_computed_callback)
 
+    
     def cursorsCallback(self):
         self.phase_controller.show_view()
 
@@ -287,11 +290,6 @@ class UltrasoundController(QObject):
         '''
         pass
 
-
-    
-
-    
-
     def setStyle(self, Style):
         print('style:  ' + str(Style))
         if Style==1:
@@ -306,3 +304,21 @@ class UltrasoundController(QObject):
             self.app.setStyleSheet(" ")
             #self.app.setPalette(self.win_palette)
             self.app.setStyle(WStyle)
+
+
+    ####################################################
+    ### Next is the User waveform handling
+    ####################################################
+
+    def waveform_computed_callback(self, data):
+        
+        if len(data):
+            t = data['t']
+            waveform = data['waveform']
+            self.arb_controller.arb_edit_controller.widget.update_plot([t,waveform])
+            #self.arb_filter_controller.model.pvs['waveform_in'].set(data)
+            # self.arb_filter_controller.model.pvs['apply'].set(True)
+        
+
+    def waveform_filtered_callback(self, *args, **kwargs):
+        pass

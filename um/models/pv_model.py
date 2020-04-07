@@ -21,7 +21,7 @@ class PV(QObject):
         if 'val' in settings:
             self._val = settings['val']
         if 'param' in settings:
-            types ={'s':str, 'i':int, 'f':float, 'b':bool, 'l':list, 'dict':dict}
+            types ={'s':str, 'i':int, 'f':float, 'b':bool, 'l':list, 'dict':dict, 'pv':type(PV)}
             self._type = types[settings['param']['type']]
             if self._type == list:
                 self._items = settings['list']
@@ -62,8 +62,8 @@ class pvModel(QThread):
         self.connected = False
         self.offline = False
         
-        self.valid_types = [str, int, float, bool, dict]
-        self.validators ={'s':str, 'i':int, 'f':float, 'b':bool, 'l':str, 'dict':dict}
+        self.valid_types = [str, int, float, bool, dict, type(PV)]
+        self.validators ={'s':str, 'i':int, 'f':float, 'b':bool, 'l':str, 'dict':dict, 'pv':type(PV)}
 
         self.pvs = {}
 

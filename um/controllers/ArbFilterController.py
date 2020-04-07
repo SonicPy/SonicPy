@@ -81,11 +81,11 @@ class ArbFilterController(pvController):
 
     def waveform_changed_signal_callback(self, pv_name, data):
         data = data[0]
-        print('filtered_waveform_changed_signal_callback: '+ str(data))
-        if len(data):
-            t = data['t']
-            waveform = data['waveform_out']
-            self.arb_filter_edit_controller.widget.update_plot([t,waveform])
+        print('filtered_waveform_changed_signal_callback')
+        #if len(data):
+        #    self.model.pvs['waveform_out'].set(data)
+
+    
 
     def controller_selection_edited_signal_callback(self, key):
         self.arb_filter_edit_controller.select_controller(key)

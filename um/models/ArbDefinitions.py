@@ -31,10 +31,11 @@ class g_wavelet_model(pvModel):
         
         # Task description markup. Aarbitrary default values ('val') are for type recognition in panel widget constructor
         # supported types are float, int, bool, string, and list of strings
-        self.tasks = {  'waveform':
-                                {'desc': 'User waveform 1', 'val':{}, 
-                                'methods':{'set':True, 'get':False}, 
-                                'param':{'tag':'user1_waveform','type':'dict'}},
+        self.tasks = {  
+                        'output_channel':     
+                                {'desc': ';Output channel', 'val':None, 
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'output_channel','type':'pv'}},
                         'apply':     
                                 {'desc': ';Apply', 'val':False, 
                                 'methods':{'set':True, 'get':True}, 
@@ -122,7 +123,8 @@ class g_wavelet_model(pvModel):
                       'delay'])[self.settings_file_tag]
         print(settings)
         ans = func(settings)
-        self.pvs['waveform'].set(ans)
+        output_channel = self.pvs['output_channel']._val
+        output_channel.set(ans)
         #print (ans)
 
     def _set_apply(self, val):
@@ -158,10 +160,11 @@ class gx2_wavelet_model(pvModel):
         
         # Task description markup. Aarbitrary default values ('val') are for type recognition in panel widget constructor
         # supported types are float, int, bool, string, and list of strings
-        self.tasks = {  'waveform':
-                                {'desc': 'User waveform 1', 'val':{}, 
-                                'methods':{'set':True, 'get':False}, 
-                                'param':{'tag':'user1_waveform','type':'dict'}},
+        self.tasks = {  
+                        'output_channel':     
+                                {'desc': ';Output channel', 'val':None, 
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'output_channel','type':'pv'}},
                         'apply':     
                                 {'desc': ';Apply', 'val':False, 
                                 'methods':{'set':True, 'get':True}, 
@@ -251,7 +254,9 @@ class gx2_wavelet_model(pvModel):
                       'delay'])[self.settings_file_tag]
         print(settings)
         ans = func(settings)
-        self.pvs['waveform'].set(ans)
+        output_channel = self.pvs['output_channel']._val
+        print(output)
+        output_channel.set(ans)
         #print (ans)
 
     def _set_apply(self, val):
@@ -284,10 +289,11 @@ class burst_fixed_time_model(pvModel):
         
         # Task description markup. Aarbitrary default values ('val') are for type recognition in panel widget constructor
         # supported types are float, int, bool, string, and list of strings
-        self.tasks = {  'waveform':
-                                {'desc': 'User waveform 1', 'val':{}, 
-                                'methods':{'set':True, 'get':False}, 
-                                'param':{'tag':'user1_waveform','type':'dict'}},
+        self.tasks = {  
+                        'output_channel':     
+                                {'desc': ';Output channel', 'val':None, 
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'output_channel','type':'pv'}},
                         'apply':     
                                 {'desc': ';Apply', 'val':False, 
                                 'methods':{'set':True, 'get':True}, 
@@ -345,6 +351,7 @@ class burst_fixed_time_model(pvModel):
 
     def compute_waveform(self):
         func = burst_fixed_time
+        
         settings = self.get_settings(['duration',
                       'freq',
                       'symmetric',
@@ -352,7 +359,8 @@ class burst_fixed_time_model(pvModel):
                       'pts'])[self.settings_file_tag]
         
         ans = func(settings)
-        self.pvs['waveform'].set(ans)
+        output_channel = self.pvs['output_channel']._val
+        output_channel.set(ans)
 
         #print (ans)
 

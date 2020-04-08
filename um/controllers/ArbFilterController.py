@@ -21,7 +21,7 @@ from um.models.FilterDefinitions import no_filter_controller, tukey_filter_contr
 
 class ArbFilterController(pvController):
     callbackSignal = pyqtSignal(dict)  
-
+    waveformFilteredcallbackSignal = pyqtSignal(dict)
 
     def __init__(self, parent, isMain = False):
         #definitions = filters
@@ -38,12 +38,12 @@ class ArbFilterController(pvController):
         self.arb_filter_edit_controller.select_controller(self.arb_filter_1.model.instrument)
 
 
-        f_types = [self.arb_filter_1.model.instrument, self.arb_filter_2.model.instrument]
+        self.f_types = [self.arb_filter_1.model.instrument, self.arb_filter_2.model.instrument]
 
 
 
         filters_task = {  'filter_type': 
-                                {'desc': 'Wave type', 'val':f_types[0], 'list':f_types, 
+                                {'desc': 'Wave type', 'val':self.f_types[0], 'list':self.f_types, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'waveform_type','type':'l'}}}
         self.model.create_pvs(filters_task)
@@ -53,6 +53,9 @@ class ArbFilterController(pvController):
         self.panel_items =[ 'filter_type',
                             'edit_state']
         self.init_panel("Waveform filter", self.panel_items)
+
+
+
         self.make_connections()
 
         self.arb_filter_1.model.pvs['output_channel']._val = self.model.pvs['waveform_out']
@@ -70,9 +73,9 @@ class ArbFilterController(pvController):
         self.model.pvs['edit_state'].value_changed_signal.connect(self.edit_state_signal_callback)
         self.arb_filter_edit_controller.applyClickedSignal.connect(self.arb_filter_edited_apply_clicked_signal_callback)
         self.arb_filter_edit_controller.widget.controller_selection_edited_signal.connect(self.controller_selection_edited_signal_callback)
+        self.model.pvs['waveform_in'].value_changed_signal.connect(self.waveform_in_signal_callback)
 
-        for controller in self.arb_filter_edit_controller.controllers:
-            controller.model.pvs['waveform_out'].value_changed_signal.connect(self.waveform_changed_signal_callback)
+        self.model.pvs['waveform_out'].value_changed_signal.connect(self.waveform_changed_signal_callback)
         
     def show_widget(self):
         self.panel.raise_widget()
@@ -82,11 +85,20 @@ class ArbFilterController(pvController):
         
         self.arb_filter_edit_controller.widget.set_selected_choice(data)
 
+    def waveform_in_signal_callback(self, pv_name, data):
+        data = data[0]
+        #print (pv_name)
+        filter_type = self.model.pvs['filter_type']._val
+        index = self.f_types.index(filter_type)
+        filter_controller = self.arb_filter_edit_controller.controllers[index]
+        filter_controller.model.pvs['waveform_in'].set(data)
+        filter_controller.model.pvs['apply'].set(True)
+    
+
     def waveform_changed_signal_callback(self, pv_name, data):
         data = data[0]
         print('filtered_waveform_changed_signal_callback')
-        #if len(data):
-        #    self.model.pvs['waveform_out'].set(data)
+        self.waveformFilteredcallbackSignal.emit(data)
 
     
 

@@ -109,7 +109,7 @@ class UltrasoundController(QObject):
 
         # User waveform events
         self.arb_controller.waveformComputedSignal.connect(self.waveform_computed_callback)
-
+        self.arb_filter_controller.waveformFilteredcallbackSignal.connect(self.waveform_filtered_callback)
     
     def cursorsCallback(self):
         self.phase_controller.show_view()
@@ -317,8 +317,10 @@ class UltrasoundController(QObject):
             waveform = data['waveform']
             self.arb_controller.arb_edit_controller.widget.update_plot([t,waveform])
             self.arb_filter_controller.model.pvs['waveform_in'].set(data)
-            #self.arb_filter_controller.model.pvs['apply'].set(True)
-        
-
-    def waveform_filtered_callback(self, *args, **kwargs):
-        pass
+            
+    
+    def waveform_filtered_callback(self, data):
+        if len(data):
+            t = data['t']
+            waveform = data['waveform']
+            self.arb_filter_controller.arb_filter_edit_controller.widget.update_plot([t,waveform])

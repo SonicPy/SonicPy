@@ -36,10 +36,6 @@ class no_filter_model(pvModel):
                                 {'desc': 'Waveform IN', 'val':{}, 
                                 'methods':{'set':True, 'get':False}, 
                                 'param':{'tag':'waveform_in','type':'dict'}},
-                        'waveform_out':
-                                {'desc': 'Waveform OUT', 'val':{}, 
-                                'methods':{'set':True, 'get':False}, 
-                                'param':{'tag':'waveform_out','type':'dict'}},
                         'apply':     
                                 {'desc': ';Apply', 'val':False, 
                                 'methods':{'set':True, 'get':True}, 
@@ -53,10 +49,11 @@ class no_filter_model(pvModel):
     def compute_waveform(self):
         func = no_filter
         settings = self.get_settings(['waveform_in'])[self.settings_file_tag]
-        print(settings)
+        #print(settings)
         ans = func(settings)
         #print (ans)
-        self.pvs['waveform_out'].set(ans)
+        output_channel = self.pvs['output_channel']._val
+        output_channel.set(ans)
        
 
     def _set_apply(self, val):
@@ -95,10 +92,6 @@ class tukey_filter_model(pvModel):
                                 {'desc': 'Waveform IN', 'val':{}, 
                                 'methods':{'set':True, 'get':False}, 
                                 'param':{'tag':'waveform_in','type':'dict'}},
-                        'waveform_out':
-                                {'desc': 'Waveform OUT', 'val':{}, 
-                                'methods':{'set':True, 'get':False}, 
-                                'param':{'tag':'waveform_out','type':'dict'}},
                         'alpha':{'symbol':u'α',
                                 'desc':u'α',
                                 'unit':u'',
@@ -119,10 +112,11 @@ class tukey_filter_model(pvModel):
     def compute_waveform(self):
         func = tukey_filter
         settings = self.get_settings(['waveform_in','alpha'])[self.settings_file_tag]
-        print(settings)
+        #print(settings)
         ans = func(settings)
         #print(ans)
-        self.pvs['waveform_out'].set(ans)
+        output_channel = self.pvs['output_channel']._val
+        output_channel.set(ans)
        
 
     def _set_apply(self, val):

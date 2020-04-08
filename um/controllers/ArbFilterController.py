@@ -54,6 +54,9 @@ class ArbFilterController(pvController):
                             'edit_state']
         self.init_panel("Waveform filter", self.panel_items)
         self.make_connections()
+
+        self.arb_filter_1.model.pvs['output_channel']._val = self.model.pvs['waveform_out']
+        self.arb_filter_2.model.pvs['output_channel']._val = self.model.pvs['waveform_out']
         
         if isMain:
             self.show_widget()

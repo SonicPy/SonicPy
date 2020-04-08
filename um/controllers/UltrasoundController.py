@@ -316,8 +316,8 @@ class UltrasoundController(QObject):
             t = data['t']
             waveform = data['waveform']
             self.arb_controller.arb_edit_controller.widget.update_plot([t,waveform])
-            #self.arb_filter_controller.model.pvs['waveform_in'].set(data)
-            # self.arb_filter_controller.model.pvs['apply'].set(True)
+            self.arb_filter_controller.model.pvs['waveform_in'].set(data)
+            #self.arb_filter_controller.model.pvs['apply'].set(True)
         
 
     def waveform_filtered_callback(self, *args, **kwargs):

@@ -28,7 +28,11 @@ class no_filter_model(pvModel):
         
         # Task description markup. Aarbitrary default values ('val') are for type recognition in panel widget constructor
         # supported types are float, int, bool, string, list of strings, dict
-        self.tasks = {  'waveform_in':
+        self.tasks = {  'output_channel':     
+                                {'desc': ';Output channel', 'val':None, 
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'output_channel','type':'pv'}},
+                        'waveform_in':
                                 {'desc': 'Waveform IN', 'val':{}, 
                                 'methods':{'set':True, 'get':False}, 
                                 'param':{'tag':'waveform_in','type':'dict'}},
@@ -83,7 +87,11 @@ class tukey_filter_model(pvModel):
         
         # Task description markup. Aarbitrary default values ('val') are for type recognition in panel widget constructor
         # supported types are float, int, bool, string, and list of strings
-        self.tasks = {  'waveform_in':
+        self.tasks = {  'output_channel':     
+                                {'desc': ';Output channel', 'val':None, 
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'output_channel','type':'pv'}},
+                        'waveform_in':
                                 {'desc': 'Waveform IN', 'val':{}, 
                                 'methods':{'set':True, 'get':False}, 
                                 'param':{'tag':'waveform_in','type':'dict'}},

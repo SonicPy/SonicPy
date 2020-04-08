@@ -35,7 +35,7 @@ class ArbFilterModel(Scope, pvModel):
                                 {'desc': ';Edit', 'val':False, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'edit_state','type':'b'}},
-                        'filtered_out':     
+                        'waveform_out':     
                                 {'desc': 'Waveform', 'val':None, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'waveform','type':'dict'}},
@@ -69,6 +69,7 @@ class ArbFilterModel(Scope, pvModel):
         #print('set ' + str(param))
         self.pvs['filter_type']._val= param'''
 
+    
 
     def _get_edit_state(self):
         ans = self.pvs['edit_state']._val

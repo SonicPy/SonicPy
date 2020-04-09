@@ -12,8 +12,10 @@ import json
 class PV(QObject):
     
     value_changed_signal = pyqtSignal(str, list)
-    def __init__(self, name, settings):
+    def __init__(self, name='', settings=''):
         super().__init__()
+        if name == '':
+            return
         self._pv_name=name
 
         if 'desc' in settings:
@@ -23,6 +25,8 @@ class PV(QObject):
         if 'param' in settings:
             types ={'s':str, 'i':int, 'f':float, 'b':bool, 'l':list, 'dict':dict, 'pv':type(PV)}
             self._type = types[settings['param']['type']]
+            if self._type == type(PV):
+                print('pv object loaded')
             if self._type == list:
                 self._items = settings['list']
             if self._type == int or self._type == float:
@@ -62,8 +66,8 @@ class pvModel(QThread):
         self.connected = False
         self.offline = False
         
-        self.valid_types = [str, int, float, bool, dict, type(PV)]
-        self.validators ={'s':str, 'i':int, 'f':float, 'b':bool, 'l':str, 'dict':dict, 'pv':type(PV)}
+        self.valid_types = [str, int, float, bool, dict, type(PV())]
+        self.validators ={'s':str, 'i':int, 'f':float, 'b':bool, 'l':str, 'dict':dict, 'pv':type(PV())}
 
         self.pvs = {}
 
@@ -131,7 +135,8 @@ class pvModel(QThread):
         #print(self.num_pvs)
 
     def _default_set_task(self,tag, val):
-        pass
+        self.pvs[tag]._val = val
+        
         #print('set: '+ tag+ ' = ' + str(val))
 
     def _default_get_task(self, tag):
@@ -172,22 +177,32 @@ class pvModel(QThread):
         if valid:
             task_str = mode+'_'+task
             queue_item = {'task_name': task, 'mode': mode, 'param':params_out}
+            #print('put in queue: ' + str(params_out))
             self.my_queue.put(queue_item)
+            #print (queue_item)
 
     def validate_params(self, desc_param, param_in):
         # here is the validator for the param_in
+        #print('param_in: ' + str(param_in))
         valid = True
         param_out = None
+        param_type = type(param_in)
+        #print(param_type)
         valid_type = type(param_in) in self.valid_types
+        
         param=desc_param
         if valid_type:
+            #print ('valid_type')
             expected_type = self.validators[param['type']]
-            if type(param_in) == expected_type or (expected_type == int and type(param_in) == float):
+            param_out = param_in
+            if (expected_type == int and type(param_in) == float):
+                #print('expected_type')
                 param_val = expected_type(param_in)
-                param_out = param_val
-            else: 
+                param_type  = expected_type
+            if param_type != expected_type:
+                
                 valid = False
-                    
+        #print( str(valid) + ', ' + str(param_out))
         return valid, param_out
             
     def exit(self):
@@ -199,7 +214,8 @@ class pvModel(QThread):
         # do stuff
         while self.go:
             task = self.my_queue.get()
-            #print(self.instrument+':'+str(task))
+            #print('task in queue: ' + str(task))
+            
             if 'task_name' in task:
                 task_name = task['task_name']
                 if task_name == 'exit':
@@ -208,11 +224,12 @@ class pvModel(QThread):
                 else:
                     mode = task['mode']
                     attr = '_'+mode+'_'+task_name
-                    #print(attr)
+                    
                     if hasattr(self, attr):
                         func = self.__getattribute__(attr)
                         if mode == 'set':
                             param = task['param']
+                            
                             # param must be validated prior to here !
                             try:
                                 func(param)

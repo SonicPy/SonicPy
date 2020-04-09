@@ -58,11 +58,13 @@ class ArbController(pvController):
         self.init_panel("USER1 waveform", self.panel_items)
 
         self.make_connections()
-
-        self.arb1.model.pvs['output_channel']._val = self.model.pvs['arb_waveform']
-        self.arb3.model.pvs['output_channel']._val = self.model.pvs['arb_waveform']
-
+        output_pv = self.model.pvs['arb_waveform']
+        self.arb1.model.pvs['output_channel'].set(output_pv)
         
+        output_channel = self.arb1.model.pvs['output_channel']._description
+        print(output_channel)
+        
+        self.arb3.model.pvs['output_channel'].set(self.model.pvs['arb_waveform'])
         if isMain:
             self.show_widget()
         

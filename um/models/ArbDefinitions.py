@@ -2,45 +2,106 @@ from um.models.arb_waveforms import gaussian_wavelet, burst_fixed_time
 from PyQt5.QtCore import QThread, pyqtSignal
 from um.models.pv_model import pvModel
 from um.controllers.pv_controller import pvController
+from functools import partial
 
+class arb_function(pvController):
+    def __init__(self, parent, isMain = False, title='', \
+                    arb_name = '', arb_desc='', arb_ref='', \
+                        arb_comment='', panel_items=[], arb_variables = {}, arb_function=None):
+                     
+        model = arb_model(parent)
+        model.instrument = arb_name
+        model.arb_variables = arb_variables   
+        model.param = {  'name': arb_desc,
+                        'reference':arb_ref,
+                        'comment':arb_comment}
+        model.tasks = {**model.tasks , **arb_variables}
+        model.create_pvs(model.tasks)
+        model.create_compute_function(list(model.arb_variables.keys()),arb_function)
+        
+        model.start()
 
-
-class g_wavelet_controller(pvController):
-    def __init__(self, parent, isMain = False):
-        model = g_wavelet_model(parent)
         super().__init__(parent, model, isMain)  
-        self.panel_items =['t_min',
-                      't_max',
-                      'center_f',
-                      'sigma',
-                      'apply']
-        self.init_panel("Gaussian wavelet", self.panel_items)
+        panel_itmes = panel_items+['apply',
+                                    'auto_process']
+        self.panel_items = panel_itmes
+        self.init_panel(title, self.panel_items)
         if isMain:
             self.show_widget()
 
-class g_wavelet_model(pvModel):
+class arb_model(pvModel):
     model_value_changed_signal = pyqtSignal(dict)
-    def __init__(self, parent):
+    def __init__(self, parent, arb_name = ''):
         super().__init__(parent)
 
         ## model speficic:
-        self.instrument = 'g_wavelet'
-        self.param = {  'name': 'Gaussian wavelet',
-                        'reference':'',
-                        'comment':''}
+        self.offline = True
+        self.instrument = arb_name
         
         # Task description markup. Aarbitrary default values ('val') are for type recognition in panel widget constructor
         # supported types are float, int, bool, string, and list of strings
         self.tasks = {  
                         'output_channel':     
-                                {'desc': ';Output channel', 'val':None, 
+                                {'desc': 'Output channel', 'val':None, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'output_channel','type':'pv'}},
                         'apply':     
                                 {'desc': ';Apply', 'val':False, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'apply','type':'b'}},
-                        't_min': 
+                        'auto_process':     
+                                {'desc': ';Auto process', 'val':False, 
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'auto_process','type':'b'}}
+        }
+
+    def create_compute_function(self, settings_list, function):
+        func = partial(self._compute,settings_list,function)
+        setattr(self,'compute_waveform',func)
+
+    def _compute(self, settings_list, func):
+        settings = self.get_settings(settings_list)[self.settings_file_tag]
+        ans = func(settings)
+        output_channel = self.pvs['output_channel']._val
+        output_channel.set(ans)
+     
+    def _set_apply(self, val):
+        if val:
+            self.compute_waveform()
+            self.pvs['apply'].set(False)
+
+    def _set_auto_process(self, val):
+        self.pvs['auto_process']._val = val
+        arb_vars = list(self.arb_variables.keys())
+        if val:
+            self.set_autoprocess_connections(arb_vars)
+        else:
+            self.unset_autoprocess_connections(arb_vars)
+
+    def set_autoprocess_connections(self, pv_names):
+        for pv in pv_names:
+            self.pvs[pv].value_changed_signal.connect(self._apply)
+
+    def unset_autoprocess_connections(self, pv_names):
+        for pv in pv_names:
+            self.pvs[pv].value_changed_signal.disconnect(self._apply)
+
+    def _apply(self):
+        self.pvs['apply'].set(True)
+
+
+class g_wavelet_controller(arb_function):
+    def __init__(self, parent, isMain = False):
+        panel_items =['t_min',
+                      't_max',
+                      'center_f',
+                      'sigma']
+        title = "Gaussian wavelet"
+        arb_name = 'g_wavelet'
+        arb_desc=title
+        arb_ref=''
+        arb_comment=''
+        arb_variables = {'t_min': 
                                 {'symbol':u't<sub>0</sub>',
                                     'desc':u'Time min',
                                     'unit':u'ns',
@@ -104,33 +165,78 @@ class g_wavelet_model(pvModel):
                                 'increment':0.01,'min':0,'max':1 ,
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'t_min','type':'f'}}
+                                }
+        arb_function = gaussian_wavelet
+
+        super().__init__(parent,isMain,title,arb_name=arb_name, \
+                        arb_desc=arb_desc,panel_items=panel_items,\
+                            arb_variables=arb_variables,arb_function=arb_function,\
+                                arb_ref=arb_ref, arb_comment=arb_comment ) 
+
+
+class burst_fixed_time_controller(arb_function):
+    def __init__(self, parent, isMain = False):
+        panel_items =['duration',
+                      'freq']
+        title = "Fixed-time burst"
+        arb_name = 'burst_fixed_time'
+        arb_desc=title
+        arb_ref=''
+        arb_comment=''
+        arb_variables = {'duration': 
+                                {'symbol':u't<sub>d</sub>',
+                                    'desc':u'Duration',
+                                    'unit':u'ns',
+                                    'val':120e-9,
+                                    'val_scale': 1e-9,
+                                'increment':0.5,'min':0,'max':1000 ,
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'t_min','type':'f'}},
+                        'freq': 
+                                {'symbol':u'f',
+                                     'desc':u'Frequency',
+                                     'unit':u'MHz',
+                                     'val':30e6,
+                                     'val_scale': 1e6,
+                                'increment':0.5,'min':0.001,'max':10000 ,
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'t_min','type':'f'}},
+                        'pts': 
+                                {'symbol':u'',
+                                     'desc':u'',
+                                     'unit':u'',
+                                     'val':1000, 
+                                'min':1,'max':10000 ,
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'pts','type':'i'}},
+                        'symmetric': 
+                                {'symbol':u'',
+                                    'desc':u'',
+                                    'unit':u'',
+                                    'val':0, 
+                                'min':0,'max':1 ,
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'symmetric','type':'i'}},
+                        'quarter_shift': 
+                                {'symbol':u'',
+                                    'desc':u'',
+                                    'unit':u'',
+                                    'val':0, 
+                                'min':0,'max':1 ,
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'quarter_shift','type':'i'}},
                                 
                                 }
+        arb_function = burst_fixed_time
+
+        super().__init__(parent,isMain,title,arb_name=arb_name, \
+                        arb_desc=arb_desc,panel_items=panel_items,\
+                            arb_variables=arb_variables,arb_function=arb_function,\
+                                arb_ref=arb_ref, arb_comment=arb_comment ) 
 
 
-        self.create_pvs(self.tasks)
-        self.offline = True
-        self.start()
 
-    def compute_waveform(self):
-        func = gaussian_wavelet
-        settings = self.get_settings(['t_min',
-                      't_max',
-                      'center_f',
-                      'sigma',
-                      'opt',
-                      'pts',
-                      'delay'])[self.settings_file_tag]
-        print(settings)
-        ans = func(settings)
-        output_channel = self.pvs['output_channel']._val
-        output_channel.set(ans)
-        #print (ans)
-
-    def _set_apply(self, val):
-        if val:
-            self.compute_waveform()
-            self.pvs['apply'].set(False)
+### not ready yet:
 
 class gx2_wavelet_controller(pvController):
     def __init__(self, parent, isMain = False):
@@ -162,13 +268,17 @@ class gx2_wavelet_model(pvModel):
         # supported types are float, int, bool, string, and list of strings
         self.tasks = {  
                         'output_channel':     
-                                {'desc': ';Output channel', 'val':None, 
+                                {'desc': 'Output channel', 'val':None, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'output_channel','type':'pv'}},
                         'apply':     
                                 {'desc': ';Apply', 'val':False, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'apply','type':'b'}},
+                        'auto_process':     
+                                {'desc': ';Auto process', 'val':False, 
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'auto_process','type':'b'}},
                         't_min': 
                                 {'symbol':u't<sub>0</sub>',
                                     'desc':u'Time min',
@@ -257,111 +367,6 @@ class gx2_wavelet_model(pvModel):
         output_channel = self.pvs['output_channel']._val
         print(output)
         output_channel.set(ans)
-        #print (ans)
-
-    def _set_apply(self, val):
-        if val:
-            self.compute_waveform()
-            self.pvs['apply'].set(False)
-
-
-class burst_fixed_time_controller(pvController):
-    def __init__(self, parent, isMain = False):
-        model = burst_fixed_time_model(parent)
-        super().__init__(parent, model, isMain)  
-        self.panel_items =['duration',
-                      'freq',
-                      'apply']
-        self.init_panel("fixed-time burst", self.panel_items)
-        if isMain:
-            self.show_widget()
-     
-class burst_fixed_time_model(pvModel):
-    model_value_changed_signal = pyqtSignal(dict)
-    def __init__(self, parent):
-        super().__init__(parent)
-
-        ## model speficic:
-        self.instrument = 'burst_fixed_time'
-        self.param = {  'name': 'fixed-time burst',
-                        'reference':'',
-                        'comment':''}
-        
-        # Task description markup. Aarbitrary default values ('val') are for type recognition in panel widget constructor
-        # supported types are float, int, bool, string, and list of strings
-        self.tasks = {  
-                        'output_channel':     
-                                {'desc': ';Output channel', 'val':None, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'output_channel','type':'pv'}},
-                        'apply':     
-                                {'desc': ';Apply', 'val':False, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'apply','type':'b'}},
-                        'duration': 
-                                {'symbol':u't<sub>d</sub>',
-                                    'desc':u'Duration',
-                                    'unit':u'ns',
-                                    'val':120e-9,
-                                    'val_scale': 1e-9,
-                                'increment':0.5,'min':0,'max':1000 ,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'t_min','type':'f'}},
-                        'freq': 
-                                {'symbol':u'f',
-                                     'desc':u'Frequency',
-                                     'unit':u'MHz',
-                                     'val':30e6,
-                                     'val_scale': 1e6,
-                                'increment':0.5,'min':0.001,'max':10000 ,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'t_min','type':'f'}},
-                        'pts': 
-                                {'symbol':u'',
-                                     'desc':u'',
-                                     'unit':u'',
-                                     'val':1000, 
-                                'min':1,'max':10000 ,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'pts','type':'i'}},
-                        'symmetric': 
-                                {'symbol':u'',
-                                    'desc':u'',
-                                    'unit':u'',
-                                    'val':0, 
-                                'min':0,'max':1 ,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'symmetric','type':'i'}},
-                        'quarter_shift': 
-                                {'symbol':u'',
-                                    'desc':u'',
-                                    'unit':u'',
-                                    'val':0, 
-                                'min':0,'max':1 ,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'quarter_shift','type':'i'}},
-                                
-                                }
-
-                       
-
-        self.create_pvs(self.tasks)
-        self.offline = True
-        self.start()
-
-    def compute_waveform(self):
-        func = burst_fixed_time
-        
-        settings = self.get_settings(['duration',
-                      'freq',
-                      'symmetric',
-                      'quarter_shift',
-                      'pts'])[self.settings_file_tag]
-        
-        ans = func(settings)
-        output_channel = self.pvs['output_channel']._val
-        output_channel.set(ans)
-
         #print (ans)
 
     def _set_apply(self, val):

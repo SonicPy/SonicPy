@@ -27,20 +27,13 @@ class ArbFilterController(pvController):
         #definitions = filters
         model = ArbFilterModel(parent)
         super().__init__(parent, model, isMain) 
-        self.arb_filter_edit_controller = EditController(self, title='Filter control')
 
         self.arb_filter_1 = no_filter_controller(self)
         self.arb_filter_2 = tukey_filter_controller(self)
 
-        self.arb_filter_edit_controller.add_controller(self.arb_filter_1.model.instrument, self.arb_filter_1)
-        self.arb_filter_edit_controller.add_controller(self.arb_filter_2.model.instrument, self.arb_filter_2)
-
-        self.arb_filter_edit_controller.select_controller(self.arb_filter_1.model.instrument)
-
-
         self.f_types = [self.arb_filter_1.model.instrument, self.arb_filter_2.model.instrument]
 
-
+        
 
         filters_task = {  'filter_type': 
                                 {'desc': 'Wave type', 'val':self.f_types[0], 'list':self.f_types, 
@@ -48,18 +41,24 @@ class ArbFilterController(pvController):
                                 'param':{'tag':'waveform_type','type':'l'}}}
         self.model.create_pvs(filters_task)
 
-
-
         self.panel_items =[ 'filter_type',
                             'edit_state']
         self.init_panel("Waveform filter", self.panel_items)
 
+        
 
+        selector_cb, selector_label = self.make_pv_widget('filter_type')
+        self.arb_filter_edit_controller = EditController(self, title='Filter control', selector_cb=selector_cb)
 
-        self.make_connections()
+        self.arb_filter_edit_controller.add_controller(self.arb_filter_1.model.instrument, self.arb_filter_1)
+        self.arb_filter_edit_controller.add_controller(self.arb_filter_2.model.instrument, self.arb_filter_2)
+
+        self.arb_filter_edit_controller.select_controller(self.arb_filter_1.model.instrument)
 
         self.arb_filter_1.model.pvs['output_channel']._val = self.model.pvs['waveform_out']
         self.arb_filter_2.model.pvs['output_channel']._val = self.model.pvs['waveform_out']
+
+        self.make_connections()
         
         if isMain:
             self.show_widget()

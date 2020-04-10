@@ -27,19 +27,22 @@ class ScopePlotController(QObject):
 
     def __init__(self, scope_controller=None, isMain = False):
         super().__init__()
-        self.widget = scopeWidget()
-        self.pg = self.widget.plot_widget.fig.win
         
         if scope_controller is None:
+            self.widget = scopeWidget()
             scope_controller = ScopeController(self.widget, isMain=True)
         self.scope_controller = scope_controller
+        btn, label = self.scope_controller.make_pv_widget('run_state')
+
+        self.widget = scopeWidget([btn])
+        self.pg = self.widget.plot_widget.fig.win
         if isMain:
             self.show_widget()
 
         self.make_connections()
 
     def make_connections(self):
-        self.widget.start_stop_btn.clicked.connect(lambda:self.start_stop_btn_callback(self.widget.start_stop_btn.isChecked()))
+        
         self.widget.erase_btn.clicked.connect(self.erase_btn_callback)
         self.widget.save_btn.clicked.connect(self.save_data_callback)
         self.scope_controller.runStateSignal.connect(self.run_state_callback)
@@ -48,11 +51,9 @@ class ScopePlotController(QObject):
 
         
     def run_state_callback(self, state):
-        self.widget.blockSignals(True)
-        self.widget.start_stop_btn.setChecked(state)
         if state:
             self.get_waveform()
-        self.widget.blockSignals(False)
+
     
     def start_stop_btn_callback(self, state):
         self.scope_controller.model.pvs['run_state'].set(state)
@@ -86,23 +87,16 @@ class ScopePlotController(QObject):
         data = waveform_data
         self.waveform_data = data
         waveform  = data['waveform']
-        '''
-        if len(waveform):
-            self.widget.save_btn.setDisabled(False)
-        '''
+ 
         ch = data['ch']
         filtered = zero_phase_bandstop_filter(waveform, 100e6, 340e6, 5)
-        #filtered = zero_phase_bandpass_filter(filtered,30e6-30e6*0.05,30e6+30e6*0.05,1)
-        #ff = fft_sig(*filtered)
+        
         self.update_plot(filtered)
-        #self.update_bg_plot(waveform)
-        #elapsed = data['transfer_time']
+  
         num_acq = data['num_acq']
         self.widget.status_lbl.setText(str(num_acq))
-        #dt = data['time']
-        #status = 'Date/Time: ' + dt + '; Transfer time: ' + str(round(elapsed,3))
-        #self.widget.status_lbl.setText(status)
-        if self.widget.start_stop_btn.isChecked():
+        
+        if self.scope_controller.model.pvs['run_state']._val:
             time.sleep(0.01)
             self.get_waveform()
             pass

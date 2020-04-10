@@ -33,38 +33,32 @@ class ArbController(pvController):
         super().__init__(parent, model, isMain) 
 
         self.arb1 = g_wavelet_controller(self)
-        
-        
         self.arb3 = burst_fixed_time_controller(self)
-
-
-        self.arb_edit_controller = EditController(self, title='Waveform control')
-        self.arb_edit_controller.add_controller(self.arb1.model.instrument, self.arb1)
-        self.arb_edit_controller.add_controller(self.arb3.model.instrument, self.arb3)
-        self.arb_edit_controller.select_controller(self.arb1.model.instrument)
-
         w_types = [self.arb1.model.instrument,  self.arb3.model.instrument]
 
+        
         waveforms_task = {  'waveform_type': 
                                 {'desc': 'Wave type', 'val':w_types[0], 'list':w_types, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'waveform_type','type':'l'}}}
-        self.model.create_pvs(waveforms_task)
 
-        
-        
+        self.model.create_pvs(waveforms_task)
         self.panel_items =[ 'waveform_type',
                             'edit_state']
         self.init_panel("USER1 waveform", self.panel_items)
 
-        self.make_connections()
+        selector_cb, selector_label = self.make_pv_widget('waveform_type')
+        self.arb_edit_controller = EditController(self, title='Waveform control', selector_cb = selector_cb)
+        self.arb_edit_controller.add_controller(self.arb1.model.instrument, self.arb1)
+        self.arb_edit_controller.add_controller(self.arb3.model.instrument, self.arb3)
+        self.arb_edit_controller.select_controller(self.arb1.model.instrument)
+
         output_pv = self.model.pvs['arb_waveform']
         self.arb1.model.pvs['output_channel'].set(output_pv)
-        
-        output_channel = self.arb1.model.pvs['output_channel']._description
-        #print(output_channel)
-        
         self.arb3.model.pvs['output_channel'].set(self.model.pvs['arb_waveform'])
+
+        self.make_connections()
+
         if isMain:
             self.show_widget()
         

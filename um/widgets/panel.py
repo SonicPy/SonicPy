@@ -19,7 +19,7 @@ class Panel(QtWidgets.QGroupBox):
         self.setSizePolicy(sizePolicy)
         self.setTitle(title)
         self.i = 0
-        self._layout, self.widgets = self.make_descriptor_items(pvs)
+        self._layout, self.widgets = self.make_widget_items(pvs)
         self.setLayout(self._layout)
         self.default_items = pvs
 
@@ -28,7 +28,7 @@ class Panel(QtWidgets.QGroupBox):
         time.sleep(0.1)
 
 
-    def make_descriptor_items(self, pvs):
+    def make_widget_items(self, pvs):
         
         _parameter_layout = QtWidgets.QVBoxLayout()
         self.controls = {}
@@ -38,30 +38,14 @@ class Panel(QtWidgets.QGroupBox):
         
         
         for i, pv in enumerate(pvs):
-            
-            desc = pv._description.split(';')[0]
-            
-            
-            ctrl = None
             if pv is not None:
-                pv_type = pv._type
-              
-                if pv_type is list:
-                    ctrl = pvQComboBox(pv) 
-                if pv_type is str:    
-                    ctrl = pvQLineEdit(pv)
-                if pv_type is int or pv_type is float:
-                    ctrl = pvQDoubleSpinBox(pv)
-                    unit = pv._unit
-                    if unit != '':
-                        desc = desc + ' (' + pv._unit + ')'
-                if pv_type is bool:
-                    ctrl = pvQPushButton(pv)
+                
+                
+                ctrl, label = self.make_pv_widget(pv)
                     
                 self.controls[pv._pv_name] = ctrl
 
                 if ctrl is not None:
-                    label = QtWidgets.QLabel(desc)
                     self._grid.addWidget(label, i, 0)
                     self._grid.addWidget(ctrl, i, 1)
                 self.i = i
@@ -78,7 +62,24 @@ class Panel(QtWidgets.QGroupBox):
             
         return self._grid, self.controls
 
-  
+    def make_pv_widget(self, pv):
+        ctrl = None
+        desc = pv._description.split(';')[0]
+        pv_type = pv._type
+        
+        if pv_type is list:
+            ctrl = pvQComboBox(pv) 
+        if pv_type is str:    
+            ctrl = pvQLineEdit(pv)
+        if pv_type is int or pv_type is float:
+            ctrl = pvQDoubleSpinBox(pv)
+            unit = pv._unit
+            if unit != '':
+                desc = desc + ' (' + pv._unit + ')'
+        if pv_type is bool:
+            ctrl = pvQPushButton(pv)
+        label = QtWidgets.QLabel(desc)
+        return ctrl, label
 
     def raise_widget(self):
         self.show()

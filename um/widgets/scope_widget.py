@@ -10,23 +10,20 @@ import numpy as np
 
 class scopeWidget(QtWidgets.QWidget):
     panelClosedSignal = pyqtSignal()
-    def __init__(self):
+    def __init__(self, ctrls = []):
         super().__init__()
+        self.scope_controls = ctrls
         self._layout = QtWidgets.QVBoxLayout()
         params = "plot title", 'Amplitude', 'Time'
         self.plot_widget = customWidget(params)
-        #self.plot_widget.enable_cursors()
-   
         
         self.button_widget = QtWidgets.QWidget()
         
         self._button_layout = QtWidgets.QHBoxLayout()
-        self.start_stop_btn = FlatButton("On")
-        self.start_stop_btn.setCheckable(True)
-
+      
         self.erase_btn = FlatButton("Erase")
         self.save_btn = FlatButton("Save")
-        #self.save_btn.setDisabled(True)
+      
         
         self._status_layout = QtWidgets.QVBoxLayout()
 
@@ -34,8 +31,9 @@ class scopeWidget(QtWidgets.QWidget):
         self._status_layout.addWidget(self.status_lbl)
         
         self._button_layout.addWidget(self.erase_btn)
-        self._button_layout.addWidget(self.start_stop_btn)
-        
+        for ctrl in self.scope_controls:
+            self._button_layout.addWidget(ctrl)
+     
         self._button_layout.addLayout(self._status_layout)
         
         self._button_layout.addSpacerItem(HorizontalSpacerItem())
@@ -53,12 +51,14 @@ class scopeWidget(QtWidgets.QWidget):
         fig.create_plots()
         self.CH1_plot = fig.win.plotForeground
         self.bg_plot = fig.win.plotRoi
-        #self.bg_plot_filtered = fig.add_line_plot([],[],color=(255,0,255))
-
+      
 
         self.setStyleSheet("""
             #FlatButton {
-                min-width: 95;
+                min-width: 120;
+            }
+            #pvQPushButton {
+                min-width: 120;
             }
             
         """)

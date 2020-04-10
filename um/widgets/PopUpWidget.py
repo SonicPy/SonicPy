@@ -34,11 +34,11 @@ from um.widgets.PltWidget import CustomViewBox, PltWidget
 class AfwGroupbox(QtWidgets.QWidget):
     param_edited_signal = QtCore.pyqtSignal(dict)
     panel_selection_edited_signal = QtCore.pyqtSignal(str)
-    def __init__(self, title):
+    def __init__(self, title, selector_cb ):
         super().__init__()
         self._layout = QtWidgets.QVBoxLayout()
         self._layout.setContentsMargins(0, 0, 0, 0)
-        self.awf_type_cb = CleanLooksComboBox()    
+        self.awf_type_cb = selector_cb   
         self._layout.addWidget(self.awf_type_cb)
         self._awf_type_info_btn = QtWidgets.QPushButton('i')
         self.panels = {}
@@ -49,11 +49,10 @@ class AfwGroupbox(QtWidgets.QWidget):
         self.panel.setLayout(self._panel_layout)
         self._layout.addWidget(self.panel)
         self.setLayout(self._layout)
-        self.awf_type_cb.currentTextChanged.connect(self.awf_type_edited)
+ 
 
     def add_panel(self, name, panel):
         self.panels[name] = panel
-        self.awf_type_cb.addItem(name)
 
     def select_panel(self, name):
         if self.selected_panel is not None:
@@ -84,8 +83,7 @@ class AfwGroupbox(QtWidgets.QWidget):
             desc = desc +'<br>Reference:<br>' +ref 
         return desc
 
-    def awf_type_edited(self, key):
-        self.panel_selection_edited_signal.emit(key)
+ 
 
 
 class PopUpWidget(QtWidgets.QWidget):
@@ -227,7 +225,7 @@ class EditWidget(PopUpWidget):
     applyClickedSignal = QtCore.pyqtSignal(str)
     controller_selection_edited_signal = QtCore.pyqtSignal(str)
     widget_closed = QtCore.Signal()
-    def __init__(self, title ):
+    def __init__(self, title , selector_cb):
         super().__init__(title)
         self.plot_window = plotWaveWindow()
 
@@ -236,7 +234,7 @@ class EditWidget(PopUpWidget):
         #self.add_bottom_row_button('apply_btn','Apply')
         self.add_bottom_horizontal_spacer()
         
-        self.afw_gb = AfwGroupbox(title=title)
+        self.afw_gb = AfwGroupbox(title=title, selector_cb=selector_cb)
         
         self.add_body_widget(self.afw_gb)
         

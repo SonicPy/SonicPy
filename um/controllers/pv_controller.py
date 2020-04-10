@@ -26,6 +26,10 @@ class pvController(QObject):
         self.make_panel(title, panel_items, self.isMain)
         self.make_panel_connections()
 
+    def make_pv_widget(self, pv_name):
+        widget, label = self.panel.make_pv_widget(self.model.pvs[pv_name])
+        return widget, label
+
     def make_panel(self, title, panel_items, isMain):
         pvs_forPanel = []
         pvs = self.model.pvs

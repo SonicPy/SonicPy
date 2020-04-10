@@ -62,7 +62,7 @@ class ArbController(pvController):
         self.arb1.model.pvs['output_channel'].set(output_pv)
         
         output_channel = self.arb1.model.pvs['output_channel']._description
-        print(output_channel)
+        #print(output_channel)
         
         self.arb3.model.pvs['output_channel'].set(self.model.pvs['arb_waveform'])
         if isMain:
@@ -88,7 +88,7 @@ class ArbController(pvController):
 
     def waveform_changed_signal_callback(self, pv_name, data):
         data = data[0]
-        print('waveform_changed_signal_callback. pv: '+ str(pv_name))
+        #print('waveform_changed_signal_callback. pv: '+ str(pv_name))
         #self.waveformComputedSignal.emit(data)
         '''if len(data):
             t = data['t']

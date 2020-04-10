@@ -44,7 +44,7 @@ def my_func(f_0,sigma, t,c,x,opt, f ):
     return f
 
 def burst_fixed_time(params):
-    print(params)
+    #print(params)
     freq = params['freq']
     total_time = params['duration']
     points = params['pts']

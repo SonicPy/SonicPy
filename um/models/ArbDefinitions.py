@@ -92,7 +92,7 @@ class arb_model(pvModel):
 
 class g_wavelet_controller(arb_function):
     def __init__(self, parent, isMain = False):
-        panel_items =['t_min',
+        panel_items =[
                       't_max',
                       'center_f',
                       'sigma']
@@ -112,7 +112,7 @@ class g_wavelet_controller(arb_function):
                                 'param':{'tag':'t_min','type':'f'}},
                         't_max': 
                                 {'symbol':u't<sub>max</sub>',
-                                    'desc':u'Time max',
+                                    'desc':u'Duration',
                                     'unit':u'ns',
                                     'val':120e-9,
                                     'val_scale': 1e-9,

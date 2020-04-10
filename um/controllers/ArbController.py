@@ -37,17 +37,17 @@ class ArbController(pvController):
         w_types = [self.arb1.model.instrument,  self.arb3.model.instrument]
 
         
-        waveforms_task = {  'waveform_type': 
+        waveforms_task = {  'selected_item': 
                                 {'desc': 'Wave type', 'val':w_types[0], 'list':w_types, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'waveform_type','type':'l'}}}
 
         self.model.create_pvs(waveforms_task)
-        self.panel_items =[ 'waveform_type',
+        self.panel_items =[ 'selected_item',
                             'edit_state']
         self.init_panel("USER1 waveform", self.panel_items)
 
-        selector_cb, selector_label = self.make_pv_widget('waveform_type')
+        selector_cb, selector_label = self.make_pv_widget('selected_item')
         self.arb_edit_controller = EditController(self, title='Waveform control', selector_cb = selector_cb)
         self.arb_edit_controller.add_controller(self.arb1.model.instrument, self.arb1)
         self.arb_edit_controller.add_controller(self.arb3.model.instrument, self.arb3)
@@ -66,7 +66,7 @@ class ArbController(pvController):
         self.model.exit()
 
     def make_connections(self):
-        self.model.pvs['waveform_type'].value_changed_signal.connect(self.waveform_type_signal_callback)
+        self.model.pvs['selected_item'].value_changed_signal.connect(self.waveform_type_signal_callback)
         
         self.model.pvs['edit_state'].value_changed_signal.connect(self.edit_state_signal_callback)
         self.model.pvs['arb_waveform'].value_changed_signal.connect(self.arb_waveform_signal_callback)

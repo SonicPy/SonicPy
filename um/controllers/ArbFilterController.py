@@ -35,19 +35,19 @@ class ArbFilterController(pvController):
 
         
 
-        filters_task = {  'filter_type': 
+        filters_task = {  'selected_item': 
                                 {'desc': 'Wave type', 'val':self.f_types[0], 'list':self.f_types, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'waveform_type','type':'l'}}}
         self.model.create_pvs(filters_task)
 
-        self.panel_items =[ 'filter_type',
+        self.panel_items =[ 'selected_item',
                             'edit_state']
         self.init_panel("Waveform filter", self.panel_items)
 
         
 
-        selector_cb, selector_label = self.make_pv_widget('filter_type')
+        selector_cb, selector_label = self.make_pv_widget('selected_item')
         self.arb_filter_edit_controller = EditController(self, title='Filter control', selector_cb=selector_cb)
 
         self.arb_filter_edit_controller.add_controller(self.arb_filter_1.model.instrument, self.arb_filter_1)
@@ -67,7 +67,7 @@ class ArbFilterController(pvController):
         self.model.exit()
 
     def make_connections(self):
-        self.model.pvs['filter_type'].value_changed_signal.connect(self.filter_type_signal_callback)
+        self.model.pvs['selected_item'].value_changed_signal.connect(self.filter_type_signal_callback)
         #self.model.pvs['variable_parameter'].value_changed_signal.connect(self.variable_parameter_signal_callback)
         self.model.pvs['edit_state'].value_changed_signal.connect(self.edit_state_signal_callback)
         self.arb_filter_edit_controller.applyClickedSignal.connect(self.arb_filter_edited_apply_clicked_signal_callback)
@@ -87,7 +87,7 @@ class ArbFilterController(pvController):
     def waveform_in_signal_callback(self, pv_name, data):
         data = data[0]
         #print (pv_name)
-        filter_type = self.model.pvs['filter_type']._val
+        filter_type = self.model.pvs['selected_item']._val
         index = self.f_types.index(filter_type)
         filter_controller = self.arb_filter_edit_controller.controllers[index]
         filter_controller.model.pvs['waveform_in'].set(data)

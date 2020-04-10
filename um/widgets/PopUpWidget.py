@@ -228,7 +228,7 @@ class EditWidget(PopUpWidget):
     def __init__(self, title , selector_cb):
         super().__init__(title)
         self.plot_window = plotWaveWindow()
-
+        self.selector_cb = selector_cb
         self.add_top_row_button('plot_btn','Plot')
         self.add_top_horizontal_spacer()
         #self.add_bottom_row_button('apply_btn','Apply')

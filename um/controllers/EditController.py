@@ -45,8 +45,13 @@ class EditController(QObject):
         panel = controller.get_panel()
         self.widget.add_panel(name, panel)
     
-    def select_controller(self, name):
-        self.widget.select_panel(name)
+    def select_controller(self, selection):
+        
+        self.widget.select_panel(selection)
+
+    def selected_item_changed_callback(self, pv_name, data):
+        selected_item = data[0]
+        self.select_controller(selected_item)
     
     def update_plot(self, data):
         self.widget.update_plot(data)
@@ -55,7 +60,7 @@ class EditController(QObject):
         self.model.exit()
 
     def make_connections(self):
-        #self.widget.get_apply_btn().clicked.connect(self.edit_widget_apply_clicked_signal_callback)
+        self.parent_controller.model.pvs['selected_item'].value_changed_signal.connect(self.selected_item_changed_callback)
         self.widget.widget_closed.connect(self.widget_closed_callback)
         
 

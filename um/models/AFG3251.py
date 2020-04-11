@@ -130,8 +130,7 @@ class AFG_AFG3251(Afg, pvModel):
                 ID = tokens[1]
         return ID
 
-    def _set_user1_waveform(self, waveform):
-        
+    def _send_user1_waveform(self, waveform):
         if 'binary_waveform' in waveform:
             binary_waveform = waveform['binary_waveform']
             slot='user1'
@@ -141,6 +140,11 @@ class AFG_AFG3251(Afg, pvModel):
             self.write('data:copy ' +slot+', ememory')
             self.pvs['function_shape'].set('user1')
             #self.write('source1:function '+slot) #sets the AFG source to user1 memory
+
+    def _set_user1_waveform(self, waveform):
+        
+        self.pvs['user1_waveform']._val = waveform
+        print('_set_user1_waveform')
     
     def _set_user1_waveform_from_file(self, filename):
         current_file = self.pvs['user1_waveform_from_file']._val

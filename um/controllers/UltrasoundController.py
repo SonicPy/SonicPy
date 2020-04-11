@@ -60,7 +60,7 @@ class UltrasoundController(QObject):
         self.arb_controller = ArbController(self)
         self.arb_filter_controller = ArbFilterController(self)
         self.scope_controller = ScopeController(self, offline = offline)
-        self.scope_plot_controller = ScopePlotController(self.scope_controller)
+        self.scope_plot_controller = ScopePlotController(self.scope_controller, afg_controller=self.afg_controller)
         self.overlay_controller = OverlayController(self, self.scope_plot_controller)
         
         self.sweep_controller = SweepController(self,
@@ -315,7 +315,7 @@ class UltrasoundController(QObject):
         if len(data):
             t = data['t']
             waveform = data['waveform']
-            self.arb_controller.arb_edit_controller.widget.update_plot([t,waveform])
+            #self.arb_controller.arb_edit_controller.widget.update_plot([t,waveform])
             self.arb_filter_controller.model.pvs['waveform_in'].set(data)
             
     
@@ -323,4 +323,5 @@ class UltrasoundController(QObject):
         if len(data):
             t = data['t']
             waveform = data['waveform']
-            self.arb_filter_controller.arb_filter_edit_controller.widget.update_plot([t,waveform])
+            #self.arb_filter_controller.arb_filter_edit_controller.widget.update_plot([t,waveform])
+            self.afg_controller.model.pvs['user1_waveform'].set(data)

@@ -64,14 +64,9 @@ class scopeWidget(QtWidgets.QWidget):
         """)
 
     def plot(self,waveform):
-        
-        
         plot = self.plot_widget.fig.win
-        
         if plot is not None:
             plot.plotData(waveform[0], waveform[1])
-
-    
 
     def clear_plot(self,):
         

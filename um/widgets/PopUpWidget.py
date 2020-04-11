@@ -229,10 +229,10 @@ class EditWidget(PopUpWidget):
         super().__init__(title)
         self.plot_window = plotWaveWindow()
         self.selector_cb = selector_cb
-        self.add_top_row_button('plot_btn','Plot')
-        self.add_top_horizontal_spacer()
+        #self.add_top_row_button('plot_btn','Plot')
+        #self.add_top_horizontal_spacer()
         #self.add_bottom_row_button('apply_btn','Apply')
-        self.add_bottom_horizontal_spacer()
+        #self.add_bottom_horizontal_spacer()
         
         self.afw_gb = AfwGroupbox(title=title, selector_cb=selector_cb)
         
@@ -261,8 +261,9 @@ class EditWidget(PopUpWidget):
     #    return getattr(self,'apply_btn')
 
     def make_connections(self):
-        self.plot_btn.clicked.connect(self.plot_window.raise_widget)
-        self.afw_gb.panel_selection_edited_signal.connect(self.panel_selection_edited_signal_callback)
+        pass
+        #self.plot_btn.clicked.connect(self.plot_window.raise_widget)
+        #self.afw_gb.panel_selection_edited_signal.connect(self.panel_selection_edited_signal_callback)
 
     def awf_type_edited_callback(self, d):
         selection_key = d['arb_waveform']

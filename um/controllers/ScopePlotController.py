@@ -25,7 +25,7 @@ class ScopePlotController(QObject):
     staticCursorMovedSignal = pyqtSignal(str) 
     dataPlotUpdated = pyqtSignal()
 
-    def __init__(self, scope_controller=None, isMain = False):
+    def __init__(self, scope_controller=None, afg_controller=None, isMain = False):
         super().__init__()
         
         if scope_controller is None:
@@ -39,10 +39,13 @@ class ScopePlotController(QObject):
         if isMain:
             self.show_widget()
 
+        self.afg_controller = afg_controller
+
         self.make_connections()
 
     def make_connections(self):
-        
+        if self.afg_controller is not None:
+            self.afg_controller.model.pvs['user1_waveform'].value_changed_signal.connect(self.user1_waveform_changed_callback)
         self.widget.erase_btn.clicked.connect(self.erase_btn_callback)
         self.widget.save_btn.clicked.connect(self.save_data_callback)
         self.scope_controller.runStateSignal.connect(self.run_state_callback)
@@ -53,6 +56,10 @@ class ScopePlotController(QObject):
     def run_state_callback(self, state):
         if state:
             self.get_waveform()
+
+    def user1_waveform_changed_callback(self, pv_name, data):
+        waveform = data[0]
+        self.update_plot([waveform['t'],waveform['waveform']])
 
     
     def start_stop_btn_callback(self, state):

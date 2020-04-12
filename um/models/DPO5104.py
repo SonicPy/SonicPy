@@ -57,8 +57,12 @@ class Scope_DPO5104(Scope, pvModel):
                                 {'desc': 'N-average', 'val':1000, 'min':2,'max':10000,
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'num_av','type':'i'}},
+                        'stop_after_num_av_preset':     
+                                {'desc': 'Auto stop;ON/OFF', 'val':False, 
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'output_state','type':'b'}},
                         'num_acq': 
-                                {'desc': 'N-acquired', 'val':1, 'min':1,'max':1e30-1,
+                                {'desc': 'N-acquired', 'val':0, 'min':0,'max':1e29,
                                 'methods':{'set':False, 'get':True},  
                                 'param':{'tag':'num_acq','type':'i'}},
                         'channel': 
@@ -175,10 +179,6 @@ class Scope_DPO5104(Scope, pvModel):
     def get_waveform(self):
         self.my_queue.put({'task_name':'get_waveform'})
 
-    def get_num_acq(self):
-        if self.waveform is not None:
-            return self.waveform['num_av']
-        else: return 0
 
     def _set_filename(self, filename):
 
@@ -219,6 +219,7 @@ class Scope_DPO5104(Scope, pvModel):
         if param:
             #self.clear_queue()
             #print('erasing')
+            self.pvs['num_acq'].set(0)
             self._set_channel_state(False)
             self._set_channel_state(True)
             time.sleep(.05)
@@ -242,11 +243,7 @@ class Scope_DPO5104(Scope, pvModel):
         
         return num_av
 
-    def _get_num_acq(self):
-        if self.waveform is not None:
-            return self.waveform['num_acq']
-        else: return 0
-        #self.DPO5000.number_acquired()
+  
 
     def _set_acquisition_type(self, acq_type):
         self.DPO5000.set_aquisition_type(acq_type)    
@@ -304,23 +301,41 @@ class Scope_DPO5104(Scope, pvModel):
     def _get_waveform(self): 
         #start = time.time()
         #wait_till = start+0.05
-        
-        data_stop = self.data_stop
-        ch = self.selected_channel
-        waveform  = self.DPO5000.read_data_one_channel( data_start=1, 
-                                                        data_stop=data_stop,
-                                                        x_axis_out=True)
-        
-        #end = time.time()
-        
-        # make sure set frame rate isn't exceeded
-        #while time.time()< wait_till:
-        #        time.sleep(0.005)
-        num_acq =self.DPO5000.num_acq
-        #elapsed = end - start
-        (dt, micro) = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f').split('.')
-        dt = "%s.%03d" % (dt, int(micro) / 1000)
+        num_av = self.pvs['num_av']._val
+        num_acq = self.pvs['num_acq']._val
+        stop_after_preset = self.pvs['stop_after_num_av_preset']._val
 
-        self.waveform = {'waveform':waveform,'ch':ch, 'time':dt, 'num_acq':num_acq}
-        self.pvs['num_acq']._val = num_acq
+        if num_acq < num_av or not stop_after_preset:
+           
+            data_stop = self.data_stop
+            ch = self.selected_channel
+            waveform  = self.DPO5000.read_data_one_channel( data_start=1, 
+                                                            data_stop=data_stop,
+                                                            x_axis_out=True)
+            
+            #end = time.time()
+            # make sure set frame rate isn't exceeded
+            #while time.time()< wait_till:
+            #        time.sleep(0.005)
+            num_acq = int(self.DPO5000.num_acq)
+            #elapsed = end - start
+            (dt, micro) = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f').split('.')
+            dt = "%s.%03d" % (dt, int(micro) / 1000)
+
+            self.waveform = {'waveform':waveform,'ch':ch, 'time':dt, 'num_acq':num_acq}
+            stop_after_preset = self.pvs['stop_after_num_av_preset']._val
+            
+            self.pvs['num_acq'].set(int(num_acq))
+
+        if stop_after_preset:
+                running = self.pvs['run_state']._val
+                #print('run_state: ' + str(running))
+                if running:
+                    
+                    num_av = self.pvs['num_av']._val
+                    #print('num_av: ' + str(num_av))
+                    if num_acq >= num_av:
+                        #print('num_acq >= num_av: ' + str(True))
+                        self.pvs['run_state'].set(False)
+        
         return self.waveform

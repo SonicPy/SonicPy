@@ -7,4 +7,4 @@
 
 from um import main
 
-main()
+main(offline=False)

@@ -45,17 +45,8 @@ class frequencySweep(pvModel):
         self.source_waveform_pvs['frequency'].set(param*1e6)
         self.scope_pvs['erase'].set(True)
         self.scope_pvs['run_state'].set(True)
-        num_av = int(str(self.scope_pvs['num_av']._val))
-        i = 0
-        time.sleep(0.5)
-        while i <= 200:
-            time.sleep(0.1)
-            num_acq = int(str(self.scope_pvs['num_acq']._val))
-            if num_acq >= num_av:
-                break
-            i = i + 1
-        self.scope_pvs['run_state'].set(False)
-        time.sleep(.6)
+       
+        time.sleep(5)
 
     def _set_run_state(self, param):
         self.parent.pvs['run_state'].set(False)

@@ -40,6 +40,7 @@ class ScopePlotController(QObject):
             self.show_widget()
 
         self.afg_controller = afg_controller
+        self.plt = self.widget.plot_widget.fig.win
 
         self.make_connections()
 
@@ -48,34 +49,17 @@ class ScopePlotController(QObject):
             self.afg_controller.model.pvs['user1_waveform'].value_changed_signal.connect(self.user1_waveform_changed_callback)
         self.widget.erase_btn.clicked.connect(self.erase_btn_callback)
         self.widget.save_btn.clicked.connect(self.save_data_callback)
-        self.scope_controller.runStateSignal.connect(self.run_state_callback)
         self.scope_controller.dataUpdatedSignal.connect(self.waveform_updated_signal_callback)
-        self.scope_controller.dataBGUpdatedSignal.connect(self.bg_waveform_updated_signal_callback)
-
         
-    def run_state_callback(self, state):
-        if state:
-            self.get_waveform()
-
     def user1_waveform_changed_callback(self, pv_name, data):
         waveform = data[0]
         self.update_plot([waveform['t'],waveform['waveform']])
 
+
     
-    def start_stop_btn_callback(self, state):
-        self.scope_controller.model.pvs['run_state'].set(state)
-            
-
-    def get_waveform(self):
-        if self.scope_controller.model.connected:
-            self.scope_controller.model.pvs['waveform'].get()
-
-    def get_pattern_widget(self):
-        plt = self.widget.plot_widget.fig.win
-        return plt
 
     def getRange(self):
-        plt = self.get_pattern_widget()
+        plt = self.plt
         if plt.xAxis is not None:
             x_range = [min(plt.xAxis), max(plt.xAxis)]
         else:
@@ -101,14 +85,10 @@ class ScopePlotController(QObject):
         self.update_plot(filtered)
   
         num_acq = data['num_acq']
-        self.widget.status_lbl.setText(str(num_acq))
-        
-        if self.scope_controller.model.pvs['run_state']._val:
-            time.sleep(0.01)
-            self.get_waveform()
-            pass
+        #self.widget.status_lbl.setText(str(num_acq))
 
-    def bg_waveform_updated_signal_callback(self, waveform_data):
+
+    '''def bg_waveform_updated_signal_callback(self, waveform_data):
         data = waveform_data
         self.waveform_bg_data = data
         waveform  = data['waveform']
@@ -117,9 +97,9 @@ class ScopePlotController(QObject):
         
         end = time.time()
         elapsed = end - start
-        self.update_bg_plot(filtered)
+        self.update_bg_plot(filtered)'''
      
-    def load_background_callback(self, *args, **kwargs):
+    '''def load_background_callback(self, *args, **kwargs):
         if 'folder' in kwargs:
             folder = kwargs['folder']
         else:
@@ -134,7 +114,7 @@ class ScopePlotController(QObject):
         if filename is not '':
             self.scope_controller.model.read_file(filename)
             folder = os.path.dirname(str(filename)) 
-        return folder
+        return folder'''
 
     def save_data_callback(self, *args, **kwargs):
         filename = ''
@@ -158,22 +138,22 @@ class ScopePlotController(QObject):
                 self.scope_controller.model.pvs['filename'].set(filename)
                 self.scope_controller.model.pvs['save'].set(True)
 
-    
+    '''  
     def close_background_callback(self):
         self.update_bg_plot([[],[]])
 
     def update_bg_plot(self, waveform):
         if waveform is not None:
-            self.widget.plot_bg(waveform)
+            self.widget.plot_bg(waveform)'''
 
     def update_plot(self, waveform):
         if waveform is not None:
             self.widget.plot(waveform)
             self.dataPlotUpdated.emit()
 
-    def update_filtered_plot(self, waveform):
+    '''def update_filtered_plot(self, waveform):
         if waveform is not None:
-            self.widget.plot_filtered(waveform)
+            self.widget.plot_filtered(waveform)'''
 
 
     def erase_btn_callback(self):

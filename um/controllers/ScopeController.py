@@ -33,7 +33,9 @@ class ScopeController(pvController):
                             'vertical_scale',
                             'acquisition_type',
                             'num_av',
-                            'run_state']
+                            'num_acq',
+                            'run_state',
+                            'stop_after_num_av_preset']
         self.init_panel("Scope", self.panel_items)
         self.make_connections()
         self.waveform_data = None
@@ -60,8 +62,12 @@ class ScopeController(pvController):
         state = data[0]
         #print('run state callback' + str(state))
         self.runStateSignal.emit(state)
-        if not state:
+        if state:
+            self.get_waveform()
+        else:
             self.stoppedSignal.emit()
+
+   
 
     def bg_waveform_updated_signal_callback(self, pv_name, data):
         data = data[0]
@@ -72,6 +78,17 @@ class ScopeController(pvController):
         data = data[0]
         self.waveform_data = data
         self.dataUpdatedSignal.emit(data)
+        if self.model.pvs['run_state']._val:
+            time.sleep(0.01)
+            self.get_waveform()
+            
+
+
+    def get_waveform(self):
+        if self.model.connected:
+            self.model.pvs['waveform'].get()
+        
+        
     
     def show_widget(self):
         self.panel.raise_widget()

@@ -26,7 +26,7 @@ class PV(QObject):
             types ={'s':str, 'i':int, 'f':float, 'b':bool, 'l':list, 'dict':dict, 'pv':type(PV)}
             self._type = types[settings['param']['type']]
             if self._type == type(PV):
-                print('pv object loaded')
+                pass
             if self._type == list:
                 self._items = settings['list']
             if self._type == int or self._type == float:
@@ -116,21 +116,21 @@ class pvModel(QThread):
             self.pvs[tag]=PV(tag,task)
             if 'methods' in task:
                 for method in task['methods']:
-                    if task['methods'][method]:
-                        private_attr ='_'+method+'_'+ tag
-                        has_private = hasattr(self, private_attr)
-                        if not has_private:
-                            
-                            self._create_default_private_method(method, tag)
-                        has_private = hasattr(self, private_attr)
-                        if not has_private:
-                            print('failed to create "'+ private_attr+ '" method')
-                        if has_private:
-                            attr = method+'_task'
-                            func = self.__getattribute__(attr)
-                            params = task['param']
-                            public_method = partial(func, method, tag, params)
-                            setattr(self.pvs[tag],method,public_method)
+                    #if task['methods'][method]:
+                    private_attr ='_'+method+'_'+ tag
+                    has_private = hasattr(self, private_attr)
+                    if not has_private:
+                        
+                        self._create_default_private_method(method, tag)
+                    has_private = hasattr(self, private_attr)
+                    if not has_private:
+                        print('failed to create "'+ private_attr+ '" method')
+                    if has_private:
+                        attr = method+'_task'
+                        func = self.__getattribute__(attr)
+                        params = task['param']
+                        public_method = partial(func, method, tag, params)
+                        setattr(self.pvs[tag],method,public_method)
                         #setattr(self, method+'_'+ tag, public_method)
         #print(self.num_pvs)
 

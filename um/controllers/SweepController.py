@@ -10,8 +10,8 @@ from PyQt5.QtCore import QThread, pyqtSignal, QObject
 
 class SweepController(pvController):
     
-    freqDoneSignal = pyqtSignal()  
-    freqStartRequestSignal = pyqtSignal()  
+    pointDoneSignal = pyqtSignal()  
+    pointStartRequestSignal = pyqtSignal()  
     
     def __init__(self, parent, scope_pvs, source_waveform_pvs, isMain = False):
         
@@ -22,8 +22,8 @@ class SweepController(pvController):
         self.model.setpointSweepThread.scope_pvs = scope_pvs
         self.model.setpointSweepThread.source_waveform_pvs = source_waveform_pvs
 
-        panel_items =[  'start_freq',
-                        'end_freq',
+        panel_items =[  'start_point',
+                        'end_point',
                         'step',
                         'n',
                         'run_state']
@@ -36,17 +36,14 @@ class SweepController(pvController):
     def run_state_changed_callback(self, tag, data):
         state = data[0]
         if state:
-            self.freqStartRequestSignal.emit()
+            self.pointStartRequestSignal.emit()
         else:
             
-            self.freqDoneSignal.emit()
+            self.pointDoneSignal.emit()
 
     def start_sweep(self):
         # here we do the setpoint sweep
-        setpoints = self.model.points['setpoints']
-        for f in setpoints:
-            self.model.setpointSweepThread.pvs['setpoint'].set(f)
-        self.model.setpointSweepThread.pvs['run_state'].set(False)
+        self.model.start_sweep()
             
     def stop_sweep(self):
         self.model.clear_queue()
@@ -56,13 +53,13 @@ class SweepController(pvController):
     def received_sweep_data_callback(self, data):
         step = data['step']
         samples = data['n']
-        freq = data['freq']
+        point = data['point']
         waveform = data['waveform']
-        self.model.add_waveform(waveform[0],waveform[1],freq)
+        self.model.add_waveform(waveform[0],waveform[1],point)
         #self.update_3d_plots()
         #self.show_latest_waveform()
         d_time = data['time']
-        #print('step: ' + str(step) + ' samples: ' + str(samples) +' freq: ' + str(freq) + ' time: ' + str(d_time))
+        #print('step: ' + str(step) + ' samples: ' + str(samples) +' point: ' + str(point) + ' time: ' + str(d_time))
         progress = (int(step)+1)/int(samples) * 100
         self.progress_bar.setValue(progress)
 

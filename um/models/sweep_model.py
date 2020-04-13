@@ -16,19 +16,19 @@ import json
 from um.models.pv_model import pvModel
 
 
-class frequencySweep(pvModel):
+class setpointSweep(pvModel):
     model_value_changed_signal = pyqtSignal(dict)
     def __init__(self, parent):
         super().__init__(parent)
         self.parent= parent
-        self.instrument = 'frequencySweep'
+        self.instrument = 'setpointSweep'
 
         ## device speficic:
         self.tasks = {  
-                        'frequency': 
-                                {'desc': 'Frequency (MHz)', 'val':30., 'increment':0.1, 'min':0.001,'max':120,
+                        'setpoint': 
+                                {'desc': 'Set-point', 'val':30., 'increment':0.1, 'min':0.001,'max':120,
                                 'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'frequency','type':'f'}},
+                                'param':{'tag':'setpoint','type':'f'}},
                         'run_state':     
                                 {'desc': 'Run;ON/OFF', 'val':False, 
                                 'methods':{'set':True, 'get':True}, 
@@ -40,9 +40,9 @@ class frequencySweep(pvModel):
         
         self.start()           
 
-    def _set_frequency(self, param):
-        print('_set_frequency '+str(param))
-        self.source_waveform_pvs['frequency'].set(param*1e6)
+    def _set_setpoint(self, param):
+        print('_set_setpoint '+str(param))
+        self.source_waveform_pvs['setpoint'].set(param*1e6)
         self.scope_pvs['erase'].set(True)
         self.scope_pvs['run_state'].set(True)
        
@@ -61,24 +61,24 @@ class SweepModel(pvModel):
         super().__init__(parent)
 
         ## device speficic:
-        self.frequencySweepThread = frequencySweep(self)
+        self.setpointSweepThread = setpointSweep(self)
         self.instrument = 'SweepModel'
         
         
         # Task description markup. Aarbitrary default values ('val') are for type recognition in panel widget constructor
         # supported types are float, int, bool, string, and list of strings
         self.tasks = {  'start_freq': 
-                                {'desc': 'Start (MHz)', 'val':10.0, 'increment':0.5,'min':.001,'max':110 ,
+                                {'desc': 'Start', 'val':10.0, 'increment':0.5,'min':.001,'max':110 ,
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'start_freq','type':'f'}},
                         'end_freq': 
-                                {'desc': 'End (MHz)', 'val':40.0, 'increment':0.5, 'min':.002,'max':120,
+                                {'desc': 'End', 'val':40.0, 'increment':0.5, 'min':.002,'max':120,
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'end_freq','type':'f'}},
                         'samples': 
-                                {'desc': 'Samples', 'val':'26',
+                                {'desc': 'Samples', 'val':26,'min':1,'max':10000,
                                 'methods':{'set':False, 'get':True},  
-                                'param':{'tag':'samples','type':'s'}},
+                                'param':{'tag':'samples','type':'i'}},
                         'step': 
                                 {'desc': 'Step', 'val':1.0, 'min':0.01,'max':110,'increment':.1,
                                 'methods':{'set':True, 'get':True},  
@@ -87,8 +87,8 @@ class SweepModel(pvModel):
                                 {'desc': 'Run;ON/OFF', 'val':False, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'output_state','type':'b'}},
-                        'frequency': 
-                                {'desc': 'Frequency (MHz)', 'val':30., 'increment':0.1, 'min':0.1,'max':100,
+                        'setpoint': 
+                                {'desc': 'Set-point', 'val':30., 'increment':0.1, 'min':0.1,'max':100,
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'end_freq','type':'f'}}
                                 
@@ -106,7 +106,7 @@ class SweepModel(pvModel):
 
     def exit(self):
         super().exit()
-        self.frequencySweepThread.exit()
+        self.setpointSweepThread.exit()
 
     def clear_waveforms(self):
         self.sweep = {}
@@ -120,47 +120,9 @@ class SweepModel(pvModel):
         else:
             return None
 
-    def get_waveforms(self):
-        freqs = sorted(list(self.sweep.keys()))
-
-
-        raw_waveforms = []
-        envelope_waveforms = []
-        for f in freqs:
-            waveform = self.sweep[f]
-            X = waveform.get_x()
-            Y = waveform.get_y()
-            xmin = None
-            xmax = None
-            x, y, _ = signal_region_by_x(X,Y,xmin,xmax)
-            raw = y
-            raw_waveforms.append(raw)
-            envelope = waveform.get_envelope()
-            x, envelope, _ = signal_region_by_x(X,envelope,xmin,xmax)
-
-            envelope_waveforms.append(envelope)
-        return np.array(raw_waveforms), np.array(envelope_waveforms)
-
-    def add_waveform(self, x, y, freq):
-        filtered = signal.sosfilt(self.sos, y)
-        y = filtered
-        waveform = Waveform(x,y)
-        envelope = self.make_envelope(x,y,freq)
-        waveform.set_envelope(envelope)
-        self.sweep[freq]= waveform
-
-    def make_envelope(self, x, y, freq):
-        spectra = y
-        envelopes = []
-        del_x = (x[2]-x[1])
-        xsource, source = generate_source(del_x, freq, N=6, window=True)
-        corr = cross_correlate_sig(y, source) 
-        amplitude_envelope, _, _ = demodulate(x,corr, freq)
-        amplitude_envelope = np.sqrt(amplitude_envelope)
-        return amplitude_envelope
 
     def samples_updated(self, samples):
-        self.samples={'frequencies':samples}
+        self.samples={'setpoints':samples}
         n = len(samples)
         self.pvs['samples']._val = str(n)
         self.pvs['samples'].value_changed_signal.emit('samples',[n])
@@ -189,7 +151,7 @@ class SweepModel(pvModel):
             samples = get_samples(self.pvs['start_freq']._val,  self.pvs['end_freq']._val, self.pvs['step']._val)
             self.samples_updated(samples)
         else:
-            self.frequencySweepThread.clear_queue()
+            self.setpointSweepThread.clear_queue()
 
     '''
     def _get_start_freq(self):

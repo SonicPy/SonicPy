@@ -19,15 +19,15 @@ class SweepController(pvController):
         super().__init__(parent, model, isMain)  
 
         
-        self.model.frequencySweepThread.scope_pvs = scope_pvs
-        self.model.frequencySweepThread.source_waveform_pvs = source_waveform_pvs
+        self.model.setpointSweepThread.scope_pvs = scope_pvs
+        self.model.setpointSweepThread.source_waveform_pvs = source_waveform_pvs
 
         panel_items =[  'start_freq',
                         'end_freq',
                         'step',
                         'samples',
                         'run_state']
-        self.init_panel('Frequency sweep', panel_items)
+        self.init_panel('Setpoint sweep', panel_items)
         self.make_connections()
 
     def make_connections(self): 
@@ -42,11 +42,11 @@ class SweepController(pvController):
             self.freqDoneSignal.emit()
 
     def start_sweep(self):
-        # here we do the frequency sweep
-        frequencies = self.model.samples['frequencies']
-        for f in frequencies:
-            self.model.frequencySweepThread.pvs['frequency'].set(f)
-        self.model.frequencySweepThread.pvs['run_state'].set(False)
+        # here we do the setpoint sweep
+        setpoints = self.model.samples['setpoints']
+        for f in setpoints:
+            self.model.setpointSweepThread.pvs['setpoint'].set(f)
+        self.model.setpointSweepThread.pvs['run_state'].set(False)
             
     def stop_sweep(self):
         self.model.clear_queue()

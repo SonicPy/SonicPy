@@ -12,6 +12,7 @@ import queue
 from functools import partial
 from um.models.tek_fileIO import read_file_TEKAFG3000
 import json
+import numpy as np
 
 from um.models.pv_model import pvModel
 
@@ -25,6 +26,14 @@ class setpointSweep(pvModel):
 
         ## device speficic:
         self.tasks = {  
+                        'det_trigger_channel':     
+                                {'desc': 'Output channel', 'val':None, 
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'output_channel','type':'pv'}},
+                        'setpoint_channel':     
+                                {'desc': 'Output channel', 'val':None, 
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'output_channel','type':'pv'}},
                         'setpoint': 
                                 {'desc': 'Set-point', 'val':30., 'increment':0.1, 'min':0.001,'max':120,
                                 'methods':{'set':True, 'get':True}, 
@@ -42,11 +51,11 @@ class setpointSweep(pvModel):
 
     def _set_setpoint(self, param):
         print('_set_setpoint '+str(param))
-        self.source_waveform_pvs['setpoint'].set(param*1e6)
-        self.scope_pvs['erase'].set(True)
-        self.scope_pvs['run_state'].set(True)
+        #self.source_waveform_pvs['setpoint'].set(param*1e6)
+        #self.scope_pvs['erase'].set(True)
+        #self.scope_pvs['run_state'].set(True)
        
-        time.sleep(5)
+        time.sleep(.5)
 
     def _set_run_state(self, param):
         self.parent.pvs['run_state'].set(False)
@@ -75,13 +84,13 @@ class SweepModel(pvModel):
                                 {'desc': 'End', 'val':40.0, 'increment':0.5, 'min':.002,'max':120,
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'end_freq','type':'f'}},
-                        'samples': 
-                                {'desc': 'Samples', 'val':26,'min':1,'max':10000,
-                                'methods':{'set':False, 'get':True},  
-                                'param':{'tag':'samples','type':'i'}},
-                        'step': 
-                                {'desc': 'Step', 'val':1.0, 'min':0.01,'max':110,'increment':.1,
+                        'n': 
+                                {'desc': '#Pts', 'val':26,'min':1,'max':10000,
                                 'methods':{'set':True, 'get':True},  
+                                'param':{'tag':'n','type':'i'}},
+                        'step': 
+                                {'desc': 'Step size', 'val':1.0, 'min':0.001,'max':110,'increment':.1,
+                                'methods':{'set':False, 'get':True},  
                                 'param':{'tag':'step','type':'f'}},
                         'run_state':     
                                 {'desc': 'Run;ON/OFF', 'val':False, 
@@ -96,7 +105,7 @@ class SweepModel(pvModel):
 
         self.create_pvs(self.tasks)
         self.offline = True
-        self.samples = []
+        self.points = {'setpoints':[]}
         self.start()
 
 
@@ -120,62 +129,33 @@ class SweepModel(pvModel):
         else:
             return None
 
-
-    def samples_updated(self, samples):
-        self.samples={'setpoints':samples}
-        n = len(samples)
-        self.pvs['samples']._val = str(n)
-        self.pvs['samples'].value_changed_signal.emit('samples',[n])
+    def _set_n(self, param):
+        self.pvs['n']._val = int(param)
+        self.get_points()
 
     def _set_start_freq(self, param):
-
-        samples = get_samples(param, self.pvs['end_freq']._val, self.pvs['step']._val)
-        self.samples_updated(samples)
+        self.pvs['start_freq']._val = float(param)
+        self.get_points()
         
     def _set_end_freq(self, param):
-        samples = get_samples(self.pvs['start_freq']._val, param,  self.pvs['step']._val)
-        self.samples_updated(samples)
-
-    '''
-    def _set_samples(self, param):
-        print(param)
-    '''
-
-    def _set_step(self, param):
-
-        samples = get_samples(self.pvs['start_freq']._val,  self.pvs['end_freq']._val, param)
-        self.samples_updated(samples)
+        self.pvs['end_freq']._val = float(param)
+        self.get_points()
 
     def _set_run_state(self, param):
         if param:
-            samples = get_samples(self.pvs['start_freq']._val,  self.pvs['end_freq']._val, self.pvs['step']._val)
-            self.samples_updated(samples)
+            self.get_points()
         else:
             self.setpointSweepThread.clear_queue()
-
-    '''
-    def _get_start_freq(self):
-        return self.pvs['start_freq']._val
-    def _get_end_freq(self):
-        return self.pvs['end_freq']._val
-    def _get_samples(self):
-        return self.pvs['samples']._val
-    def _get_step(self):
-        return self.pvs['step']._val
-    def _get_run_state(self):
-        return self.pvs['run_state']._val
-    '''
-
-def get_samples(start_freq, end_freq, step):
-    samples = [start_freq]
-    sample = round(start_freq,5)
-    #print(start_freq)
-    #print(end_freq)
-    #print(step)
     
-    while sample < end_freq:
+    def get_points(self):
+        points, step = get_points(self.pvs['start_freq']._val,  self.pvs['end_freq']._val, self.pvs['n']._val)
+        self.points = self.points={'setpoints':points}
+        self.pvs['step'].set(step)
         
-        sample = round(sample + step,5)
-        samples.append(sample)
-    #print(samples)
-    return samples
+def get_points(start_freq, end_freq, n):
+    rng = end_freq - start_freq
+    step = rng / (n -1)
+    points = []
+    for i in range(n):
+        points.append(float(start_freq+i*step))
+    return points, float(step)

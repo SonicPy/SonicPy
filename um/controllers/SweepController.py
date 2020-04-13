@@ -25,9 +25,9 @@ class SweepController(pvController):
         panel_items =[  'start_freq',
                         'end_freq',
                         'step',
-                        'samples',
+                        'n',
                         'run_state']
-        self.init_panel('Setpoint sweep', panel_items)
+        self.init_panel('Scan', panel_items)
         self.make_connections()
 
     def make_connections(self): 
@@ -43,7 +43,7 @@ class SweepController(pvController):
 
     def start_sweep(self):
         # here we do the setpoint sweep
-        setpoints = self.model.samples['setpoints']
+        setpoints = self.model.points['setpoints']
         for f in setpoints:
             self.model.setpointSweepThread.pvs['setpoint'].set(f)
         self.model.setpointSweepThread.pvs['run_state'].set(False)
@@ -55,7 +55,7 @@ class SweepController(pvController):
 
     def received_sweep_data_callback(self, data):
         step = data['step']
-        samples = data['samples']
+        samples = data['n']
         freq = data['freq']
         waveform = data['waveform']
         self.model.add_waveform(waveform[0],waveform[1],freq)

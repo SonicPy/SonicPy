@@ -48,6 +48,9 @@ class PV(QObject):
         if 'unit' in settings:
             self._unit = settings['unit']
         else: self._unit = ''
+
+    def __str__(self):
+        return self._pv_name
     
 
 class pvModel(QThread):

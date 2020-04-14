@@ -229,12 +229,14 @@ class burst_fixed_time_controller(arb_function):
                                 }
         arb_function = burst_fixed_time
 
+        
+
         super().__init__(parent,isMain,title,arb_name=arb_name, \
                         arb_desc=arb_desc,panel_items=panel_items,\
                             arb_variables=arb_variables,arb_function=arb_function,\
                                 arb_ref=arb_ref, arb_comment=arb_comment ) 
 
-
+        self.scan_pv = self.model.pvs['freq']
 
 ### not ready yet:
 

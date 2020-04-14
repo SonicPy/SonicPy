@@ -33,10 +33,10 @@ class setpointSweep(pvModel):
                                 {'desc': 'Output channel', 'val':None, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'output_channel','type':'pv'}},
-                        'setpoint_channel':     
+                        'positioner_channel':     
                                 {'desc': 'Output channel', 'val':None, 
                                 'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'output_channel','type':'pv'}},
+                                'param':{'tag':'positioner_channel','type':'pv'}},
                         'current_setpoint_index': 
                                 {'desc': 'Current set-point index', 'val':0,'min':0,'max':10000,
                                 'methods':{'set':True, 'get':True},  
@@ -93,6 +93,10 @@ class setpointSweep(pvModel):
         #self.offline = True
         
         self.start()           
+
+    def _set_positioner_channel(self, param):
+        self.pvs['positioner_channel']._val = param
+        print (param)
     
     def _set_acquire(self, param):
         if param:
@@ -122,7 +126,10 @@ class setpointSweep(pvModel):
     def _set_move_positioner(self, param):
         if param:
             p = self.pvs['current_setpoint']._val
-            print('moving positioner to: ' +str(p))
+            #print('moving positioner to: ' +str(p))
+            positioner = self.pvs['positioner_channel']._val
+            print (str(positioner)+ ' = '+str(p))
+            positioner.set(p*1e6)
             time.sleep(.5)
             self.positioner_busy_signal.emit(False)
 
@@ -267,10 +274,14 @@ class SweepModel(pvModel):
         
         self.start()
 
+    def set_scan_pv(self, pv):
+        self.setpointSweepThread.pvs['positioner_channel'].set(pv)
+
 
     #####################################################################
     #  Private set/get functions. Should not be used by external calls  #
     #####################################################################    
+
 
     def exit(self):
         super().exit()

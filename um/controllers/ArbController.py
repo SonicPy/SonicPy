@@ -34,6 +34,8 @@ class ArbController(pvController):
 
         self.arb1 = g_wavelet_controller(self)
         self.arb3 = burst_fixed_time_controller(self)
+        self.scan_pv = self.arb3.scan_pv
+
         w_types = [self.arb1.model.instrument,  self.arb3.model.instrument]
 
         
@@ -55,9 +57,12 @@ class ArbController(pvController):
 
         output_pv = self.model.pvs['arb_waveform']
         self.arb1.model.pvs['output_channel'].set(output_pv)
-        self.arb3.model.pvs['output_channel'].set(self.model.pvs['arb_waveform'])
+        self.arb3.model.pvs['output_channel'].set(output_pv)
+        self.arb1.model.pvs['auto_process'].set(True)
+        self.arb3.model.pvs['auto_process'].set(True)
 
         self.make_connections()
+        
 
         if isMain:
             self.show_widget()

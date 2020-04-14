@@ -13,11 +13,11 @@ class SweepController(pvController):
     scanDoneSignal = pyqtSignal()  
     scanStartRequestSignal = pyqtSignal()  
     
-    def __init__(self, parent, scope_pvs, source_waveform_pvs, isMain = False):
+    def __init__(self, parent, scope_pvs, source_waveform_pvs, scan_pv = None, isMain = False):
         
         model = SweepModel(parent)
         super().__init__(parent, model, isMain)  
-
+        self.scan_pv = scan_pv
         
         self.model.setpointSweepThread.scope_pvs = scope_pvs
         self.model.setpointSweepThread.source_waveform_pvs = source_waveform_pvs
@@ -29,7 +29,16 @@ class SweepController(pvController):
                         'current_index',
                         'scan_go']
         self.init_panel('Scan', panel_items)
+
+
         self.make_connections()
+
+        if self.scan_pv is not None:
+            self.set_scan_pv(self.scan_pv)
+
+
+    def set_scan_pv (self, pv ):
+        self.model.set_scan_pv(pv)
 
     def make_connections(self): 
         self.model.pvs['scan_go'].value_changed_signal.connect(self.run_state_changed_callback)

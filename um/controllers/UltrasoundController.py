@@ -58,6 +58,7 @@ class UltrasoundController(QObject):
         
         self.afg_controller = AFGController(self, offline = offline)
         self.arb_controller = ArbController(self)
+        self.scan_pv = self.arb_controller.scan_pv
         self.arb_filter_controller = ArbFilterController(self)
         self.scope_controller = ScopeController(self, offline = offline)
         self.scope_plot_controller = ScopePlotController(self.scope_controller, afg_controller=self.afg_controller)
@@ -65,7 +66,8 @@ class UltrasoundController(QObject):
         
         self.sweep_controller = SweepController(self,
                                                 self.scope_controller.model.pvs, 
-                                                self.afg_controller.model.pvs)
+                                                self.afg_controller.model.pvs,
+                                                scan_pv=self.scan_pv)
 
 
         self.phase_controller = PhaseController(self.scope_plot_controller.plt,

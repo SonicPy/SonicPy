@@ -14,11 +14,13 @@ from um.models.tek_fileIO import read_file_TEKAFG3000
 import json
 import numpy as np
 
+
 from um.models.pv_model import pvModel
 
 
 class setpointSweep(pvModel):
     model_value_changed_signal = pyqtSignal(dict)
+    acquire_signal = pyqtSignal(bool)
     def __init__(self, parent):
         super().__init__(parent)
         self.parent= parent
@@ -54,22 +56,54 @@ class setpointSweep(pvModel):
                                 }
         self.create_pvs(self.tasks)
         #self.offline = True
-        
+        self.acquire_signal.connect(self.acquire)
         self.start()           
 
-    def _set_setpoint(self, param):
-        print('_set_setpoint '+str(param))
-        #self.source_waveform_pvs['setpoint'].set(param*1e6)
-        #self.scope_pvs['erase'].set(True)
-        #self.scope_pvs['run_state'].set(True)
-       
-        time.sleep(.5)
+   
+    
+    def acquire(self, param):
+        if param:
+            p = self.pvs['current_setpoint']._val
+            print('aquiring: ' +str(p))
+            time.sleep(.5)
+            self.acquire_signal.emit(False)
+
+
+    def wait_for_done(self, param):
+        self.acquire_signal.disconnect(self.wait_for_done)
+        if not param:
+            print('done')
+            self.do_next()
+
+    def do_next(self):
+        pts = self.pvs['setpoints']._val['setpoints']
+        if len (pts):
+            print(pts)
+            p = pts.pop(0)
+            print(p)
+            self.pvs['setpoints']._val['setpoints'] = pts
+            self.pvs['current_setpoint'].set(p)
+        else:
+            self.pvs['run_state'].set(False)
 
     def _set_run_state(self, param):
-        self.parent.pvs['run_state'].set(False)
+        self.pvs['run_state']._val = param
+        if param:
+            self.do_next()
+
+    def _set_setpoints(self, param):
+        print('_set_setpoints '+str(param))
+        self.pvs['setpoints']._val = param
+
+    def _set_current_setpoint(self, param):
+        self.acquire_signal.connect(self.wait_for_done)
+        print('current septoint updated, acquire')
+        self.acquire_signal.emit(True)
+
+    def _set_scan_go(self, param):
+        self.parent.pvs['scan_go'].set(False)
         print('point sweep done')
         
-
 class SweepModel(pvModel):
 
     model_value_changed_signal = pyqtSignal(dict)
@@ -100,8 +134,16 @@ class SweepModel(pvModel):
                                 {'desc': 'Step size', 'val':1.0, 'min':0.001,'max':110,'increment':.1,
                                 'methods':{'set':False, 'get':True},  
                                 'param':{'tag':'step','type':'f'}},
-                        'run_state':     
-                                {'desc': 'Run;ON/OFF', 'val':False, 
+                        'scan_go':     
+                                {'desc': 'Scan;Go', 'val':False, 
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'output_state','type':'b'}},
+                        'scan_stop':     
+                                {'desc': 'Scan;Stop', 'val':False, 
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'output_state','type':'b'}},
+                        'scan_pause':     
+                                {'desc': 'Scan;Stop', 'val':False, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'output_state','type':'b'}},
                         'setpoint': 
@@ -113,6 +155,8 @@ class SweepModel(pvModel):
         self.create_pvs(self.tasks)
         self.offline = True
         self.points = {'setpoints':[]}
+
+        self.setpointSweepThread.pvs['run_state'].value_changed_signal.connect(self.scan_done_callback)
         self.start()
 
 
@@ -127,9 +171,16 @@ class SweepModel(pvModel):
     def clear_waveforms(self):
         self.sweep = {}
 
+    def scan_done_callback(self, pv, data):
+        running = data[0]
+        if not running:
+            print('scan_go: False')
+            self.pvs['scan_go'].set(False)
+
+
     def start_sweep(self):
         # here we do the setpoint sweep
-        setpoints = self.points['setpoints']
+        setpoints = copy.deepcopy(self.points)
         self.setpointSweepThread.pvs['setpoints'].set(setpoints)
         self.setpointSweepThread.pvs['run_state'].set(True)
 
@@ -154,7 +205,7 @@ class SweepModel(pvModel):
         self.pvs['end_point']._val = float(param)
         self.get_points()
 
-    def _set_run_state(self, param):
+    def _set_scan_go(self, param):
         if param:
             self.get_points()
         else:

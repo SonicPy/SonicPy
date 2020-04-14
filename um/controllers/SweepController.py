@@ -26,12 +26,13 @@ class SweepController(pvController):
                         'end_point',
                         'step',
                         'n',
-                        'run_state']
+                        'scan_go',
+                        'scan_stop']
         self.init_panel('Scan', panel_items)
         self.make_connections()
 
     def make_connections(self): 
-        self.model.pvs['run_state'].value_changed_signal.connect(self.run_state_changed_callback)
+        self.model.pvs['scan_go'].value_changed_signal.connect(self.run_state_changed_callback)
 
     def run_state_changed_callback(self, tag, data):
         state = data[0]

@@ -10,8 +10,8 @@ from PyQt5.QtCore import QThread, pyqtSignal, QObject
 
 class SweepController(pvController):
     
-    pointDoneSignal = pyqtSignal()  
-    pointStartRequestSignal = pyqtSignal()  
+    scanDoneSignal = pyqtSignal()  
+    scanStartRequestSignal = pyqtSignal()  
     
     def __init__(self, parent, scope_pvs, source_waveform_pvs, isMain = False):
         
@@ -26,8 +26,8 @@ class SweepController(pvController):
                         'end_point',
                         'step',
                         'n',
-                        'scan_go',
-                        'scan_stop']
+                        'current_index',
+                        'scan_go']
         self.init_panel('Scan', panel_items)
         self.make_connections()
 
@@ -37,10 +37,10 @@ class SweepController(pvController):
     def run_state_changed_callback(self, tag, data):
         state = data[0]
         if state:
-            self.pointStartRequestSignal.emit()
+            self.scanStartRequestSignal.emit()
         else:
-            
-            self.pointDoneSignal.emit()
+            self.model.stop_scan()
+            self.scanDoneSignal.emit()
 
     def start_sweep(self):
         # here we do the setpoint sweep

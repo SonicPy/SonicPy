@@ -95,8 +95,8 @@ class UltrasoundController(QObject):
         self.make_connections()
 
     def make_connections(self): 
-        self.sweep_controller.pointStartRequestSignal.connect(self.pointStartRequestCallback)
-        self.sweep_controller.pointDoneSignal.connect(self.pointDoneCallback)
+        self.sweep_controller.scanStartRequestSignal.connect(self.scanStartRequestCallback)
+        self.sweep_controller.scanDoneSignal.connect(self.scanDoneCallback)
         self.scope_controller.stoppedSignal.connect(self.scopeStoppedCallback)
         self.display_window.actionPreferences.triggered.connect(self.preferences_module)
         self.display_window.actionSave_As.triggered.connect(self.scopeSaveAsCallback)
@@ -218,12 +218,12 @@ class UltrasoundController(QObject):
             self.working_directories.savedata = new_folder
             mcaUtil.save_folder_settings(self.working_directories, self.scope_working_directories_file)
 
-    def pointStartRequestCallback(self):
+    def scanStartRequestCallback(self):
         #print('starting frequency sweep!')
         self.controls_setEnable(False)
         self.sweep_controller.start_sweep()
 
-    def pointDoneCallback(self):
+    def scanDoneCallback(self):
         #print('ending frequency sweep!')
         self.controls_setEnable(True)
 

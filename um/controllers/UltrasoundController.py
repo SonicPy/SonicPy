@@ -302,7 +302,8 @@ class UltrasoundController(QObject):
     
     def waveform_filtered_callback(self, data):
         if len(data):
-            t = data['t']
-            waveform = data['waveform']
+            t = np.asarray(data['t'])
+            waveform = np.asarray(data['waveform'])
+            out = {'waveform':(t,waveform),'ch':-1, 'time':-1, 'num_acq':-1}
             #self.arb_filter_controller.arb_filter_edit_controller.widget.update_plot([t,waveform])
-            self.afg_controller.model.pvs['user1_waveform'].set(data)
+            self.scope_controller.model.pvs['waveform'].set(out)

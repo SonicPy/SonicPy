@@ -36,7 +36,7 @@ class SaveDataController(pvController):
 
     def save_data_callback(self, *args, **kwargs):
         filename = ''
-        if self.scope_controller.waveform_data is not None:
+        if self.waveform_data is not None:
             if 'folder' in kwargs:
                 folder = kwargs['folder']
             else:
@@ -44,17 +44,17 @@ class SaveDataController(pvController):
             if not 'filename' in kwargs:
                 filename = save_file_dialog(
                                 self.widget, "Save waveform",directory=folder,
-                                filter=self.scope_controller.model.file_filter)
+                                filter=self.model.file_filter)
             else:
                 filename = kwargs['filename']
             if filename is not '':
                 if 'params' in kwargs:
                     params = kwargs['params']
-                    self.scope_controller.model.pvs['params'].set(params)
+                    self.model.pvs['params'].set(params)
                 else:
-                    self.scope_controller.model.pvs['params'].set({})
-                self.scope_controller.model.pvs['filename'].set(filename)
-                self.scope_controller.model.pvs['save'].set(True)
+                    self.model.pvs['params'].set({})
+                self.model.pvs['filename'].set(filename)
+                self.model.pvs['save'].set(True)
 
     def make_connections(self):
         pass

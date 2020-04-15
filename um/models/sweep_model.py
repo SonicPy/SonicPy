@@ -228,7 +228,7 @@ class SweepModel(pvModel):
                                 'param':{'tag':'det_trigger_channel','type':'s'}},
                         
                         'positioner_channel':     
-                                {'desc': 'Positioner', 'val':'AFG3251:frequency', 
+                                {'desc': 'Positioner', 'val':'burst_fixed_time:freq', 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'positioner_channel','type':'s'}},
                         'start_point': 

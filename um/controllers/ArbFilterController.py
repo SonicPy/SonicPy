@@ -36,9 +36,9 @@ class ArbFilterController(pvController):
         
 
         filters_task = {  'selected_item': 
-                                {'desc': 'Wave type', 'val':self.f_types[0], 'list':self.f_types, 
+                                {'desc': 'Filter type', 'val':self.f_types[0], 'list':self.f_types, 
                                 'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'waveform_type','type':'l'}}}
+                                'param':{'tag':'selected_item','type':'l'}}}
         self.model.create_pvs(filters_task)
 
         self.panel_items =[ 'selected_item',

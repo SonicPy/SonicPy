@@ -42,7 +42,7 @@ class ArbController(pvController):
         waveforms_task = {  'selected_item': 
                                 {'desc': 'Wave type', 'val':w_types[0], 'list':w_types, 
                                 'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'waveform_type','type':'l'}}}
+                                'param':{'tag':'selected_item','type':'l'}}}
 
         self.model.create_pvs(waveforms_task)
         self.panel_items =[ 'selected_item',

@@ -27,22 +27,22 @@ class ArbFilterModel(Scope, pvModel):
         self.instrument = 'ArbFilter'
         self.tasks = {  
                         'waveform_in':     
-                                {'desc': 'Waveform', 'val':None, 
+                                {'desc': 'Waveform in', 'val':None, 
                                 'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'waveform','type':'dict'}},
+                                'param':{'tag':'waveform_in','type':'dict'}},
                         
                         'edit_state':     
                                 {'desc': ';Edit', 'val':False, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'edit_state','type':'b'}},
                         'waveform_out':     
-                                {'desc': 'Waveform', 'val':None, 
+                                {'desc': 'Waveform out', 'val':None, 
                                 'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'waveform','type':'dict'}},
+                                'param':{'tag':'waveform_out','type':'dict'}},
                         'filter_params':     
-                                {'desc': 'Waveform parameters', 'val':None, 
+                                {'desc': 'Filter parameters', 'val':None, 
                                 'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'waveform','type':'dict'}}
+                                'param':{'tag':'filter_params','type':'dict'}}
                                 
                       }       
 
@@ -60,15 +60,7 @@ class ArbFilterModel(Scope, pvModel):
     def _exit_task(self):
         pass
 
-    '''    def _get_filter_type(self):
-        ans = self.pvs['filter_type']._val
-        #print('get ' + str(ans))
-        return ans
-
-    def _set_filter_type(self, param):
-        #print('set ' + str(param))
-        self.pvs['filter_type']._val= param'''
-
+ 
     
 
     def _get_edit_state(self):

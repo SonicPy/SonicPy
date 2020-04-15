@@ -28,13 +28,16 @@ class SaveDataModel(pvModel):
         
         self.instrument = 'SaveData'
     
-        self.file_name = ''
+        
         self.file_settings = None
   
         self.file_filter='Text (*.csv);;Binary (*.npz)'
 
 
-        self.tasks = {  
+        self.tasks = {  'data_channel':
+                                {'desc': '', 'val':'', 
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'data_channel','type':'s'}},
                         'filename':
                                 {'desc': 'Filename', 'val':'', 
                                 'methods':{'set':True, 'get':True}, 
@@ -58,9 +61,13 @@ class SaveDataModel(pvModel):
 
         self.start()
 
+        self.pvs['data_channel'].set('DPO5104:waveform')
+
 
     def write_file(self, filename, params = {}):
-        data = self.waveform
+        data = self.pv_server.get_pv(self.pvs['data_channel']._val)._val
+        print(data)
+        '''
         if data is not None:
             waveform  = data['waveform']
             
@@ -72,7 +79,7 @@ class SaveDataModel(pvModel):
                 np.savez_compressed(filename, waveform)
             
             self.file_name = filename
-        
+        '''
     
     #####################################################################
     #  Private set/get functions. Should not be used by external calls  #
@@ -93,10 +100,9 @@ class SaveDataModel(pvModel):
     
     def _set_save(self, state):
         if state:
-            self.write_file(self.file_name, self.params)
-
-    def _get_filename(self):
-        return self.file_name
+            file_name = self.pvs['filename']._val
+            self.write_file(file_name)
+            self.pvs['save'].set(False)
 
     def _get_file_extension(self):
         return self.file_filter

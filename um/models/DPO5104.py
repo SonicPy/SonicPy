@@ -72,9 +72,9 @@ class Scope_DPO5104(Scope, pvModel):
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'output_state','type':'b'}},
                         'erase_start':     
-                                {'desc': 'Erase & start;Go', 'val':False, 
+                                {'desc': u';Erase & ON', 'val':False, 
                                 'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'output_state','type':'b'}},
+                                'param':{'tag':'erase_start','type':'b'}},
                         'erase':     
                                 {'desc': 'Erase;Erase', 'val':False, 
                                 'methods':{'set':True, 'get':False}, 
@@ -84,7 +84,7 @@ class Scope_DPO5104(Scope, pvModel):
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'vertical_scale','type':'f'}},
                         'instrument':
-                                {'desc': 'Instrument', 'val':self.instrument, 
+                                {'desc': 'Instrument', 'val':'not connected', 
                                 'methods':{'set':False, 'get':True}, 
                                 'param':{'tag':'instrument','type':'s'}},   
                         'waveform':
@@ -106,19 +106,19 @@ class Scope_DPO5104(Scope, pvModel):
         
         self.DPO5000 = TektronixScope('143')
         return self.DPO5000.connect()
-        return False
+        
         
 
     def disconnect(self):
         if self.connected:
             self.DPO5000.disconnect()
 
-    def clear_bg(self):
+    '''def clear_bg(self):
         waveform = None
         self.bg_waveform = {'waveform':waveform}
-        self.pvs['bg_waveform'].set(self.bg_waveform)
+        self.pvs['bg_waveform'].set(self.bg_waveform)'''
 
-
+    '''
     def read_file(self, filename):
         waveform = None
         if filename.endswith('.csv'):
@@ -129,22 +129,8 @@ class Scope_DPO5104(Scope, pvModel):
         self.bg_waveform = {'waveform':waveform}
         self.pvs['bg_waveform']._val = self.bg_waveform
         self.pvs['bg_waveform'].value_changed_signal.emit('bg_waveform',[self.bg_waveform])
-        
-
-    def write_file(self, filename, params = {}):
-        data = self.waveform
-        if data is not None:
-            waveform  = data['waveform']
-            
-            if filename.endswith('.csv'):
-                self.file_filter='Text (*.csv);;Binary (*.npz)'
-                write_tek_csv(filename, waveform[0], waveform[1])
-            if filename.endswith('.npz'):
-                self.file_filter='Binary (*.npz);;Text (*.csv)'
-                np.savez_compressed(filename, waveform)
-            
-            self.file_name = filename
-        
+    '''
+    
     
     #####################################################################
     #  Private set/get functions. Should not be used by external calls  #
@@ -154,44 +140,15 @@ class Scope_DPO5104(Scope, pvModel):
         self.disconnect()
 
 
-    def get_waveform(self):
-        self.my_queue.put({'task_name':'get_waveform'})
 
     def _set_erase_start(self, params):
-         self.pvs['erase_start']._val = False
-         self.pvs['erase'].set (True)
-         self.pvs['run_state'].set (True)
-
-
-    def _set_filename(self, filename):
-
-        self.file_name = filename
-        if filename.endswith('.csv'):
-            self.pvs['file_extension'].set('Text (*.csv)')
+        self.pvs['erase_start']._val = params
+        if params:
+            self.pvs['erase'].set (True)
+            self.pvs['run_state'].set (True)
+            self.pvs['erase_start'].set(False)
             
-        if filename.endswith('.npz'):
-            self.pvs['file_extension'].set('Binary (*.npz)')
-            
-    def _set_params(self, params):
-        self.params = params
-    
-    def _set_save(self, state):
-        if state:
-            self.write_file(self.file_name, self.params)
 
-    def _get_filename(self):
-        return self.file_name
-
-    def _get_file_extension(self):
-        return self.file_filter
-    
-    def _set_file_extension(self, extension):
-        if 'csv' in extension:
-            self.file_filter = 'Text (*.csv);;Binary (*.npz)'
-            #print(self.file_filter)
-        if 'npz' in extension:
-            self.file_filter = 'Binary (*.npz);;Text (*.csv)'
-            #print(self.file_filter)
 
     def _set_clear_all(self, clear):
 
@@ -212,116 +169,174 @@ class Scope_DPO5104(Scope, pvModel):
             self.pvs['erase'].set(False)
 
     def _get_instrument(self):
-        ID = self.DPO5000.get_ID()
-        if ID is not None:
-            if len(ID):
-                tokens = ID.split(',')
-                ID = tokens[1]
+        if self.connected:
+            ID = self.DPO5000.get_ID()
+            if ID is not None:
+                if len(ID):
+                    tokens = ID.split(',')
+                    ID = tokens[1]
+        else:
+            ID = 'not connected'
         return ID
         
     def _set_num_av(self, num_av):
-        self.DPO5000.set_num_av(num_av)
+        self.pvs['num_av']._val = num_av
+        if self.connected:
+            self.DPO5000.set_num_av(num_av)
 
     def _get_num_av(self):
 
-        
-        num_av = self.DPO5000.get_num_av()
+        if self.connected:
+            num_av = self.DPO5000.get_num_av()
+        else:
+            num_av = self.pvs['num_av']._val
         
         return num_av
 
-  
 
     def _set_acquisition_type(self, acq_type):
-        self.DPO5000.set_aquisition_type(acq_type)    
+        self.pvs['acquisition_type']._val = acq_type
+        if self.connected:
+            self.DPO5000.set_aquisition_type(acq_type)    
 
     def _get_acquisition_type(self):
-        t = self.DPO5000.get_aquisition_type()  
+        if self.connected:
+            t = self.DPO5000.get_aquisition_type()  
+        else:
+            t = self.pvs['acquisition_type']._val
         return t
 
     def _set_channel(self, channel):
-        self.channel = channel.upper()
-        self.DPO5000.set_data_source(self.channel)
-        self.channel_changed_signal.emit()
+        self.pvs['channel']._val = channel.upper()
+        if self.connected:
+            channel = self.pvs['channel']._val
+            self.DPO5000.set_data_source(channel)
+            
 
     def _get_channel(self):
-        ch = self.DPO5000.get_data_source()
+        if self.connected:
+            ch = self.DPO5000.get_data_source()
+        else:
+            ch = self.pvs['channel']._val
         return ch
 
     def _get_setup(self):
-        setup = self.DPO5000.get_setup_dict(force_load=True)
+        if self.connected:
+            setup = self.DPO5000.get_setup_dict(force_load=True)
+        else:
+            setup = self.pvs['setup']._val
         return setup
 
     def _set_channel_state(self,state):
-        channel = self._get_channel()
-        if state:
-            self.DPO5000.select_channel(channel)
-        else:
-            self.DPO5000.turn_off_channel(channel)
+        if self.connected:
+            channel = self._get_channel()
+            if state:
+                self.DPO5000.select_channel(channel)
+            else:
+                self.DPO5000.turn_off_channel(channel)
+
     
     def _get_channel_state(self):
-        channel = self._get_channel()
-        ans = self.DPO5000.is_channel_selected(channel)
+        if self.connected:
+            channel = self._get_channel()
+            ans = self.DPO5000.is_channel_selected(channel)
+        else:
+            ans = self.pvs['channel_state']._val    
         return ans
 
     def _get_run_state(self):
-        state = self.DPO5000.get_state()
+        print('_get_run_state')
+        if self.connected:
+            state = self.DPO5000.get_state()
+        else:
+            state = self.pvs['run_state']._val  
         return state
 
     def _set_run_state(self, state):
-        if state:
-            """Start acquisition"""
-            self.DPO5000.start_acq()
-        else:
-            """Stop acquisition"""
-            self.DPO5000.stop_acq()
+        print('_set_run_state')
+        self.pvs['run_state']._val = state
+        if self.connected:
+            if state:
+                """Start acquisition"""
+                self.DPO5000.start_acq()
+            else:
+                """Stop acquisition"""
+                self.DPO5000.stop_acq()
 
     def _set_vertical_scale(self,scale):
-        channel = self._get_channel()
-        self.DPO5000.set_vertical_scale(channel, scale)
+        self.pvs['vertical_scale']._val = scale
+        if self.connected:
+            channel = self._get_channel()
+            self.DPO5000.set_vertical_scale(channel, scale)
         
     def _get_vertical_scale(self):
-        channel = self._get_channel()
-        scale = self.DPO5000.get_vertical_scale(channel)
+        if self.connected:
+            channel = self._get_channel()
+            scale = self.DPO5000.get_vertical_scale(channel)
+        else:
+            scale = self.pvs['vertical_scale']._val      
         return scale
 
     def _get_waveform(self): 
-        #start = time.time()
-        #wait_till = start+0.05
-        num_av = self.pvs['num_av']._val
-        num_acq = self.pvs['num_acq']._val
-        stop_after_preset = self.pvs['stop_after_num_av_preset']._val
+        print('get waveform')
 
-        if num_acq < num_av or not stop_after_preset:
-           
-            data_stop = self.data_stop
-            ch = self.selected_channel
-            waveform  = self.DPO5000.read_data_one_channel( data_start=1, 
-                                                            data_stop=data_stop,
-                                                            x_axis_out=True)
+        if self.connected:
+            #start = time.time()
+            #wait_till = start+0.05
+            num_av = self.pvs['num_av']._val
+            num_acq = self.pvs['num_acq']._val
+            stop_after_preset = self.pvs['stop_after_num_av_preset']._val
+
+            if num_acq < num_av or not stop_after_preset:
             
-            #end = time.time()
-            # make sure set frame rate isn't exceeded
-            #while time.time()< wait_till:
-            #        time.sleep(0.005)
-            num_acq = int(self.DPO5000.num_acq)
-            #elapsed = end - start
+                data_stop = self.data_stop
+                ch = self.selected_channel
+                waveform  = self.DPO5000.read_data_one_channel( data_start=1, 
+                                                                data_stop=data_stop,
+                                                                x_axis_out=True)
+                
+                #end = time.time()
+                # make sure set frame rate isn't exceeded
+                #while time.time()< wait_till:
+                #        time.sleep(0.005)
+                num_acq = int(self.DPO5000.num_acq)
+                #elapsed = end - start
+                (dt, micro) = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f').split('.')
+                dt = "%s.%03d" % (dt, int(micro) / 1000)
+
+                waveform_out = {'waveform':waveform,'ch':ch, 'time':dt, 'num_acq':num_acq}
+                
+        else:
+            print('reading csv file')
+            num_acq = self.pvs['num_av']._val
+            
+            ch = 1
             (dt, micro) = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f').split('.')
             dt = "%s.%03d" % (dt, int(micro) / 1000)
+            waveform = read_tek_csv('anvil.csv')
+            time.sleep(.5)
+            noise_scale = 0.002
+            waveform[1] = waveform[1]+(np.random.normal(0,1,len(waveform[1]))-0.5)*noise_scale
+            print('read csv file')
+            waveform_out = {'waveform':waveform,'ch':ch, 'time':dt, 'num_acq':num_acq}  
 
-            self.waveform = {'waveform':waveform,'ch':ch, 'time':dt, 'num_acq':num_acq}
-            stop_after_preset = self.pvs['stop_after_num_av_preset']._val
-            
-            self.pvs['num_acq'].set(int(num_acq))
+        print('num_acq: '+str(num_acq))
+        self.pvs['num_acq'].set(int(num_acq))
+
+        stop_after_preset = self.pvs['stop_after_num_av_preset']._val
 
         if stop_after_preset:
-                running = self.pvs['run_state']._val
-                #print('run_state: ' + str(running))
-                if running:
+            running = self.pvs['run_state']._val
+            print('run_state: ' + str(running))
+            if running:
+                
+                num_av = self.pvs['num_av']._val
+                
+                print('num_av: ' + str(num_av))
+                print('num_acq >= num_av: '+ str(num_acq >= num_av))
+                if num_acq >= num_av:
                     
-                    num_av = self.pvs['num_av']._val
-                    #print('num_av: ' + str(num_av))
-                    if num_acq >= num_av:
-                        #print('num_acq >= num_av: ' + str(True))
-                        self.pvs['run_state'].set(False)
-        
-        return self.waveform
+                    print('num_acq >= num_av: ' + str(True))
+                    self.pvs['run_state'].set(False)
+        print('returning waveform_out')
+        return waveform_out

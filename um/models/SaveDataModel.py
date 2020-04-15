@@ -27,23 +27,23 @@ class SaveDataModel(pvModel):
         self.pv_server = pvServer()
         
         self.instrument = 'SaveData'
-    
-        
-        self.file_settings = None
-  
-        self.file_filter='Text (*.csv);;Binary (*.npz)'
 
+        self.extensions = 'Text (*.csv);;Binary (*.npz)'.split(';;')
 
         self.tasks = {  'data_channel':
                                 {'desc': '', 'val':'', 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'data_channel','type':'s'}},
                         'filename':
-                                {'desc': 'Filename', 'val':'', 
+                                {'desc': 'Filename', 'val':'savedata.csv', 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'filename','type':'s'}},
+                        'file_filter':
+                                {'desc': 'Filename', 'val':'Text (*.csv);;Binary (*.npz)', 
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'file_filter','type':'s'}},
                         'file_extension':
-                                {'desc': 'Extension', 'val':self.file_filter.split(';;')[0],'list':self.file_filter.split(';;'), 
+                                {'desc': 'Extension', 'val':self.extensions[0],'list':self.extensions, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'file_extension','type':'l'}},
                         'file_header':
@@ -53,8 +53,20 @@ class SaveDataModel(pvModel):
                         'save':     
                                 {'desc': 'Save;Save', 'val':False, 
                                 'methods':{'set':True, 'get':False}, 
-                                'param':{'tag':'save','type':'b'}}
-                                
+                                'param':{'tag':'save','type':'b'}}, 
+                        'autorestart':     
+                                {'desc': 'autorestart;ON/OFF', 'val':False, 
+                                'methods':{'set':True, 'get':False}, 
+                                'param':{'tag':'autorestart','type':'b'}}, 
+                        'autosave':     
+                                {'desc': 'Sutosave;ON/OFF', 'val':False, 
+                                'methods':{'set':True, 'get':False}, 
+                                'param':{'tag':'autosave','type':'b'}}, 
+                        'warn_overwrite':     
+                                {'desc': 'Warn overwrite;ON/OFF', 'val':False, 
+                                'methods':{'set':True, 'get':False}, 
+                                'param':{'tag':'warn_overwrite','type':'b'}}
+
                       }       
 
         self.create_pvs(self.tasks)
@@ -63,27 +75,27 @@ class SaveDataModel(pvModel):
 
         self.pvs['data_channel'].set('DPO5104:waveform')
 
-
-    def write_file(self, filename, params = {}):
-        data = self.pv_server.get_pv(self.pvs['data_channel']._val)._val
-        print(data)
-        '''
-        if data is not None:
-            waveform  = data['waveform']
-            
-            if filename.endswith('.csv'):
-                self.file_filter='Text (*.csv);;Binary (*.npz)'
-                write_tek_csv(filename, waveform[0], waveform[1])
-            if filename.endswith('.npz'):
-                self.file_filter='Binary (*.npz);;Text (*.csv)'
-                np.savez_compressed(filename, waveform)
-            
-            self.file_name = filename
-        '''
     
     #####################################################################
     #  Private set/get functions. Should not be used by external calls  #
     #####################################################################    
+
+    def write_file(self, filename, params = {}):
+        data = self.pv_server.get_pv(self.pvs['data_channel']._val)._val
+        print(data)
+        
+        if len(data):
+            waveform  = data['waveform']
+            
+            if filename.endswith('.csv'):
+                
+                
+                write_tek_csv(filename, waveform[0], waveform[1])
+            if filename.endswith('.npz'):
+                
+                np.savez_compressed(filename, waveform)
+            
+            self.pvs['filename'].set('filename')
 
     def _exit_task(self):
         pass
@@ -101,18 +113,17 @@ class SaveDataModel(pvModel):
     def _set_save(self, state):
         if state:
             file_name = self.pvs['filename']._val
-            self.write_file(file_name)
+            if len(file_name):
+                self.write_file(file_name)
             self.pvs['save'].set(False)
 
-    def _get_file_extension(self):
-        return self.file_filter
     
     def _set_file_extension(self, extension):
         if 'csv' in extension:
-            self.file_filter = 'Text (*.csv);;Binary (*.npz)'
+            self.pvs['file_filter'].set('Text (*.csv);;Binary (*.npz)')
             #print(self.file_filter)
         if 'npz' in extension:
-            self.file_filter = 'Binary (*.npz);;Text (*.csv)'
+            self.pvs['file_filter'].set('Binary (*.npz);;Text (*.csv)')
             #print(self.file_filter)
 
 

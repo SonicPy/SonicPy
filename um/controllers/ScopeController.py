@@ -18,10 +18,10 @@ from utilities.utilities import *
 
 class ScopeController(pvController):
     callbackSignal = pyqtSignal(dict)  
-    stoppedSignal = pyqtSignal()
+    #stoppedSignal = pyqtSignal()
     dataUpdatedSignal = pyqtSignal(dict)
-    dataBGUpdatedSignal = pyqtSignal(dict)
-    runStateSignal = pyqtSignal(bool)
+    #dataBGUpdatedSignal = pyqtSignal(dict)
+    #runStateSignal = pyqtSignal(bool)
 
     def __init__(self, parent, isMain = False, offline = False):
         visa_hostname='143' 
@@ -61,32 +61,25 @@ class ScopeController(pvController):
     def run_state_callback(self, tag, data):
         state = data[0]
         #print('run state callback' + str(state))
-        self.runStateSignal.emit(state)
+        #self.runStateSignal.emit(state)
         if state:
             self.get_waveform()
-        else:
-            self.stoppedSignal.emit()
+        #else:
+        #    self.stoppedSignal.emit()
 
    
 
-    def bg_waveform_updated_signal_callback(self, pv_name, data):
-        data = data[0]
-        #self.waveform_bg_data = data
-        self.dataBGUpdatedSignal.emit(data)
-
     def waveform_updated_signal_callback(self, pv_name, data):
-        data = data[0]
-        #self.waveform_data = data
-        self.dataUpdatedSignal.emit(data)
+        self.dataUpdatedSignal.emit(data[0])
+        time.sleep(0.01)
+
         if self.model.pvs['run_state']._val:
-            time.sleep(0.01)
             self.get_waveform()
             
 
-
     def get_waveform(self):
-        if self.model.connected:
-            self.model.pvs['waveform'].get()
+        #self.model._get_waveform()
+        self.model.pvs['waveform'].get()
         
         
     

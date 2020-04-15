@@ -106,7 +106,7 @@ class UltrasoundController(QObject):
     def make_connections(self): 
         self.sweep_controller.scanStartRequestSignal.connect(self.scanStartRequestCallback)
         self.sweep_controller.scanDoneSignal.connect(self.scanDoneCallback)
-        self.scope_controller.stoppedSignal.connect(self.scopeStoppedCallback)
+        self.scope_controller.model.pvs['run_state'].value_changed_signal.connect(self.scopeStoppedCallback)
         self.display_window.actionPreferences.triggered.connect(self.preferences_module)
         self.display_window.actionSave_As.triggered.connect(self.scopeSaveAsCallback)
         self.display_window.actionBG.triggered.connect(self.overlay_btn_callback)
@@ -168,24 +168,26 @@ class UltrasoundController(QObject):
                 self.scope_controller.model.file_settings = file_options
             mcaUtil.save_file_settings(file_options, file=self.scope_file_options_file)
 
-    def scopeStoppedCallback(self):
-        #print('stopped')
-        if self.file_options.autosave:
-            if self.scope_controller.model.file_name != '':
-                freq = None
-                try:
-                    afg_pvs = self.afg_controller.model.pvs
-                    freq = afg_pvs['frequency']._val
-                except:
-                    pass
-                new_file = increment_filename_extra(self.scope_controller.model.file_name, frequency = freq)
-                print(new_file)
-                if new_file != self.scope_controller.model.file_name:
-                    self.saveFile(new_file)
-                    #print('save: ' + new_file)
-        if self.file_options.autorestart:
-            pass
-            #self.model.acq_erase_start()
+    def scopeStoppedCallback(self, pv, data):
+        running  = data[0]
+        if not running:
+            #print('stopped')
+            if self.file_options.autosave:
+                if self.scope_controller.model.file_name != '':
+                    freq = None
+                    try:
+                        afg_pvs = self.afg_controller.model.pvs
+                        freq = afg_pvs['frequency']._val
+                    except:
+                        pass
+                    new_file = increment_filename_extra(self.scope_controller.model.file_name, frequency = freq)
+                    print(new_file)
+                    if new_file != self.scope_controller.model.file_name:
+                        self.saveFile(new_file)
+                        #print('save: ' + new_file)
+            if self.file_options.autorestart:
+                pass
+                #self.model.acq_erase_start()
 
     
 

@@ -171,19 +171,11 @@ class pvModel(QThread):
         #print('create private method: _' + method+ '_'+ tag + ' ('+self.instrument+')') 
 
     def get_task(self,  mode, task, get_params):
-        if self.connected:
-            task_str = mode+'_'+task
-            self.my_queue.put({'task_name': task, 'mode': mode})
-            # asynchronously waiting for reply
-            # may look for a better way to do this later
-            '''
-            try:
-                ans = self.get_queue.get(timeout=2) 
-                return ans
-            except:
-                return None
-        else: return None
-            '''
+        
+        task_str = mode+'_'+task
+        self.my_queue.put({'task_name': task, 'mode': mode})
+        
+       
 
     def set_task(self,  mode, task, desc_params, param_in):
         pv = self.pvs[task]
@@ -229,7 +221,7 @@ class pvModel(QThread):
         # do stuff
         while self.go:
             task = self.my_queue.get()
-            #print('task in queue: ' + str(task))
+            print('task in queue: ' + str(task))
             
             if 'task_name' in task:
                 task_name = task['task_name']
@@ -252,14 +244,16 @@ class pvModel(QThread):
                                 print('set failed: '+task_name)
                             self.pvs[task_name]._val = param
                             self.pvs[task_name].value_changed_signal.emit(task_name,[param])
+                            print('emit '+ str(task_name) + ', '+ str(param))
                             
                         elif mode == 'get':
+                            #print('get... try:  '+ str(task_name))
                             try:
                                 ans = func()
                             except:
-                                print('get failed: '+task_name)
+                                #print('get failed: '+task_name)
                                 ans = None
-                                
+                            #print('get succeeded')
                             # asynchronously send reply
                             if ans is not None:
                                 if type(ans) is not dict:

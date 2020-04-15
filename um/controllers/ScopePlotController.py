@@ -33,13 +33,14 @@ class ScopePlotController(QObject):
             self.widget = scopeWidget()
             scope_controller = ScopeController(self.widget, isMain=True)
         self.scope_controller = scope_controller
+        btn_erase_on, _ =self.scope_controller.make_pv_widget('DPO5104:erase_start')
         btn_erase, _ = self.scope_controller.make_pv_widget('DPO5104:erase')
         btn_on_off, _ = self.scope_controller.make_pv_widget('DPO5104:run_state')
         
         self.save_data_controller= save_data_controller
         btn_save, _ = self.save_data_controller.make_pv_widget('SaveData:save')
 
-        self.widget = scopeWidget([btn_erase,btn_on_off, 'spacer', btn_save])
+        self.widget = scopeWidget([btn_erase_on,btn_erase,btn_on_off, 'spacer', btn_save])
         self.pg = self.widget.plot_widget.fig.win
         if isMain:
             self.show_widget()
@@ -76,8 +77,8 @@ class ScopePlotController(QObject):
     def widgetSetEnabled(self, state):
         self.widget.button_widget.setEnabled(state)
         
-    def waveform_updated_signal_callback(self, waveform_data):
-        data = waveform_data
+    def waveform_updated_signal_callback(self, data):
+        
         self.waveform_data = data
         waveform  = data['waveform']
  

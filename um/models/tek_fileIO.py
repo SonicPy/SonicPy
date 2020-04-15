@@ -77,9 +77,9 @@ def read_tek_csv(fname, return_x=True, subsample=1):
     y = np.array(raw_samples)
     if return_x:
         x = np.array(range(len(y)))*sample_period*subsample
-        return x, y
+        return [x, y]
     else: 
-        return y
+        return [y]
 
 
 

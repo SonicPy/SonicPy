@@ -92,17 +92,16 @@ class setpointSweep(pvModel):
             p = self.pvs['current_setpoint']._val
             print('aquiring @ ' +str(p))
             detector_pvname = self.parent.pvs['det_trigger_channel']._val
-            
             detector_pv = self.pv_server.get_pv(detector_pvname)
             detector_pv.set(True)
             
-            time.sleep(3)  # replace with event from detector done
-            self.detector_busy_signal.emit(False)
 
-    def wait_for_detector_done(self, param):
-        
+    def wait_for_detector_done(self, pv, param):
+        param = param[0]
         if not param:
-            self.detector_busy_signal.disconnect(self.wait_for_detector_done)
+            detector_pvname = self.parent.pvs['det_run_state_channel']._val
+            detector_pv = self.pv_server.get_pv(detector_pvname)
+            detector_pv.value_changed_signal.disconnect(self.wait_for_detector_done)
             print('detector done')
             
             self.pvs['detector_done'].set(True)
@@ -148,7 +147,11 @@ class setpointSweep(pvModel):
             self.pvs['detector_trigger'].set(True)
 
     def _set_detector_trigger(self, param):
-        self.detector_busy_signal.connect(self.wait_for_detector_done)
+        detector_pvname = self.parent.pvs['det_run_state_channel']._val
+        print(detector_pvname)
+        detector_pv = self.pv_server.get_pv(detector_pvname)
+        print('pv: ' + str(detector_pv))
+        detector_pv.value_changed_signal.connect(self.wait_for_detector_done)
         self.pvs['acquire'].set(True)
             
 
@@ -226,9 +229,13 @@ class SweepModel(pvModel):
                                 {'desc': 'Detector', 'val':'DPO5104:erase_start', 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'det_trigger_channel','type':'s'}},
+                        'det_run_state_channel':
+                                {'desc': 'Detector', 'val':'DPO5104:run_state', 
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'det_run_state_channel','type':'s'}},
                         
                         'positioner_channel':     
-                                {'desc': 'Positioner', 'val':'burst_fixed_time:freq', 
+                                {'desc': 'Positioner', 'val':'AFG3251:frequency', 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'positioner_channel','type':'s'}},
                         'start_point': 

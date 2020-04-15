@@ -23,6 +23,9 @@ class Scope_DPO5104(Scope, pvModel):
 
     def __init__(self, parent, visa_hostname='143', offline = False):
         
+        
+        self.virtual_data = read_tek_csv('anvil.csv')
+
         pvModel.__init__(self, parent)
         Scope.__init__(self)
         
@@ -36,6 +39,8 @@ class Scope_DPO5104(Scope, pvModel):
         
         if not offline:
             self.connected = self.connect(self.visa_hostname)
+        
+        
         
         self.data_stop = 100000
         self.selected_channel = 'CH1'
@@ -313,12 +318,12 @@ class Scope_DPO5104(Scope, pvModel):
             ch = 1
             (dt, micro) = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f').split('.')
             dt = "%s.%03d" % (dt, int(micro) / 1000)
-            waveform = read_tek_csv('anvil.csv')
-            time.sleep(.5)
+            waveform = self.virtual_data
+            time.sleep(.05)
             noise_scale = 0.002
-            waveform[1] = waveform[1]+(np.random.normal(0,1,len(waveform[1]))-0.5)*noise_scale
+            waveform_noised = waveform[1]+(np.random.normal(0,1,len(waveform[1]))-0.5)*noise_scale
             print('read csv file')
-            waveform_out = {'waveform':waveform,'ch':ch, 'time':dt, 'num_acq':num_acq}  
+            waveform_out = {'waveform':[waveform[0],waveform_noised],'ch':ch, 'time':dt, 'num_acq':num_acq}  
 
         print('num_acq: '+str(num_acq))
         self.pvs['num_acq'].set(int(num_acq))

@@ -81,6 +81,12 @@ class ScopePlotController(QObject):
         
         self.waveform_data = data
         waveform  = data['waveform']
+        x = waveform[0]
+        y = waveform[1]
+        subsample = np.arange(0,len(x),10)
+        x = np.take(x, subsample)
+        y = np.take(y, subsample)
+        waveform = [x,y]
  
         #ch = data['ch']
         filtered = zero_phase_bandstop_filter(waveform, 100e6, 340e6, 5)

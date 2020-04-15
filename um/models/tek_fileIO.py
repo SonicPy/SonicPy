@@ -63,7 +63,7 @@ def read_tek_csv(fname, return_x=True, subsample=1):
     sample_period = 0.0
     raw_samples = []
     with open(fname, 'rt',encoding='ascii') as csvfile:
-        s = lambda x: x%subsample
+        #s = lambda x: x%subsample
         c = csv.reader(csvfile, delimiter=',')
         
         # Sample period is in cell B2 (1,1)

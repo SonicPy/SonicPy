@@ -32,9 +32,10 @@ class ScopePlotController(QObject):
             self.widget = scopeWidget()
             scope_controller = ScopeController(self.widget, isMain=True)
         self.scope_controller = scope_controller
-        btn, label = self.scope_controller.make_pv_widget('DPO5104:run_state')
+        btn_erase, _ = self.scope_controller.make_pv_widget('DPO5104:erase')
+        btn_on_off, _ = self.scope_controller.make_pv_widget('DPO5104:run_state')
 
-        self.widget = scopeWidget([btn])
+        self.widget = scopeWidget([btn_erase,btn_on_off])
         self.pg = self.widget.plot_widget.fig.win
         if isMain:
             self.show_widget()
@@ -47,7 +48,7 @@ class ScopePlotController(QObject):
     def make_connections(self):
         if self.afg_controller is not None:
             self.afg_controller.model.pvs['user1_waveform'].value_changed_signal.connect(self.user1_waveform_changed_callback)
-        self.widget.erase_btn.clicked.connect(self.erase_btn_callback)
+        
         self.widget.save_btn.clicked.connect(self.save_data_callback)
         self.scope_controller.dataUpdatedSignal.connect(self.waveform_updated_signal_callback)
         
@@ -156,8 +157,6 @@ class ScopePlotController(QObject):
             self.widget.plot_filtered(waveform)'''
 
 
-    def erase_btn_callback(self):
-        self.scope_controller.model.pvs['erase'].set(True)
 
     def show_widget(self):
         self.widget.raise_widget()

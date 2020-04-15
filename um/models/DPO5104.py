@@ -226,12 +226,15 @@ class Scope_DPO5104(Scope, pvModel):
 
     def _set_erase(self, param):
         if param:
-            #self.clear_queue()
-            #print('erasing')
-            self.pvs['num_acq'].set(0)
-            self._set_channel_state(False)
-            self._set_channel_state(True)
-            time.sleep(.05)
+            try:
+                #self.clear_queue()
+                #print('erasing')
+                self.pvs['num_acq'].set(0)
+                self._set_channel_state(False)
+                self._set_channel_state(True)
+                time.sleep(.05)
+            except:
+                pass
             self.pvs['erase'].set(False)
 
     def _get_instrument(self):

@@ -123,8 +123,9 @@ class pvModel(QThread):
             self.create_pv(tag, task)
    
     def create_pv(self, tag, task):
-
-        new_pv = PV(tag,task)
+        pv_name = self.instrument + ':'+tag
+        new_pv = PV(pv_name,task)
+        
         if 'methods' in task:
             for method in task['methods']:
                 #if task['methods'][method]:

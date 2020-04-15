@@ -8,11 +8,15 @@ import time
 from um.models.pv_model import PV
 from PyQt5.QtWidgets import QWidget, QLineEdit, QComboBox, QDoubleSpinBox, QCheckBox, QPushButton
 
+
+
 class pvQWidget(QWidget):
     def __init__(self, myPV):
         #super().__init__(self)
         self.pv = myPV
         self.val = None
+        self.pv_name = myPV._pv_name
+        self.setToolTip(self.pv_name)
         
         if hasattr(self.pv,'_val_scale'):
             self.scale = self.pv._val_scale
@@ -28,6 +32,8 @@ class pvQWidget(QWidget):
         enabled = myPV._set_enabled
         super().setEnabled(enabled) 
         self.pv.value_changed_signal.connect(self.setValue)
+
+    
         
     def valueChangedCallback(self,value):
         if hasattr(self.pv,'set'):

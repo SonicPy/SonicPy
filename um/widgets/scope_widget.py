@@ -21,21 +21,15 @@ class scopeWidget(QtWidgets.QWidget):
         
         self._button_layout = QtWidgets.QHBoxLayout()
       
-        self.erase_btn = FlatButton("Erase")
+        
         self.save_btn = FlatButton("Save")
       
         
         self._status_layout = QtWidgets.QVBoxLayout()
 
-        #self.status_lbl = QtWidgets.QLabel(' ')
-        #self._status_layout.addWidget(self.status_lbl)
-        
-        self._button_layout.addWidget(self.erase_btn)
         for ctrl in self.scope_controls:
             self._button_layout.addWidget(ctrl)
-     
-        #self._button_layout.addLayout(self._status_layout)
-        
+  
         self._button_layout.addSpacerItem(HorizontalSpacerItem())
         self._button_layout.addWidget(self.save_btn)
        

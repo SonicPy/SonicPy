@@ -24,6 +24,7 @@ class ArbModel(Scope, pvModel):
         
         pvModel.__init__(self, parent)
         
+        self.instrument = 'ArbModel'
         self.tasks = {  
                         'edit_state':     
                                 {'desc': ';Edit', 'val':False, 

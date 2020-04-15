@@ -7,6 +7,7 @@ from PyQt5.QtCore import QThread, pyqtSignal, QObject
 import queue 
 from functools import partial
 import json
+from um.models.pvServer import pvServer
 
 
 class PV(QObject):
@@ -49,6 +50,8 @@ class PV(QObject):
             self._unit = settings['unit']
         else: self._unit = ''
 
+
+
     def __str__(self):
         return self._pv_name
     
@@ -60,6 +63,7 @@ class pvModel(QThread):
     def __init__(self, parent):
         super().__init__(parent)
         self.my_queue = queue.Queue()
+        self.pv_server = pvServer()
 
         # may use later for synchronous get:
         # self.get_queue = queue.Queue()
@@ -116,26 +120,32 @@ class pvModel(QThread):
             self.num_pvs = self.num_pvs + 1
             
             task = tasks[tag]
-            self.pvs[tag]=PV(tag,task)
-            if 'methods' in task:
-                for method in task['methods']:
-                    #if task['methods'][method]:
-                    private_attr ='_'+method+'_'+ tag
-                    has_private = hasattr(self, private_attr)
-                    if not has_private:
-                        
-                        self._create_default_private_method(method, tag)
-                    has_private = hasattr(self, private_attr)
-                    if not has_private:
-                        print('failed to create "'+ private_attr+ '" method')
-                    if has_private:
-                        attr = method+'_task'
-                        func = self.__getattribute__(attr)
-                        params = task['param']
-                        public_method = partial(func, method, tag, params)
-                        setattr(self.pvs[tag],method,public_method)
-                        #setattr(self, method+'_'+ tag, public_method)
-        #print(self.num_pvs)
+            self.pvs[tag]=self.create_pv(tag, task)
+     
+
+    def create_pv(self, tag, task):
+
+        new_pv = PV(tag,task)
+        if 'methods' in task:
+            for method in task['methods']:
+                #if task['methods'][method]:
+                private_attr ='_'+method+'_'+ tag
+                has_private = hasattr(self, private_attr)
+                if not has_private:
+                    
+                    self._create_default_private_method(method, tag)
+                has_private = hasattr(self, private_attr)
+                if not has_private:
+                    print('failed to create "'+ private_attr+ '" method')
+                if has_private:
+                    attr = method+'_task'
+                    func = self.__getattribute__(attr)
+                    params = task['param']
+                    public_method = partial(func, method, tag, params)
+                    setattr(new_pv,method,public_method)
+        if self.instrument != '':
+            self.pv_server.set_pv(self.instrument + ':'+tag, new_pv)
+        return new_pv
 
     def _default_set_task(self,tag, val):
         self.pvs[tag]._val = val

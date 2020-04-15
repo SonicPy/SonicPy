@@ -16,6 +16,7 @@ import numpy as np
 
 
 from um.models.pv_model import pvModel
+from um.models.pvServer import pvServer
 
 
 class setpointSweep(pvModel):
@@ -25,18 +26,12 @@ class setpointSweep(pvModel):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent= parent
-        self.instrument = 'setpointSweep'
+        self.instrument = 'setpointScan'
+        self.pv_server = pvServer()
         
         ## device speficic:
         self.tasks = {  
-                        'det_trigger_channel':     
-                                {'desc': 'Output channel', 'val':None, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'output_channel','type':'pv'}},
-                        'positioner_channel':     
-                                {'desc': 'Output channel', 'val':None, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'positioner_channel','type':'pv'}},
+                        
                         'current_setpoint_index': 
                                 {'desc': 'Current set-point index', 'val':0,'min':0,'max':10000,
                                 'methods':{'set':True, 'get':True},  
@@ -94,9 +89,7 @@ class setpointSweep(pvModel):
         
         self.start()           
 
-    def _set_positioner_channel(self, param):
-        self.pvs['positioner_channel']._val = param
-        print (param)
+  
     
     def _set_acquire(self, param):
         if param:
@@ -127,9 +120,11 @@ class setpointSweep(pvModel):
         if param:
             p = self.pvs['current_setpoint']._val
             #print('moving positioner to: ' +str(p))
-            positioner = self.pvs['positioner_channel']._val
-            print (str(positioner)+ ' = '+str(p))
-            positioner.set(p*1e6)
+            positioner_pvname = self.parent.pvs['positioner_channel']._val
+            print (str(positioner_pvname)+ ' = '+str(p))
+            positioner_pv = self.pv_server.get_pv(positioner_pvname)
+            print (str(positioner_pv)+ ' = '+str(p))
+            positioner_pv.set(p*1e6)
             time.sleep(.5)
             self.positioner_busy_signal.emit(False)
 
@@ -221,12 +216,21 @@ class SweepModel(pvModel):
 
         ## device speficic:
         self.setpointSweepThread = setpointSweep(self)
-        self.instrument = 'SweepModel'
+        self.instrument = 'ScanModel'
         
         
         # Task description markup. Aarbitrary default values ('val') are for type recognition in panel widget constructor
         # supported types are float, int, bool, string, and list of strings
-        self.tasks = {  'start_point': 
+        self.tasks = {  'det_trigger_channel':
+                                {'desc': 'Detector', 'val':'DPO5104:run_state', 
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'det_trigger_channel','type':'s'}},
+                        
+                        'positioner_channel':     
+                                {'desc': 'Positioner', 'val':'burst_fixed_time:freq', 
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'positioner_channel','type':'s'}},
+                        'start_point': 
                                 {'desc': 'Start', 'val':10.0, 'increment':0.5,'min':.001,'max':110 ,
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'start_point','type':'f'}},
@@ -274,9 +278,7 @@ class SweepModel(pvModel):
         
         self.start()
 
-    def set_scan_pv(self, pv):
-        self.setpointSweepThread.pvs['positioner_channel'].set(pv)
-
+ 
 
     #####################################################################
     #  Private set/get functions. Should not be used by external calls  #

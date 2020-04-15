@@ -9,7 +9,7 @@ class Afg():
     generator classes should inherit from this class.
     '''
     def __init__(self):
-        self.instrument = ''
+        self.instrument = 'afgBase'
         self.channel = 1
         self.amplitude = 1      # V
         self.offset = 0

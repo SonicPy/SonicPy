@@ -24,7 +24,7 @@ class ArbFilterModel(Scope, pvModel):
         pvModel.__init__(self, parent)
       
         
-
+        self.instrument = 'ArbFilter'
         self.tasks = {  
                         'waveform_in':     
                                 {'desc': 'Waveform', 'val':None, 

@@ -35,6 +35,7 @@ from utilities.HelperModule import increment_filename, increment_filename_extra
 
 from .. import style_path
 
+from um.models.pvServer import pvServer
 
 ############################################################
 
@@ -66,8 +67,7 @@ class UltrasoundController(QObject):
         
         self.sweep_controller = SweepController(self,
                                                 self.scope_controller.model.pvs, 
-                                                self.afg_controller.model.pvs,
-                                                scan_pv=self.scan_pv)
+                                                self.afg_controller.model.pvs)
 
 
         self.phase_controller = PhaseController(self.scope_plot_controller.plt,
@@ -95,6 +95,9 @@ class UltrasoundController(QObject):
         
         
         self.make_connections()
+
+        self.pv_server = pvServer()
+        positioner_pv = self.pv_server.get_pv('burst_fixed_time:freq')
 
     def make_connections(self): 
         self.sweep_controller.scanStartRequestSignal.connect(self.scanStartRequestCallback)

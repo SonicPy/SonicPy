@@ -19,6 +19,7 @@ from um.controllers.ScopeController import ScopeController
 from um.controllers.ScopePlotController import ScopePlotController
 from um.controllers.ArbController import ArbController
 from um.controllers.ArbFilterController import ArbFilterController
+from um.controllers.SaveDataController import SaveDataController
 
 from um.controllers.OverlayController import OverlayController
 
@@ -59,10 +60,13 @@ class UltrasoundController(QObject):
         
         self.afg_controller = AFGController(self, offline = offline)
         self.arb_controller = ArbController(self)
+        self.save_data_controller = SaveDataController(self)
         self.scan_pv = self.arb_controller.scan_pv
         self.arb_filter_controller = ArbFilterController(self)
         self.scope_controller = ScopeController(self, offline = offline)
-        self.scope_plot_controller = ScopePlotController(self.scope_controller, afg_controller=self.afg_controller)
+        self.scope_plot_controller = ScopePlotController(self.scope_controller, 
+                                                afg_controller=self.afg_controller, 
+                                                save_data_controller=self.save_data_controller)
         self.overlay_controller = OverlayController(self, self.scope_plot_controller)
         
         self.sweep_controller = SweepController(self,

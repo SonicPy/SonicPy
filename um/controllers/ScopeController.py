@@ -54,7 +54,7 @@ class ScopeController(pvController):
 
     def make_connections(self):
         self.model.pvs['waveform'].value_changed_signal.connect(self.waveform_updated_signal_callback)
-        self.model.pvs['bg_waveform'].value_changed_signal.connect(self.bg_waveform_updated_signal_callback)
+      
         self.model.pvs['channel'].value_changed_signal.connect(self.channel_changed_callback)
         self.model.pvs['run_state'].value_changed_signal.connect(self.run_state_callback)
         

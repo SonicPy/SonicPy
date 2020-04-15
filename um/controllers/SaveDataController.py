@@ -14,6 +14,7 @@ from functools import partial
 from um.widgets.UtilityWidgets import save_file_dialog, open_file_dialog, open_files_dialog
 from um.controllers.pv_controller import pvController
 from utilities.utilities import *
+from um.models.SaveDataModel import SaveDataModel
 
 
 class SaveDataController(pvController):
@@ -21,7 +22,7 @@ class SaveDataController(pvController):
 
     def __init__(self, parent, isMain = False, offline = False):
         
-        model = None
+        model = SaveDataModel(parent, offline)
         super().__init__(parent, model, isMain) 
         
         self.panel_items =[ ]

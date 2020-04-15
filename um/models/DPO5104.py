@@ -37,18 +37,12 @@ class Scope_DPO5104(Scope, pvModel):
         if not offline:
             self.connected = self.connect(self.visa_hostname)
         
-        self.file_name = ''
-        self.file_settings = None
         self.data_stop = 100000
         self.selected_channel = 'CH1'
-        self.waveform = None
-        self.bg_waveform = None
-        self.file_filter='Text (*.csv);;Binary (*.npz)'
 
         self.acquisition_types = ['sample', 'peak', 'hires', 'envelope', 'average']
         self.channels = ['CH1','CH2','CH3','CH4']
      
-
         self.tasks = {  'acquisition_type': 
                                 {'desc': 'Acqusition type', 'val':self.acquisition_types[0], 'list':self.acquisition_types, 
                                 'methods':{'set':True, 'get':True}, 
@@ -92,30 +86,10 @@ class Scope_DPO5104(Scope, pvModel):
                         'instrument':
                                 {'desc': 'Instrument', 'val':self.instrument, 
                                 'methods':{'set':False, 'get':True}, 
-                                'param':{'tag':'instrument','type':'s'}},
-                        'filename':
-                                {'desc': 'Filename', 'val':'', 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'filename','type':'s'}},
-                        'file_extension':
-                                {'desc': 'Extension', 'val':self.file_filter.split(';;')[0],'list':self.file_filter.split(';;'), 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'file_extension','type':'l'}},
-                        'file_header':
-                                {'desc': 'Header', 'val':{}, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'file_header','type':'dict'}}, 
-                        'save':     
-                                {'desc': 'Save;Save', 'val':False, 
-                                'methods':{'set':True, 'get':False}, 
-                                'param':{'tag':'save','type':'b'}},       
+                                'param':{'tag':'instrument','type':'s'}},   
                         'waveform':
                                 {'desc': 'Waveform', 'val':{}, 
                                 'methods':{'set':False, 'get':True}, 
-                                'param':{'tag':'waveform','type':'dict'}},
-                        'bg_waveform':
-                                {'desc': 'Waveform', 'val':{}, 
-                                'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'waveform','type':'dict'}},
                         'params':
                                 {'desc': 'Environment parameters', 'val':{}, 

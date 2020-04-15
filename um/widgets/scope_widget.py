@@ -21,17 +21,16 @@ class scopeWidget(QtWidgets.QWidget):
         
         self._button_layout = QtWidgets.QHBoxLayout()
       
-        
-        self.save_btn = FlatButton("Save")
-      
-        
         self._status_layout = QtWidgets.QVBoxLayout()
 
         for ctrl in self.scope_controls:
-            self._button_layout.addWidget(ctrl)
+            if type(ctrl)== str:
+                self._button_layout.addSpacerItem(HorizontalSpacerItem())
+            else:
+                self._button_layout.addWidget(ctrl)
   
-        self._button_layout.addSpacerItem(HorizontalSpacerItem())
-        self._button_layout.addWidget(self.save_btn)
+        
+        
        
         self.button_widget.setLayout(self._button_layout)
 

@@ -26,7 +26,7 @@ class ScopePlotController(QObject):
     staticCursorMovedSignal = pyqtSignal(str) 
     dataPlotUpdated = pyqtSignal()
 
-    def __init__(self, scope_controller=None, afg_controller=None, isMain = False):
+    def __init__(self, scope_controller=None, afg_controller=None, save_data_controller = None, isMain = False):
         super().__init__()
         self.pv_server = pvServer()
         if scope_controller is None:
@@ -35,8 +35,11 @@ class ScopePlotController(QObject):
         self.scope_controller = scope_controller
         btn_erase, _ = self.scope_controller.make_pv_widget('DPO5104:erase')
         btn_on_off, _ = self.scope_controller.make_pv_widget('DPO5104:run_state')
+        
+        self.save_data_controller= save_data_controller
+        btn_save, _ = self.save_data_controller.make_pv_widget('SaveData:save')
 
-        self.widget = scopeWidget([btn_erase,btn_on_off])
+        self.widget = scopeWidget([btn_erase,btn_on_off, 'spacer', btn_save])
         self.pg = self.widget.plot_widget.fig.win
         if isMain:
             self.show_widget()
@@ -50,15 +53,12 @@ class ScopePlotController(QObject):
         if self.afg_controller is not None:
             self.afg_controller.model.pvs['user1_waveform'].value_changed_signal.connect(self.user1_waveform_changed_callback)
         
-        self.widget.save_btn.clicked.connect(self.save_data_callback)
+        
         self.scope_controller.dataUpdatedSignal.connect(self.waveform_updated_signal_callback)
         
     def user1_waveform_changed_callback(self, pv_name, data):
         waveform = data[0]
         self.update_plot([waveform['t'],waveform['waveform']])
-
-
-    
 
     def getRange(self):
         plt = self.plt
@@ -90,76 +90,12 @@ class ScopePlotController(QObject):
         #self.widget.status_lbl.setText(str(num_acq))
 
 
-    '''def bg_waveform_updated_signal_callback(self, waveform_data):
-        data = waveform_data
-        self.waveform_bg_data = data
-        waveform  = data['waveform']
-        start = time.time()
-        filtered = zero_phase_bandstop_filter(waveform, 100000000, 340000000, 5)
-        
-        end = time.time()
-        elapsed = end - start
-        self.update_bg_plot(filtered)'''
-     
-    '''def load_background_callback(self, *args, **kwargs):
-        if 'folder' in kwargs:
-            folder = kwargs['folder']
-        else:
-            folder = None
 
-        if not 'filename' in kwargs:
-            filename = open_file_dialog(
-                            self.widget, "Open waveform",directory=folder,
-                            filter=self.scope_controller.model.file_filter)
-        else:
-            filename = kwargs['filename']
-        if filename is not '':
-            self.scope_controller.model.read_file(filename)
-            folder = os.path.dirname(str(filename)) 
-        return folder'''
-
-    def save_data_callback(self, *args, **kwargs):
-        
-        filename = ''
-        waveform_data = self.pv_server.get_pv('DPO5104:waveform')._val
-        if waveform_data is not None:
-            if len(waveform_data):
-                if 'folder' in kwargs:
-                    folder = kwargs['folder']
-                else:
-                    folder = None
-                if not 'filename' in kwargs:
-                    filename = save_file_dialog(
-                                    self.widget, "Save waveform",directory=folder,
-                                    filter=self.scope_controller.model.file_filter)
-                else:
-                    filename = kwargs['filename']
-                if filename is not '':
-                    if 'params' in kwargs:
-                        params = kwargs['params']
-                        self.scope_controller.model.pvs['params'].set(params)
-                    else:
-                        self.scope_controller.model.pvs['params'].set({})
-                    self.scope_controller.model.pvs['filename'].set(filename)
-                    self.scope_controller.model.pvs['save'].set(True)
-
-    '''  
-    def close_background_callback(self):
-        self.update_bg_plot([[],[]])
-
-    def update_bg_plot(self, waveform):
-        if waveform is not None:
-            self.widget.plot_bg(waveform)'''
 
     def update_plot(self, waveform):
         if waveform is not None:
             self.widget.plot(waveform)
             self.dataPlotUpdated.emit()
-
-    '''def update_filtered_plot(self, waveform):
-        if waveform is not None:
-            self.widget.plot_filtered(waveform)'''
-
 
 
     def show_widget(self):

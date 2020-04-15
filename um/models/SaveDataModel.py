@@ -14,26 +14,23 @@ import queue
 from functools import partial
 import json
 from um.models.pv_model import pvModel
+from um.models.pvServer import pvServer
 
 
 class SaveDataModel(pvModel):
     
 
     def __init__(self, parent, offline = False):
+        super().__init__(parent)
+        self.parent= parent
         
-        
-        ## device speficic:
+        self.pv_server = pvServer()
         
         self.instrument = 'SaveData'
-        self.settings_file_tag ='SaveData'
-
-        
+    
         self.file_name = ''
         self.file_settings = None
-        self.data_stop = 100000
-        self.selected_channel = 'CH1'
-        self.waveform = None
-        self.bg_waveform = None
+  
         self.file_filter='Text (*.csv);;Binary (*.npz)'
 
 

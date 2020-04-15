@@ -16,6 +16,7 @@ from um.widgets.UtilityWidgets import save_file_dialog, open_file_dialog, open_f
 from um.controllers.pv_controller import pvController
 from um.controllers.ScopeController import ScopeController
 from utilities.utilities import *
+from um.models.pvServer import pvServer
 
 
 class ScopePlotController(QObject):
@@ -27,7 +28,7 @@ class ScopePlotController(QObject):
 
     def __init__(self, scope_controller=None, afg_controller=None, isMain = False):
         super().__init__()
-        
+        self.pv_server = pvServer()
         if scope_controller is None:
             self.widget = scopeWidget()
             scope_controller = ScopeController(self.widget, isMain=True)
@@ -118,26 +119,29 @@ class ScopePlotController(QObject):
         return folder'''
 
     def save_data_callback(self, *args, **kwargs):
+        
         filename = ''
-        if self.scope_controller.waveform_data is not None:
-            if 'folder' in kwargs:
-                folder = kwargs['folder']
-            else:
-                folder = None
-            if not 'filename' in kwargs:
-                filename = save_file_dialog(
-                                self.widget, "Save waveform",directory=folder,
-                                filter=self.scope_controller.model.file_filter)
-            else:
-                filename = kwargs['filename']
-            if filename is not '':
-                if 'params' in kwargs:
-                    params = kwargs['params']
-                    self.scope_controller.model.pvs['params'].set(params)
+        waveform_data = self.pv_server.get_pv('DPO5104:waveform')._val
+        if waveform_data is not None:
+            if len(waveform_data):
+                if 'folder' in kwargs:
+                    folder = kwargs['folder']
                 else:
-                    self.scope_controller.model.pvs['params'].set({})
-                self.scope_controller.model.pvs['filename'].set(filename)
-                self.scope_controller.model.pvs['save'].set(True)
+                    folder = None
+                if not 'filename' in kwargs:
+                    filename = save_file_dialog(
+                                    self.widget, "Save waveform",directory=folder,
+                                    filter=self.scope_controller.model.file_filter)
+                else:
+                    filename = kwargs['filename']
+                if filename is not '':
+                    if 'params' in kwargs:
+                        params = kwargs['params']
+                        self.scope_controller.model.pvs['params'].set(params)
+                    else:
+                        self.scope_controller.model.pvs['params'].set({})
+                    self.scope_controller.model.pvs['filename'].set(filename)
+                    self.scope_controller.model.pvs['save'].set(True)
 
     '''  
     def close_background_callback(self):

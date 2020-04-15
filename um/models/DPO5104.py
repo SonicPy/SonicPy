@@ -77,6 +77,10 @@ class Scope_DPO5104(Scope, pvModel):
                                 {'desc': 'Run state;ON/OFF', 'val':False, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'output_state','type':'b'}},
+                        'erase_start':     
+                                {'desc': 'Erase & start;Go', 'val':False, 
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'output_state','type':'b'}},
                         'erase':     
                                 {'desc': 'Erase;Erase', 'val':False, 
                                 'methods':{'set':True, 'get':False}, 
@@ -178,6 +182,11 @@ class Scope_DPO5104(Scope, pvModel):
 
     def get_waveform(self):
         self.my_queue.put({'task_name':'get_waveform'})
+
+    def _set_erase_start(self, params):
+         self.pvs['erase_start']._val = False
+         self.pvs['erase'].set (True)
+         self.pvs['run_state'].set (True)
 
 
     def _set_filename(self, filename):

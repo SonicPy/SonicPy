@@ -85,20 +85,19 @@ class setpointSweep(pvModel):
                                 'param':{'tag':'positioner_done','type':'b'}}
                                 }
         self.create_pvs(self.tasks)
-        #self.offline = True
-        
         self.start()           
-
-  
     
     def _set_acquire(self, param):
         if param:
             p = self.pvs['current_setpoint']._val
             print('aquiring @ ' +str(p))
-            time.sleep(.5)
+            detector_pvname = self.parent.pvs['det_trigger_channel']._val
+            
+            detector_pv = self.pv_server.get_pv(detector_pvname)
+            detector_pv.set(True)
+            
+            time.sleep(3)  # replace with event from detector done
             self.detector_busy_signal.emit(False)
-
-    
 
     def wait_for_detector_done(self, param):
         
@@ -125,7 +124,9 @@ class setpointSweep(pvModel):
             positioner_pv = self.pv_server.get_pv(positioner_pvname)
             print (str(positioner_pv)+ ' = '+str(p))
             positioner_pv.set(p*1e6)
-            time.sleep(.5)
+
+            # replace timer with event from positioner (AFG, etc)
+            time.sleep(.5)   
             self.positioner_busy_signal.emit(False)
 
     def _set_detector_done(self, param):
@@ -222,12 +223,12 @@ class SweepModel(pvModel):
         # Task description markup. Aarbitrary default values ('val') are for type recognition in panel widget constructor
         # supported types are float, int, bool, string, and list of strings
         self.tasks = {  'det_trigger_channel':
-                                {'desc': 'Detector', 'val':'DPO5104:run_state', 
+                                {'desc': 'Detector', 'val':'DPO5104:erase_start', 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'det_trigger_channel','type':'s'}},
                         
                         'positioner_channel':     
-                                {'desc': 'Positioner', 'val':'burst_fixed_time:freq', 
+                                {'desc': 'Positioner', 'val':'AFG3251:frequency', 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'positioner_channel','type':'s'}},
                         'start_point': 

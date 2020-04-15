@@ -47,7 +47,7 @@ class ArbFilterController(pvController):
 
         
 
-        selector_cb, selector_label = self.make_pv_widget('selected_item')
+        selector_cb, selector_label = self.make_pv_widget('ArbFilter:selected_item')
         self.arb_filter_edit_controller = EditController(self, title='Filter control', selector_cb=selector_cb)
 
         self.arb_filter_edit_controller.add_controller(self.arb_filter_1.model.instrument, self.arb_filter_1)

@@ -120,9 +120,8 @@ class pvModel(QThread):
             self.num_pvs = self.num_pvs + 1
             
             task = tasks[tag]
-            self.pvs[tag]=self.create_pv(tag, task)
-     
-
+            self.create_pv(tag, task)
+   
     def create_pv(self, tag, task):
 
         new_pv = PV(tag,task)
@@ -143,9 +142,11 @@ class pvModel(QThread):
                     params = task['param']
                     public_method = partial(func, method, tag, params)
                     setattr(new_pv,method,public_method)
+
+        pv_name = self.instrument + ':'+tag
         if self.instrument != '':
-            self.pv_server.set_pv(self.instrument + ':'+tag, new_pv)
-        return new_pv
+            self.pv_server.set_pv(pv_name, new_pv)
+        self.pvs[tag]=new_pv
 
     def _default_set_task(self,tag, val):
         self.pvs[tag]._val = val

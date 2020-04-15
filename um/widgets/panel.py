@@ -8,12 +8,14 @@ import time
 from um.models.pv_model import PV
 from um.widgets.pvWidgets import pvQCheckBox, pvQComboBox, pvQDoubleSpinBox, pvQLineEdit, pvQPushButton
 
+from um.models.pvServer import pvServer
 
 class Panel(QtWidgets.QGroupBox):
 
     panelClosedSignal = pyqtSignal()
-    def __init__(self, title='',pvs={}, isMain = False):
+    def __init__(self, title='',pvs=[], isMain = False):
         super().__init__()
+        self.pv_server = pvServer()
         self.isMain = isMain
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         self.setSizePolicy(sizePolicy)
@@ -22,6 +24,7 @@ class Panel(QtWidgets.QGroupBox):
         self._layout, self.widgets = self.make_widget_items(pvs)
         self.setLayout(self._layout)
         self.default_items = pvs
+        
 
     def closeEvent(self, QCloseEvent, *event):
         self.panelClosedSignal.emit()
@@ -30,6 +33,7 @@ class Panel(QtWidgets.QGroupBox):
 
     def make_widget_items(self, pvs):
         
+
         _parameter_layout = QtWidgets.QVBoxLayout()
         self.controls = {}
         self._grid = QtWidgets.QGridLayout()
@@ -43,7 +47,7 @@ class Panel(QtWidgets.QGroupBox):
                 
                 ctrl, label = self.make_pv_widget(pv)
                     
-                self.controls[pv._pv_name] = ctrl
+                self.controls[pv] = ctrl
 
                 if ctrl is not None:
                     self._grid.addWidget(label, i, 0)
@@ -62,7 +66,9 @@ class Panel(QtWidgets.QGroupBox):
             
         return self._grid, self.controls
 
-    def make_pv_widget(self, pv):
+    def make_pv_widget(self, pv_name):
+
+        pv = self.pv_server.get_pv(pv_name)
         ctrl = None
         desc = pv._description.split(';')[0]
         pv_type = pv._type

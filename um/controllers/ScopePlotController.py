@@ -32,7 +32,7 @@ class ScopePlotController(QObject):
             self.widget = scopeWidget()
             scope_controller = ScopeController(self.widget, isMain=True)
         self.scope_controller = scope_controller
-        btn, label = self.scope_controller.make_pv_widget('run_state')
+        btn, label = self.scope_controller.make_pv_widget('DPO5104:run_state')
 
         self.widget = scopeWidget([btn])
         self.pg = self.widget.plot_widget.fig.win

@@ -49,7 +49,7 @@ class ArbController(pvController):
                             'edit_state']
         self.init_panel("USER1 waveform", self.panel_items)
 
-        selector_cb, selector_label = self.make_pv_widget('selected_item')
+        selector_cb, selector_label = self.make_pv_widget('ArbModel:selected_item')
         self.arb_edit_controller = EditController(self, title='Waveform control', selector_cb = selector_cb)
         self.arb_edit_controller.add_controller(self.arb1.model.instrument, self.arb1)
         self.arb_edit_controller.add_controller(self.arb3.model.instrument, self.arb3)

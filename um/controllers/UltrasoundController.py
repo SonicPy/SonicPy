@@ -79,15 +79,17 @@ class UltrasoundController(QObject):
 
         afg_panel = self.afg_controller.get_panel()
         scope_panel = self.scope_controller.get_panel()
-        sweep_widget = self.sweep_controller.get_panel()
+        sweep_panel = self.sweep_controller.get_panel()
         arb_panel = self.arb_controller.get_panel()
         arb_filter_panel = self.arb_filter_controller.get_panel()
+        save_data_panel = self.save_data_controller.get_panel()
 
         self.display_window.insert_panel(scope_panel)
         self.display_window.insert_panel(afg_panel)
         self.display_window.insert_panel(arb_panel)
         self.display_window.insert_panel(arb_filter_panel)
-        self.display_window.insert_panel(sweep_widget)
+        self.display_window.insert_panel_right(sweep_panel)
+        self.display_window.insert_panel_right(save_data_panel)
 
         scope_waveform_widget = self.scope_plot_controller.widget
         self.display_window.scope_waveform_layout.addWidget(scope_waveform_widget)
@@ -149,8 +151,8 @@ class UltrasoundController(QObject):
         self.overlay_controller.showWidget()
 
     def scopeSaveAsCallback(self):
-        start_folder = self.working_directories.savedata 
-        self.save_data_controller.save_data_callback(folder=start_folder)
+        
+        self.save_data_controller.save_data_callback()
 
     def preferences_module(self, *args, **kwargs):
         [ok, file_options] = mcaUtil.mcaFilePreferences.showDialog(self.display_window, self.file_options) 
@@ -165,33 +167,11 @@ class UltrasoundController(QObject):
         if not running:
             #print('stopped')
             if self.file_options.autosave:
-                fname = self.save_data_controller.model.pvs['filename']._val
-                if fname != '':
-                    freq = None
-                    try:
-                        afg_pvs = self.afg_controller.model.pvs
-                        freq = afg_pvs['frequency']._val
-                    except:
-                        pass
-                    new_file = increment_filename_extra(fname, frequency = freq)
-                    print(new_file)
-                    if new_file != fname:
-                        self.saveFile(new_file)
-                        #print('save: ' + new_file)
+                self.save_data_controller.model.pvs['save'].set(True)
+                
             if self.file_options.autorestart:
                 pass
                 #self.model.acq_erase_start()
-
-    
-
-    def saveFile(self, filename, params = {}):
-        afg_pvs = self.afg_controller.model.pvs
-        saved_filename = self.save_data_controller.save_data_callback(filename=filename, params=params)
-        new_folder = os.path.dirname(str(saved_filename))
-        old_folder = self.working_directories.savedata
-        if new_folder != old_folder:
-            self.working_directories.savedata = new_folder
-            mcaUtil.save_folder_settings(self.working_directories, self.scope_working_directories_file)
 
     def scanStartRequestCallback(self):
         #print('starting frequency sweep!')
@@ -214,6 +194,7 @@ class UltrasoundController(QObject):
         self.arb_controller.exit()
         self.arb_filter_controller.exit()
         self.overlay_controller.overlay_widget.close()
+        self.save_data_controller.exit()
 
     def show_window(self):
         self.display_window.raise_widget()

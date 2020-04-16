@@ -25,7 +25,16 @@ class SaveDataController(pvController):
         model = SaveDataModel(parent, offline)
         super().__init__(parent, model, isMain) 
         self.pv_server = pvServer()
-        self.panel_items =[ ]
+        self.panel_items =['file_system_path',
+                            'subdirectory',
+                            'base_name',
+                            'format',
+                            'path',
+                            'name',
+                            'next_file_number',
+                            'latest_event',
+                            'save'
+                        ]
 
         self.init_panel("Save data", self.panel_items)
         self.make_connections()

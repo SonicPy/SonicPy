@@ -26,6 +26,8 @@ class SweepController(pvController):
                         'positioner_read_channel',
                         'det_trigger_channel',
                         'det_run_state_channel',
+                        'save_data_set_channel',
+                        'save_data_read_channel',
                         'start_point',
                         'end_point',
                         'step',

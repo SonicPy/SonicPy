@@ -28,25 +28,24 @@ class UltrasoundWidget(QMainWindow):
         self.resize(1250, 700)
         self.centralwidget = QtWidgets.QWidget()
         self._layout = QtWidgets.QHBoxLayout()
+
+        self.control_panels = []
+
         self.controls_sidebar = QtWidgets.QWidget()
         self.controls_sidebar.setObjectName('controls_sidebar')
         self.controls_layout = QtWidgets.QVBoxLayout()
         self.controls_layout.setContentsMargins(1, 1, 1, 1)
         self.controls_layout.setSpacing(15)
-
-
         self.controls_grid_layout= QtWidgets.QGridLayout()
         self.grid_rows = 0
-
         self.controls_layout.addLayout(self.controls_grid_layout)
-
-
-        self.control_panels = []
         
         self.controls_vertical_spacer = VerticalSpacerItem()
         self.controls_layout.addSpacerItem(self.controls_vertical_spacer)
         self.controls_sidebar.setLayout(self.controls_layout)
         self._layout.addWidget(self.controls_sidebar)
+
+
         self.DisplayLayout = QtWidgets.QVBoxLayout()
         self.DisplayLayout.setContentsMargins(0, 0, 0, 0)
         self.scope_waveform_layout = QtWidgets.QVBoxLayout()
@@ -86,6 +85,22 @@ class UltrasoundWidget(QMainWindow):
         self.DisplayLayout.addLayout(self.detail_plots_layout)
         #self.DisplayLayout.addSpacerItem(VerticalSpacerItem())
         self._layout.addLayout(self.DisplayLayout)
+
+
+        self.controls_sidebar_right = QtWidgets.QWidget()
+        self.controls_sidebar_right.setObjectName('controls_sidebar_right')
+        self.controls_layout_right = QtWidgets.QVBoxLayout()
+        self.controls_layout_right.setContentsMargins(1, 1, 1, 1)
+        self.controls_layout_right.setSpacing(15)
+        self.controls_grid_layout_right= QtWidgets.QGridLayout()
+        self.grid_rows_right = 0
+        self.controls_layout_right.addLayout(self.controls_grid_layout_right)
+        self.controls_vertical_spacer_right = VerticalSpacerItem()
+        self.controls_layout_right.addSpacerItem(self.controls_vertical_spacer_right)
+        self.controls_sidebar_right.setLayout(self.controls_layout_right)
+        self._layout.addWidget(self.controls_sidebar_right)
+
+
         self.centralwidget.setLayout(self._layout)
         self.setCentralWidget(self.centralwidget)
         self.create_menu()
@@ -101,9 +116,14 @@ class UltrasoundWidget(QMainWindow):
         self.control_panels.append(panel)
         self.controls_grid_layout.addWidget(panel,self.grid_rows,0)
         self.grid_rows +=1
+
+    def insert_panel_right(self, panel):
+        
+        self.control_panels.append(panel)
+        self.controls_grid_layout_right.addWidget(panel,self.grid_rows_right,0)
+        self.grid_rows_right +=1
         
     
-
     def make_panel(self, title, panel_items, tasks):
         d = []
         for tag in panel_items:

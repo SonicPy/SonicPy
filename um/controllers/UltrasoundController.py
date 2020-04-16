@@ -146,19 +146,11 @@ class UltrasoundController(QObject):
         self.scope_controller.close_background_callback()
 
     def overlay_btn_callback(self):
-
         self.overlay_controller.showWidget()
-
-    def load_background_callback(self):
-        start_folder = self.working_directories.savedata 
-        new_folder = self.scope_controller.load_background_callback(folder=start_folder)
-        if new_folder != start_folder:
-            self.working_directories.savedata = new_folder
-            mcaUtil.save_folder_settings(self.working_directories, self.scope_working_directories_file)
 
     def scopeSaveAsCallback(self):
         start_folder = self.working_directories.savedata 
-        self.scope_plot_controller.save_data_callback(folder=start_folder)
+        self.save_data_controller.save_data_callback(folder=start_folder)
 
     def preferences_module(self, *args, **kwargs):
         [ok, file_options] = mcaUtil.mcaFilePreferences.showDialog(self.display_window, self.file_options) 
@@ -173,16 +165,17 @@ class UltrasoundController(QObject):
         if not running:
             #print('stopped')
             if self.file_options.autosave:
-                if self.scope_controller.model.file_name != '':
+                fname = self.save_data_controller.model.pvs['filename']._val
+                if fname != '':
                     freq = None
                     try:
                         afg_pvs = self.afg_controller.model.pvs
                         freq = afg_pvs['frequency']._val
                     except:
                         pass
-                    new_file = increment_filename_extra(self.scope_controller.model.file_name, frequency = freq)
+                    new_file = increment_filename_extra(fname, frequency = freq)
                     print(new_file)
-                    if new_file != self.scope_controller.model.file_name:
+                    if new_file != fname:
                         self.saveFile(new_file)
                         #print('save: ' + new_file)
             if self.file_options.autorestart:
@@ -193,8 +186,7 @@ class UltrasoundController(QObject):
 
     def saveFile(self, filename, params = {}):
         afg_pvs = self.afg_controller.model.pvs
-        
-        saved_filename = self.scope_plot_controller.save_data_callback(filename=filename, params=params)
+        saved_filename = self.save_data_controller.save_data_callback(filename=filename, params=params)
         new_folder = os.path.dirname(str(saved_filename))
         old_folder = self.working_directories.savedata
         if new_folder != old_folder:

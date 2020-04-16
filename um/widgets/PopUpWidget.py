@@ -229,10 +229,6 @@ class EditWidget(PopUpWidget):
         super().__init__(title)
         self.plot_window = plotWaveWindow()
         self.selector_cb = selector_cb
-        #self.add_top_row_button('plot_btn','Plot')
-        #self.add_top_horizontal_spacer()
-        #self.add_bottom_row_button('apply_btn','Apply')
-        #self.add_bottom_horizontal_spacer()
         
         self.afw_gb = AfwGroupbox(title=title, selector_cb=selector_cb)
         
@@ -256,9 +252,6 @@ class EditWidget(PopUpWidget):
     def get_selected_choice(self):
         display_name = self.afw_gb.awf_type_cb.currentText()
         return display_name
-
-    #def get_apply_btn(self):
-    #    return getattr(self,'apply_btn')
 
     def make_connections(self):
         pass

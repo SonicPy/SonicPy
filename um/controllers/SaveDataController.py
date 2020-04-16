@@ -15,7 +15,7 @@ from um.widgets.UtilityWidgets import save_file_dialog, open_file_dialog, open_f
 from um.controllers.pv_controller import pvController
 from utilities.utilities import *
 from um.models.SaveDataModel import SaveDataModel
-
+from um.models.pvServer import pvServer
 
 class SaveDataController(pvController):
     callbackSignal = pyqtSignal(dict)  
@@ -24,7 +24,7 @@ class SaveDataController(pvController):
         
         model = SaveDataModel(parent, offline)
         super().__init__(parent, model, isMain) 
-        
+        self.pv_server = pvServer()
         self.panel_items =[ ]
 
         self.init_panel("Save data", self.panel_items)
@@ -35,16 +35,18 @@ class SaveDataController(pvController):
 
 
     def save_data_callback(self, *args, **kwargs):
-        filename = ''
-        if self.waveform_data is not None:
+        
+        waveform_data = self.pv_server.get_pv('DPO5104:waveform')._val
+        
+        if waveform_data is not None:
             if 'folder' in kwargs:
                 folder = kwargs['folder']
             else:
                 folder = None
             if not 'filename' in kwargs:
                 filename = save_file_dialog(
-                                self.widget, "Save waveform",directory=folder,
-                                filter=self.model.file_filter)
+                                self.panel, "Save waveform",directory=folder,
+                                filter=self.model.pvs['file_filter']._val)
             else:
                 filename = kwargs['filename']
             if filename is not '':
@@ -55,6 +57,7 @@ class SaveDataController(pvController):
                     self.model.pvs['params'].set({})
                 self.model.pvs['filename'].set(filename)
                 self.model.pvs['save'].set(True)
+        return filename
 
     def make_connections(self):
         pass

@@ -95,11 +95,8 @@ class Scope_DPO5104(Scope, pvModel):
                         'waveform':
                                 {'desc': 'Waveform', 'val':{}, 
                                 'methods':{'set':False, 'get':True}, 
-                                'param':{'tag':'waveform','type':'dict'}},
-                        'params':
-                                {'desc': 'Environment parameters', 'val':{}, 
-                                'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'waveform','type':'dict'}}
+                        
                                 
                       }       
 

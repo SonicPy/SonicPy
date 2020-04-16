@@ -65,7 +65,11 @@ class SaveDataModel(pvModel):
                         'warn_overwrite':     
                                 {'desc': 'Warn overwrite;ON/OFF', 'val':False, 
                                 'methods':{'set':True, 'get':False}, 
-                                'param':{'tag':'warn_overwrite','type':'b'}}
+                                'param':{'tag':'warn_overwrite','type':'b'}},
+                        'params':
+                                {'desc': 'Environment parameters', 'val':{}, 
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'waveform','type':'dict'}}
 
                       }       
 
@@ -82,7 +86,7 @@ class SaveDataModel(pvModel):
 
     def write_file(self, filename, params = {}):
         data = self.pv_server.get_pv(self.pvs['data_channel']._val)._val
-        print(data)
+        #print(data)
         
         if len(data):
             waveform  = data['waveform']
@@ -95,7 +99,7 @@ class SaveDataModel(pvModel):
                 
                 np.savez_compressed(filename, waveform)
             
-            self.pvs['filename'].set('filename')
+            self.pvs['filename'].set(filename)
 
     def _exit_task(self):
         pass

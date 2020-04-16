@@ -65,8 +65,6 @@ class SaveDataModel(pvModel):
 
         self.create_pvs(self.tasks)
 
-        self.start()
-
         self.pvs['data_channel'].set('DPO5104:waveform')
 
     

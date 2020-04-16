@@ -93,8 +93,6 @@ class Scope_DPO5104(Scope, pvModel):
 
         self.create_pvs(self.tasks)
 
-        self.start()
-
     def connect(self, hostname):
         
         self.DPO5000 = TektronixScope('143')

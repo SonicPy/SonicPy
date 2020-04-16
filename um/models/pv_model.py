@@ -110,9 +110,9 @@ class pvModel(QThread):
         self.create_pvs(self.tasks)
         '''
 
-        '''
+        
         self.start()
-        '''
+        
 
     def clear_queue(self):
         q = self.my_queue

@@ -39,7 +39,6 @@ class ArbModel(Scope, pvModel):
         self.instrument = 'ArbModel'
 
         self.create_pvs(self.tasks)
-        self.start()
 
     #####################################################################
     #  Private set/get functions. Should not be used by external calls  #

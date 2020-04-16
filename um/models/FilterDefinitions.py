@@ -42,8 +42,6 @@ class no_filter_model(pvModel):
                                 }
 
         self.create_pvs(self.tasks)
-        
-        self.start()
 
     def compute_waveform(self):
         func = no_filter
@@ -102,8 +100,6 @@ class tukey_filter_model(pvModel):
                                 }
 
         self.create_pvs(self.tasks)
-        
-        self.start()
 
     def compute_waveform(self):
         func = tukey_filter

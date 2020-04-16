@@ -10,8 +10,6 @@
 #-------------------------------------------------------------------------------
 
 
-# TODO asymmetric waveform
-
 import visa, time, logging, os, struct, sys, copy, os.path
 
 import pyqtgraph as pg
@@ -68,7 +66,7 @@ class AFG_AFG3251(Afg, pvModel):
                                 {'desc': 'N-cycles', 'val':3,'min':1 ,'max':100000, 
                                 'param':{'type':'i'}},
                         'instrument':
-                                {'desc': 'Instrument', 'val':self.instrument, 
+                                {'desc': 'Instrument', 'val':'not connected', 
                                 'methods':{'set':False, 'get':True}, 
                                 'param':{'type':'s'}},
                         'operating_mode':
@@ -83,10 +81,16 @@ class AFG_AFG3251(Afg, pvModel):
                         'user1_waveform_from_file':
                                 {'desc': 'Waveform file', 'val':'', 
                                 'param':{'type':'s'}},
+                        'upload_user1_waveform':     
+                                {'desc': 'Upload waveform;Go','val':False, 
+                                'param':{'type':'b'}},
+                        'auto_upload_user1_waveform':     
+                                {'desc': 'Auto-pload waveform;ON/OFF','val':False, 
+                                'param':{'type':'b'}},
                       }       
 
         self.create_pvs(self.tasks)
-        self.start()
+        
 
     ###############################################################################
     #  Private device specific functions. Should not be used by external callers  #

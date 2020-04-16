@@ -19,7 +19,8 @@ class AFGController(pvController):
                       'operating_mode',
                       'n_cycles',
                       'frequency',
-                      'output_state']
+                      'output_state',
+                      'upload_user1_waveform']
 
         self.init_panel("Function generator", self.panel_items)
 

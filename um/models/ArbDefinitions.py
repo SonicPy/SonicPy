@@ -20,7 +20,6 @@ class arb_function(pvController):
         model.create_pvs(model.tasks)
         model.create_compute_function(list(model.arb_variables.keys()),arb_function)
         
-        model.start()
 
         super().__init__(parent, model, isMain)  
         panel_itmes = panel_items+['apply',

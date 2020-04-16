@@ -70,8 +70,7 @@ class setpointSweep(pvModel):
                                 'param':{'tag':'positioner_done','type':'b'}}
                                 }
         self.create_pvs(self.tasks)
-        self.start()           
-    
+
     ### initialize scan
         
     def _set_setpoints(self, param):
@@ -252,11 +251,7 @@ class SweepModel(pvModel):
 
         self.setpointSweepThread.pvs['run_state'].value_changed_signal.connect(self.scan_done_callback)
         self.setpointSweepThread.pvs['current_setpoint_index'].value_changed_signal.connect(self.current_setpoint_index_callback)
-        
-        self.start()
-
- 
-
+   
     #####################################################################
     #  Private set/get functions. Should not be used by external calls  #
     #####################################################################    

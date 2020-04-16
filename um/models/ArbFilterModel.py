@@ -44,9 +44,7 @@ class ArbFilterModel(Scope, pvModel):
         
         self.create_pvs(self.tasks)
 
-        self.start()
-
-
+ 
     
     #####################################################################
     #  Private set/get functions. Should not be used by external calls  #

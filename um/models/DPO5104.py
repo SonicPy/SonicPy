@@ -57,7 +57,7 @@ class Scope_DPO5104(Scope, pvModel):
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'num_av','type':'i'}},
                         'stop_after_num_av_preset':     
-                                {'desc': 'Auto stop;ON/OFF', 'val':False, 
+                                {'desc': 'Auto stop;ON/OFF', 'val':True, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'output_state','type':'b'}},
                         'num_acq': 
@@ -77,7 +77,7 @@ class Scope_DPO5104(Scope, pvModel):
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'output_state','type':'b'}},
                         'erase_start':     
-                                {'desc': u';Erase & ON', 'val':False, 
+                                {'desc': u';Erase + ON', 'val':False, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'erase_start','type':'b'}},
                         'erase':     
@@ -250,7 +250,7 @@ class Scope_DPO5104(Scope, pvModel):
         return ans
 
     def _get_run_state(self):
-        print('_get_run_state')
+        #print('_get_run_state')
         if self.connected:
             state = self.DPO5000.get_state()
         else:
@@ -258,7 +258,7 @@ class Scope_DPO5104(Scope, pvModel):
         return state
 
     def _set_run_state(self, state):
-        print('_set_run_state')
+        #print('_set_run_state')
         self.pvs['run_state']._val = state
         if self.connected:
             if state:
@@ -283,7 +283,7 @@ class Scope_DPO5104(Scope, pvModel):
         return scale
 
     def _get_waveform(self): 
-        print('get waveform')
+        #print('get waveform')
 
         if self.connected:
             #start = time.time()
@@ -312,7 +312,7 @@ class Scope_DPO5104(Scope, pvModel):
                 waveform_out = {'waveform':waveform,'ch':ch, 'time':dt, 'num_acq':num_acq}
                 
         else:
-            print('reading csv file')
+            #print('reading csv file')
             num_acq = self.pvs['num_av']._val
             
             ch = 1
@@ -322,26 +322,26 @@ class Scope_DPO5104(Scope, pvModel):
             time.sleep(.05)
             noise_scale = 0.002
             waveform_noised = waveform[1]+(np.random.normal(0,1,len(waveform[1]))-0.5)*noise_scale
-            print('read csv file')
+            #print('read csv file')
             waveform_out = {'waveform':[waveform[0],waveform_noised],'ch':ch, 'time':dt, 'num_acq':num_acq}  
 
-        print('num_acq: '+str(num_acq))
+        #print('num_acq: '+str(num_acq))
         self.pvs['num_acq'].set(int(num_acq))
 
         stop_after_preset = self.pvs['stop_after_num_av_preset']._val
 
         if stop_after_preset:
             running = self.pvs['run_state']._val
-            print('run_state: ' + str(running))
+            #print('run_state: ' + str(running))
             if running:
                 
                 num_av = self.pvs['num_av']._val
                 
-                print('num_av: ' + str(num_av))
-                print('num_acq >= num_av: '+ str(num_acq >= num_av))
+                #print('num_av: ' + str(num_av))
+                #print('num_acq >= num_av: '+ str(num_acq >= num_av))
                 if num_acq >= num_av:
                     
-                    print('num_acq >= num_av: ' + str(True))
+                    #print('num_acq >= num_av: ' + str(True))
                     self.pvs['run_state'].set(False)
-        print('returning waveform_out')
+        #print('returning waveform_out')
         return waveform_out

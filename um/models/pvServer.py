@@ -15,7 +15,7 @@ class pvServer():
 
     def set_pv(self, pv_name, pv):
         self.pvs[pv_name] = pv
-        #print(str(pv_name)+':'+str(pv))
+        print(pv_name)
 
     def get_pv(self, pv_name):
         #print(pv_name)

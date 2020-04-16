@@ -164,7 +164,7 @@ class AFG_AFG3251(Afg, pvModel):
         return waveform
 
     def _set_frequency(self, freq):
-        
+        #time.sleep(.2)
         freq_str = str(freq )
         command = 'source1:Frequency '+freq_str
         self.write(command) #set frequency 

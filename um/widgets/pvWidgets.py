@@ -32,7 +32,7 @@ class pvQWidget(QWidget):
         enabled = myPV._set_enabled
         super().setEnabled(enabled) 
         self.pv.value_changed_signal.connect(self.setValue)
-
+        self.setMinimumWidth( 150)
     
         
     def valueChangedCallback(self,value):
@@ -76,6 +76,8 @@ class pvQComboBox(QComboBox, pvQWidget):
             QComboBox.addItem(widget, item)
         self.currentTextChanged.connect(self.valueChangedCallback)
 
+       
+
     def setValue(self, tag, value):
         pvQWidget.setValue(self, tag, value)
         value = self.val
@@ -101,6 +103,7 @@ class pvQDoubleSpinBox(QDoubleSpinBox, pvQWidget):
                     
         QDoubleSpinBox.setMinimum(widget, minimum)
         QDoubleSpinBox.setMaximum(widget, maximum)
+
         val = myPV._val            
        
 
@@ -144,7 +147,6 @@ class pvQCheckBox(QCheckBox, pvQWidget):
         pvQWidget.__init__(self, myPV)
         widget = self
         value = myPV._val
-        #QCheckBox.setCheckable(widget, True)
         QCheckBox.setChecked(widget, value)
         self.clicked.connect(self.valueChangedCallback)
 
@@ -162,12 +164,16 @@ class pvQCheckBox(QCheckBox, pvQWidget):
 class pvQPushButton(QPushButton, pvQWidget):
     def __init__(self, myPV):
         desc = myPV._description.split(';')[1]
-
+        
         QPushButton.__init__(self)
+        
+        
         QPushButton.setText(self, desc)
         pvQWidget.__init__(self, myPV)
         widget = self
         QPushButton.setCheckable(widget, True)
+        val = myPV._val
+        QPushButton.setChecked(widget, val)
         self.clicked.connect(self.valueChangedCallback)
 
     def setValue(self, tag, value):

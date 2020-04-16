@@ -22,12 +22,15 @@ class SweepController(pvController):
         self.model.setpointSweepThread.scope_pvs = scope_pvs
         self.model.setpointSweepThread.source_waveform_pvs = source_waveform_pvs
 
-        panel_items =[  'positioner_channel',
+        panel_items =[  'positioner_set_channel',
+                        'positioner_read_channel',
+                        'det_trigger_channel',
+                        'det_run_state_channel',
                         'start_point',
                         'end_point',
                         'step',
                         'n',
-                        'current_index',
+                        'current_point',
                         'scan_go']
         self.init_panel('Scan', panel_items)
 

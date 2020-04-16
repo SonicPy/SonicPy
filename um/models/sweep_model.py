@@ -87,73 +87,37 @@ class setpointSweep(pvModel):
         self.create_pvs(self.tasks)
         self.start()           
     
-    def _set_acquire(self, param):
+    ### initialize scan
+        
+    def _set_setpoints(self, param):
+        #print('_set_setpoints '+str(param))
+        self.pvs['setpoints']._val = param
+
+    ### scan starts here
+    ### parent thread starts the scan be setting 'run_state' to True
+    ### scan can be interrupted/stopped by setting 'run_state to False at any time
+    ### after all points in scan are done the 'run_state' resets to False by itself
+
+    def _set_run_state(self, param):
+        currently_running = self.pvs['run_state']._val
+        self.pvs['run_state']._val = param
         if param:
-            p = self.pvs['current_setpoint']._val
-            print('aquiring @ ' +str(p))
-            detector_pvname = self.parent.pvs['det_trigger_channel']._val
-            detector_pv = self.pv_server.get_pv(detector_pvname)
-            detector_pv.set(True)
-            
+            if not currently_running:  
+                self.pvs['start_scan'].set(True)
+                #print('point sweep starting')
+        else:
+            self.parent.pvs['scan_go'].set(False)
+            #print('point sweep done')
 
-    def wait_for_detector_done(self, pv, param):
-        param = param[0]
-        if not param:
-            detector_pvname = self.parent.pvs['det_run_state_channel']._val
-            detector_pv = self.pv_server.get_pv(detector_pvname)
-            detector_pv.value_changed_signal.disconnect(self.wait_for_detector_done)
-            print('detector done')
-            
-            self.pvs['detector_done'].set(True)
-
-    def wait_for_positioner_done(self, param):
-        
-        if not param:
-            self.positioner_busy_signal.disconnect(self.wait_for_positioner_done)
-            print('positioner done')
-            
-            self.pvs['positioner_done'].set(True)
-
-    def _set_move_positioner(self, param):
+    def _set_start_scan(self, param):
+        self.pvs['current_setpoint_index'].set(0)
+        self.pvs['start_scan']._val = param
         if param:
-            p = self.pvs['current_setpoint']._val
-            #print('moving positioner to: ' +str(p))
-            positioner_pvname = self.parent.pvs['positioner_channel']._val
-            print (str(positioner_pvname)+ ' = '+str(p))
-            positioner_pv = self.pv_server.get_pv(positioner_pvname)
-            print (str(positioner_pv)+ ' = '+str(p))
-            positioner_pv.set(p*1e6)
+            self.pvs['do_point'].set(True)
 
-            # replace timer with event from positioner (AFG, etc)
-            time.sleep(.5)   
-            self.positioner_busy_signal.emit(False)
-
-    def _set_detector_done(self, param):
-        
-        # do something with the acquire point
-
-        # go to next point if run_state is True
-        run_state = self.pvs['run_state']._val
-        if run_state:
-            self.pvs['advance_to_next'].set(True)
-
-    def _set_positioner_done(self, param):
-        
-        # do something with the acquire point
-
-        # go to next point if run_state is True
-        run_state = self.pvs['run_state']._val
-        if run_state:
-            self.pvs['detector_trigger'].set(True)
-
-    def _set_detector_trigger(self, param):
-        detector_pvname = self.parent.pvs['det_run_state_channel']._val
-        print(detector_pvname)
-        detector_pv = self.pv_server.get_pv(detector_pvname)
-        print('pv: ' + str(detector_pv))
-        detector_pv.value_changed_signal.connect(self.wait_for_detector_done)
-        self.pvs['acquire'].set(True)
-            
+    def _set_current_setpoint_index(self, param):
+        self.pvs['current_setpoint_index']._val = param
+        #print('setpoint index: '+str(param))
 
     def _set_do_point(self, param):
         pts = self.pvs['setpoints']._val['setpoints']
@@ -166,50 +130,79 @@ class setpointSweep(pvModel):
         else:
             self.pvs['run_state'].set(False)
 
-    def _set_run_state(self, param):
-        currently_running = self.pvs['run_state']._val
-        self.pvs['run_state']._val = param
-        if param:
-            if not currently_running:  
-                self.pvs['start_scan'].set(True)
-                print('point sweep starting')
-        else:
-            self.parent.pvs['scan_go'].set(False)
-            print('point sweep done')
+    def _set_current_setpoint(self, param):
+        self.pvs['current_setpoint']._val = param
+        positioner_pvname = self.parent.pvs['positioner_read_channel']._val
+        positioner_pv = self.pv_server.get_pv(positioner_pvname)
+        positioner_pv.value_changed_signal.connect(self.wait_for_positioner_done)
+        self.pvs['move_positioner'].set(True)
 
-    def _set_start_scan(self, param):
-        self.pvs['current_setpoint_index'].set(0)
-        self.pvs['start_scan']._val = param
+    def _set_move_positioner(self, param):
         if param:
-            self.pvs['do_point'].set(True)
+            p = self.pvs['current_setpoint']._val
+            positioner_pvname = self.parent.pvs['positioner_set_channel']._val
+            positioner_pv = self.pv_server.get_pv(positioner_pvname)
+            positioner_pv.set(p*1e6)
+
+    def wait_for_positioner_done(self, pv, param):
+        positioner_pvname = self.parent.pvs['positioner_read_channel']._val
+        positioner_pv = self.pv_server.get_pv(positioner_pvname)
+        positioner_pv.value_changed_signal.disconnect(self.wait_for_positioner_done)
+        #print('positioner done')
+        self.pvs['positioner_done'].set(True)
+
+    def _set_positioner_done(self, param):
+        run_state = self.pvs['run_state']._val
+        if run_state:
+            self.pvs['detector_trigger'].set(True)
+
+    def _set_detector_trigger(self, param):
+        detector_pvname = self.parent.pvs['det_run_state_channel']._val
+        detector_pv = self.pv_server.get_pv(detector_pvname)
+        detector_pv.value_changed_signal.connect(self.wait_for_detector_done)
+        self.pvs['acquire'].set(True)
+
+    def _set_acquire(self, param):
+        if param:
+            p = self.pvs['current_setpoint']._val
+            #print('aquiring @ ' +str(p))
+            detector_pvname = self.parent.pvs['det_trigger_channel']._val
+            detector_pv = self.pv_server.get_pv(detector_pvname)
+            detector_pv.set(True)
+
+    def wait_for_detector_done(self, pv, param):
+        param = param[0]
+        if not param:
+            detector_pvname = self.parent.pvs['det_run_state_channel']._val
+            detector_pv = self.pv_server.get_pv(detector_pvname)
+            detector_pv.value_changed_signal.disconnect(self.wait_for_detector_done)
+            #print('detector done')
+            
+            self.pvs['detector_done'].set(True)
+
+
+    def _set_detector_done(self, param):
+        
+        # do something with the acquire point
+
+        # go to next point if run_state is True
+        run_state = self.pvs['run_state']._val
+        if run_state:
+            self.pvs['advance_to_next'].set(True)
 
     def _set_advance_to_next(self, param):
         pts = self.pvs['setpoints']._val['setpoints']
         index = self.pvs['current_setpoint_index']._val
         
         if len(pts)>index+1:
-            print('advancing to index: ' + str(index+1))
+            #print('advancing to next index: ' + str(index+1))
             self.pvs['current_setpoint_index'].set(index+1)
             self.pvs['do_point'].set(True)
         else:
             self.pvs['run_state'].set(False)
         
-    
-    def _set_setpoints(self, param):
-        print('_set_setpoints '+str(param))
-        self.pvs['setpoints']._val = param
 
-    def _set_current_setpoint(self, param):
-        self.positioner_busy_signal.connect(self.wait_for_positioner_done)
-        print('septoint updated: '+ str(param))
-        self.pvs['move_positioner'].set(True)
-        
 
-    def _set_current_setpoint_index(self, param):
-        self.pvs['current_setpoint_index']._val = param
-        print('setpoint index: '+str(param))
-
-    
         
 class SweepModel(pvModel):
 
@@ -226,18 +219,21 @@ class SweepModel(pvModel):
         # Task description markup. Aarbitrary default values ('val') are for type recognition in panel widget constructor
         # supported types are float, int, bool, string, and list of strings
         self.tasks = {  'det_trigger_channel':
-                                {'desc': 'Detector', 'val':'DPO5104:erase_start', 
+                                {'desc': 'Detector trigger', 'val':'DPO5104:erase_start', 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'det_trigger_channel','type':'s'}},
                         'det_run_state_channel':
-                                {'desc': 'Detector', 'val':'DPO5104:run_state', 
+                                {'desc': 'Detector status', 'val':'DPO5104:run_state', 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'det_run_state_channel','type':'s'}},
-                        
-                        'positioner_channel':     
-                                {'desc': 'Positioner', 'val':'AFG3251:frequency', 
+                        'positioner_set_channel':     
+                                {'desc': 'Point set', 'val':'burst_fixed_time:freq', 
                                 'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'positioner_channel','type':'s'}},
+                                'param':{'tag':'positioner_set_channel','type':'s'}},
+                        'positioner_read_channel':     
+                                {'desc': 'Point read', 'val':'ArbFilter:waveform_out', 
+                                'methods':{'set':True, 'get':True}, 
+                                'param':{'tag':'positioner_read_channel','type':'s'}},
                         'start_point': 
                                 {'desc': 'Start', 'val':10.0, 'increment':0.5,'min':.001,'max':110 ,
                                 'methods':{'set':True, 'get':True}, 
@@ -250,10 +246,10 @@ class SweepModel(pvModel):
                                 {'desc': '#Pts', 'val':6,'min':2,'max':10000,
                                 'methods':{'set':True, 'get':True},  
                                 'param':{'tag':'n','type':'i'}},
-                        'current_index': 
+                        'current_point': 
                                 {'desc': 'Point', 'val':0,'min':0,'max':10000,
                                 'methods':{'set':False, 'get':True},  
-                                'param':{'tag':'current_index','type':'i'}},
+                                'param':{'tag':'current_point','type':'i'}},
                         
                         'step': 
                                 {'desc': 'Step size', 'val':1.0, 'min':0.001,'max':110,'increment':.1,
@@ -303,12 +299,12 @@ class SweepModel(pvModel):
     def scan_done_callback(self, pv, data):
         running = data[0]
         if not running:
-            print('scan_go: False')
+            #print('scan_go: False')
             self.pvs['scan_go'].set(False)
 
     def current_setpoint_index_callback(self, pv, data):
         ind = data[0]
-        self.pvs['current_index'].set(ind+1)
+        self.pvs['current_point'].set(ind+1)
 
     def stop_scan(self):
         self.setpointSweepThread.pvs['run_state']._val = False

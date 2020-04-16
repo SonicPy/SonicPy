@@ -95,7 +95,7 @@ class tukey_filter_model(pvModel):
                         'alpha':{'symbol':u'α',
                                 'desc':u'α',
                                 'unit':u'',
-                                'val':0.1, 
+                                'val':0.2, 
                                 'increment':0.05,'min':0,'max':1 ,
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'alpha','type':'f'}},

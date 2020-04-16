@@ -150,10 +150,7 @@ class UltrasoundWidget(QMainWindow):
                 min-width: 110;
                 max-width: 110;
             }
-            #controls_sidebar QLineEdit {
-                min-width: 120;
-                max-width: 120;
-            }
+          
             #controls_sidebar QLabel {
                 min-width: 110;
                 max-width: 110;

@@ -221,7 +221,7 @@ class pvModel(QThread):
         # do stuff
         while self.go:
             task = self.my_queue.get()
-            print('task in queue: ' + str(task))
+            #print('task in queue: ' + str(task))
             
             if 'task_name' in task:
                 task_name = task['task_name']
@@ -244,7 +244,7 @@ class pvModel(QThread):
                                 print('set failed: '+task_name)
                             self.pvs[task_name]._val = param
                             self.pvs[task_name].value_changed_signal.emit(task_name,[param])
-                            print('emit '+ str(task_name) + ', '+ str(param))
+                            #print('emit '+ str(task_name) + ', '+ str(param))
                             
                         elif mode == 'get':
                             #print('get... try:  '+ str(task_name))

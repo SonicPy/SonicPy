@@ -31,12 +31,12 @@ class ArbFilterController(pvController):
         self.arb_filter_1 = no_filter_controller(self)
         self.arb_filter_2 = tukey_filter_controller(self)
 
-        self.f_types = [self.arb_filter_1.model.instrument, self.arb_filter_2.model.instrument]
+        self.f_types = [self.arb_filter_1.model.param['name'], self.arb_filter_2.model.param['name']]
 
         
 
         filters_task = {  'selected_item': 
-                                {'desc': 'Filter type', 'val':self.f_types[0], 'list':self.f_types, 
+                                {'desc': 'Filter type', 'val':self.f_types[1], 'list':self.f_types, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'selected_item','type':'l'}}}
         self.model.create_pvs(filters_task)
@@ -50,10 +50,10 @@ class ArbFilterController(pvController):
         selector_cb, selector_label = self.make_pv_widget('ArbFilter:selected_item')
         self.arb_filter_edit_controller = EditController(self, title='Filter control', selector_cb=selector_cb)
 
-        self.arb_filter_edit_controller.add_controller(self.arb_filter_1.model.instrument, self.arb_filter_1)
-        self.arb_filter_edit_controller.add_controller(self.arb_filter_2.model.instrument, self.arb_filter_2)
+        self.arb_filter_edit_controller.add_controller(self.arb_filter_1.model.param['name'], self.arb_filter_1)
+        self.arb_filter_edit_controller.add_controller(self.arb_filter_2.model.param['name'], self.arb_filter_2)
 
-        self.arb_filter_edit_controller.select_controller(self.arb_filter_1.model.instrument)
+        self.arb_filter_edit_controller.select_controller(self.arb_filter_2.model.param['name'])
 
         self.arb_filter_1.model.pvs['output_channel']._val = self.model.pvs['waveform_out']
         self.arb_filter_2.model.pvs['output_channel']._val = self.model.pvs['waveform_out']
@@ -96,7 +96,7 @@ class ArbFilterController(pvController):
 
     def waveform_changed_signal_callback(self, pv_name, data):
         data = data[0]
-        print('filtered_waveform_changed_signal_callback')
+        #print('filtered_waveform_changed_signal_callback')
         self.waveformFilteredcallbackSignal.emit(data)
 
     

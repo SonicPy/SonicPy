@@ -36,11 +36,11 @@ class ArbController(pvController):
         self.arb3 = burst_fixed_time_controller(self)
         self.scan_pv = self.arb3.scan_pv
 
-        w_types = [self.arb1.model.instrument,  self.arb3.model.instrument]
+        w_types = [self.arb1.model.param['name'],  self.arb3.model.param['name']]
 
         
         waveforms_task = {  'selected_item': 
-                                {'desc': 'Wave type', 'val':w_types[0], 'list':w_types, 
+                                {'desc': 'Wave type', 'val':w_types[1], 'list':w_types, 
                                 'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'selected_item','type':'l'}}}
 
@@ -51,9 +51,9 @@ class ArbController(pvController):
 
         selector_cb, selector_label = self.make_pv_widget('ArbModel:selected_item')
         self.arb_edit_controller = EditController(self, title='Waveform control', selector_cb = selector_cb)
-        self.arb_edit_controller.add_controller(self.arb1.model.instrument, self.arb1)
-        self.arb_edit_controller.add_controller(self.arb3.model.instrument, self.arb3)
-        self.arb_edit_controller.select_controller(self.arb1.model.instrument)
+        self.arb_edit_controller.add_controller(self.arb1.model.param['name'], self.arb1)
+        self.arb_edit_controller.add_controller(self.arb3.model.param['name'], self.arb3)
+        self.arb_edit_controller.select_controller(self.arb3.model.param['name'])
 
         output_pv = self.model.pvs['arb_waveform']
         self.arb1.model.pvs['output_channel'].set(output_pv)

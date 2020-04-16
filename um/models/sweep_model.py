@@ -34,54 +34,39 @@ class setpointSweep(pvModel):
                         
                         'current_setpoint_index': 
                                 {'desc': 'Current set-point index', 'val':0,'min':0,'max':10000,
-                                'methods':{'set':True, 'get':True},  
                                 'param':{'tag':'current_setpoint_index','type':'i'}},
                         'current_setpoint': 
                                 {'desc': 'Current set-point', 'val':0., 'increment':0.1, 'min':-10e11,'max':10e11,
-                                'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'current_setpoint','type':'f'}},
                         'setpoints':     
                                 {'desc': 'Setpoints', 'val':None, 
-                                'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'setpoints','type':'dict'}},
                         'run_state':     
                                 {'desc': 'Run;ON/OFF', 'val':False, 
-                                'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'run_state','type':'b'}},
                         'start_scan':     
                                 {'desc': '', 'val':False, 
-                                'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'start_scan','type':'b'}},
                         'advance_to_next':     
                                 {'desc': '', 'val':False, 
-                                'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'advance_to_next','type':'b'}},
                         'acquire':     
                                 {'desc': '', 'val':False, 
-                                'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'acquire','type':'b'}},
                         'do_point':     
                                 {'desc': '', 'val':False, 
-                                'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'do_point','type':'b'}},
                         'detector_done':     
                                 {'desc': '', 'val':False, 
-                                'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'detector_done','type':'b'}},
-                                
                         'detector_trigger':     
                                 {'desc': '', 'val':False, 
-                                'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'detector_trigger','type':'b'}},
-                                
                         'positioner_done':     
                                 {'desc': '', 'val':False, 
-                                'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'positioner_done','type':'b'}},
-                                
                         'move_positioner':     
                                 {'desc': '', 'val':False, 
-                                'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'positioner_done','type':'b'}}
                                 }
         self.create_pvs(self.tasks)
@@ -220,57 +205,45 @@ class SweepModel(pvModel):
         # supported types are float, int, bool, string, and list of strings
         self.tasks = {  'det_trigger_channel':
                                 {'desc': 'Detector trigger', 'val':'DPO5104:erase_start', 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'det_trigger_channel','type':'s'}},
+                                'param':{ 'type':'s'}},
                         'det_run_state_channel':
                                 {'desc': 'Detector status', 'val':'DPO5104:run_state', 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'det_run_state_channel','type':'s'}},
+                                'param':{ 'type':'s'}},
                         'positioner_set_channel':     
                                 {'desc': 'Point set', 'val':'burst_fixed_time:freq', 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'positioner_set_channel','type':'s'}},
+                                'param':{ 'type':'s'}},
                         'positioner_read_channel':     
                                 {'desc': 'Point read', 'val':'ArbFilter:waveform_out', 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'positioner_read_channel','type':'s'}},
+                                'param':{ 'type':'s'}},
                         'start_point': 
                                 {'desc': 'Start', 'val':10.0, 'increment':0.5,'min':.001,'max':110 ,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'start_point','type':'f'}},
+                                'param':{ 'type':'f'}},
                         'end_point': 
                                 {'desc': 'End', 'val':40.0, 'increment':0.5, 'min':.002,'max':120,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'end_point','type':'f'}},
+                                'param':{ 'type':'f'}},
                         'n': 
                                 {'desc': '#Pts', 'val':6,'min':2,'max':10000,
-                                'methods':{'set':True, 'get':True},  
-                                'param':{'tag':'n','type':'i'}},
+                                'param':{ 'type':'i'}},
                         'current_point': 
                                 {'desc': 'Point', 'val':0,'min':0,'max':10000,
                                 'methods':{'set':False, 'get':True},  
-                                'param':{'tag':'current_point','type':'i'}},
-                        
+                                'param':{ 'type':'i'}},
                         'step': 
                                 {'desc': 'Step size', 'val':1.0, 'min':0.001,'max':110,'increment':.1,
                                 'methods':{'set':False, 'get':True},  
-                                'param':{'tag':'step','type':'f'}},
+                                'param':{ 'type':'f'}},
                         'scan_go':     
                                 {'desc': 'Scan;Go', 'val':False, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'output_state','type':'b'}},
+                                'param':{ 'type':'b'}},
                         'scan_stop':     
                                 {'desc': 'Scan;Stop', 'val':False, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'output_state','type':'b'}},
+                                'param':{ 'type':'b'}},
                         'scan_pause':     
                                 {'desc': 'Scan;Stop', 'val':False, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'output_state','type':'b'}},
+                                'param':{ 'type':'b'}},
                         'setpoint': 
                                 {'desc': 'Set-point', 'val':30., 'increment':0.1, 'min':0.1,'max':100,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'set_point','type':'f'}}
+                                'param':{ 'type':'f'}}
                                 }
 
         self.create_pvs(self.tasks)

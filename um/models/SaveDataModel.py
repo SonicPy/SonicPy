@@ -32,44 +32,34 @@ class SaveDataModel(pvModel):
 
         self.tasks = {  'data_channel':
                                 {'desc': '', 'val':'', 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'data_channel','type':'s'}},
+                                'param':{'type':'s'}},
                         'filename':
                                 {'desc': 'Filename', 'val':'savedata.csv', 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'filename','type':'s'}},
+                                'param':{'type':'s'}},
                         'file_filter':
                                 {'desc': 'Filename', 'val':'Text (*.csv);;Binary (*.npz)', 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'file_filter','type':'s'}},
+                                'param':{'type':'s'}},
                         'file_extension':
                                 {'desc': 'Extension', 'val':self.extensions[0],'list':self.extensions, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'file_extension','type':'l'}},
+                                'param':{'type':'l'}},
                         'file_header':
                                 {'desc': 'Header', 'val':{}, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'file_header','type':'dict'}}, 
+                                'param':{'type':'dict'}}, 
                         'save':     
                                 {'desc': 'Save;Save', 'val':False, 
-                                'methods':{'set':True, 'get':False}, 
-                                'param':{'tag':'save','type':'b'}}, 
+                                'param':{'type':'b'}}, 
                         'autorestart':     
                                 {'desc': 'autorestart;ON/OFF', 'val':False, 
-                                'methods':{'set':True, 'get':False}, 
-                                'param':{'tag':'autorestart','type':'b'}}, 
+                                'param':{'type':'b'}}, 
                         'autosave':     
                                 {'desc': 'Sutosave;ON/OFF', 'val':False, 
-                                'methods':{'set':True, 'get':False}, 
-                                'param':{'tag':'autosave','type':'b'}}, 
+                                'param':{'type':'b'}}, 
                         'warn_overwrite':     
                                 {'desc': 'Warn overwrite;ON/OFF', 'val':False, 
-                                'methods':{'set':True, 'get':False}, 
-                                'param':{'tag':'warn_overwrite','type':'b'}},
+                                'param':{'type':'b'}},
                         'params':
                                 {'desc': 'Environment parameters', 'val':{}, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'waveform','type':'dict'}}
+                                'param':{'type':'dict'}}
 
                       }       
 

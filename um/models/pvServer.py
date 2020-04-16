@@ -10,8 +10,7 @@ import json
 
 class pvServer():
     pvs = {}
-    def __init__(self):
-        pass
+   
 
     def set_pv(self, pv_name, pv):
         self.pvs[pv_name] = pv

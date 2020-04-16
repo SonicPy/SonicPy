@@ -3,12 +3,13 @@ from PyQt5.QtCore import QThread, pyqtSignal
 from um.models.pv_model import pvModel
 from um.controllers.pv_controller import pvController
 from functools import partial
+from um.models.pvServer import pvServer
 
 class arb_function(pvController):
     def __init__(self, parent, isMain = False, title='', \
                     arb_name = '', arb_desc='', arb_ref='', \
                         arb_comment='', panel_items=[], arb_variables = {}, arb_function=None):
-                     
+        
         model = arb_model(parent)
         model.instrument = arb_name
         model.arb_variables = arb_variables   
@@ -33,7 +34,7 @@ class arb_model(pvModel):
     model_value_changed_signal = pyqtSignal(dict)
     def __init__(self, parent, arb_name = ''):
         super().__init__(parent)
-
+        self.pv_server = pvServer()
         ## model speficic:
         self.offline = True
         self.instrument = arb_name
@@ -43,16 +44,13 @@ class arb_model(pvModel):
         self.tasks = {  
                         'output_channel':     
                                 {'desc': 'Output channel', 'val':None, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'output_channel','type':'pv'}},
+                                'param':{ 'type':'s'}},
                         'apply':     
                                 {'desc': ';Apply', 'val':False, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'apply','type':'b'}},
+                                'param':{ 'type':'b'}},
                         'auto_process':     
                                 {'desc': ';Auto process', 'val':False, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'auto_process','type':'b'}}
+                                'param':{ 'type':'b'}}
         }
 
     def create_compute_function(self, settings_list, function):
@@ -62,7 +60,7 @@ class arb_model(pvModel):
     def _compute(self, settings_list, func):
         settings = self.get_settings(settings_list)[self.settings_file_tag]
         ans = func(settings)
-        output_channel = self.pvs['output_channel']._val
+        output_channel = self.pv_server.get_pv(self.pvs['output_channel']._val)
         output_channel.set(ans)
      
     def _set_apply(self, val):
@@ -108,8 +106,7 @@ class g_wavelet_controller(arb_function):
                                     'val':0, 
                                     'val_scale': 1e-9,
                                 'increment':0.5,'min':0,'max':1000 ,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'t_min','type':'f'}},
+                                'param':{ 'type':'f'}},
                         't_max': 
                                 {'symbol':u't<sub>max</sub>',
                                     'desc':u'Duration',
@@ -117,8 +114,7 @@ class g_wavelet_controller(arb_function):
                                     'val':120e-9,
                                     'val_scale': 1e-9,
                                 'increment':0.5,'min':0,'max':1000 ,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'t_min','type':'f'}},
+                                'param':{ 'type':'f'}},
                         'center_f': 
                                 {'symbol':u'f<sub>0</sub>',
                                     'desc':u'Center frequency',
@@ -126,8 +122,7 @@ class g_wavelet_controller(arb_function):
                                     'val':45e6, 
                                     'val_scale': 1e6,
                                 'increment':0.5,'min':0,'max':1e12 ,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'t_min','type':'f'}},
+                                'param':{ 'type':'f'}},
                         'sigma': 
                                 {'symbol':u'σ',
                                     'desc':u"HWHM in frequency domain",
@@ -135,8 +130,7 @@ class g_wavelet_controller(arb_function):
                                     'val':20e6,
                                     'val_scale': 1e6,
                                 'increment':0.5,'min':0,'max':1e12 ,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'t_min','type':'f'}},
+                                'param':{ 'type':'f'}},
                         'opt':     
                                 {'symbol':u'opt',
                                     'desc':u"",
@@ -145,8 +139,7 @@ class g_wavelet_controller(arb_function):
                                     'val_scale': 1e6,
                                     'hidden':True,
                                 'increment':0.5,'min':0,'max':1000 ,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'t_min','type':'i'}},
+                                'param':{ 'type':'i'}},
                         'pts': 
                                 {'symbol':u'pts',
                                     'desc':u"",
@@ -154,8 +147,7 @@ class g_wavelet_controller(arb_function):
                                     'val':1000,
                                     'hidden':True ,
                                 'min':1,'max':10000 ,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'t_min','type':'i'}},
+                                'param':{ 'type':'i'}},
                         'delay': 
                                 {'symbol':u'pts',
                                     'desc':u"",
@@ -163,8 +155,7 @@ class g_wavelet_controller(arb_function):
                                     'val':.5,
                                     'hidden':True ,
                                 'increment':0.01,'min':0,'max':1 ,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'t_min','type':'f'}}
+                                'param':{ 'type':'f'}}
                                 }
         arb_function = gaussian_wavelet
 
@@ -190,8 +181,7 @@ class burst_fixed_time_controller(arb_function):
                                     'val':120e-9,
                                     'val_scale': 1e-9,
                                 'increment':0.5,'min':0,'max':1000 ,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'t_min','type':'f'}},
+                                'param':{ 'type':'f'}},
                         'freq': 
                                 {'symbol':u'f',
                                      'desc':u'Frequency',
@@ -199,32 +189,28 @@ class burst_fixed_time_controller(arb_function):
                                      'val':30e6,
                                      'val_scale': 1e6,
                                 'increment':0.5,'min':0.001,'max':10000 ,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'t_min','type':'f'}},
+                                'param':{ 'type':'f'}},
                         'pts': 
                                 {'symbol':u'',
                                      'desc':u'',
                                      'unit':u'',
                                      'val':1000, 
                                 'min':1,'max':10000 ,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'pts','type':'i'}},
+                                'param':{ 'type':'i'}},
                         'symmetric': 
                                 {'symbol':u'',
                                     'desc':u'',
                                     'unit':u'',
                                     'val':0, 
                                 'min':0,'max':1 ,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'symmetric','type':'i'}},
+                                'param':{ 'type':'i'}},
                         'quarter_shift': 
                                 {'symbol':u'',
                                     'desc':u'',
                                     'unit':u'',
                                     'val':0, 
                                 'min':0,'max':1 ,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'quarter_shift','type':'i'}},
+                                'param':{ 'type':'i'}},
                                 
                                 }
         arb_function = burst_fixed_time
@@ -271,64 +257,55 @@ class gx2_wavelet_model(pvModel):
         self.tasks = {  
                         'output_channel':     
                                 {'desc': 'Output channel', 'val':None, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'output_channel','type':'pv'}},
+                                'param':{ 'type':'pv'}},
                         'apply':     
                                 {'desc': ';Apply', 'val':False, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'apply','type':'b'}},
+                                'param':{ 'type':'b'}},
                         'auto_process':     
                                 {'desc': ';Auto process', 'val':False, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'auto_process','type':'b'}},
+                                'param':{ 'type':'b'}},
                         't_min': 
                                 {'symbol':u't<sub>0</sub>',
                                     'desc':u'Time min',
                                     'unit':u's',
                                     'val':0, 
                                 'increment':0.5,'min':0,'max':1000 ,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'t_min','type':'f'}},
+                                'param':{ 'type':'f'}},
                         't_max': 
                                 {'symbol':u't<sub>max</sub>',
                                     'desc':u'Time max',
                                     'unit':u's',
                                     'val':120e-9,
                                 'increment':0.5,'min':0,'max':1000 ,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'t_min','type':'f'}},
+                                'param':{ 'type':'f'}},
                         'center_f': 
                                 {'symbol':u'f<sub>0_1</sub>',
                                      'desc':u'Center 1 frequency',
                                      'unit':u'Hz',
                                      'val':20e6, 
                                 'increment':0.5,'min':0,'max':1e12 ,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'t_min','type':'f'}},
+                                'param':{ 'type':'f'}},
                         'center_f_2': 
                                 {'symbol':u'f<sub>0_2</sub>',
                                      'desc':u'Center 2 frequency',
                                      'unit':u'Hz',
                                      'val':45e6, 
                                 'increment':0.5,'min':0,'max':1e12 ,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'t_min','type':'f'}},
+                                'param':{ 'type':'f'}},
                         'sigma': 
                                 {'symbol':u'σ',
                                     'desc':u"HWHM in frequency domain",
                                     'unit':u'Hz',
                                     'val':20e6,
                                 'increment':0.5,'min':0,'max':1e12 ,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'t_min','type':'f'}},
+                                'param':{ 'type':'f'}},
                         'sigma_2': 
                                 {'symbol':u'σ<sub>0_2</sub>',
                                     'desc':u"HWHM in frequency domain",
                                     'unit':u'Hz',
                                     'val':20e6,
                                 'increment':0.5,'min':0,'max':1e12 ,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'t_min','type':'f'}},
+                                'param':{ 'type':'f'}},
                         'opt':     
                                 {'symbol':u'opt',
                                     'desc':u"",
@@ -336,8 +313,7 @@ class gx2_wavelet_model(pvModel):
                                     'val':0,
                                     'hidden':True,
                                 'increment':0.5,'min':0,'max':1000 ,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'t_min','type':'i'}},
+                                'param':{ 'type':'i'}},
                         'pts': 
                                 {'symbol':u'pts',
                                     'desc':u"",
@@ -345,8 +321,7 @@ class gx2_wavelet_model(pvModel):
                                     'val':1000,
                                     'hidden':True ,
                                 'increment':0.5,'min':0,'max':1000 ,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'t_min','type':'i'}}
+                                'param':{ 'type':'i'}}
                                 
                                 }
 

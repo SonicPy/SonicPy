@@ -57,40 +57,32 @@ class AFG_AFG3251(Afg, pvModel):
         # supported types are float, int, bool, string, and list of strings
         self.tasks = {  'amplitude': 
                                 {'desc': 'Amplitude', 'unit':u'V<sub>p-p</sub>', 'val':1.0,'min':0.05,'max':9,'increment':0.05, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'amplitude','type':'f'}},
+                                'param':{'type':'f'}},
                         'frequency': 
                                 {'desc': 'Frequency', 'unit':'MHz','val':30000000.0,'val_scale':1e6, 'min':0, 'max':1000e6,'increment':.5, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'frequency','type':'f'}},
+                                'param':{'type':'f'}},
                         'output_state':     
                                 {'desc': 'Output;ON/OFF','val':False, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'output_state','type':'b'}},
+                                'param':{'type':'b'}},
                         'n_cycles':  
                                 {'desc': 'N-cycles', 'val':3,'min':1 ,'max':100000, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'n_cycles','type':'i'}},
+                                'param':{'type':'i'}},
                         'instrument':
                                 {'desc': 'Instrument', 'val':self.instrument, 
                                 'methods':{'set':False, 'get':True}, 
-                                'param':{'tag':'instrument','type':'s'}},
+                                'param':{'type':'s'}},
                         'operating_mode':
                                 {'desc': 'Operating mode', 'val':self.operating_modes[0],'list':self.operating_modes, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'operating_mode','type':'l'}},
+                                'param':{'type':'l'}},
                         'function_shape':
                                 {'desc': 'Function shape', 'val':self.function_shapes[0],'list':self.function_shapes, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'function_shape','type':'l'}},
+                                'param':{'type':'l'}},
                         'user1_waveform':
                                 {'desc': 'User waveform 1', 'val':{}, 
-                                'methods':{'set':True, 'get':False}, 
-                                'param':{'tag':'user1_waveform','type':'dict'}},
+                                'param':{'type':'dict'}},
                         'user1_waveform_from_file':
                                 {'desc': 'Waveform file', 'val':'', 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'user1_waveform_from_file','type':'s'}},
+                                'param':{'type':'s'}},
                       }       
 
         self.create_pvs(self.tasks)

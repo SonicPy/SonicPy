@@ -4,6 +4,7 @@ from um.models.arb_filters import my_filter, no_filter, tukey_filter
 from PyQt5.QtCore import QThread, pyqtSignal
 from um.models.pv_model import pvModel
 from um.controllers.pv_controller import pvController
+from um.models.pvServer import pvServer
 
 class no_filter_controller(pvController):
     def __init__(self, parent, isMain = False):
@@ -19,6 +20,7 @@ class no_filter_model(pvModel):
     model_value_changed_signal = pyqtSignal(dict)
     def __init__(self, parent):
         super().__init__(parent)
+        self.pv_server = pvServer()
         self.offline = True
         ## model speficic:
         self.instrument = 'no_filter'
@@ -29,17 +31,14 @@ class no_filter_model(pvModel):
         # Task description markup. Aarbitrary default values ('val') are for type recognition in panel widget constructor
         # supported types are float, int, bool, string, list of strings, dict
         self.tasks = {  'output_channel':     
-                                {'desc': ';Output channel', 'val':None, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'output_channel','type':'pv'}},
+                                {'desc': ';Output channel', 'val':'', 
+                                'param':{ 'type':'s'}},
                         'waveform_in':
                                 {'desc': 'Waveform IN', 'val':{}, 
-                                'methods':{'set':True, 'get':False}, 
-                                'param':{'tag':'waveform_in','type':'dict'}},
+                                'param':{ 'type':'dict'}},
                         'apply':     
                                 {'desc': ';Apply', 'val':False, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'apply','type':'b'}},
+                                'param':{ 'type':'b'}},
                                 }
 
         self.create_pvs(self.tasks)
@@ -52,7 +51,7 @@ class no_filter_model(pvModel):
         #print(settings)
         ans = func(settings)
         #print (ans)
-        output_channel = self.pvs['output_channel']._val
+        output_channel = self.pv_server.get_pv(self.pvs['output_channel']._val)
         output_channel.set(ans)
        
 
@@ -75,6 +74,7 @@ class tukey_filter_model(pvModel):
     model_value_changed_signal = pyqtSignal(dict)
     def __init__(self, parent):
         super().__init__(parent)
+        self.pv_server = pvServer()
         self.offline = True
         ## model speficic:
         self.instrument = 'tukey_filter'
@@ -85,24 +85,20 @@ class tukey_filter_model(pvModel):
         # Task description markup. Aarbitrary default values ('val') are for type recognition in panel widget constructor
         # supported types are float, int, bool, string, and list of strings
         self.tasks = {  'output_channel':     
-                                {'desc': ';Output channel', 'val':None, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'output_channel','type':'pv'}},
+                                {'desc': ';Output channel', 'val':'', 
+                                'param':{ 'type':'s'}},
                         'waveform_in':
                                 {'desc': 'Waveform IN', 'val':{}, 
-                                'methods':{'set':True, 'get':False}, 
-                                'param':{'tag':'waveform_in','type':'dict'}},
+                                'param':{ 'type':'dict'}},
                         'alpha':{'symbol':u'α',
                                 'desc':u'α',
                                 'unit':u'',
                                 'val':0.2, 
                                 'increment':0.05,'min':0,'max':1 ,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'alpha','type':'f'}},
+                                'param':{ 'type':'f'}},
                         'apply':     
                                 {'desc': ';Apply', 'val':False, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'apply','type':'b'}},
+                                'param':{ 'type':'b'}},
                                 }
 
         self.create_pvs(self.tasks)
@@ -115,7 +111,7 @@ class tukey_filter_model(pvModel):
         #print(settings)
         ans = func(settings)
         #print(ans)
-        output_channel = self.pvs['output_channel']._val
+        output_channel = self.pv_server.get_pv(self.pvs['output_channel']._val)
         output_channel.set(ans)
        
 

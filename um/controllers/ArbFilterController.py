@@ -37,7 +37,6 @@ class ArbFilterController(pvController):
 
         filters_task = {  'selected_item': 
                                 {'desc': 'Filter type', 'val':self.f_types[1], 'list':self.f_types, 
-                                'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'selected_item','type':'l'}}}
         self.model.create_pvs(filters_task)
 
@@ -55,8 +54,10 @@ class ArbFilterController(pvController):
 
         self.arb_filter_edit_controller.select_controller(self.arb_filter_2.model.param['name'])
 
-        self.arb_filter_1.model.pvs['output_channel']._val = self.model.pvs['waveform_out']
-        self.arb_filter_2.model.pvs['output_channel']._val = self.model.pvs['waveform_out']
+        output_pv = 'ArbFilter:waveform_out'
+
+        self.arb_filter_1.model.pvs['output_channel'].set(output_pv)
+        self.arb_filter_2.model.pvs['output_channel'].set(output_pv)
 
         self.make_connections()
         

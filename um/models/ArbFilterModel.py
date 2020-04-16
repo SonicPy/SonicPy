@@ -28,21 +28,16 @@ class ArbFilterModel(Scope, pvModel):
         self.tasks = {  
                         'waveform_in':     
                                 {'desc': 'Waveform in', 'val':None, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'waveform_in','type':'dict'}},
-                        
+                                'param':{ 'type':'dict'}},
                         'edit_state':     
                                 {'desc': ';Edit', 'val':False, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'edit_state','type':'b'}},
+                                'param':{ 'type':'b'}},
                         'waveform_out':     
                                 {'desc': 'Waveform out', 'val':None, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'waveform_out','type':'dict'}},
+                                'param':{ 'type':'dict'}},
                         'filter_params':     
                                 {'desc': 'Filter parameters', 'val':None, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'filter_params','type':'dict'}}
+                                'param':{ 'type':'dict'}}
                                 
                       }       
 

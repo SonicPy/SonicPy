@@ -38,8 +38,7 @@ class ScopeController(pvController):
                             'stop_after_num_av_preset']
         self.init_panel("Scope", self.panel_items)
         self.make_connections()
-        #self.waveform_data = None
-        #self.waveform_bg_data = None
+        
         if isMain:
             self.show_widget()
         
@@ -60,28 +59,20 @@ class ScopeController(pvController):
         
     def run_state_callback(self, tag, data):
         state = data[0]
-        #print('run state callback' + str(state))
-        #self.runStateSignal.emit(state)
+
         if state:
             self.get_waveform()
-        #else:
-        #    self.stoppedSignal.emit()
-
-   
 
     def waveform_updated_signal_callback(self, pv_name, data):
         self.dataUpdatedSignal.emit(data[0])
         time.sleep(0.01)
 
         if self.model.pvs['run_state']._val:
-            self.get_waveform()
-            
+            self.get_waveform()         
 
     def get_waveform(self):
         #self.model._get_waveform()
         self.model.pvs['waveform'].get()
-        
-        
-    
+
     def show_widget(self):
         self.panel.raise_widget()

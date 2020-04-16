@@ -20,7 +20,7 @@ from um.controllers.pv_controller import pvController
 from utilities.utilities import *
 
 from um.models.ArbDefinitions import g_wavelet_controller, gx2_wavelet_controller, burst_fixed_time_controller
-
+from um.models.pvServer import pvServer
 
 class ArbController(pvController):
     callbackSignal = pyqtSignal(dict)  
@@ -29,6 +29,7 @@ class ArbController(pvController):
     def __init__(self, parent, isMain = False):
         
         model = ArbModel(parent)
+        self.pv_server = pvServer()
 
         super().__init__(parent, model, isMain) 
 
@@ -41,7 +42,6 @@ class ArbController(pvController):
         
         waveforms_task = {  'selected_item': 
                                 {'desc': 'Wave type', 'val':w_types[1], 'list':w_types, 
-                                'methods':{'set':True, 'get':True}, 
                                 'param':{'tag':'selected_item','type':'l'}}}
 
         self.model.create_pvs(waveforms_task)
@@ -55,7 +55,7 @@ class ArbController(pvController):
         self.arb_edit_controller.add_controller(self.arb3.model.param['name'], self.arb3)
         self.arb_edit_controller.select_controller(self.arb3.model.param['name'])
 
-        output_pv = self.model.pvs['arb_waveform']
+        output_pv = 'ArbModel:arb_waveform'
         self.arb1.model.pvs['output_channel'].set(output_pv)
         self.arb3.model.pvs['output_channel'].set(output_pv)
         self.arb1.model.pvs['auto_process'].set(True)

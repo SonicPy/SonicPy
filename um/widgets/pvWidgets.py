@@ -6,7 +6,7 @@ from um.widgets.CustomWidgets import HorizontalSpacerItem, VerticalSpacerItem, F
 from functools import partial
 import time
 from um.models.pv_model import PV
-from PyQt5.QtWidgets import QWidget, QLineEdit, QComboBox, QDoubleSpinBox, QCheckBox, QPushButton
+from PyQt5.QtWidgets import QWidget, QLineEdit, QComboBox, QDoubleSpinBox, QCheckBox, QPushButton, QAction
 
 
 
@@ -33,8 +33,8 @@ class pvQWidget(QWidget):
         super().setEnabled(enabled) 
         self.pv.value_changed_signal.connect(self.setValue)
         self.setMinimumWidth( 150)
-    
         
+
     def valueChangedCallback(self,value):
         if hasattr(self.pv,'set'):
             if self.scale !=1:

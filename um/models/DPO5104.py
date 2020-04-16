@@ -50,52 +50,43 @@ class Scope_DPO5104(Scope, pvModel):
      
         self.tasks = {  'acquisition_type': 
                                 {'desc': 'Acqusition type', 'val':self.acquisition_types[0], 'list':self.acquisition_types, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'aquisition_type','type':'l'}},
+                                'param':{ 'type':'l'}},
                         'num_av': 
                                 {'desc': 'N-average', 'val':1000, 'min':2,'max':10000,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'num_av','type':'i'}},
+                                'param':{ 'type':'i'}},
                         'stop_after_num_av_preset':     
                                 {'desc': 'Auto stop;ON/OFF', 'val':True, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'output_state','type':'b'}},
+                                'param':{ 'type':'b'}},
                         'num_acq': 
                                 {'desc': 'N-acquired', 'val':0, 'min':0,'max':1e29,
                                 'methods':{'set':False, 'get':True},  
-                                'param':{'tag':'num_acq','type':'i'}},
+                                'param':{ 'type':'i'}},
                         'channel': 
                                 {'desc': 'Data source', 'val':self.channels[0],'list':self.channels,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'channel','type':'l'}},      
+                                'param':{ 'type':'l'}},      
                         'channel_state': 
                                 {'desc': 'Channel state;ON/OFF', 'val':False, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'channel_state','type':'b'}},
+                                'param':{ 'type':'b'}},
                         'run_state':     
                                 {'desc': 'Run state;ON/OFF', 'val':False, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'output_state','type':'b'}},
+                                'param':{ 'type':'b'}},
                         'erase_start':     
                                 {'desc': u';Erase + ON', 'val':False, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'erase_start','type':'b'}},
+                                'param':{ 'type':'b'}},
                         'erase':     
                                 {'desc': 'Erase;Erase', 'val':False, 
-                                'methods':{'set':True, 'get':False}, 
-                                'param':{'tag':'output_state','type':'b'}},
+                                'param':{ 'type':'b'}},
                         'vertical_scale':  
                                 {'desc': 'Vertical scale', 'val':1.0,'increment':0.05, 'min':1e-9,'max':10,
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'vertical_scale','type':'f'}},
+                                'param':{ 'type':'f'}},
                         'instrument':
                                 {'desc': 'Instrument', 'val':'not connected', 
                                 'methods':{'set':False, 'get':True}, 
-                                'param':{'tag':'instrument','type':'s'}},   
+                                'param':{ 'type':'s'}},   
                         'waveform':
                                 {'desc': 'Waveform', 'val':{}, 
                                 'methods':{'set':False, 'get':True}, 
-                                'param':{'tag':'waveform','type':'dict'}}
+                                'param':{ 'type':'dict'}}
                         
                                 
                       }       

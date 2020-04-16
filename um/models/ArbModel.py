@@ -28,16 +28,13 @@ class ArbModel(Scope, pvModel):
         self.tasks = {  
                         'edit_state':     
                                 {'desc': ';Edit', 'val':False, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'edit_state','type':'b'}},
+                                'param':{ 'type':'b'}},
                         'arb_waveform':     
                                 {'desc': 'Waveform', 'val':None, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'waveform','type':'dict'}},
+                                'param':{ 'type':'dict'}},
                         'arb_waveform_params':     
                                 {'desc': 'Waveform parameters', 'val':None, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'waveform','type':'dict'}}
+                                'param':{ 'type':'dict'}}
                       }       
         self.instrument = 'ArbModel'
 

@@ -35,8 +35,17 @@ class PV(QObject):
                     self._val_scale = self._val_scale = settings['val_scale']
                 else : self._val_scale = 1
         if 'methods' in settings:
-            self._get_enabled = settings['methods']['get']
-            self._set_enabled = settings['methods']['set']
+            if 'get' in settings['methods']:
+                self._get_enabled = settings['methods']['get']
+            else:
+                self._get_enabled = True
+            if 'set' in settings['methods']:
+                self._set_enabled = settings['methods']['set']
+            else:
+                self._set_enabled = True
+        else:
+            self._get_enabled = True
+            self._set_enabled = True
         if 'increment' in settings:
             self._increment = settings['increment']
         if 'min' in settings:
@@ -73,8 +82,8 @@ class pvModel(QThread):
         self.connected = False
         self.offline = False
         
-        self.valid_types = [str, int, float, bool, dict, type(PV())]
-        self.validators ={'s':str, 'i':int, 'f':float, 'b':bool, 'l':str, 'dict':dict, 'pv':type(PV())}
+        self.valid_types = [str, int, float, bool, dict]
+        self.validators ={'s':str, 'i':int, 'f':float, 'b':bool, 'l':str, 'dict':dict}
 
         self.pvs = {}
 
@@ -90,7 +99,7 @@ class pvModel(QThread):
         self.tasks = {'start_freq': 
                                 {'desc': 'Start (MHz)', 'val':5.0, 'increment':0.5,'min':1,'max':50 ,
                                 'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'start_freq','type':'f'}},
+                                'param':{'type':'f'}},
                                 ...
                      }
         '''
@@ -126,23 +135,22 @@ class pvModel(QThread):
         pv_name = self.instrument + ':'+tag
         new_pv = PV(pv_name,task)
         
-        if 'methods' in task:
-            for method in task['methods']:
-                #if task['methods'][method]:
-                private_attr ='_'+method+'_'+ tag
-                has_private = hasattr(self, private_attr)
-                if not has_private:
-                    
-                    self._create_default_private_method(method, tag)
-                has_private = hasattr(self, private_attr)
-                if not has_private:
-                    print('failed to create "'+ private_attr+ '" method')
-                if has_private:
-                    attr = method+'_task'
-                    func = self.__getattribute__(attr)
-                    params = task['param']
-                    public_method = partial(func, method, tag, params)
-                    setattr(new_pv,method,public_method)
+        for method in ['set', 'get']:
+            #if task['methods'][method]:
+            private_attr ='_'+method+'_'+ tag
+            has_private = hasattr(self, private_attr)
+            if not has_private:
+                
+                self._create_default_private_method(method, tag)
+            has_private = hasattr(self, private_attr)
+            if not has_private:
+                print('failed to create "'+ private_attr+ '" method')
+            if has_private:
+                attr = method+'_task'
+                func = self.__getattribute__(attr)
+                params = task['param']
+                public_method = partial(func, method, tag, params)
+                setattr(new_pv,method,public_method)
 
         pv_name = self.instrument + ':'+tag
         if self.instrument != '':

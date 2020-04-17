@@ -26,7 +26,7 @@ class UltrasoundWidget(QMainWindow):
         self.setWindowTitle('sonicPy')
         self.Theme = Theme
         self.app = app  # app object
-        self.resize(1250, 700)
+        self.resize(1400, 800)
         self.centralwidget = QtWidgets.QWidget()
         self._layout = QtWidgets.QHBoxLayout()
         self._layout.setSpacing(0)
@@ -54,6 +54,7 @@ class UltrasoundWidget(QMainWindow):
         self.center_widget.setLayout(self._layout_center_widget)
 
         self.main_frame = QtWidgets.QFrame(self)
+        self.main_frame.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         self.main_frame.setObjectName("main_frame")
         self._layout_main_frame = QtWidgets.QVBoxLayout()
         self._layout_main_frame.setContentsMargins(6, 10, 6, 6)

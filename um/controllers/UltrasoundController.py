@@ -109,6 +109,11 @@ class UltrasoundController(QObject):
         self.make_connections()
 
         self.pv_server = pvServer()
+
+        self.display_window.afg_mode_btn.setChecked(True)
+        self.display_window.scan_mode_btn.setChecked(True)
+        self.display_window.scope_mode_btn.setChecked(True)
+
         
 
     def make_connections(self): 

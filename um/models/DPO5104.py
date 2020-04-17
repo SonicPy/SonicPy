@@ -151,11 +151,11 @@ class Scope_DPO5104(Scope, pvModel):
             try:
                 #self.clear_queue()
                 #print('erasing')
-                self.pvs['num_acq'].set(0)
-                self.pvs['waveform'].set({})
+                
                 
                 self._set_channel_state(False)
-                
+                self.pvs['num_acq'].set(0)
+                self.pvs['waveform']._val={}
                 
                 self._set_channel_state(True)
                 

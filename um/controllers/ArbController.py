@@ -41,16 +41,18 @@ class ArbController(pvController):
 
         
         waveforms_task = {  'selected_item': 
-                                {'desc': 'Waveform type', 'val':w_types[1], 'list':w_types, 
-                                'param':{'tag':'selected_item','type':'l'}}}
+                                {'desc': 'Waveform type', 'val':w_types[0], 'list':w_types, 
+                                'param':{'type':'l'}}}
 
         self.model.create_pvs(waveforms_task)
+
+        
         self.panel_items =[ 'selected_item',
                             'edit_state']
         self.init_panel("USER1 waveform", self.panel_items)
 
-        selector_cb, selector_label = self.make_pv_widget('ArbModel:selected_item')
-        self.arb_edit_controller = EditController(self, title='Waveform control', selector_cb = selector_cb)
+        
+        self.arb_edit_controller = EditController(self, title='Waveform control', selector_pv = 'ArbModel:selected_item')
         self.arb_edit_controller.add_controller(self.arb1.model.param['name'], self.arb1)
         self.arb_edit_controller.add_controller(self.arb3.model.param['name'], self.arb3)
         self.arb_edit_controller.select_controller(self.arb3.model.param['name'])
@@ -61,8 +63,11 @@ class ArbController(pvController):
         self.arb1.model.pvs['auto_process'].set(True)
         self.arb3.model.pvs['auto_process'].set(True)
 
+
         self.make_connections()
-        
+
+
+        self.model.pvs['selected_item'].set(self.arb3.model.param['name'])
 
         if isMain:
             self.show_widget()
@@ -75,9 +80,9 @@ class ArbController(pvController):
         
         self.model.pvs['edit_state'].value_changed_signal.connect(self.edit_state_signal_callback)
         self.model.pvs['arb_waveform'].value_changed_signal.connect(self.arb_waveform_signal_callback)
-        self.arb_edit_controller.applyClickedSignal.connect(self.arb_edited_apply_clicked_signal_callback)
+        #self.arb_edit_controller.applyClickedSignal.connect(self.arb_edited_apply_clicked_signal_callback)
 
-        self.arb_edit_controller.widget.controller_selection_edited_signal.connect(self.controller_selection_edited_signal_callback)
+        #self.arb_edit_controller.widget.controller_selection_edited_signal.connect(self.controller_selection_edited_signal_callback)
 
         
         

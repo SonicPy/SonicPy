@@ -81,19 +81,20 @@ class UltrasoundController(QObject):
         afg_panel = self.afg_controller.get_panel()
         scope_panel = self.scope_controller.get_panel()
         sweep_panel = self.sweep_controller.get_panel()
-        #arb_panel = self.arb_controller.get_panel()
-        #arb_filter_panel = self.arb_filter_controller.get_panel()
+        arb_panel = self.arb_controller.get_panel()
+        arb_filter_panel = self.arb_filter_controller.get_panel()
         save_data_panel = self.save_data_controller.get_panel()
 
-        arb_and_filter_panel = Panel('USER1 waveform', 
+        '''arb_and_filter_panel = Panel('USER1 waveform', 
                                         ['ArbModel:selected_item',
                                         'ArbModel:edit_state',
                                         'ArbFilter:selected_item',
-                                        'ArbFilter:edit_state'])
+                                        'ArbFilter:edit_state'])'''
 
         self.display_window.insert_panel(scope_panel)
         self.display_window.insert_panel(afg_panel)
-        self.display_window.insert_panel(arb_and_filter_panel)
+        self.display_window.insert_panel(arb_panel)
+        self.display_window.insert_panel(arb_filter_panel)
         self.display_window.insert_panel_right(sweep_panel)
         self.display_window.insert_panel_right(save_data_panel)
 

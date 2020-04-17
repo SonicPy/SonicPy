@@ -30,15 +30,22 @@ from um.widgets.CustomWidgets import FlatButton, DoubleSpinBoxAlignRight, Vertic
         CleanLooksComboBox, NumberTextField, LabelAlignRight
 from um.widgets.PltWidget import CustomViewBox, PltWidget
 
+from um.models.pvServer import pvServer
+from um.widgets.panel import Panel
+
 
 class AfwGroupbox(QtWidgets.QWidget):
     param_edited_signal = QtCore.pyqtSignal(dict)
     panel_selection_edited_signal = QtCore.pyqtSignal(str)
-    def __init__(self, title, selector_cb ):
+    def __init__(self, title, selector_pv ):
         super().__init__()
+
+        self.panel = Panel('',[])
+        
         self._layout = QtWidgets.QVBoxLayout()
         self._layout.setContentsMargins(0, 0, 0, 0)
-        self.awf_type_cb = selector_cb   
+
+        self.awf_type_cb, _ = self.panel.make_pv_widget(selector_pv)
         self._layout.addWidget(self.awf_type_cb)
         self._awf_type_info_btn = QtWidgets.QPushButton('i')
         self.panels = {}
@@ -225,12 +232,12 @@ class EditWidget(PopUpWidget):
     applyClickedSignal = QtCore.pyqtSignal(str)
     controller_selection_edited_signal = QtCore.pyqtSignal(str)
     widget_closed = QtCore.Signal()
-    def __init__(self, title , selector_cb):
+    def __init__(self, title , selector_pv):
         super().__init__(title)
         self.plot_window = plotWaveWindow()
-        self.selector_cb = selector_cb
         
-        self.afw_gb = AfwGroupbox(title=title, selector_cb=selector_cb)
+        
+        self.afw_gb = AfwGroupbox(title=title, selector_pv=selector_pv)
         
         self.add_body_widget(self.afw_gb)
         

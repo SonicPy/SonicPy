@@ -486,7 +486,7 @@ QFrame#main_frame {
 }
 
 #scope_mode_btn, #afg_mode_btn, #scan_mode_btn {
-    font: normal 12px;
+    font: normal 13px;
     border-radius: 1px;
 }
 

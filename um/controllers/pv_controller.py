@@ -41,33 +41,12 @@ class pvController(QObject):
                 pvs_forPanel.append(pv)
         self.panel = Panel(title, pvs_forPanel, isMain)
 
-    def save(self, *args, **kwargs):
-        if not 'filename' in kwargs:
-            filename = save_file_dialog(
-                self.panel, "Save " + self.model.settings_file_tag+ " settings",
-                filter='Instrument settings (*.json)')
-        else:
-            filename = kwargs['filename']
-        if filename is not '':
-            if filename.endswith('.json'):
-                self.model.save_settings(self.panel_items, filename)
-
-    def load(self, *args, **kwargs):
-        if not 'filename' in kwargs:
-            filename = open_file_dialog(
-                self.panel, "Load settings")
-        else:
-            filename = kwargs['filename']
-        if filename is not '':
-            if filename.endswith('.json'):
-                self.model.load_settings(filename)
-
+    
   
     
     def make_panel_connections(self):
         self.panel.panelClosedSignal.connect(self.panel_closed_callback)
-        self.panel.save_btn.clicked.connect(self.save)
-        self.panel.load_btn.clicked.connect(self.load)
+   
 
     def exit(self):
         self.model.exit()

@@ -55,8 +55,6 @@ class Panel(QtWidgets.QGroupBox):
                 self.i = i
         
         
-        self.save_btn = QtWidgets.QPushButton('Save')
-        self.load_btn = QtWidgets.QPushButton('Load')
         
         if self.isMain:
             self.i +=1

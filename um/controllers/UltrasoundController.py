@@ -12,7 +12,7 @@ import copy
 from pathlib import Path
 from numpy import arange
 from utilities.utilities import *
-from um.widgets.UltrasoundWidget_2 import UltrasoundWidget
+from um.widgets.UltrasoundWidget import UltrasoundWidget
 from um.controllers.SweepController import SweepController
 from um.controllers.AFGController import AFGController
 from um.controllers.ScopeController import ScopeController
@@ -37,6 +37,7 @@ from utilities.HelperModule import increment_filename, increment_filename_extra
 from .. import style_path
 
 from um.models.pvServer import pvServer
+from um.widgets.panel import Panel
 
 ############################################################
 
@@ -80,14 +81,19 @@ class UltrasoundController(QObject):
         afg_panel = self.afg_controller.get_panel()
         scope_panel = self.scope_controller.get_panel()
         sweep_panel = self.sweep_controller.get_panel()
-        arb_panel = self.arb_controller.get_panel()
-        arb_filter_panel = self.arb_filter_controller.get_panel()
+        #arb_panel = self.arb_controller.get_panel()
+        #arb_filter_panel = self.arb_filter_controller.get_panel()
         save_data_panel = self.save_data_controller.get_panel()
+
+        arb_and_filter_panel = Panel('USER1 waveform', 
+                                        ['ArbModel:selected_item',
+                                        'ArbModel:edit_state',
+                                        'ArbFilter:selected_item',
+                                        'ArbFilter:edit_state'])
 
         self.display_window.insert_panel(scope_panel)
         self.display_window.insert_panel(afg_panel)
-        self.display_window.insert_panel(arb_panel)
-        self.display_window.insert_panel(arb_filter_panel)
+        self.display_window.insert_panel(arb_and_filter_panel)
         self.display_window.insert_panel_right(sweep_panel)
         self.display_window.insert_panel_right(save_data_panel)
 
@@ -98,7 +104,7 @@ class UltrasoundController(QObject):
         
         
         self.waveform_index = 0
-        
+        self.current_tab_index = 0
         
         self.make_connections()
 
@@ -106,6 +112,13 @@ class UltrasoundController(QObject):
         
 
     def make_connections(self): 
+        self.display_window.tabWidget.currentChanged.connect(self.tab_changed)
+        self.display_window.mode_btn_group.buttonToggled.connect(self.tab_changed)
+        self.display_window.scope_mode_btn.toggled.connect(self.display_window.scope_widget.setVisible)
+        self.display_window.afg_mode_btn.toggled.connect(self.display_window.afg_widget.setVisible)
+        self.display_window.scan_mode_btn.toggled.connect(self.display_window.scan_widget.setVisible)
+
+
         self.sweep_controller.scanStartRequestSignal.connect(self.scanStartRequestCallback)
         self.sweep_controller.scanDoneSignal.connect(self.scanDoneCallback)
         self.scope_controller.model.pvs['run_state'].value_changed_signal.connect(self.scopeStoppedCallback)
@@ -124,6 +137,19 @@ class UltrasoundController(QObject):
     
     def cursorsCallback(self):
         self.phase_controller.show_view()
+
+    def tab_changed(self):
+        if self.display_window.scope_mode_btn.isChecked():
+            ind = 0
+        elif self.display_window.afg_mode_btn.isChecked():
+            ind = 1
+        elif self.display_window.scan_mode_btn.isChecked():
+            ind = 2
+        else:
+            return
+
+        old_index = self.current_tab_index
+        self.current_tab_index = ind
 
     def SetUserWaveformCallback(self):
 

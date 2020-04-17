@@ -29,6 +29,7 @@ class SaveDataController(pvController):
                             'subdirectory',
                             'base_name',
                             'format',
+                            'file_extension',
                             'path',
                             'name',
                             'next_file_number',

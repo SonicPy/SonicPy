@@ -41,7 +41,7 @@ class ArbController(pvController):
 
         
         waveforms_task = {  'selected_item': 
-                                {'desc': 'Wave type', 'val':w_types[1], 'list':w_types, 
+                                {'desc': 'Waveform type', 'val':w_types[1], 'list':w_types, 
                                 'param':{'tag':'selected_item','type':'l'}}}
 
         self.model.create_pvs(waveforms_task)
@@ -87,7 +87,7 @@ class ArbController(pvController):
 
     def waveform_changed_signal_callback(self, pv_name, data):
         data = data[0]
-        #print('waveform_changed_signal_callback. pv: '+ str(pv_name))
+        print('waveform_changed_signal_callback. pv: '+ str(pv_name))
         #self.waveformComputedSignal.emit(data)
         '''if len(data):
             t = data['t']

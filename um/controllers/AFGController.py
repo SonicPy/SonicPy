@@ -22,7 +22,7 @@ class AFGController(pvController):
                       'output_state',
                       'upload_user1_waveform']
 
-        self.init_panel("Function generator", self.panel_items)
+        self.init_panel("AFG", self.panel_items)
 
         
         

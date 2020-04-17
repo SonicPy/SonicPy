@@ -27,7 +27,7 @@ class ArbModel(Scope, pvModel):
         self.instrument = 'ArbModel'
         self.tasks = {  
                         'edit_state':     
-                                {'desc': ';Edit', 'val':False, 
+                                {'desc': ';Edit waveform', 'val':False, 
                                 'param':{ 'type':'b'}},
                         'arb_waveform':     
                                 {'desc': 'Waveform', 'val':None, 

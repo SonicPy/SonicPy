@@ -78,23 +78,25 @@ class ScopePlotController(QObject):
         self.widget.button_widget.setEnabled(state)
         
     def waveform_updated_signal_callback(self, data):
+        if len(data):
         
-        self.waveform_data = data
-        waveform  = data['waveform']
-        x = waveform[0]
-        y = waveform[1]
-        subsample = np.arange(0,len(x),10)
-        x = np.take(x, subsample)
-        y = np.take(y, subsample)
-        waveform = [x,y]
- 
-        #ch = data['ch']
-        filtered = zero_phase_bandstop_filter(waveform, 100e6, 340e6, 5)
+            self.waveform_data = data
+            waveform  = data['waveform']
+            x = waveform[0]
+            y = waveform[1]
         
-        self.update_plot(filtered)
-  
-        #num_acq = data['num_acq']
-        #self.widget.status_lbl.setText(str(num_acq))
+            subsample = np.arange(0,len(x),10)
+            x = np.take(x, subsample)
+            y = np.take(y, subsample)
+            waveform = [x,y]
+    
+            #ch = data['ch']
+            filtered = zero_phase_bandstop_filter(waveform, 100e6, 340e6, 5)
+            
+            self.update_plot(filtered)
+    
+            #num_acq = data['num_acq']
+            #self.widget.status_lbl.setText(str(num_acq))
 
 
 

@@ -40,7 +40,7 @@ class SaveDataModel(pvModel):
                                 {'desc': 'Filename', 'val':'Text (*.csv);;Binary (*.npz)', 
                                 'param':{'type':'s'}},
                         'file_extension':
-                                {'desc': 'Extension', 'val':self.extensions[0],'list':self.extensions, 
+                                {'desc': 'File type', 'val':self.extensions[0],'list':self.extensions, 
                                 'param':{'type':'l'}},
                         'file_header':
                                 {'desc': 'Header', 'val':{}, 
@@ -84,7 +84,7 @@ class SaveDataModel(pvModel):
                                 {'desc': 'Next file #', 'val':0,'min':0,'max':1e16,
                                 'param':{ 'type':'i'}},
                         'latest_event':
-                                {'desc': '', 'val':'', 
+                                {'desc': 'Status', 'val':'', 
                                 
                                 'param':{'type':'s'}},
 
@@ -168,11 +168,13 @@ class SaveDataModel(pvModel):
                 try:
                     os.mkdir(path)
                 except OSError:
-                    print ("Creation of the directory %s failed" % path)
+                    self.pvs['latest_event'].set("Creation of the directory %s failed" % path)
+                    
                     self.pvs['save'].set(False)
                     return
                 else:
-                    print ("Successfully created the directory %s " % path)
+                    self.pvs['latest_event'].set("Successfully created the directory %s " % path)
+                  
 
             base_name = self.pvs['base_name']._val
             next_file_number = self.pvs['next_file_number']._val
@@ -202,7 +204,7 @@ class SaveDataModel(pvModel):
                     pass
 
                 self.write_file(file_name, params=params)
-            print(self.pvs['save']._pv_name + ' save done')
+            #print(self.pvs['save']._pv_name + ' save done')
             self.pvs['save']._pv_name
             self.pvs['save'].set(False)
 

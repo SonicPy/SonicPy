@@ -32,7 +32,7 @@ class pvQWidget(QWidget):
         enabled = myPV._set_enabled
         super().setEnabled(enabled) 
         self.pv.value_changed_signal.connect(self.setValue)
-        self.setMinimumWidth( 150)
+        self.setMinimumWidth( 160)
         
 
     def valueChangedCallback(self,value):

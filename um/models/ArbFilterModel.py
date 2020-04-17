@@ -30,7 +30,7 @@ class ArbFilterModel(Scope, pvModel):
                                 {'desc': 'Waveform in', 'val':None, 
                                 'param':{ 'type':'dict'}},
                         'edit_state':     
-                                {'desc': ';Edit', 'val':False, 
+                                {'desc': ';Edit filter', 'val':False, 
                                 'param':{ 'type':'b'}},
                         'waveform_out':     
                                 {'desc': 'Waveform out', 'val':None, 

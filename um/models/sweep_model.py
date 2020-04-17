@@ -283,10 +283,10 @@ class SweepModel(pvModel):
                                 {'desc': 'Detector read', 'val':'DPO5104:run_state', 
                                 'param':{ 'type':'s'}},
                         'positioner_set_channel':     
-                                {'desc': 'Point set', 'val':'AFG3251:frequency', 
+                                {'desc': 'Position set', 'val':'AFG3251:frequency', 
                                 'param':{ 'type':'s'}},
                         'positioner_read_channel':     
-                                {'desc': 'Point read', 'val':'AFG3251:frequency', 
+                                {'desc': 'Position read', 'val':'AFG3251:frequency', 
                                 'param':{ 'type':'s'}},
                         'save_data_set_channel':     
                                 {'desc': 'Save data set', 'val':'SaveData:save', 

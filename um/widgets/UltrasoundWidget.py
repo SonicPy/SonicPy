@@ -47,22 +47,30 @@ class UltrasoundWidget(QMainWindow):
         self.controls_sidebar.setLayout(self.controls_layout)
         self._layout.addWidget(self.controls_sidebar)
 
+        self.center_widget = QtWidgets.QWidget()
+        self._layout_center_widget = QtWidgets.QHBoxLayout()
+        self._layout_center_widget.setContentsMargins(0, 8, 12, 10)
+        self._layout_center_widget.setSpacing(0)
+        self.center_widget.setLayout(self._layout_center_widget)
 
-        self.DisplayLayout = QtWidgets.QVBoxLayout()
-        self.DisplayLayout.setContentsMargins(0, 0, 0, 0)
-        self.DisplayLayout.setSpacing(15)
+        self.main_frame = QtWidgets.QFrame(self)
+        self.main_frame.setObjectName("main_frame")
+        self._layout_main_frame = QtWidgets.QVBoxLayout()
+        self._layout_main_frame.setContentsMargins(6, 10, 6, 6)
+        self._layout_main_frame.setSpacing(0)
+        self.main_frame.setLayout(self._layout_main_frame)
 
-     
+        
 
         self._mode_layout = QtWidgets.QVBoxLayout()
         self._mode_layout.setContentsMargins(15, 0, 0, 0)
         self._mode_layout.setSpacing(0)
 
-        self._layout.addLayout(self._mode_layout)
+        self._layout_center_widget.addLayout(self._mode_layout)
 
-        self.tabWidget = QtWidgets.QTabWidget()
+        '''self.tabWidget = QtWidgets.QTabWidget()
         self.tabWidget.setTabPosition(QtWidgets.QTabWidget.West)
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(0)'''
 
         self.mode_btn_group = QtWidgets.QButtonGroup()
         self.scope_mode_btn = RotatedCheckableFlatButton('Scope', self)
@@ -87,7 +95,7 @@ class UltrasoundWidget(QMainWindow):
         self.scope_widget = QtWidgets.QWidget(self)
         self.scope_waveform_layout = QtWidgets.QHBoxLayout()
         self.scope_waveform_layout.setContentsMargins(0, 0, 0, 0)
-        self.scope_waveform_layout.setSpacing(7)
+        self.scope_waveform_layout.setSpacing(0)
         self.scope_widget.setLayout(self.scope_waveform_layout)
 
         self.afg_widget = QtWidgets.QWidget(self)
@@ -100,12 +108,12 @@ class UltrasoundWidget(QMainWindow):
         self.scan_widget.setLayout(self._scan_layout)
         
 
-        self.DisplayLayout.addWidget(self.scope_widget)
-        self.DisplayLayout.addWidget(self.afg_widget)
-        self.DisplayLayout.addWidget(self.scan_widget)
+        self._layout_main_frame.addWidget(self.scope_widget)
+        self._layout_main_frame.addWidget(self.afg_widget)
+        self._layout_main_frame.addWidget(self.scan_widget)
 
 
-        self.DisplayLayout.addLayout(self.scope_waveform_layout)
+        #self._layout_main_frame.addLayout(self.scope_waveform_layout)
         '''
         US1_fig_parameters = 'Signal Full', 'Voltage','Time'
         self.US1 = SimpleDisplayWidget(US1_fig_parameters)
@@ -115,7 +123,7 @@ class UltrasoundWidget(QMainWindow):
         win.setPlotMouseMode(0)
         self.US1.setMaximumHeight(200)
         self.US1.setMinimumHeight(200)
-        self.DisplayLayout.addWidget(self.US1)
+        self._layout_main_frame.addWidget(self.US1)
         self.us1_plot =None
         '''
 
@@ -138,10 +146,14 @@ class UltrasoundWidget(QMainWindow):
         self.us3_plot =None
         '''
 
-        self.DisplayLayout.addLayout(self.detail_plots_layout)
-        #self.DisplayLayout.addSpacerItem(VerticalSpacerItem())
-        self._layout.addLayout(self.DisplayLayout)
+        #self._layout_main_frame.addLayout(self.detail_plots_layout)
 
+
+        #self._layout_main_frame.addSpacerItem(VerticalSpacerItem())
+
+        self._layout_center_widget.addWidget(self.main_frame)
+        
+        self._layout.addWidget(self.center_widget)
 
         self.controls_sidebar_right = QtWidgets.QWidget()
         self.controls_sidebar_right.setObjectName('controls_sidebar_right')
@@ -164,14 +176,7 @@ class UltrasoundWidget(QMainWindow):
         self.style_widgets()
 
 
-    def set_system_dependent_stylesheet(self):
-        from sys import platform
-        if platform == "darwin":
-            self.tabWidget.setStyleSheet(
-                "QDoubleSpinBox, QSpinBox {padding-right: -8px;}")
-        else:
-            self.tabWidget.setStyleSheet(
-                "QDoubleSpinBox, QSpinBox {padding-right: -3px;}")
+   
 
     def closeEvent(self, QCloseEvent, *event):
         self.panelClosedSignal.emit()
@@ -220,7 +225,7 @@ class UltrasoundWidget(QMainWindow):
         self._pb_widget_layout.addWidget(self.progress_bar)
         self._pb_widget_layout.setContentsMargins(0,0,0,0)
         self.pb_widget.setLayout(self._pb_widget_layout)
-        self.DisplayLayout.addWidget(self.pb_widget)
+        self._layout_main_frame.addWidget(self.pb_widget)
         #sb.addWidget(self.pb_widget)
 
     
@@ -253,13 +258,12 @@ class UltrasoundWidget(QMainWindow):
                 max-width: 110;
             }
             #controls_sidebar_right QLabel {
-                min-width: 110;
-                max-width: 110;
+                min-width: 100;
+                max-width: 100;
             }
             
         """)
-        self.set_system_dependent_stylesheet()
-
+     
     def plot_waveform(self, x, y, text=''):
         if self.us1_plot is None:
             self.create_plots(x,y)

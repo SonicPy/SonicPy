@@ -112,7 +112,7 @@ class UltrasoundController(QObject):
         
 
     def make_connections(self): 
-        self.display_window.tabWidget.currentChanged.connect(self.tab_changed)
+        #self.display_window.tabWidget.currentChanged.connect(self.tab_changed)
         self.display_window.mode_btn_group.buttonToggled.connect(self.tab_changed)
         self.display_window.scope_mode_btn.toggled.connect(self.display_window.scope_widget.setVisible)
         self.display_window.afg_mode_btn.toggled.connect(self.display_window.afg_widget.setVisible)

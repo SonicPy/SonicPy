@@ -14,12 +14,16 @@ class scopeWidget(QtWidgets.QWidget):
         super().__init__()
         self.scope_controls = ctrls
         self._layout = QtWidgets.QVBoxLayout()
+        self._layout.setSpacing(0)
+        self._layout.setContentsMargins(8, 0, 8, 0)
         params = "plot title", 'Amplitude', 'Time'
         self.plot_widget = customWidget(params)
         
         self.button_widget = QtWidgets.QWidget()
         
         self._button_layout = QtWidgets.QHBoxLayout()
+        self._button_layout.setSpacing(10)
+        self._button_layout.setContentsMargins(0, 8, 0, 12)
       
         self._status_layout = QtWidgets.QVBoxLayout()
 

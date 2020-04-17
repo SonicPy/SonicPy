@@ -64,10 +64,10 @@ class ScopeController(pvController):
             self.get_waveform()
 
     def waveform_updated_signal_callback(self, pv_name, data):
-        self.dataUpdatedSignal.emit(data[0])
-        time.sleep(0.01)
-
+        time.sleep(0.03)
         if self.model.pvs['run_state']._val:
+            self.dataUpdatedSignal.emit(data[0])
+            
             self.get_waveform()         
 
     def get_waveform(self):

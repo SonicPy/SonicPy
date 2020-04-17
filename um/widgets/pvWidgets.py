@@ -32,7 +32,7 @@ class pvQWidget(QWidget):
         enabled = myPV._set_enabled
         super().setEnabled(enabled) 
         self.pv.value_changed_signal.connect(self.setValue)
-        self.setMinimumWidth( 160)
+        self.setMinimumWidth( 150)
         
 
     def valueChangedCallback(self,value):
@@ -145,6 +145,7 @@ class pvQCheckBox(QCheckBox, pvQWidget):
         QCheckBox.__init__(self)
         QCheckBox.setText(self, desc)
         pvQWidget.__init__(self, myPV)
+        pvQWidget.setMinimumWidth(self, 90)
         widget = self
         value = myPV._val
         QCheckBox.setChecked(widget, value)
@@ -170,6 +171,8 @@ class pvQPushButton(QPushButton, pvQWidget):
         
         QPushButton.setText(self, desc)
         pvQWidget.__init__(self, myPV)
+
+        pvQWidget.setMinimumWidth(self, 90)
         widget = self
         QPushButton.setCheckable(widget, True)
         val = myPV._val

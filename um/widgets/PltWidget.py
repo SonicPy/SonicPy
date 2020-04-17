@@ -308,7 +308,7 @@ class plotWindow(QtWidgets.QWidget):
         
         self._layout.addWidget(self.win)
         self.setLayout(self._layout)
-        self.resize(600,400)
+        #self.resize(600,400)
         self.plots = []
         self.fast_cursor = self.win.plotMouseMoveSignal
         self.cursor = self.win.viewBox.plotMouseCursorSignal
@@ -765,7 +765,7 @@ class PltWidget(pg.PlotWidget):
 
     def create_plots(self, xAxis,data,roiHorz,roiData, xLabel):
         # initialize some plots
-        self.setLabel('left', 'Counts')
+        self.setLabel('left', 'Amplitude')
         data_color = self.colors['data_color']
         self.plotForeground = pg.PlotDataItem(xAxis, data, title="",
                 antialias=True, pen=pg.mkPen(color=data_color, width=1), connect="finite" )

@@ -8,6 +8,32 @@ import time
 from um.models.pv_model import PV
 from PyQt5.QtWidgets import QWidget, QLineEdit, QComboBox, QDoubleSpinBox, QCheckBox, QPushButton, QAction
 
+from um.models.pvServer import pvServer
+
+class pvQWidgets():
+    def __init__(self):
+        self.pv_server = pvServer()
+    
+    def pvWidget(self, pv_name):
+
+        pv = self.pv_server.get_pv(pv_name)
+        ctrl = None
+        desc = pv._description.split(';')[0]
+        pv_type = pv._type
+        
+        if pv_type is list:
+            ctrl = pvQComboBox(pv) 
+        if pv_type is str:    
+            ctrl = pvQLineEdit(pv)
+        if pv_type is int or pv_type is float:
+            ctrl = pvQDoubleSpinBox(pv)
+            unit = pv._unit
+            if unit != '':
+                desc = desc + ' (' + pv._unit + ')'
+        if pv_type is bool:
+            ctrl = pvQPushButton(pv)
+        label = QtWidgets.QLabel(desc)
+        return ctrl, label
 
 
 class pvQWidget(QWidget):
@@ -52,6 +78,10 @@ class pvQLineEdit(QLineEdit, pvQWidget):
         QLineEdit.__init__(self)
         pvQWidget.__init__(self, myPV)
         widget = self
+
+        val = str(myPV._val)        
+        self.setValue(widget, [val])
+
         self.editingFinished.connect(lambda:self.valueChangedCallback(self.text()))
         
 
@@ -74,6 +104,10 @@ class pvQComboBox(QComboBox, pvQWidget):
         items = myPV._items
         for item in items:
             QComboBox.addItem(widget, item)
+
+        val = myPV._val            
+        self.setValue(widget, [val])
+
         self.currentTextChanged.connect(self.valueChangedCallback)
 
        

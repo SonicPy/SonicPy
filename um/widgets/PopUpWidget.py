@@ -32,6 +32,7 @@ from um.widgets.PltWidget import CustomViewBox, PltWidget
 
 from um.models.pvServer import pvServer
 from um.widgets.panel import Panel
+from um.widgets.pvWidgets import pvQWidgets
 
 
 class AfwGroupbox(QtWidgets.QWidget):
@@ -40,12 +41,12 @@ class AfwGroupbox(QtWidgets.QWidget):
     def __init__(self, title, selector_pv ):
         super().__init__()
 
-        self.panel = Panel('',[])
+        self.pv_widgets = pvQWidgets()
         
         self._layout = QtWidgets.QVBoxLayout()
         self._layout.setContentsMargins(0, 0, 0, 0)
 
-        self.awf_type_cb, _ = self.panel.make_pv_widget(selector_pv)
+        self.awf_type_cb, _ = self.pv_widgets.pvWidget(selector_pv)
         self._layout.addWidget(self.awf_type_cb)
         self._awf_type_info_btn = QtWidgets.QPushButton('i')
         self.panels = {}

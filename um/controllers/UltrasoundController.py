@@ -15,6 +15,7 @@ from utilities.utilities import *
 from um.widgets.UltrasoundWidget import UltrasoundWidget
 from um.controllers.SweepController import SweepController
 from um.controllers.AFGController import AFGController
+from um.controllers.AFGPlotController import AFGPlotController
 from um.controllers.ScopeController import ScopeController
 from um.controllers.ScopePlotController import ScopePlotController
 from um.controllers.ArbController import ArbController
@@ -59,15 +60,23 @@ class UltrasoundController(QObject):
         self.display_window = UltrasoundWidget(app, _platform, theme)
         #self.progress_bar = self.display_window.progress_bar
         
-        self.afg_controller = AFGController(self, offline = offline)
         self.arb_controller = ArbController(self)
+        self.arb_filter_controller = ArbFilterController(self)
+        self.afg_controller = AFGController(self, arb_controller = self.arb_controller, arb_filter_controller= self.arb_filter_controller,  offline = offline)
+        
         self.save_data_controller = SaveDataController(self)
         self.scan_pv = self.arb_controller.scan_pv
-        self.arb_filter_controller = ArbFilterController(self)
+        
         self.scope_controller = ScopeController(self, offline = offline)
-        self.scope_plot_controller = ScopePlotController(self.scope_controller, 
-                                                afg_controller=self.afg_controller, 
-                                                save_data_controller=self.save_data_controller)
+
+        scope_waveform_widget = self.display_window.scope_widget
+        self.scope_plot_controller = ScopePlotController(scope_controller = self.scope_controller,
+                                                scope_widget= scope_waveform_widget)
+
+        afg_waveform_widget = self.display_window.afg_widget
+        self.afg_plot_controller = AFGPlotController(afg_controller = self.afg_controller,
+                                                afg_waveform_widget= afg_waveform_widget)
+                                                
         self.overlay_controller = OverlayController(self, self.scope_plot_controller)
         
         self.sweep_controller = SweepController(self,
@@ -85,21 +94,20 @@ class UltrasoundController(QObject):
         arb_filter_panel = self.arb_filter_controller.get_panel()
         save_data_panel = self.save_data_controller.get_panel()
 
-        '''arb_and_filter_panel = Panel('USER1 waveform', 
+        arb_and_filter_panel = Panel('USER1 waveform', 
                                         ['ArbModel:selected_item',
                                         'ArbModel:edit_state',
                                         'ArbFilter:selected_item',
-                                        'ArbFilter:edit_state'])'''
+                                        'ArbFilter:edit_state'])
 
         self.display_window.insert_panel(scope_panel)
         self.display_window.insert_panel(afg_panel)
-        self.display_window.insert_panel(arb_panel)
-        self.display_window.insert_panel(arb_filter_panel)
+        #self.display_window.insert_panel(arb_panel)
+        #self.display_window.insert_panel(arb_filter_panel)
+        self.display_window.insert_panel(arb_and_filter_panel)
         self.display_window.insert_panel_right(sweep_panel)
         self.display_window.insert_panel_right(save_data_panel)
 
-        scope_waveform_widget = self.scope_plot_controller.widget
-        self.display_window.scope_waveform_layout.addWidget(scope_waveform_widget)
 
         self.display_window.panelClosedSignal.connect(self.panel_closed_callback)
         
@@ -111,6 +119,7 @@ class UltrasoundController(QObject):
 
         self.pv_server = pvServer()
 
+        # for some reason this helps resize the plots in the frames properly 
         self.display_window.afg_mode_btn.setChecked(True)
         self.display_window.scan_mode_btn.setChecked(True)
         self.display_window.scope_mode_btn.setChecked(True)
@@ -137,9 +146,6 @@ class UltrasoundController(QObject):
         self.display_window.ActionSetUserWaveform.triggered.connect(self.SetUserWaveformCallback)
         self.display_window.actionCursors.triggered.connect(self.cursorsCallback)
 
-        # User waveform events
-        self.arb_controller.waveformComputedSignal.connect(self.waveform_computed_callback)
-        self.arb_filter_controller.waveformFilteredcallbackSignal.connect(self.waveform_filtered_callback)
     
     def cursorsCallback(self):
         self.phase_controller.show_view()
@@ -158,7 +164,7 @@ class UltrasoundController(QObject):
         self.current_tab_index = ind
 
     def SetUserWaveformCallback(self):
-
+        pass
         
         '''
         arb = get_arb()
@@ -231,7 +237,7 @@ class UltrasoundController(QObject):
     def show_window(self):
         self.display_window.raise_widget()
 
-    def cursor_dragged(self, cursor):
+    '''def cursor_dragged(self, cursor):
         pos = cursor.getYPos()
         c1 = self.display_window.hLine1
         c2 = self.display_window.hLine2
@@ -241,9 +247,9 @@ class UltrasoundController(QObject):
         if c1 is not cursor:
             c1.setPos(pos)
         if c2 is not cursor:
-            c2.setPos(pos)
+            c2.setPos(pos)'''
 
-    def up_down_signal_callback(self, event):
+    '''def up_down_signal_callback(self, event):
         new_ind = self.waveform_index
         if event == 'up':
             new_ind = self.waveform_index + 1
@@ -268,15 +274,15 @@ class UltrasoundController(QObject):
                     self.waveform_index = ind
                     if update_cursor_pos:
                         self.display_window.hLine1.setPos(ind+.5)
-                        self.display_window.hLine2.setPos(ind+.5)
+                        self.display_window.hLine2.setPos(ind+.5)'''
 
-    def apply_callback(self):
-        '''
+    '''def apply_callback(self):
+        
         g = self.display_window.gradient
         state = g.saveState()
         print(state)
-        '''
-        pass
+        
+        pass'''
 
     def setStyle(self, Style):
         #print('style:  ' + str(Style))
@@ -294,23 +300,4 @@ class UltrasoundController(QObject):
             self.app.setStyle(WStyle)
 
 
-    ####################################################
-    ### Next is the User waveform handling
-    ####################################################
-
-    def waveform_computed_callback(self, data):
-        
-        if len(data):
-            t = data['t']
-            waveform = data['waveform']
-            #self.arb_controller.arb_edit_controller.widget.update_plot([t,waveform])
-            self.arb_filter_controller.model.pvs['waveform_in'].set(data)
-            
     
-    def waveform_filtered_callback(self, data):
-        if len(data):
-            t = np.asarray(data['t'])
-            waveform = np.asarray(data['waveform'])
-            out = {'waveform':(t,waveform),'ch':1, 'time':1, 'num_acq':1000}
-            self.arb_filter_controller.arb_filter_edit_controller.widget.update_plot([t,waveform])
-            #self.scope_controller.model.pvs['waveform'].set(out)

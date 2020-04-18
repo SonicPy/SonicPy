@@ -7,7 +7,7 @@ import time
 from um.models.ScopeModel import Scope
 from um.models.ArbModel import ArbModel
 import json
-from um.widgets.scope_widget import scopeWidget
+
 
 from um.controllers.EditController import EditController
 
@@ -41,8 +41,9 @@ class ArbController(pvController):
 
         
         waveforms_task = {  'selected_item': 
-                                {'desc': 'Waveform type', 'val':w_types[0], 'list':w_types, 
-                                'param':{'type':'l'}}}
+                                {'desc': 'Waveform type', 'val':w_types[1], 'list':w_types, 
+                                'param':{'type':'l'}}
+                                }
 
         self.model.create_pvs(waveforms_task)
 
@@ -67,7 +68,7 @@ class ArbController(pvController):
         self.make_connections()
 
 
-        self.model.pvs['selected_item'].set(self.arb3.model.param['name'])
+        #self.model.pvs['selected_item'].set(self.arb3.model.param['name'])
 
         if isMain:
             self.show_widget()
@@ -84,20 +85,10 @@ class ArbController(pvController):
 
         #self.arb_edit_controller.widget.controller_selection_edited_signal.connect(self.controller_selection_edited_signal_callback)
 
-        
-        
-    
+ 
     def show_widget(self):
         self.panel.raise_widget()
 
-    def waveform_changed_signal_callback(self, pv_name, data):
-        data = data[0]
-        print('waveform_changed_signal_callback. pv: '+ str(pv_name))
-        #self.waveformComputedSignal.emit(data)
-        '''if len(data):
-            t = data['t']
-            waveform = data['waveform']
-            self.arb_edit_controller.widget.update_plot([t,waveform])'''
 
     def controller_selection_edited_signal_callback(self, key):
         self.arb_edit_controller.select_controller(key)
@@ -112,13 +103,10 @@ class ArbController(pvController):
 
     def arb_waveform_signal_callback(self, pv_name, data):
         data = data[0]
-        self.waveformComputedSignal.emit(data)
+        
+        
         #self.arb_edit_controller.update_plot(data)
 
-    '''
-    def variable_parameter_signal_callback(self, pv_name, data):
-        data = data[0]
-    '''    
 
     def edit_state_signal_callback(self, pv_name, data):
         data = data[0]

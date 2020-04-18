@@ -7,7 +7,7 @@ import time
 from um.models.ScopeModel import Scope
 from um.models.DPO5104 import Scope_DPO5104
 import json
-from um.widgets.scope_widget import scopeWidget
+
 
 from um.widgets.panel import Panel
 from functools import partial

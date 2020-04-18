@@ -11,6 +11,8 @@ from um.widgets.panel import Panel
 from functools import partial
 from um.widgets.UtilityWidgets import save_file_dialog, open_file_dialog, open_files_dialog
 
+from um.widgets.pvWidgets import pvQWidgets
+
 
 
 class pvController(QObject):
@@ -27,9 +29,6 @@ class pvController(QObject):
         self.make_panel(title, panel_items, self.isMain)
         self.make_panel_connections()
 
-    def make_pv_widget(self, pv_name):
-        widget, label = self.panel.make_pv_widget(pv_name)
-        return widget, label
 
     def make_panel(self, title, panel_items, isMain):
         pvs_forPanel = []
@@ -41,8 +40,6 @@ class pvController(QObject):
                 pvs_forPanel.append(pv)
         self.panel = Panel(title, pvs_forPanel, isMain)
 
-    
-  
     
     def make_panel_connections(self):
         self.panel.panelClosedSignal.connect(self.panel_closed_callback)

@@ -12,7 +12,7 @@ class scopeWidget(QtWidgets.QWidget):
     panelClosedSignal = pyqtSignal()
     def __init__(self, ctrls = []):
         super().__init__()
-        self.scope_controls = ctrls
+        
         self._layout = QtWidgets.QVBoxLayout()
         self._layout.setSpacing(0)
         self._layout.setContentsMargins(8, 0, 8, 0)
@@ -27,14 +27,6 @@ class scopeWidget(QtWidgets.QWidget):
       
         self._status_layout = QtWidgets.QVBoxLayout()
 
-        for ctrl in self.scope_controls:
-            if type(ctrl)== str:
-                self._button_layout.addSpacerItem(HorizontalSpacerItem())
-            else:
-                self._button_layout.addWidget(ctrl)
-  
-        
-        
        
         self.button_widget.setLayout(self._button_layout)
 
@@ -59,6 +51,14 @@ class scopeWidget(QtWidgets.QWidget):
             }
             
         """)
+
+    def add_buttons(self, buttons):
+        self.scope_controls = buttons
+        for ctrl in self.scope_controls:
+            if type(ctrl)== str:
+                self._button_layout.addSpacerItem(HorizontalSpacerItem())
+            else:
+                self._button_layout.addWidget(ctrl)
 
     def plot(self,waveform):
         plot = self.plot_widget.fig.win

@@ -14,6 +14,8 @@ import numpy as np
 from um.widgets.panel import Panel
 import time
 
+from um.widgets.ScopeWidget import scopeWidget
+from um.widgets.afgWidget import afgWidget
 
 class UltrasoundWidget(QMainWindow):
     
@@ -93,16 +95,10 @@ class UltrasoundWidget(QMainWindow):
         self._mode_layout.addWidget(self.scan_mode_btn)
         self._mode_layout.addSpacerItem(VerticalSpacerItem())
 
-        self.scope_widget = QtWidgets.QWidget(self)
-        self.scope_waveform_layout = QtWidgets.QHBoxLayout()
-        self.scope_waveform_layout.setContentsMargins(0, 0, 0, 0)
-        self.scope_waveform_layout.setSpacing(0)
-        self.scope_widget.setLayout(self.scope_waveform_layout)
 
-        self.afg_widget = QtWidgets.QWidget(self)
-        self._afg_layout = QtWidgets.QVBoxLayout()
-        self._afg_layout.addSpacerItem(HorizontalSpacerItem())
-        self.afg_widget.setLayout(self._afg_layout)
+        self.scope_widget = scopeWidget()
+
+        self.afg_widget = afgWidget()
         self.scan_widget = QtWidgets.QWidget(self)
         self._scan_layout = QtWidgets.QVBoxLayout()
         self._scan_layout.addSpacerItem(HorizontalSpacerItem())

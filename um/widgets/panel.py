@@ -9,6 +9,7 @@ from um.models.pv_model import PV
 from um.widgets.pvWidgets import pvQCheckBox, pvQComboBox, pvQDoubleSpinBox, pvQLineEdit, pvQPushButton
 
 from um.models.pvServer import pvServer
+from um.widgets.pvWidgets import pvQWidgets
 
 class Panel(QtWidgets.QGroupBox):
 
@@ -16,6 +17,7 @@ class Panel(QtWidgets.QGroupBox):
     def __init__(self, title='',pvs=[], isMain = False):
         super().__init__()
         self.pv_server = pvServer()
+        self.pv_widgets = pvQWidgets()
         self.isMain = isMain
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         self.setSizePolicy(sizePolicy)
@@ -45,7 +47,7 @@ class Panel(QtWidgets.QGroupBox):
             if pv is not None:
                 
                 
-                ctrl, label = self.make_pv_widget(pv)
+                ctrl, label = self.pv_widgets.pvWidget(pv)
                     
                 self.controls[pv] = ctrl
 
@@ -64,26 +66,7 @@ class Panel(QtWidgets.QGroupBox):
             
         return self._grid, self.controls
 
-    def make_pv_widget(self, pv_name):
-
-        pv = self.pv_server.get_pv(pv_name)
-        ctrl = None
-        desc = pv._description.split(';')[0]
-        pv_type = pv._type
-        
-        if pv_type is list:
-            ctrl = pvQComboBox(pv) 
-        if pv_type is str:    
-            ctrl = pvQLineEdit(pv)
-        if pv_type is int or pv_type is float:
-            ctrl = pvQDoubleSpinBox(pv)
-            unit = pv._unit
-            if unit != '':
-                desc = desc + ' (' + pv._unit + ')'
-        if pv_type is bool:
-            ctrl = pvQPushButton(pv)
-        label = QtWidgets.QLabel(desc)
-        return ctrl, label
+    
 
     def raise_widget(self):
         self.show()

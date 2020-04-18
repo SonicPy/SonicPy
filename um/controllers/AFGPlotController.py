@@ -17,45 +17,35 @@ from um.controllers.pv_controller import pvController
 from um.controllers.ScopeController import ScopeController
 from utilities.utilities import *
 from um.models.pvServer import pvServer
-from um.widgets.pvWidgets import pvQWidgets
 
 
-
-class ScopePlotController(QObject):
+class AFGPlotController(QObject):
     callbackSignal = pyqtSignal(dict)  
     stoppedSignal = pyqtSignal()
     fastCursorMovedSignal = pyqtSignal(str)  
     staticCursorMovedSignal = pyqtSignal(str) 
     dataPlotUpdated = pyqtSignal()
 
-    def __init__(self, scope_controller, scope_widget, isMain = False):
+    def __init__(self, afg_controller, afg_waveform_widget,  isMain = False):
         super().__init__()
         self.pv_server = pvServer()
-        self.pv_widgets = pvQWidgets()
-        self.scope_controller = scope_controller
-        self.widget = scope_widget
-        
-        btn_erase_on, _ =self.pv_widgets.pvWidget('DPO5104:erase_start')
-        btn_erase, _ = self.pv_widgets.pvWidget('DPO5104:erase')
-        btn_on_off, _ = self.pv_widgets.pvWidget('DPO5104:run_state')
-        btn_save, _ = self.pv_widgets.pvWidget('SaveData:save')
-
-        scope_widget_controls = [btn_erase_on, btn_erase, btn_on_off, 'spacer', btn_save]
-        self.widget.add_buttons(scope_widget_controls)
+        self.widget = afg_waveform_widget
+        self.afg_controller = afg_controller
+        self.waveform = self.pv_server.get_pv('AFG3251:user1_waveform')
 
         self.pg = self.widget.plot_widget.fig.win
         if isMain:
             self.show_widget()
 
-   
+        
         self.plt = self.widget.plot_widget.fig.win
 
         self.make_connections()
 
     def make_connections(self):
-     
         
-        self.scope_controller.dataUpdatedSignal.connect(self.waveform_updated_signal_callback)
+        self.afg_controller.model.pvs['user1_waveform'].value_changed_signal.connect(self.user1_waveform_changed_callback)
+        
         
     def user1_waveform_changed_callback(self, pv_name, data):
         waveform = data[0]

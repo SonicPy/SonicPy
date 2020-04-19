@@ -24,6 +24,8 @@ class afgWidget(QtWidgets.QWidget):
         self._button_layout = QtWidgets.QHBoxLayout()
         self._button_layout.setSpacing(10)
         self._button_layout.setContentsMargins(0, 8, 0, 12)
+
+        self._button_layout.addWidget(QtWidgets.QLabel('Arbitrary Function Generator user1 waveform preview'))
       
         self._status_layout = QtWidgets.QVBoxLayout()
 

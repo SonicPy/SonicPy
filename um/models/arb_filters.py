@@ -1,6 +1,6 @@
 import os.path, sys
 import numpy as np
-from scipy.signal import tukey
+from scipy.signal import tukey, windows
 
 from um.models.tek_fileIO import *
 from utilities.utilities import *
@@ -20,10 +20,15 @@ def tukey_filter(params):
     waveform_in = params['waveform_in']
     t = waveform_in['t']
     waveform = waveform_in['waveform']
-    tk = tukey(len(waveform), alpha)
+    #tk = tukey(len(waveform), alpha)
+    tk = windows.nuttall(len(waveform))
     waveform = waveform * tk
     waveform_out = {'t':t,'waveform':waveform}
+    
+
     return waveform_out
+
+
                         
 def g_wave(t_array, A, f_0,sigma,x,c,f_min, f_max, opt=0):
 

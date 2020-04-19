@@ -24,7 +24,7 @@ class no_filter_model(pvModel):
         self.offline = True
         ## model speficic:
         self.instrument = 'no_filter'
-        self.param = {  'name': 'No window',
+        self.param = {  'name': 'Rectangular',
                         'reference':'',
                         'comment':''}
         
@@ -76,7 +76,7 @@ class tukey_filter_model(pvModel):
         self.offline = True
         ## model speficic:
         self.instrument = 'tukey_filter'
-        self.param = {  'name': 'Tukey window',
+        self.param = {  'name': 'Nuttall',
                         'reference':'',
                         'comment':''}
         

@@ -24,7 +24,8 @@ class AFGController(pvController):
                       'n_cycles',
                       'frequency',
                       'output_state',
-                      'upload_user1_waveform']
+                      'upload_user1_waveform',
+                      'auto_upload_user1_waveform']
 
         self.init_panel("AFG", self.panel_items)
 
@@ -33,10 +34,10 @@ class AFGController(pvController):
         if isMain:
             self.show_widget()
 
-    def make_connections(self):
+    '''def make_connections(self):
         # User waveform events
         self.arb_controller.waveformComputedSignal.connect(self.waveform_computed_callback)
-        self.arb_filter_controller.waveformFilteredcallbackSignal.connect(self.waveform_filtered_callback)
+        self.arb_filter_controller.waveformFilteredcallbackSignal.connect(self.waveform_filtered_callback)'''
      
     ####################################################
     ### Next is the User waveform handling

@@ -19,7 +19,7 @@ from PyQt5.QtCore import QThread, pyqtSignal
 
 import queue 
 from functools import partial
-from um.models.tek_fileIO import read_file_TEKAFG3000
+from um.models.tek_fileIO import read_file_TEKAFG3000, waveform_to_AFG3251_binary
 import json
 from um.models.pv_model import pvModel
 
@@ -126,20 +126,45 @@ class AFG_AFG3251(Afg, pvModel):
                 ID = tokens[1]
         return ID
 
-    def _send_user1_waveform(self, waveform):
-        if 'binary_waveform' in waveform:
-            binary_waveform = waveform['binary_waveform']
-            slot='user1'
-            #We can write the waveform data to the AFG after making sure its in big endian format
-            self.write_binary_values('TRACE:DATA EMEMory,', binary_waveform)
-            #'copies' the Editable Memory to User1 memory location. note: there are 4 user memory locations
-            self.write('data:copy ' +slot+', ememory')
-            self.pvs['function_shape'].set('user1')
-            #self.write('source1:function '+slot) #sets the AFG source to user1 memory
+    def _set_upload_user1_waveform(self, param):
+        self.pvs['upload_user1_waveform']._val = param
+        if param:
+            waveform = self.pvs['user1_waveform']._val
+
+            if len(waveform):
+                
+                t = waveform['t']
+                
+                y = waveform['waveform']
+
+                freq, binary_waveform = waveform_to_AFG3251_binary(t, y)
+                
+                if self.connected:
+                    slot='user1'
+                    #We can write the waveform data to the AFG after making sure its in big endian format
+                    self.write_binary_values('TRACE:DATA EMEMory,', binary_waveform)
+                    #'copies' the Editable Memory to User1 memory location. note: there are 4 user memory locations
+                    self.write('data:copy ' +slot+', ememory')
+
+                self.pvs['function_shape'].set('user1')
+                print('set function_shape to user1')
+                self.pvs['frequency'].set(float(freq))
+
+            self.pvs['upload_user1_waveform'].set(False)
+            
+                #self.write('source1:function '+slot) #sets the AFG source to user1 memory
+
+        
+
 
     def _set_user1_waveform(self, waveform):
         
         self.pvs['user1_waveform']._val = waveform
+        autoupload = self.pvs['auto_upload_user1_waveform']._val
+        if autoupload:
+            if len(waveform):
+                self.pvs['upload_user1_waveform'].set(True)
+
         print('_set_user1_waveform')
     
     def _set_user1_waveform_from_file(self, filename):

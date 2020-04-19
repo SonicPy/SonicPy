@@ -59,6 +59,20 @@ def read_file_TEKAFG3000( filename=''):
         except:
             return None
 
+def waveform_to_AFG3251_binary(t, y):
+    # max: 16382  (2^14-2)
+    absmax = max(abs(min(y)), abs(max(y)))
+    y = y/absmax
+    half = 8192-1
+    y = np.asarray(y*half + half).astype(int)
+
+    x_range = max(t)-min(t)
+    freq = round(1/x_range,0)
+
+    return freq, tuple(y)
+
+        
+
 def read_tek_csv(fname, return_x=True, subsample=1):
     sample_period = 0.0
     raw_samples = []

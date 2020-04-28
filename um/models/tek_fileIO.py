@@ -59,11 +59,25 @@ def read_file_TEKAFG3000( filename=''):
         except:
             return None
 
+def waveform_to_AFG3251_binary(t, y):
+    # max: 16382  (2^14-2)
+    absmax = max(abs(min(y)), abs(max(y)))
+    y = y/absmax
+    half = 8192-1
+    y = np.asarray(y*half + half).astype(int)
+
+    x_range = max(t)-min(t)
+    freq = round(1/x_range,0)
+
+    return freq, tuple(y)
+
+        
+
 def read_tek_csv(fname, return_x=True, subsample=1):
     sample_period = 0.0
     raw_samples = []
     with open(fname, 'rt',encoding='ascii') as csvfile:
-        s = lambda x: x%subsample
+        #s = lambda x: x%subsample
         c = csv.reader(csvfile, delimiter=',')
         
         # Sample period is in cell B2 (1,1)
@@ -77,13 +91,13 @@ def read_tek_csv(fname, return_x=True, subsample=1):
     y = np.array(raw_samples)
     if return_x:
         x = np.array(range(len(y)))*sample_period*subsample
-        return x, y
+        return [x, y]
     else: 
-        return y
+        return [y]
 
 
 
-def write_tek_csv(fname, x,y):
+def write_tek_csv(fname, x,y, params = {}):
     length = len(x)
     sam_interval = x[1]-x[0]
     header = [  ["Record Length",str(length),"Points"],
@@ -91,15 +105,28 @@ def write_tek_csv(fname, x,y):
                 ["Trigger Point",0,"Samples"],
                 ["Record Length",'%.8e' % 0.0,'s'],
                 ['','',''],
-                ["Horizontal Offset", '%.8e'% 0.0,'s'],
-                ]
+                ["Horizontal Offset", '%.8e'% 0.0,'s']
+                
+             ]
+
+    if len(params):
+        header.append(["Experimental parameters", ' ',' '])
+        for key in params:
+            param = params[key]
+            if len(param):
+                p_val = str(param['val'])
+                if 'unit' in param:
+                    p_unit = param['unit']
+                else:
+                    p_unit = ''
+            header.append([str(key), p_val,p_unit])
     try:
         with open(fname, mode='w',newline='') as csvFile:
             writer = csv.writer(csvFile)
-            for row in range(6):
+            for row in range(len(header)):
                 s = header[row]+['%.8e' % item for item in [x[row],y[row]]]
                 writer.writerow(s)
-            for row in range(length-6):
+            for row in range(length-len(header)):
                 i = row+6
                 s = ['','','']+['%.8e' % item for item in [x[i],y[i]]]
                 writer.writerow(s)    

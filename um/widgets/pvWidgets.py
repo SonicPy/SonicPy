@@ -6,13 +6,43 @@ from um.widgets.CustomWidgets import HorizontalSpacerItem, VerticalSpacerItem, F
 from functools import partial
 import time
 from um.models.pv_model import PV
-from PyQt5.QtWidgets import QWidget, QLineEdit, QComboBox, QDoubleSpinBox, QCheckBox, QPushButton
+from PyQt5.QtWidgets import QWidget, QLineEdit, QComboBox, QDoubleSpinBox, QCheckBox, QPushButton, QAction
+
+from um.models.pvServer import pvServer
+
+class pvQWidgets():
+    def __init__(self):
+        self.pv_server = pvServer()
+    
+    def pvWidget(self, pv_name):
+
+        pv = self.pv_server.get_pv(pv_name)
+        ctrl = None
+        desc = pv._description.split(';')[0]
+        pv_type = pv._type
+        
+        if pv_type is list:
+            ctrl = pvQComboBox(pv) 
+        if pv_type is str:    
+            ctrl = pvQLineEdit(pv)
+        if pv_type is int or pv_type is float:
+            ctrl = pvQDoubleSpinBox(pv)
+            unit = pv._unit
+            if unit != '':
+                desc = desc + ' (' + pv._unit + ')'
+        if pv_type is bool:
+            ctrl = pvQPushButton(pv)
+        label = QtWidgets.QLabel(desc)
+        return ctrl, label
+
 
 class pvQWidget(QWidget):
     def __init__(self, myPV):
         #super().__init__(self)
         self.pv = myPV
         self.val = None
+        self.pv_name = myPV._pv_name
+        self.setToolTip(self.pv_name)
         
         if hasattr(self.pv,'_val_scale'):
             self.scale = self.pv._val_scale
@@ -28,7 +58,9 @@ class pvQWidget(QWidget):
         enabled = myPV._set_enabled
         super().setEnabled(enabled) 
         self.pv.value_changed_signal.connect(self.setValue)
+        self.setMinimumWidth( 150)
         
+
     def valueChangedCallback(self,value):
         if hasattr(self.pv,'set'):
             if self.scale !=1:
@@ -46,6 +78,10 @@ class pvQLineEdit(QLineEdit, pvQWidget):
         QLineEdit.__init__(self)
         pvQWidget.__init__(self, myPV)
         widget = self
+
+        val = str(myPV._val)        
+        self.setValue(widget, [val])
+
         self.editingFinished.connect(lambda:self.valueChangedCallback(self.text()))
         
 
@@ -68,7 +104,13 @@ class pvQComboBox(QComboBox, pvQWidget):
         items = myPV._items
         for item in items:
             QComboBox.addItem(widget, item)
+
+        val = myPV._val            
+        self.setValue(widget, [val])
+
         self.currentTextChanged.connect(self.valueChangedCallback)
+
+       
 
     def setValue(self, tag, value):
         pvQWidget.setValue(self, tag, value)
@@ -95,6 +137,7 @@ class pvQDoubleSpinBox(QDoubleSpinBox, pvQWidget):
                     
         QDoubleSpinBox.setMinimum(widget, minimum)
         QDoubleSpinBox.setMaximum(widget, maximum)
+
         val = myPV._val            
        
 
@@ -136,9 +179,9 @@ class pvQCheckBox(QCheckBox, pvQWidget):
         QCheckBox.__init__(self)
         QCheckBox.setText(self, desc)
         pvQWidget.__init__(self, myPV)
+        pvQWidget.setMinimumWidth(self, 90)
         widget = self
         value = myPV._val
-        #QCheckBox.setCheckable(widget, True)
         QCheckBox.setChecked(widget, value)
         self.clicked.connect(self.valueChangedCallback)
 
@@ -156,12 +199,18 @@ class pvQCheckBox(QCheckBox, pvQWidget):
 class pvQPushButton(QPushButton, pvQWidget):
     def __init__(self, myPV):
         desc = myPV._description.split(';')[1]
-
+        
         QPushButton.__init__(self)
+        
+        
         QPushButton.setText(self, desc)
         pvQWidget.__init__(self, myPV)
+
+        pvQWidget.setMinimumWidth(self, 90)
         widget = self
         QPushButton.setCheckable(widget, True)
+        val = myPV._val
+        QPushButton.setChecked(widget, val)
         self.clicked.connect(self.valueChangedCallback)
 
     def setValue(self, tag, value):

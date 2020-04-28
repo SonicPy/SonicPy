@@ -11,6 +11,9 @@ from um.widgets.panel import Panel
 from functools import partial
 from um.widgets.UtilityWidgets import save_file_dialog, open_file_dialog, open_files_dialog
 
+from um.widgets.pvWidgets import pvQWidgets
+
+
 
 class pvController(QObject):
     
@@ -26,46 +29,21 @@ class pvController(QObject):
         self.make_panel(title, panel_items, self.isMain)
         self.make_panel_connections()
 
-    def make_pv_widget(self, pv_name):
-        widget, label = self.panel.make_pv_widget(self.model.pvs[pv_name])
-        return widget, label
 
     def make_panel(self, title, panel_items, isMain):
         pvs_forPanel = []
-        pvs = self.model.pvs
+        pvs = list(self.model.pvs.keys())
+        instr = self.model.instrument
         for tag in panel_items:
             if tag in pvs:
-                pv = pvs[tag]
+                pv = instr+':'+tag
                 pvs_forPanel.append(pv)
         self.panel = Panel(title, pvs_forPanel, isMain)
 
-    def save(self, *args, **kwargs):
-        if not 'filename' in kwargs:
-            filename = save_file_dialog(
-                self.panel, "Save " + self.model.settings_file_tag+ " settings",
-                filter='Instrument settings (*.json)')
-        else:
-            filename = kwargs['filename']
-        if filename is not '':
-            if filename.endswith('.json'):
-                self.model.save_settings(self.panel_items, filename)
-
-    def load(self, *args, **kwargs):
-        if not 'filename' in kwargs:
-            filename = open_file_dialog(
-                self.panel, "Load settings")
-        else:
-            filename = kwargs['filename']
-        if filename is not '':
-            if filename.endswith('.json'):
-                self.model.load_settings(filename)
-
-  
     
     def make_panel_connections(self):
         self.panel.panelClosedSignal.connect(self.panel_closed_callback)
-        self.panel.save_btn.clicked.connect(self.save)
-        self.panel.load_btn.clicked.connect(self.load)
+   
 
     def exit(self):
         self.model.exit()

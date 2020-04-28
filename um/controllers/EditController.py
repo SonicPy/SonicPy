@@ -22,10 +22,10 @@ class EditController(QObject):
     callbackSignal = pyqtSignal(dict)  
     applyClickedSignal = pyqtSignal(str)
         
-    def __init__(self, parent_controller, title, selector_cb, isMain = False):
+    def __init__(self, parent_controller, title, selector_pv, isMain = False):
         super().__init__()
         
-        self.widget = EditWidget(title,selector_cb)
+        self.widget = EditWidget(title,selector_pv)
         #self.definitions = definitions
         #self.pg = self.widget.plot_widget.fig.win
         

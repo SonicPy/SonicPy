@@ -12,13 +12,15 @@ import copy
 from pathlib import Path
 from numpy import arange
 from utilities.utilities import *
-from um.widgets.UltrasoundWidget_2 import UltrasoundWidget
+from um.widgets.UltrasoundWidget import UltrasoundWidget
 from um.controllers.SweepController import SweepController
 from um.controllers.AFGController import AFGController
+from um.controllers.AFGPlotController import AFGPlotController
 from um.controllers.ScopeController import ScopeController
 from um.controllers.ScopePlotController import ScopePlotController
 from um.controllers.ArbController import ArbController
 from um.controllers.ArbFilterController import ArbFilterController
+from um.controllers.SaveDataController import SaveDataController
 
 from um.controllers.OverlayController import OverlayController
 
@@ -35,6 +37,8 @@ from utilities.HelperModule import increment_filename, increment_filename_extra
 
 from .. import style_path
 
+from um.models.pvServer import pvServer
+from um.widgets.panel import Panel
 
 ############################################################
 
@@ -56,11 +60,23 @@ class UltrasoundController(QObject):
         self.display_window = UltrasoundWidget(app, _platform, theme)
         #self.progress_bar = self.display_window.progress_bar
         
-        self.afg_controller = AFGController(self, offline = offline)
         self.arb_controller = ArbController(self)
         self.arb_filter_controller = ArbFilterController(self)
+        self.afg_controller = AFGController(self, arb_controller = self.arb_controller, arb_filter_controller= self.arb_filter_controller,  offline = offline)
+        
+        self.save_data_controller = SaveDataController(self)
+        self.scan_pv = self.arb_controller.scan_pv
+        
         self.scope_controller = ScopeController(self, offline = offline)
-        self.scope_plot_controller = ScopePlotController(self.scope_controller, afg_controller=self.afg_controller)
+
+        scope_waveform_widget = self.display_window.scope_widget
+        self.scope_plot_controller = ScopePlotController(scope_controller = self.scope_controller,
+                                                scope_widget= scope_waveform_widget)
+
+        afg_waveform_widget = self.display_window.afg_widget
+        self.afg_plot_controller = AFGPlotController(afg_controller = self.afg_controller,
+                                                afg_waveform_widget= afg_waveform_widget)
+                                                
         self.overlay_controller = OverlayController(self, self.scope_plot_controller)
         
         self.sweep_controller = SweepController(self,
@@ -73,31 +89,54 @@ class UltrasoundController(QObject):
 
         afg_panel = self.afg_controller.get_panel()
         scope_panel = self.scope_controller.get_panel()
-        sweep_widget = self.sweep_controller.get_panel()
+        sweep_panel = self.sweep_controller.get_panel()
         arb_panel = self.arb_controller.get_panel()
         arb_filter_panel = self.arb_filter_controller.get_panel()
+        save_data_panel = self.save_data_controller.get_panel()
+
+        arb_and_filter_panel = Panel('USER1 waveform', 
+                                        ['ArbModel:selected_item',
+                                        'ArbModel:edit_state',
+                                        'ArbFilter:selected_item',
+                                        'ArbFilter:edit_state'])
 
         self.display_window.insert_panel(scope_panel)
         self.display_window.insert_panel(afg_panel)
-        self.display_window.insert_panel(arb_panel)
-        self.display_window.insert_panel(arb_filter_panel)
-        self.display_window.insert_panel(sweep_widget)
+        #self.display_window.insert_panel(arb_panel)
+        #self.display_window.insert_panel(arb_filter_panel)
+        self.display_window.insert_panel(arb_and_filter_panel)
+        self.display_window.insert_panel_right(sweep_panel)
+        self.display_window.insert_panel_right(save_data_panel)
 
-        scope_waveform_widget = self.scope_plot_controller.widget
-        self.display_window.scope_waveform_layout.addWidget(scope_waveform_widget)
 
         self.display_window.panelClosedSignal.connect(self.panel_closed_callback)
         
         
         self.waveform_index = 0
-        
+        self.current_tab_index = 0
         
         self.make_connections()
 
+        self.pv_server = pvServer()
+
+        # for some reason this helps resize the plots in the frames properly 
+        self.display_window.afg_mode_btn.setChecked(True)
+        self.display_window.scan_mode_btn.setChecked(True)
+        self.display_window.scope_mode_btn.setChecked(True)
+
+        
+
     def make_connections(self): 
-        self.sweep_controller.pointStartRequestSignal.connect(self.pointStartRequestCallback)
-        self.sweep_controller.pointDoneSignal.connect(self.pointDoneCallback)
-        self.scope_controller.stoppedSignal.connect(self.scopeStoppedCallback)
+        #self.display_window.tabWidget.currentChanged.connect(self.tab_changed)
+        self.display_window.mode_btn_group.buttonToggled.connect(self.tab_changed)
+        self.display_window.scope_mode_btn.toggled.connect(self.display_window.scope_widget.setVisible)
+        self.display_window.afg_mode_btn.toggled.connect(self.display_window.afg_widget.setVisible)
+        self.display_window.scan_mode_btn.toggled.connect(self.display_window.scan_widget.setVisible)
+
+
+        self.sweep_controller.scanStartRequestSignal.connect(self.scanStartRequestCallback)
+        self.sweep_controller.scanDoneSignal.connect(self.scanDoneCallback)
+        self.scope_controller.model.pvs['run_state'].value_changed_signal.connect(self.scopeStoppedCallback)
         self.display_window.actionPreferences.triggered.connect(self.preferences_module)
         self.display_window.actionSave_As.triggered.connect(self.scopeSaveAsCallback)
         self.display_window.actionBG.triggered.connect(self.overlay_btn_callback)
@@ -107,45 +146,27 @@ class UltrasoundController(QObject):
         self.display_window.ActionSetUserWaveform.triggered.connect(self.SetUserWaveformCallback)
         self.display_window.actionCursors.triggered.connect(self.cursorsCallback)
 
-        # User waveform events
-        self.arb_controller.waveformComputedSignal.connect(self.waveform_computed_callback)
-        self.arb_filter_controller.waveformFilteredcallbackSignal.connect(self.waveform_filtered_callback)
     
     def cursorsCallback(self):
         self.phase_controller.show_view()
 
+    def tab_changed(self):
+        if self.display_window.scope_mode_btn.isChecked():
+            ind = 0
+        elif self.display_window.afg_mode_btn.isChecked():
+            ind = 1
+        elif self.display_window.scan_mode_btn.isChecked():
+            ind = 2
+        else:
+            return
+
+        old_index = self.current_tab_index
+        self.current_tab_index = ind
+
     def SetUserWaveformCallback(self):
-
-        params = {}
-        params ['t_min']=0
-        params['t_max'] = 120e-9
-        params['center_f'] = 45e6
-        params['sigma'] = 20e6
-        params['delay'] = .5
-        params['opt']=0
-    
+        pass
         
-        params['pts'] = 1000
         '''
-        ans = gaussian_wavelet(params)
-        ss = ans['waveform']
-
-        ss_fft = ans['waveform_fft']
-
-        t = ans['t']
-
-        self.win = pg.GraphicsLayoutWidget()
-        self.win.resize(1000,600)
-        self.win.setWindowTitle('burst_waveform')
-        # Enable antialiasing for prettier plots
-        pg.setConfigOptions(antialias=True)
-        self.p2 = self.win.addPlot()
-        self.p3 = self.win.addPlot()
-        self.p2.plot(t,ss, pen=(0,255,0))
-        self.p3.plot(ss_fft[0][:250],ss_fft[1][:250], pen=(0,255,255))
-        self.win.show()
-
-        
         arb = get_arb()
         waveform={}
         waveform['binary_waveform'] = arb
@@ -165,19 +186,11 @@ class UltrasoundController(QObject):
         self.scope_controller.close_background_callback()
 
     def overlay_btn_callback(self):
-
         self.overlay_controller.showWidget()
 
-    def load_background_callback(self):
-        start_folder = self.working_directories.savedata 
-        new_folder = self.scope_controller.load_background_callback(folder=start_folder)
-        if new_folder != start_folder:
-            self.working_directories.savedata = new_folder
-            mcaUtil.save_folder_settings(self.working_directories, self.scope_working_directories_file)
-
     def scopeSaveAsCallback(self):
-        start_folder = self.working_directories.savedata 
-        self.scope_plot_controller.save_data_callback(folder=start_folder)
+        
+        self.save_data_controller.save_data_callback()
 
     def preferences_module(self, *args, **kwargs):
         [ok, file_options] = mcaUtil.mcaFilePreferences.showDialog(self.display_window, self.file_options) 
@@ -187,43 +200,23 @@ class UltrasoundController(QObject):
                 self.scope_controller.model.file_settings = file_options
             mcaUtil.save_file_settings(file_options, file=self.scope_file_options_file)
 
-    def scopeStoppedCallback(self):
-        #print('stopped')
-        if self.file_options.autosave:
-            if self.scope_controller.model.file_name != '':
-                freq = None
-                try:
-                    afg_pvs = self.afg_controller.model.pvs
-                    freq = afg_pvs['frequency']._val
-                except:
-                    pass
-                new_file = increment_filename_extra(self.scope_controller.model.file_name, frequency = freq)
-                print(new_file)
-                if new_file != self.scope_controller.model.file_name:
-                    self.saveFile(new_file)
-                    #print('save: ' + new_file)
-        if self.file_options.autorestart:
-            pass
-            #self.model.acq_erase_start()
+    def scopeStoppedCallback(self, pv, data):
+        running  = data[0]
+        if not running:
+            #print('stopped')
+            if self.file_options.autosave:
+                self.save_data_controller.model.pvs['save'].set(True)
+                
+            if self.file_options.autorestart:
+                pass
+                #self.model.acq_erase_start()
 
-    
-
-    def saveFile(self, filename, params = {}):
-        afg_pvs = self.afg_controller.model.pvs
-        
-        saved_filename = self.scope_plot_controller.save_data_callback(filename=filename, params=params)
-        new_folder = os.path.dirname(str(saved_filename))
-        old_folder = self.working_directories.savedata
-        if new_folder != old_folder:
-            self.working_directories.savedata = new_folder
-            mcaUtil.save_folder_settings(self.working_directories, self.scope_working_directories_file)
-
-    def pointStartRequestCallback(self):
+    def scanStartRequestCallback(self):
         #print('starting frequency sweep!')
         self.controls_setEnable(False)
         self.sweep_controller.start_sweep()
 
-    def pointDoneCallback(self):
+    def scanDoneCallback(self):
         #print('ending frequency sweep!')
         self.controls_setEnable(True)
 
@@ -239,11 +232,12 @@ class UltrasoundController(QObject):
         self.arb_controller.exit()
         self.arb_filter_controller.exit()
         self.overlay_controller.overlay_widget.close()
+        self.save_data_controller.exit()
 
     def show_window(self):
         self.display_window.raise_widget()
 
-    def cursor_dragged(self, cursor):
+    '''def cursor_dragged(self, cursor):
         pos = cursor.getYPos()
         c1 = self.display_window.hLine1
         c2 = self.display_window.hLine2
@@ -253,9 +247,9 @@ class UltrasoundController(QObject):
         if c1 is not cursor:
             c1.setPos(pos)
         if c2 is not cursor:
-            c2.setPos(pos)
+            c2.setPos(pos)'''
 
-    def up_down_signal_callback(self, event):
+    '''def up_down_signal_callback(self, event):
         new_ind = self.waveform_index
         if event == 'up':
             new_ind = self.waveform_index + 1
@@ -280,15 +274,15 @@ class UltrasoundController(QObject):
                     self.waveform_index = ind
                     if update_cursor_pos:
                         self.display_window.hLine1.setPos(ind+.5)
-                        self.display_window.hLine2.setPos(ind+.5)
+                        self.display_window.hLine2.setPos(ind+.5)'''
 
-    def apply_callback(self):
-        '''
+    '''def apply_callback(self):
+        
         g = self.display_window.gradient
         state = g.saveState()
         print(state)
-        '''
-        pass
+        
+        pass'''
 
     def setStyle(self, Style):
         #print('style:  ' + str(Style))
@@ -306,22 +300,4 @@ class UltrasoundController(QObject):
             self.app.setStyle(WStyle)
 
 
-    ####################################################
-    ### Next is the User waveform handling
-    ####################################################
-
-    def waveform_computed_callback(self, data):
-        
-        if len(data):
-            t = data['t']
-            waveform = data['waveform']
-            #self.arb_controller.arb_edit_controller.widget.update_plot([t,waveform])
-            self.arb_filter_controller.model.pvs['waveform_in'].set(data)
-            
     
-    def waveform_filtered_callback(self, data):
-        if len(data):
-            t = data['t']
-            waveform = data['waveform']
-            #self.arb_filter_controller.arb_filter_edit_controller.widget.update_plot([t,waveform])
-            self.afg_controller.model.pvs['user1_waveform'].set(data)

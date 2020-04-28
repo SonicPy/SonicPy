@@ -30,15 +30,23 @@ from um.widgets.CustomWidgets import FlatButton, DoubleSpinBoxAlignRight, Vertic
         CleanLooksComboBox, NumberTextField, LabelAlignRight
 from um.widgets.PltWidget import CustomViewBox, PltWidget
 
+from um.models.pvServer import pvServer
+from um.widgets.panel import Panel
+from um.widgets.pvWidgets import pvQWidgets
+
 
 class AfwGroupbox(QtWidgets.QWidget):
     param_edited_signal = QtCore.pyqtSignal(dict)
     panel_selection_edited_signal = QtCore.pyqtSignal(str)
-    def __init__(self, title, selector_cb ):
+    def __init__(self, title, selector_pv ):
         super().__init__()
+
+        self.pv_widgets = pvQWidgets()
+        
         self._layout = QtWidgets.QVBoxLayout()
         self._layout.setContentsMargins(0, 0, 0, 0)
-        self.awf_type_cb = selector_cb   
+
+        self.awf_type_cb, _ = self.pv_widgets.pvWidget(selector_pv)
         self._layout.addWidget(self.awf_type_cb)
         self._awf_type_info_btn = QtWidgets.QPushButton('i')
         self.panels = {}
@@ -225,16 +233,12 @@ class EditWidget(PopUpWidget):
     applyClickedSignal = QtCore.pyqtSignal(str)
     controller_selection_edited_signal = QtCore.pyqtSignal(str)
     widget_closed = QtCore.Signal()
-    def __init__(self, title , selector_cb):
+    def __init__(self, title , selector_pv):
         super().__init__(title)
         self.plot_window = plotWaveWindow()
-        self.selector_cb = selector_cb
-        #self.add_top_row_button('plot_btn','Plot')
-        #self.add_top_horizontal_spacer()
-        #self.add_bottom_row_button('apply_btn','Apply')
-        #self.add_bottom_horizontal_spacer()
         
-        self.afw_gb = AfwGroupbox(title=title, selector_cb=selector_cb)
+        
+        self.afw_gb = AfwGroupbox(title=title, selector_pv=selector_pv)
         
         self.add_body_widget(self.afw_gb)
         
@@ -257,9 +261,6 @@ class EditWidget(PopUpWidget):
         display_name = self.afw_gb.awf_type_cb.currentText()
         return display_name
 
-    #def get_apply_btn(self):
-    #    return getattr(self,'apply_btn')
-
     def make_connections(self):
         pass
         #self.plot_btn.clicked.connect(self.plot_window.raise_widget)
@@ -271,7 +272,7 @@ class EditWidget(PopUpWidget):
 
     def update_plot(self, data):
         self.plot_window.set_data(data[0],data[1])
-        print('updated plot')
+        #print('updated plot')
         
     def closeEvent(self, event):
         # Overrides close event to let controller know that widget was closed by user

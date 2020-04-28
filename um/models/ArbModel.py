@@ -24,24 +24,21 @@ class ArbModel(Scope, pvModel):
         
         pvModel.__init__(self, parent)
         
+        self.instrument = 'ArbModel'
         self.tasks = {  
                         'edit_state':     
-                                {'desc': ';Edit', 'val':False, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'edit_state','type':'b'}},
+                                {'desc': ';Edit waveform', 'val':False, 
+                                'param':{ 'type':'b'}},
                         'arb_waveform':     
                                 {'desc': 'Waveform', 'val':None, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'waveform','type':'dict'}},
+                                'param':{ 'type':'dict'}},
                         'arb_waveform_params':     
                                 {'desc': 'Waveform parameters', 'val':None, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'waveform','type':'dict'}}
+                                'param':{ 'type':'dict'}}
                       }       
         self.instrument = 'ArbModel'
 
         self.create_pvs(self.tasks)
-        self.start()
 
     #####################################################################
     #  Private set/get functions. Should not be used by external calls  #

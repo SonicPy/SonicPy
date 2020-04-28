@@ -8,36 +8,27 @@ from pyqtgraph import QtCore, mkPen, mkColor, hsvColor, ViewBox
 from um.widgets.CustomWidgets import HorizontalSpacerItem, VerticalSpacerItem, FlatButton
 import numpy as np
 
-class scopeWidget(QtWidgets.QWidget):
+class afgWidget(QtWidgets.QWidget):
     panelClosedSignal = pyqtSignal()
     def __init__(self, ctrls = []):
         super().__init__()
-        self.scope_controls = ctrls
+        
         self._layout = QtWidgets.QVBoxLayout()
+        self._layout.setSpacing(0)
+        self._layout.setContentsMargins(8, 0, 8, 0)
         params = "plot title", 'Amplitude', 'Time'
         self.plot_widget = customWidget(params)
         
         self.button_widget = QtWidgets.QWidget()
         
         self._button_layout = QtWidgets.QHBoxLayout()
+        self._button_layout.setSpacing(10)
+        self._button_layout.setContentsMargins(0, 8, 0, 12)
+
+        self._button_layout.addWidget(QtWidgets.QLabel('Arbitrary Function Generator user1 waveform preview'))
       
-        self.erase_btn = FlatButton("Erase")
-        self.save_btn = FlatButton("Save")
-      
-        
         self._status_layout = QtWidgets.QVBoxLayout()
 
-        #self.status_lbl = QtWidgets.QLabel(' ')
-        #self._status_layout.addWidget(self.status_lbl)
-        
-        self._button_layout.addWidget(self.erase_btn)
-        for ctrl in self.scope_controls:
-            self._button_layout.addWidget(ctrl)
-     
-        #self._button_layout.addLayout(self._status_layout)
-        
-        self._button_layout.addSpacerItem(HorizontalSpacerItem())
-        self._button_layout.addWidget(self.save_btn)
        
         self.button_widget.setLayout(self._button_layout)
 
@@ -62,6 +53,14 @@ class scopeWidget(QtWidgets.QWidget):
             }
             
         """)
+
+    def add_buttons(self, buttons):
+        self.scope_controls = buttons
+        for ctrl in self.scope_controls:
+            if type(ctrl)== str:
+                self._button_layout.addSpacerItem(HorizontalSpacerItem())
+            else:
+                self._button_layout.addWidget(ctrl)
 
     def plot(self,waveform):
         plot = self.plot_widget.fig.win

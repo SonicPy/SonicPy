@@ -24,34 +24,27 @@ class ArbFilterModel(Scope, pvModel):
         pvModel.__init__(self, parent)
       
         
-
+        self.instrument = 'ArbFilter'
         self.tasks = {  
                         'waveform_in':     
-                                {'desc': 'Waveform', 'val':None, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'waveform','type':'dict'}},
-                        
+                                {'desc': 'Waveform in', 'val':None, 
+                                'param':{ 'type':'dict'}},
                         'edit_state':     
-                                {'desc': ';Edit', 'val':False, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'edit_state','type':'b'}},
+                                {'desc': ';Edit window', 'val':False, 
+                                'param':{ 'type':'b'}},
                         'waveform_out':     
-                                {'desc': 'Waveform', 'val':None, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'waveform','type':'dict'}},
+                                {'desc': 'Waveform out', 'val':None, 
+                                'param':{ 'type':'dict'}},
                         'filter_params':     
-                                {'desc': 'Waveform parameters', 'val':None, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'waveform','type':'dict'}}
+                                {'desc': 'Window parameters', 'val':None, 
+                                'param':{ 'type':'dict'}}
                                 
                       }       
 
         
         self.create_pvs(self.tasks)
 
-        self.start()
-
-
+ 
     
     #####################################################################
     #  Private set/get functions. Should not be used by external calls  #
@@ -60,15 +53,7 @@ class ArbFilterModel(Scope, pvModel):
     def _exit_task(self):
         pass
 
-    '''    def _get_filter_type(self):
-        ans = self.pvs['filter_type']._val
-        #print('get ' + str(ans))
-        return ans
-
-    def _set_filter_type(self, param):
-        #print('set ' + str(param))
-        self.pvs['filter_type']._val= param'''
-
+ 
     
 
     def _get_edit_state(self):

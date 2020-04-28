@@ -10,8 +10,6 @@
 #-------------------------------------------------------------------------------
 
 
-# TODO asymmetric waveform
-
 import visa, time, logging, os, struct, sys, copy, os.path
 
 import pyqtgraph as pg
@@ -21,7 +19,7 @@ from PyQt5.QtCore import QThread, pyqtSignal
 
 import queue 
 from functools import partial
-from um.models.tek_fileIO import read_file_TEKAFG3000
+from um.models.tek_fileIO import read_file_TEKAFG3000, waveform_to_AFG3251_binary
 import json
 from um.models.pv_model import pvModel
 
@@ -57,44 +55,42 @@ class AFG_AFG3251(Afg, pvModel):
         # supported types are float, int, bool, string, and list of strings
         self.tasks = {  'amplitude': 
                                 {'desc': 'Amplitude', 'unit':u'V<sub>p-p</sub>', 'val':1.0,'min':0.05,'max':9,'increment':0.05, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'amplitude','type':'f'}},
+                                'param':{'type':'f'}},
                         'frequency': 
                                 {'desc': 'Frequency', 'unit':'MHz','val':30000000.0,'val_scale':1e6, 'min':0, 'max':1000e6,'increment':.5, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'frequency','type':'f'}},
+                                'param':{'type':'f'}},
                         'output_state':     
                                 {'desc': 'Output;ON/OFF','val':False, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'output_state','type':'b'}},
+                                'param':{'type':'b'}},
                         'n_cycles':  
                                 {'desc': 'N-cycles', 'val':3,'min':1 ,'max':100000, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'n_cycles','type':'i'}},
+                                'param':{'type':'i'}},
                         'instrument':
-                                {'desc': 'Instrument', 'val':self.instrument, 
+                                {'desc': 'Instrument', 'val':'not connected', 
                                 'methods':{'set':False, 'get':True}, 
-                                'param':{'tag':'instrument','type':'s'}},
+                                'param':{'type':'s'}},
                         'operating_mode':
                                 {'desc': 'Operating mode', 'val':self.operating_modes[0],'list':self.operating_modes, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'operating_mode','type':'l'}},
+                                'param':{'type':'l'}},
                         'function_shape':
                                 {'desc': 'Function shape', 'val':self.function_shapes[0],'list':self.function_shapes, 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'function_shape','type':'l'}},
+                                'param':{'type':'l'}},
                         'user1_waveform':
                                 {'desc': 'User waveform 1', 'val':{}, 
-                                'methods':{'set':True, 'get':False}, 
-                                'param':{'tag':'user1_waveform','type':'dict'}},
+                                'param':{'type':'dict'}},
                         'user1_waveform_from_file':
                                 {'desc': 'Waveform file', 'val':'', 
-                                'methods':{'set':True, 'get':True}, 
-                                'param':{'tag':'user1_waveform_from_file','type':'s'}},
+                                'param':{'type':'s'}},
+                        'upload_user1_waveform':     
+                                {'desc': 'Upload waveform;Go','val':False, 
+                                'param':{'type':'b'}},
+                        'auto_upload_user1_waveform':     
+                                {'desc': 'Auto-pload waveform;ON/OFF','val':False, 
+                                'param':{'type':'b'}},
                       }       
 
         self.create_pvs(self.tasks)
-        self.start()
+        
 
     ###############################################################################
     #  Private device specific functions. Should not be used by external callers  #
@@ -130,20 +126,45 @@ class AFG_AFG3251(Afg, pvModel):
                 ID = tokens[1]
         return ID
 
-    def _send_user1_waveform(self, waveform):
-        if 'binary_waveform' in waveform:
-            binary_waveform = waveform['binary_waveform']
-            slot='user1'
-            #We can write the waveform data to the AFG after making sure its in big endian format
-            self.write_binary_values('TRACE:DATA EMEMory,', binary_waveform)
-            #'copies' the Editable Memory to User1 memory location. note: there are 4 user memory locations
-            self.write('data:copy ' +slot+', ememory')
-            self.pvs['function_shape'].set('user1')
-            #self.write('source1:function '+slot) #sets the AFG source to user1 memory
+    def _set_upload_user1_waveform(self, param):
+        self.pvs['upload_user1_waveform']._val = param
+        if param:
+            waveform = self.pvs['user1_waveform']._val
+
+            if len(waveform):
+                
+                t = waveform['t']
+                
+                y = waveform['waveform']
+
+                freq, binary_waveform = waveform_to_AFG3251_binary(t, y)
+                
+                if self.connected:
+                    slot='user1'
+                    #We can write the waveform data to the AFG after making sure its in big endian format
+                    self.write_binary_values('TRACE:DATA EMEMory,', binary_waveform)
+                    #'copies' the Editable Memory to User1 memory location. note: there are 4 user memory locations
+                    self.write('data:copy ' +slot+', ememory')
+
+                self.pvs['function_shape'].set('user1')
+                print('set function_shape to user1')
+                self.pvs['frequency'].set(float(freq))
+
+            self.pvs['upload_user1_waveform'].set(False)
+            
+                #self.write('source1:function '+slot) #sets the AFG source to user1 memory
+
+        
+
 
     def _set_user1_waveform(self, waveform):
         
         self.pvs['user1_waveform']._val = waveform
+        autoupload = self.pvs['auto_upload_user1_waveform']._val
+        if autoupload:
+            if len(waveform):
+                self.pvs['upload_user1_waveform'].set(True)
+
         print('_set_user1_waveform')
     
     def _set_user1_waveform_from_file(self, filename):
@@ -164,7 +185,7 @@ class AFG_AFG3251(Afg, pvModel):
         return waveform
 
     def _set_frequency(self, freq):
-        
+        #time.sleep(.2)
         freq_str = str(freq )
         command = 'source1:Frequency '+freq_str
         self.write(command) #set frequency 

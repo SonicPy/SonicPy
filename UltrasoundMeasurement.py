@@ -1,5 +1,5 @@
 # TODO:
-#  arb waveforms
+#  arb waveforms corect frequency display
 #  plot interaction (box zoom), 
 #     cursors (buttons to toggle on/off each cursor), 
 #     oveview plot and zoom plot 

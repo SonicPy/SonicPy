@@ -10,26 +10,36 @@ from PyQt5.QtCore import QThread, pyqtSignal, QObject
 
 class SweepController(pvController):
     
-    pointDoneSignal = pyqtSignal()  
-    pointStartRequestSignal = pyqtSignal()  
+    scanDoneSignal = pyqtSignal()  
+    scanStartRequestSignal = pyqtSignal()  
     
     def __init__(self, parent, scope_pvs, source_waveform_pvs, isMain = False):
         
         model = SweepModel(parent)
         super().__init__(parent, model, isMain)  
-
+        
         
         self.model.setpointSweepThread.scope_pvs = scope_pvs
         self.model.setpointSweepThread.source_waveform_pvs = source_waveform_pvs
 
-        panel_items =[  'start_point',
+        panel_items =[  'positioner_set_channel',
+                        'positioner_read_channel',
+                        'det_trigger_channel',
+                        'det_run_state_channel',
+                        'save_data_set_channel',
+                        'save_data_read_channel',
+                        'start_point',
                         'end_point',
                         'step',
                         'n',
-                        'scan_go',
-                        'scan_stop']
+                        'current_point',
+                        'scan_go']
         self.init_panel('Scan', panel_items)
+
+
         self.make_connections()
+
+
 
     def make_connections(self): 
         self.model.pvs['scan_go'].value_changed_signal.connect(self.run_state_changed_callback)
@@ -37,10 +47,10 @@ class SweepController(pvController):
     def run_state_changed_callback(self, tag, data):
         state = data[0]
         if state:
-            self.pointStartRequestSignal.emit()
+            self.scanStartRequestSignal.emit()
         else:
-            
-            self.pointDoneSignal.emit()
+            self.model.stop_scan()
+            self.scanDoneSignal.emit()
 
     def start_sweep(self):
         # here we do the setpoint sweep

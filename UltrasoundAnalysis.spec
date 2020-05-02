@@ -5,7 +5,7 @@ import sys
 sys.setrecursionlimit(5000)
 
 a = Analysis(['UltrasoundAnalysis.py'],
-             pathex=['C:\\Users\\Ross\\Documents\\GitHub\\sonicPy'],
+             pathex=['/Users/ross/GitHub/sonicPy'],
              binaries=[],
              datas=[],
              hiddenimports=[],

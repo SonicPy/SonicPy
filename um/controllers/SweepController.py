@@ -34,6 +34,7 @@ class SweepController(pvController):
                         'step',
                         'n',
                         'current_point',
+                        'setpoint',
                         'scan_go']
         self.init_panel('Scan', panel_items)
 

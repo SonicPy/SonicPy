@@ -304,7 +304,7 @@ class SweepModel(pvModel):
                                 {'desc': '#Pts', 'val':6,'min':2,'max':10000,
                                 'param':{ 'type':'i'}},
                         'current_point': 
-                                {'desc': 'Current point', 'val':0,'min':0,'max':10000,
+                                {'desc': 'Set-point index', 'val':0,'min':0,'max':10000,
                                 'methods':{'set':False, 'get':True},  
                                 'param':{ 'type':'i'}},
                         'step': 

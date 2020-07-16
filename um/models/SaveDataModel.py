@@ -1,5 +1,5 @@
 
-import os.path, sys
+import os.path, sys, math
 import numpy as np
 from um.models.ScopeModel import Scope
 from um.models.tek_fileIO import *
@@ -15,6 +15,8 @@ from functools import partial
 import json
 from um.models.pv_model import pvModel
 from um.models.pvServer import pvServer
+
+from scipy import nanmean
 
 import string
 class SaveDataModel(pvModel):

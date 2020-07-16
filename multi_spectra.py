@@ -4,21 +4,23 @@ import sys
 
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtGui, QtCore
-from widgets.PltWidget import SimpleDisplayWidget, DetailDisplayWidget
+from um.widgets.PltWidget import SimpleDisplayWidget, DetailDisplayWidget
 from scipy import signal
 import time
 from utilities.utilities import *
 from utilities.HelperModule import move_window_relative_to_screen_center
-from widgets.UtilityWidgets import open_files_dialog
+from um.widgets.UtilityWidgets import open_files_dialog
 
 from PyQt5.QtWidgets import QMainWindow, QApplication, QInputDialog, QMessageBox, QErrorMessage
-from models.tek_fileIO import *
+from um.models.tek_fileIO import *
 
 
 app = QApplication(sys.argv)
 app.aboutToQuit.connect(app.deleteLater)
 
 filenames = open_files_dialog(None, "Load File(s).", None) 
+
+
 
 
 
@@ -30,14 +32,14 @@ filenames =['sweep_test/test_001.csv',
             'sweep_test/test_004.csv',
             'sweep_test/test_005.csv']
 '''
-width = 20
+width = 2
 
 if len(filenames):
     spectra, x = read_multiple_spectra(filenames)
 
-x = rebin(x,20)
+x = rebin(x,width)
 for i in range(len(spectra)):
-    spectra[i] = rebin(spectra[i],20)
+    spectra[i] = rebin(np.asarray(spectra[i]),width)
 
 '''
 freqs = [10,15,20,25,30]

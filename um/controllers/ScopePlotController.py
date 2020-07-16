@@ -1,6 +1,6 @@
 
 
-import os.path, sys
+import os.path, sys, math
 from PyQt5 import QtWidgets
 import copy
 from PyQt5.QtCore import QThread, pyqtSignal, QObject
@@ -18,6 +18,8 @@ from um.controllers.ScopeController import ScopeController
 from utilities.utilities import *
 from um.models.pvServer import pvServer
 from um.widgets.pvWidgets import pvQWidgets
+
+from scipy import nanmean
 
 
 
@@ -85,9 +87,25 @@ class ScopePlotController(QObject):
             x = waveform[0]
             y = waveform[1]
         
-            subsample = np.arange(0,len(x),10)
+            R = 10
+
+            pad_size = math.ceil(float(x.size)/R)*R - x.size
+
+            x_padded = np.append(x, np.zeros(pad_size)*np.NaN)
+            x = x_padded
+            y_padded = np.append(y, np.zeros(pad_size)*np.NaN)
+            y = y_padded
+
+            x = x.reshape(-1, R)
+            x = nanmean(x.reshape(-1,R), axis=1)
+            y = y.reshape(-1, R)
+            y = nanmean(y.reshape(-1,R), axis=1)
+
+            
+
+            '''subsample = np.arange(0,len(x),10)
             x = np.take(x, subsample)
-            y = np.take(y, subsample)
+            y = np.take(y, subsample)'''
             waveform = [x,y]
     
             #ch = data['ch']

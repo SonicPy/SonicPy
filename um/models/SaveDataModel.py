@@ -105,6 +105,30 @@ class SaveDataModel(pvModel):
         
         if len(data):
             waveform  = data['waveform']
+            x = waveform[0]
+            y = waveform[1]
+        
+            R = 10
+
+            pad_size = math.ceil(float(x.size)/R)*R - x.size
+
+            x_padded = np.append(x, np.zeros(pad_size)*np.NaN)
+            x = x_padded
+            y_padded = np.append(y, np.zeros(pad_size)*np.NaN)
+            y = y_padded
+
+            x = x.reshape(-1, R)
+            x = nanmean(x.reshape(-1,R), axis=1)
+            y = y.reshape(-1, R)
+            y = nanmean(y.reshape(-1,R), axis=1)
+
+            
+
+            '''subsample = np.arange(0,len(x),10)
+            x = np.take(x, subsample)
+            y = np.take(y, subsample)'''
+            waveform = [x,y]
+
             success = False
             if filename.endswith('.csv'):
                 try:

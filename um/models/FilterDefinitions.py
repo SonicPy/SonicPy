@@ -76,7 +76,7 @@ class tukey_filter_model(pvModel):
         self.offline = True
         ## model speficic:
         self.instrument = 'tukey_filter'
-        self.param = {  'name': 'Nuttall',
+        self.param = {  'name': 'Tukey',
                         'reference':'',
                         'comment':''}
         

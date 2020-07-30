@@ -32,7 +32,7 @@ class ScopePlotController(QObject):
 
     def __init__(self, scope_controller, scope_widget, isMain = False):
         super().__init__()
-        self.pv_server = pvServer()
+        #self.pv_server = pvServer()
         self.pv_widgets = pvQWidgets()
         self.scope_controller = scope_controller
         self.widget = scope_widget

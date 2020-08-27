@@ -19,6 +19,9 @@ from um.models.pvServer import pvServer
 from scipy import nanmean
 
 import string
+
+from os.path import expanduser
+
 class SaveDataModel(pvModel):
     
 
@@ -63,7 +66,7 @@ class SaveDataModel(pvModel):
                                 {'desc': 'Environment parameters', 'val':{}, 
                                 'param':{'type':'dict'}},
                         'file_system_path':
-                                {'desc': 'File system', 'val':'/Users/hrubiak/Desktop', 
+                                {'desc': 'File system', 'val':'~', 
                                 'param':{'type':'s'}},
                         'subdirectory':
                                 {'desc': 'Subdirectory', 'val':'ultrasonic', 
@@ -75,6 +78,9 @@ class SaveDataModel(pvModel):
                                 {'desc': 'Path', 'val':'', 
                                 
                                 'param':{'type':'s'}},
+                        'path_exists':     
+                                {'desc': 'Path exists;Yes/No', 'val':False, 
+                                'param':{'type':'b'}}, 
                         'name':
                                 {'desc': 'Name', 'val':'', 
                                 
@@ -164,9 +170,39 @@ class SaveDataModel(pvModel):
     def _exit_task(self):
         pass
 
+    def _set_path_exists(self, exists):
+        self.pvs['path_exists']._val = exists
+        
+
+    def _get_path_exists(self):
+        file_system_path = self.pvs['file_system_path']._val
+        subdirectory = self.pvs['subdirectory']._val
+        exists = self.check_if_folder_exists(file_system_path, subdirectory)
+        return exists
+
+    def _set_file_system_path(self, file_system_path):
+        self.pvs['file_system_path']._val = file_system_path
+        subdirectory = self.pvs['subdirectory']._val
+        exists = self.check_if_folder_exists(file_system_path, subdirectory)
+        self.pvs['path_exists'].set(exists)
+
+    def _set_subdirectory(self, subdirectory):
+        file_system_path = self.pvs['file_system_path']._val
+        exists = self.check_if_folder_exists(file_system_path, subdirectory)
+        self.pvs['path_exists'].set(exists)
+
+    def check_if_folder_exists(self, file_system_path, subdirectory):
+        if '~'in file_system_path:
+            file_system_path = expanduser(file_system_path)
+        fpath = os.path.join(file_system_path,subdirectory)
+        exists = os.path.exists(fpath)
+        #print('path_exists: '+ str(exists))
+        return exists
+
+
     def _set_filename(self, filename):
 
-        self.file_name = filename
+        self.pvs['filename']._val =  filename
         if filename.endswith('.csv'):
             self.pvs['file_extension'].set('Text (*.csv)')
             
@@ -174,14 +210,14 @@ class SaveDataModel(pvModel):
             self.pvs['file_extension'].set('Binary (*.npz)')
 
 
-    def saveFile(self, filename, params = {}):
+    '''def saveFile(self, filename, params = {}):
         afg_pvs = self.afg_controller.model.pvs
         saved_filename = self.save_data_controller.save_data_callback(filename=filename, params=params)
         new_folder = os.path.dirname(str(saved_filename))
         old_folder = self.working_directories.savedata
         if new_folder != old_folder:
             self.working_directories.savedata = new_folder
-            mcaUtil.save_folder_settings(self.working_directories, self.scope_working_directories_file)
+            mcaUtil.save_folder_settings(self.working_directories, self.scope_working_directories_file)'''
     
     def _set_save(self, state):
         self.pvs['save']._val = state
@@ -231,7 +267,7 @@ class SaveDataModel(pvModel):
 
                 self.write_file(file_name, params=params)
             #print(self.pvs['save']._pv_name + ' save done')
-            self.pvs['save']._pv_name
+            #self.pvs['save']._pv_name
             self.pvs['save'].set(False)
 
     

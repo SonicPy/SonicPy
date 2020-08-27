@@ -10,6 +10,8 @@ calibrants_path = os.path.join(resources_path, 'calibrants')
 icons_path = os.path.join(resources_path, 'icons')
 data_path = os.path.join(resources_path, 'data')
 style_path = os.path.join(resources_path, 'style')
+env_path = os.path.join(resources_path, 'catch1d.env')
+
 from pathlib import Path
 home_path = str(Path.home())
 

@@ -336,3 +336,5 @@ class Scope_DPO5104(Scope, pvModel):
                     self.pvs['run_state'].set(False)
         #print('returning waveform_out')
         return waveform_out
+
+

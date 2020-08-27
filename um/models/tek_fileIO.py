@@ -101,11 +101,8 @@ def write_tek_csv(fname, x,y, params = {}):
     length = len(x)
     sam_interval = x[1]-x[0]
     header = [  ["Record Length",str(length),"Points"],
-                ["Sample Interval",'%.8e'% sam_interval,'s'],
-                ["Trigger Point",0,"Samples"],
-                ["Record Length",'%.8e' % 0.0,'s'],
-                ['','',''],
-                ["Horizontal Offset", '%.8e'% 0.0,'s']
+                ["Sample Interval",'%.8e'% sam_interval,'s']
+                
                 
              ]
 

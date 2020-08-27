@@ -98,7 +98,7 @@ class ArbController(pvController):
 
     def waveform_type_signal_callback(self, pv_name, data):
         data = data[0]
-        print('waveform_type_signal_callback. pv: '+ str(pv_name))
+        #print('waveform_type_signal_callback. pv: '+ str(pv_name))
         #self.arb_edit_controller.widget.set_selected_choice(data)
 
     def arb_waveform_signal_callback(self, pv_name, data):

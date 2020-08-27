@@ -14,7 +14,7 @@ from functools import partial
 from um.widgets.UtilityWidgets import save_file_dialog, open_file_dialog, open_files_dialog
 from um.controllers.pv_controller import pvController
 from utilities.utilities import *
-
+from um.controllers.envController import envController
 
 class ScopeController(pvController):
     callbackSignal = pyqtSignal(dict)  
@@ -38,6 +38,8 @@ class ScopeController(pvController):
                             'stop_after_num_av_preset']
         self.init_panel("Scope", self.panel_items)
         self.make_connections()
+
+        self.env_controller = envController(offline = offline)
         
         if isMain:
             self.show_widget()

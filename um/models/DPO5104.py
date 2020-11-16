@@ -135,6 +135,7 @@ class Scope_DPO5104(Scope, pvModel):
     def _set_erase_start(self, params):
         self.pvs['erase_start']._val = params
         if params:
+            
             self.pvs['erase'].set (True)
             self.pvs['run_state'].set (True)
             self.pvs['erase_start'].set(False)
@@ -154,11 +155,14 @@ class Scope_DPO5104(Scope, pvModel):
                 
                 
                 self._set_channel_state(False)
+                n = self.pvs['num_av']._val
+                self.pvs['num_av'].set(1)
+                self.pvs['num_av'].set(n)
                 self.pvs['num_acq'].set(0)
                 self.pvs['waveform']._val={}
                 
                 self._set_channel_state(True)
-                
+                print('erased')
                 
             except:
                 pass

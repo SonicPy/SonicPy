@@ -1,11 +1,12 @@
 import numpy as np
 from scipy import signal
-from scipy import blackman
+from scipy import blackman, nanmean
 from scipy.signal import hilbert
 from scipy.fftpack import rfft, irfft, fftfreq, fft
 import scipy.fftpack
 import csv
-from models.tek_fileIO import read_tek_csv
+from um.models.tek_fileIO import read_tek_csv
+import math
 
 def read_multiple_spectra(filenames, ):
     spectra = []
@@ -139,8 +140,23 @@ def signal_region_by_x(X, Y, xmin=None, xmax=None):
     return x, y, mask
 
 def rebin(data, width):
-    result = data[:(data.size // width) * width].reshape(-1, width).mean(axis=1)
-    return result
+
+    
+    x = data
+   
+    R = width
+
+    pad_size = math.ceil(float(x.size)/R)*R - x.size
+
+    x_padded = np.append(x, np.zeros(pad_size)*np.NaN)
+    x = x_padded
+
+    x = x.reshape(-1, R)
+    x = nanmean(x.reshape(-1,R), axis=1)
+ 
+
+    
+    return x
 
 def generate_source(del_x, freq, N=6, window=True):
     period = 1/(freq*1e+6)

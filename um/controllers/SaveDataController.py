@@ -39,6 +39,8 @@ class SaveDataController(pvController):
 
         self.init_panel("Save data", self.panel_items)
         self.make_connections()
+
+        
         
         if isMain:
             self.show_widget()
@@ -71,10 +73,6 @@ class SaveDataController(pvController):
 
     def make_connections(self):
         pass
-
-
-    def exit(self):
-        self.model.exit()
 
 
     def show_widget(self):

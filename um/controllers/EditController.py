@@ -56,8 +56,7 @@ class EditController(QObject):
     def update_plot(self, data):
         self.widget.update_plot(data)
         
-    def exit(self):
-        self.model.exit()
+
 
     def make_connections(self):
         self.parent_controller.model.pvs['selected_item'].value_changed_signal.connect(self.selected_item_changed_callback)

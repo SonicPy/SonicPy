@@ -67,6 +67,9 @@ class PV(QObject):
 
 class pvModel(QThread):
 
+    # TODO add autosave_settings file support. autosave file would list pvs that need saving.
+    # those pvs would be saved when changed and loaded when running __init__
+
     model_value_changed_signal = pyqtSignal(dict)
     num_pvs = 0
     def __init__(self, parent):
@@ -112,6 +115,8 @@ class pvModel(QThread):
 
         
         self.start()
+
+        
         
 
     def clear_queue(self):
@@ -323,6 +328,7 @@ class pvModel(QThread):
             pass
         return None
 
+    
 
     def _exit_task(self):
         pass

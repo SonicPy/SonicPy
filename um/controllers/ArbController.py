@@ -73,8 +73,7 @@ class ArbController(pvController):
         if isMain:
             self.show_widget()
         
-    def exit(self):
-        self.model.exit()
+    
 
     def make_connections(self):
         self.model.pvs['selected_item'].value_changed_signal.connect(self.waveform_type_signal_callback)

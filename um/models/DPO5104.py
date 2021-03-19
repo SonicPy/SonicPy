@@ -21,7 +21,7 @@ class Scope_DPO5104(Scope, pvModel):
     channel_changed_signal = pyqtSignal()
     model_value_changed_signal = pyqtSignal(dict)
 
-    def __init__(self, parent, visa_hostname='143', offline = False):
+    def __init__(self, parent, visa_hostname='44', offline = False):
         
         
         self.virtual_data = read_tek_csv('anvil.csv')
@@ -95,7 +95,7 @@ class Scope_DPO5104(Scope, pvModel):
 
     def connect(self, hostname):
         
-        self.DPO5000 = TektronixScope('143')
+        self.DPO5000 = TektronixScope(hostname)
         return self.DPO5000.connect()
         
         

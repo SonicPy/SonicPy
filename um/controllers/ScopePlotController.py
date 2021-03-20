@@ -109,10 +109,10 @@ class ScopePlotController(QObject):
             waveform = [x,y]
     
             #ch = data['ch']
-            filtered = zero_phase_bandstop_filter(waveform, 100e6, 340e6, 5)
+            #filtered = zero_phase_bandstop_filter(waveform, 100e6, 340e6, 5)
             
-            self.update_plot(filtered)
-    
+            self.update_plot(waveform)
+    #
             #num_acq = data['num_acq']
             #self.widget.status_lbl.setText(str(num_acq))
 

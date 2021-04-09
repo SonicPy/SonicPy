@@ -24,7 +24,7 @@ class ScopeController(pvController):
     #runStateSignal = pyqtSignal(bool)
 
     def __init__(self, parent, isMain = False, offline = False):
-        visa_hostname = '44'
+        visa_hostname = '143'
         model = Scope_DPO5104(parent, visa_hostname=visa_hostname, offline = offline)
         super().__init__(parent, model, isMain) 
         

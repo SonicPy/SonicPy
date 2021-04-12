@@ -70,7 +70,7 @@ class afgWidget(QtWidgets.QWidget):
     def clear_plot(self,):
         
         self.plot([np.asarray([]),np.asarray([])])
-        self.status_lbl.setText(' ')
+        #self.status_lbl.setText(' ')
 
 
     def raise_widget(self):

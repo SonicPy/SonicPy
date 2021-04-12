@@ -16,6 +16,7 @@ import time
 
 from um.widgets.ScopeWidget import scopeWidget
 from um.widgets.afgWidget import afgWidget
+from um.widgets.WaterfallWidget import WaterfallWidget
 
 class UltrasoundWidget(QMainWindow):
     
@@ -99,10 +100,10 @@ class UltrasoundWidget(QMainWindow):
         self.scope_widget = scopeWidget()
 
         self.afg_widget = afgWidget()
-        self.scan_widget = QtWidgets.QWidget(self)
-        self._scan_layout = QtWidgets.QVBoxLayout()
-        self._scan_layout.addSpacerItem(HorizontalSpacerItem())
-        self.scan_widget.setLayout(self._scan_layout)
+
+        self.scan_widget = WaterfallWidget()
+
+        
         
 
         self._layout_main_frame.addWidget(self.scope_widget)

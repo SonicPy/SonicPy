@@ -38,6 +38,9 @@ class SaveDataModel(pvModel):
         self.tasks = {  'data_channel':
                                 {'desc': '', 'val':'', 
                                 'param':{'type':'s'}},
+                        'history_channel':
+                                {'desc': '', 'val':'', 
+                                'param':{'type':'s'}},
                         'filename':
                                 {'desc': 'Filename', 'val':'', 
                                 'param':{'type':'s'}},
@@ -101,6 +104,8 @@ class SaveDataModel(pvModel):
         self.create_pvs(self.tasks)
 
         self.pvs['data_channel'].set('DPO5104:waveform')
+        self.pvs['history_channel'].set('Waterfall:waveform_in')
+
 
     
     #####################################################################
@@ -110,6 +115,7 @@ class SaveDataModel(pvModel):
     def write_file(self, filename, params = {}):
         data = self.pv_server.get_pv(self.pvs['data_channel']._val)._val
         #print(data)
+        
         
         if len(data):
             waveform  = data['waveform']
@@ -153,6 +159,7 @@ class SaveDataModel(pvModel):
                     pass
 
             if success:
+
                 filenumber = self.pvs['next_file_number']._val
                 self.pvs['next_file_number'].set(filenumber+1)
                 path, fname = os.path.split(filename)
@@ -163,6 +170,13 @@ class SaveDataModel(pvModel):
                 self.pvs['latest_event'].set('Failed writing ' + str(fname))
             
             self.pvs['filename'].set(filename)
+            history_pvname = self.pvs['history_channel']._val
+            history_pv = self.pv_server.get_pv(history_pvname)
+            waveform_out = {}
+            waveform_out['filename']= filename
+            waveform_out['waveform']= waveform
+            history_pv.set(waveform_out)
+            #print('set wafeform_in')
         else:
             self.pvs['latest_event'].set('No data to write')
         

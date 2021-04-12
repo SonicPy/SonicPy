@@ -8,4 +8,4 @@
 
 from um import main
 
-main(offline=True)
+main(offline=False)

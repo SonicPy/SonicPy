@@ -98,8 +98,8 @@ class WaterfallModel(Scope, pvModel):
                 x_next = waveform[0]
                 y_next = waveform[1]*float(scale)
                 if clip:
-                    y_next[y_next>(offset/2)] = offset/2 * 0.9
-                    y_next[y_next<(-1*offset/2)] = -1*offset/2 * 0.9
+                    y_next[y_next>(offset/2* 0.9)] = offset/2 * 0.9
+                    y_next[y_next<(-1*offset/2* 0.9)] = -1*offset/2 * 0.9
                 y_next = y_next + i * float(offset)
                 
                 

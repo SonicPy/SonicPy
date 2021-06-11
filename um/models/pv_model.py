@@ -8,13 +8,14 @@ import queue
 from functools import partial
 import json
 from um.models.pvServer import pvServer
-
+from epics import PV as epics_PV
 
 class PV(QObject):
     
     value_changed_signal = pyqtSignal(str, list)
     def __init__(self, name='', settings=''):
         super().__init__()
+        
         if name == '':
             return
         self._pv_name=name
@@ -58,7 +59,12 @@ class PV(QObject):
         if 'unit' in settings:
             self._unit = settings['unit']
         else: self._unit = ''
-
+        if 'epics_PV' in settings:
+            self._epics_PV_name = settings['epics_PV']  
+            self._epics_PV = epics_PV(self._epics_PV_name)
+            print(type(self._epics_PV))
+        else:
+            self._epics_PV = None
 
 
     def __str__(self):
@@ -247,6 +253,7 @@ class pvModel(QThread):
                     
                     if hasattr(self, attr):
                         func = self.__getattribute__(attr)
+                        pv = self.pvs[task_name]
                         if mode == 'set':
                             param = task['param']
                             
@@ -255,8 +262,18 @@ class pvModel(QThread):
                                 func(param)
                             except:
                                 print('set failed: '+task_name)
-                            self.pvs[task_name]._val = param
-                            self.pvs[task_name].value_changed_signal.emit(task_name,[param])
+                            pv._val = param
+                            
+                            if pv._epics_PV is not None:
+                                try:
+                                    #print(pv._epics_PV)
+                                    pv._epics_PV.put(str(param))
+                                except:
+                                    pass
+                                    if pv._epics_PV is not None:
+                                        print('could not put epics pv ' + pv._epics_PV_name)
+                                        print(param)
+                            pv.value_changed_signal.emit(task_name,[param])
                             #print('emit '+ str(task_name) + ', '+ str(param))
                             
                         elif mode == 'get':
@@ -272,8 +289,8 @@ class pvModel(QThread):
                                 if type(ans) is not dict:
                                     #print(ans)
                                     pass
-                                self.pvs[task_name]._val = ans
-                                self.pvs[task_name].value_changed_signal.emit(task_name,[ans])
+                                pv._val = ans
+                                pv.value_changed_signal.emit(task_name,[ans])
                                 #self.get_queue.put(ans)
         #print('Exited thread')
 

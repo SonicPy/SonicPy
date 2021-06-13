@@ -224,6 +224,7 @@ class pvQPushButton(QPushButton, pvQWidget):
         widget = self
         current_value = widget.isChecked()
         if value != current_value:
+            #print(value)
             QPushButton.setChecked(widget, value)
             
         self.blockSignals(False)  

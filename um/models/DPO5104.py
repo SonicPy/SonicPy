@@ -162,7 +162,7 @@ class Scope_DPO5104(Scope, pvModel):
                 self.pvs['waveform']._val={}
                 
                 self._set_channel_state(True)
-                print('erased')
+                #print('erased')
                 
             except:
                 pass

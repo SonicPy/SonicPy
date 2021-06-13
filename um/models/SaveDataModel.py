@@ -50,7 +50,7 @@ class SaveDataModel(pvModel):
                                 'param':{'type':'s'}},
                         'full_file_name':
                                 {'desc': 'FullFileName', 'val':'', 
-                                'param':{'type':'s'}, 'epics_PV':'16bmb:scope_file:FullFileName_RBV'},
+                                'param':{'type':'s'}, 'epics_PV_out':'16bmb:scope_file:FullFileName_RBV'},
                         'file_filter':
                                 {'desc': 'Filename', 'val':'Text (*.csv);;Binary (*.npz)', 
                                 'param':{'type':'s'}},
@@ -62,6 +62,8 @@ class SaveDataModel(pvModel):
                                 'param':{'type':'dict'}}, 
                         'save':     
                                 {'desc': ';Save', 'val':False, 
+                                'epics_PV_in':'16bmb:scope_file:WriteFile',
+                                'epics_PV_out':'16bmb:scope_file:WriteFile',
                                 'param':{'type':'b'}}, 
                         'autorestart':     
                                 {'desc': 'autorestart;ON/OFF', 'val':False, 
@@ -92,7 +94,7 @@ class SaveDataModel(pvModel):
                                 {'desc': 'Path exists;Yes/No', 'val':False, 
                                 'param':{'type':'b'}}, 
                         'name':
-                                {'desc': 'Name', 'val':'', 
+                                {'desc': 'Last file', 'val':'', 
                                 
                                 'param':{'type':'s'}},
                         'format':
@@ -102,7 +104,7 @@ class SaveDataModel(pvModel):
                                 {'desc': 'Next file #', 'val':0,'min':0,'max':1e16,
                                 'param':{ 'type':'i'}},
                         'latest_event':
-                                {'desc': 'Status', 'val':'', 'epics_PV':'16bmb:scope_file:WriteMessage',
+                                {'desc': 'Status', 'val':'', 'epics_PV_out':'16bmb:scope_file:WriteMessage',
                                 
                                 'param':{'type':'s'}},
 
@@ -266,6 +268,7 @@ class SaveDataModel(pvModel):
     
     def _set_save(self, state):
         self.pvs['save']._val = state
+        print('received save state: ' + str(state))
         if state:
 
             file_system_path = self.pvs['file_system_path']._val
@@ -313,9 +316,10 @@ class SaveDataModel(pvModel):
                     pass
 
                 self.write_file(file_name, params=params)
-            #print(self.pvs['save']._pv_name + ' save done')
+            print(self.pvs['save']._pv_name + ' save done')
             #self.pvs['save']._pv_name
             self.pvs['save'].set(False)
+            
 
     
     def _set_file_extension(self, extension):

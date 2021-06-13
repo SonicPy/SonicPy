@@ -34,8 +34,7 @@ class SaveDataController(pvController):
                             'name',
                             'next_file_number',
                             'latest_event',
-                            'save',
-                            'full_file_name'
+                            'save'
                         ]
 
         self.init_panel("Save data", self.panel_items)

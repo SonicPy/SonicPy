@@ -112,7 +112,7 @@ class AFG_AFG3251(Afg, pvModel):
             self.AFG3000.write(command)
     
     def write_binary_values(self, command, binary_waveform):
-        print (command)
+        #print (command)
         if self.connected:
             self.AFG3000.write_binary_values(command, binary_waveform, datatype='h', is_big_endian=True)
 
@@ -147,7 +147,7 @@ class AFG_AFG3251(Afg, pvModel):
                     self.write('data:copy ' +slot+', ememory')
 
                 self.pvs['function_shape'].set('user1')
-                print('set function_shape to user1')
+                #print('set function_shape to user1')
                 self.pvs['frequency'].set(float(freq))
 
             self.pvs['upload_user1_waveform'].set(False)
@@ -165,7 +165,7 @@ class AFG_AFG3251(Afg, pvModel):
             if len(waveform):
                 self.pvs['upload_user1_waveform'].set(True)
 
-        print('_set_user1_waveform')
+        #print('_set_user1_waveform')
     
     def _set_user1_waveform_from_file(self, filename):
         current_file = self.pvs['user1_waveform_from_file']._val

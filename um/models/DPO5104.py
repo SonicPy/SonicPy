@@ -95,7 +95,7 @@ class Scope_DPO5104(Scope, pvModel):
 
     def connect(self, hostname):
         
-        self.DPO5000 = TektronixScope('143')
+        self.DPO5000 = TektronixScope(hostname)
         return self.DPO5000.connect()
         
         
@@ -162,7 +162,7 @@ class Scope_DPO5104(Scope, pvModel):
                 self.pvs['waveform']._val={}
                 
                 self._set_channel_state(True)
-                print('erased')
+                #print('erased')
                 
             except:
                 pass
@@ -281,8 +281,8 @@ class Scope_DPO5104(Scope, pvModel):
         #print('get waveform')
 
         if self.connected:
-            #start = time.time()
-            #wait_till = start+0.05
+            start = time.time()
+            wait_till = start+0.5
             num_av = self.pvs['num_av']._val
             num_acq = self.pvs['num_acq']._val
             stop_after_preset = self.pvs['stop_after_num_av_preset']._val
@@ -297,8 +297,8 @@ class Scope_DPO5104(Scope, pvModel):
                 
                 #end = time.time()
                 # make sure set frame rate isn't exceeded
-                #while time.time()< wait_till:
-                #        time.sleep(0.005)
+                while time.time()< wait_till:
+                        time.sleep(0.005)
                 num_acq = int(self.DPO5000.num_acq)
                 #elapsed = end - start
                 (dt, micro) = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f').split('.')

@@ -765,7 +765,7 @@ class PltWidget(pg.PlotWidget):
 
     def create_plots(self, xAxis,data,roiHorz,roiData, xLabel):
         # initialize some plots
-        self.setLabel('left', 'Amplitude')
+        #self.setLabel('left', 'Amplitude')
         data_color = self.colors['data_color']
         self.plotForeground = pg.PlotDataItem(xAxis, data, title="",
                 antialias=True, pen=pg.mkPen(color=data_color, width=1), connect="finite" )

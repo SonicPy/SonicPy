@@ -21,10 +21,12 @@ from um.controllers.ScopePlotController import ScopePlotController
 from um.controllers.ArbController import ArbController
 from um.controllers.ArbFilterController import ArbFilterController
 from um.controllers.SaveDataController import SaveDataController
+from um.controllers.WaterfallController import WaterfallController
+from um.controllers.WaterfallPlotController import WaterfallPlotController
 
 from um.controllers.OverlayController import OverlayController
 
-from um.models.WaveformModel import Waveform
+
 import math
 
 from um.controllers.PhaseController import PhaseController
@@ -82,7 +84,9 @@ class UltrasoundController(QObject):
         self.sweep_controller = SweepController(self,
                                                 self.scope_controller.model.pvs, 
                                                 self.afg_controller.model.pvs)
-
+        self.waterfall_controller = WaterfallController(self)
+        waterfall_widget = self.display_window.scan_widget
+        self.waterfall_plotController = WaterfallPlotController(self.waterfall_controller,waterfall_widget)
 
         self.phase_controller = PhaseController(self.scope_plot_controller.plt,
                                                 self.scope_plot_controller, self.working_directories)
@@ -143,7 +147,7 @@ class UltrasoundController(QObject):
         #self.display_window.actionBGclose.triggered.connect(self.close_background_callback)
         self.display_window.ActionRecallSetup.triggered.connect(self.RecallSetupCallback)
         self.display_window.ActionSaveSetup.triggered.connect(self.SaveSetupCallback)
-        self.display_window.ActionSetUserWaveform.triggered.connect(self.SetUserWaveformCallback)
+        #self.display_window.ActionSetUserWaveform.triggered.connect(self.SetUserWaveformCallback)
         self.display_window.actionCursors.triggered.connect(self.cursorsCallback)
 
     
@@ -163,16 +167,7 @@ class UltrasoundController(QObject):
         old_index = self.current_tab_index
         self.current_tab_index = ind
 
-    def SetUserWaveformCallback(self):
-        pass
-        
-        '''
-        arb = get_arb()
-        waveform={}
-        waveform['binary_waveform'] = arb
-
-        self.afg_controller.model.pvs['user1_waveform'].set(copy.deepcopy(waveform))
-        '''
+    
 
     def RecallSetupCallback(self):
         print('RecallSetupCallback')

@@ -15,7 +15,7 @@ import queue
 
 class Scope_DPO5104(Scope, QThread):
     waveform_updated_signal = pyqtSignal(dict)
-    def __init__(self, parent, visa_hostname='143'):
+    def __init__(self, parent, visa_hostname='44'):
         
         QThread.__init__(self,parent)
         Scope.__init__(self)

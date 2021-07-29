@@ -1,0 +1,22 @@
+{
+    "SaveData": ["data_channel",
+                "filename",
+                "file_filter",
+                "file_extension",
+                "file_header", 
+                "save", 
+                "autorestart", 
+                "autosave", 
+                "warn_overwrite",
+                "params",
+                "file_system_path",
+                "subdirectory",
+                "base_name",
+                "path",
+                "path_exists", 
+                "name",
+                "format",
+                "next_file_number",
+                "latest_event"
+    ]
+}

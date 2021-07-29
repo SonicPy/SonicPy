@@ -76,8 +76,7 @@ class ArbFilterController(pvController):
         if isMain:
             self.show_widget()
         
-    def exit(self):
-        self.model.exit()
+    
 
 
     def make_connections(self):

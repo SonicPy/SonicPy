@@ -22,12 +22,16 @@ import string
 
 from os.path import expanduser
 
+from epics import caput, caget, PV
+
 class SaveDataModel(pvModel):
     
 
     def __init__(self, parent, offline = False):
         super().__init__(parent)
         self.parent= parent
+
+
         
         self.pv_server = pvServer()
         
@@ -38,9 +42,15 @@ class SaveDataModel(pvModel):
         self.tasks = {  'data_channel':
                                 {'desc': '', 'val':'', 
                                 'param':{'type':'s'}},
+                        'history_channel':
+                                {'desc': '', 'val':'', 
+                                'param':{'type':'s'}},
                         'filename':
                                 {'desc': 'Filename', 'val':'', 
                                 'param':{'type':'s'}},
+                        'full_file_name':
+                                {'desc': 'FullFileName', 'val':'', 
+                                'param':{'type':'s'}, 'epics_PV_out':'16bmb:scope_file:FullFileName_RBV'},
                         'file_filter':
                                 {'desc': 'Filename', 'val':'Text (*.csv);;Binary (*.npz)', 
                                 'param':{'type':'s'}},
@@ -52,6 +62,8 @@ class SaveDataModel(pvModel):
                                 'param':{'type':'dict'}}, 
                         'save':     
                                 {'desc': ';Save', 'val':False, 
+                                'epics_PV_in':'16bmb:scope_file:WriteFile',
+                                'epics_PV_out':'16bmb:scope_file:WriteFile',
                                 'param':{'type':'b'}}, 
                         'autorestart':     
                                 {'desc': 'autorestart;ON/OFF', 'val':False, 
@@ -82,7 +94,7 @@ class SaveDataModel(pvModel):
                                 {'desc': 'Path exists;Yes/No', 'val':False, 
                                 'param':{'type':'b'}}, 
                         'name':
-                                {'desc': 'Name', 'val':'', 
+                                {'desc': 'Last file', 'val':'', 
                                 
                                 'param':{'type':'s'}},
                         'format':
@@ -92,7 +104,7 @@ class SaveDataModel(pvModel):
                                 {'desc': 'Next file #', 'val':0,'min':0,'max':1e16,
                                 'param':{ 'type':'i'}},
                         'latest_event':
-                                {'desc': 'Status', 'val':'', 
+                                {'desc': 'Status', 'val':'', 'epics_PV_out':'16bmb:scope_file:WriteMessage',
                                 
                                 'param':{'type':'s'}},
 
@@ -101,6 +113,29 @@ class SaveDataModel(pvModel):
         self.create_pvs(self.tasks)
 
         self.pvs['data_channel'].set('DPO5104:waveform')
+        self.pvs['history_channel'].set('Waterfall:waveform_in')
+
+
+        # these may get implemented in the future to be in line with area detector file saving workflow
+        '''self.pvs_file ={'FilePath': None,
+                        'FilePath_RBV': None,
+                        'FileName': None,
+                        'FileName_RBV': None,
+                        'FullFileName_RBV': None,
+                        'FileTemplate': None,
+                        'FileTemplate_RBV': None,
+                        'WriteMessage': None,
+                        'FileNumber': None,
+                        'FileNumber_RBV': None,
+                        'AutoIncrement': None,
+                        'AutoIncrement_RBV': None,
+                        'WriteStatus': None,
+                        'FilePathExists_RBV': None,
+                        'AutoSave': None,
+                        'AutoSave_RBV': None,
+                        'WriteFile': None,
+                        'WriteFile_RBV': None}'''
+
 
     
     #####################################################################
@@ -110,6 +145,7 @@ class SaveDataModel(pvModel):
     def write_file(self, filename, params = {}):
         data = self.pv_server.get_pv(self.pvs['data_channel']._val)._val
         #print(data)
+        
         
         if len(data):
             waveform  = data['waveform']
@@ -130,7 +166,7 @@ class SaveDataModel(pvModel):
             y = y.reshape(-1, R)
             y = nanmean(y.reshape(-1,R), axis=1)
 
-            
+            path, fname = os.path.split(filename)
 
             '''subsample = np.arange(0,len(x),10)
             x = np.take(x, subsample)
@@ -139,30 +175,41 @@ class SaveDataModel(pvModel):
 
             success = False
             if filename.endswith('.csv'):
+                fullname = os.path.expanduser(filename)
                 try:
-                    write_tek_csv(filename, waveform[0], waveform[1], params)
+                    
+                    write_tek_csv(fullname, waveform[0], waveform[1], params)
                     success = True
                 except :
                     pass
                 
             if filename.endswith('.npz'):
                 try:
-                    np.savez_compressed(filename, waveform)
+                    np.savez_compressed(fullname, waveform)
                     success = True
                 except :
                     pass
+            
 
             if success:
                 filenumber = self.pvs['next_file_number']._val
                 self.pvs['next_file_number'].set(filenumber+1)
-                path, fname = os.path.split(filename)
                 self.pvs['path'].set(str(path))
                 self.pvs['name'].set(str(fname))
+                self.pvs['full_file_name'].set(str(fullname))
                 self.pvs['latest_event'].set('Wrote data to ' + str(fname))
+                 
             else:
                 self.pvs['latest_event'].set('Failed writing ' + str(fname))
             
             self.pvs['filename'].set(filename)
+            history_pvname = self.pvs['history_channel']._val
+            history_pv = self.pv_server.get_pv(history_pvname)
+            waveform_out = {}
+            waveform_out['filename']= filename
+            waveform_out['waveform']= waveform
+            history_pv.set(waveform_out)
+            #print('set wafeform_in')
         else:
             self.pvs['latest_event'].set('No data to write')
         
@@ -221,11 +268,14 @@ class SaveDataModel(pvModel):
     
     def _set_save(self, state):
         self.pvs['save']._val = state
+        print('received save state: ' + str(state))
         if state:
 
             file_system_path = self.pvs['file_system_path']._val
             subdirectory = self.pvs['subdirectory']._val
+            
             path = os.path.join(file_system_path,subdirectory)
+            path = os.path.expanduser(path)
             if not os.path.exists(path):
                 try:
                     os.mkdir(path)
@@ -266,9 +316,10 @@ class SaveDataModel(pvModel):
                     pass
 
                 self.write_file(file_name, params=params)
-            #print(self.pvs['save']._pv_name + ' save done')
+            print(self.pvs['save']._pv_name + ' save done')
             #self.pvs['save']._pv_name
             self.pvs['save'].set(False)
+            
 
     
     def _set_file_extension(self, extension):

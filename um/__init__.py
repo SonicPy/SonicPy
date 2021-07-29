@@ -11,6 +11,8 @@ icons_path = os.path.join(resources_path, 'icons')
 data_path = os.path.join(resources_path, 'data')
 style_path = os.path.join(resources_path, 'style')
 env_path = os.path.join(resources_path, 'catch1d.env')
+autosave_settings_path = os.path.join(resources_path, 'pv','autosave.json')
+autosave_data_path = os.path.join(resources_path, 'pv','saved')
 
 from pathlib import Path
 home_path = str(Path.home())

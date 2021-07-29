@@ -8,7 +8,7 @@ from pyqtgraph import QtCore, mkPen, mkColor, hsvColor, ViewBox
 from um.widgets.CustomWidgets import HorizontalSpacerItem, VerticalSpacerItem, FlatButton
 import numpy as np
 
-class scopeWidget(QtWidgets.QWidget):
+class WaterfallWidget(QtWidgets.QWidget):
     panelClosedSignal = pyqtSignal()
     def __init__(self, ctrls = []):
         super().__init__()
@@ -16,7 +16,7 @@ class scopeWidget(QtWidgets.QWidget):
         self._layout = QtWidgets.QVBoxLayout()
         self._layout.setSpacing(0)
         self._layout.setContentsMargins(8, 0, 8, 0)
-        params = "plot title", 'Amplitude', 'Time'
+        params = "Waterfall plot", 'Scan point', 'Time'
         self.plot_widget = customWidget(params)
         
         self.button_widget = QtWidgets.QWidget()
@@ -24,6 +24,8 @@ class scopeWidget(QtWidgets.QWidget):
         self._button_layout = QtWidgets.QHBoxLayout()
         self._button_layout.setSpacing(10)
         self._button_layout.setContentsMargins(0, 8, 0, 12)
+
+        self._button_layout.addWidget(QtWidgets.QLabel('Scan view'))
       
         self._status_layout = QtWidgets.QVBoxLayout()
 

@@ -353,6 +353,8 @@ class SweepModel(pvModel):
     def current_setpoint_index_callback(self, pv, data):
         ind = data[0]
         self.pvs['current_point'].set(ind+1)
+        current_setpoint = self.setpointSweepThread.pvs['current_setpoint']._val
+        self.pvs['setpoint'].set(current_setpoint)
 
     def stop_scan(self):
         self.setpointSweepThread.pvs['run_state']._val = False

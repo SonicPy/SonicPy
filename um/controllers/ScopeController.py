@@ -24,7 +24,7 @@ class ScopeController(pvController):
     #runStateSignal = pyqtSignal(bool)
 
     def __init__(self, parent, isMain = False, offline = False):
-        visa_hostname='143' 
+        visa_hostname = '143'
         model = Scope_DPO5104(parent, visa_hostname=visa_hostname, offline = offline)
         super().__init__(parent, model, isMain) 
         
@@ -39,7 +39,7 @@ class ScopeController(pvController):
         self.init_panel("Scope", self.panel_items)
         self.make_connections()
 
-        self.env_controller = envController(offline = offline)
+        #self.env_controller = envController(offline = offline)
         
         if isMain:
             self.show_widget()
@@ -50,8 +50,7 @@ class ScopeController(pvController):
         for item in panel_items:
             self.model.pvs[item].get()
         
-    def exit(self):
-        self.model.exit()
+    
 
     def make_connections(self):
         self.model.pvs['waveform'].value_changed_signal.connect(self.waveform_updated_signal_callback)

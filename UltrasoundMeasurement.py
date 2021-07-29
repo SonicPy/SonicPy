@@ -6,7 +6,7 @@
 
 from um import main
 
-main(offline=True)
+main(offline=False)
  
 
 # TODO monitoring epics_PV for and update inernal PVs accordingly

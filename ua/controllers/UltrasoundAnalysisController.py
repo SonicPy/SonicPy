@@ -6,10 +6,10 @@ import os.path, sys
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QObject, pyqtSignal
 import numpy as np
-from functools import partial
-import json
-import copy
-from pathlib import Path
+#from functools import partial
+#import json
+#import copy
+##from pathlib import Path
 from numpy import arange
 from utilities.utilities import *
 from ua.widgets.UltrasoundAnalysisWidget import UltrasoundAnalysisWidget
@@ -21,12 +21,12 @@ import math
 from ua.controllers.ArrowPlotController import ArrowPlotController
 
 
-from um.models.WaveformModel import Waveform
+#from um.models.WaveformModel import Waveform
 
-from um.controllers.PhaseController import PhaseController
+#from um.controllers.PhaseController import PhaseController
 
 
-import utilities.hpMCAutilities as mcaUtil
+#import utilities.hpMCAutilities as mcaUtil
 from utilities.HelperModule import increment_filename, increment_filename_extra
 from um.widgets.UtilityWidgets import open_file_dialog
 

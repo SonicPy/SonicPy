@@ -83,11 +83,22 @@ class ImageAnalysisWidget(QMainWindow):
 
         self.buttons_widget_top.setLayout(self._buttons_layout_top)
         self._layout.addWidget(self.buttons_widget_top)
+
+        self.plot_grid = QtWidgets.QWidget(self.my_widget)
+        self._plot_grid_layout = QtWidgets.QGridLayout(self.plot_grid)
+
         params = "Image echo analysis", 'Amplitude', 'Time'
         self.imv = pg.ImageView(self.my_widget)
         self.imv_filtered = pg.ImageView(self.my_widget)
-        self._layout.addWidget(self.imv)
-        self._layout.addWidget(self.imv_filtered)
+        self.imv_roi = pg.ImageView(self.my_widget)
+        self.imv_roi_filtered = pg.ImageView(self.my_widget)
+        self._plot_grid_layout.addWidget(self.imv, 0,0)
+        self._plot_grid_layout.addWidget(self.imv_filtered,0,1)
+        self._plot_grid_layout.addWidget(self.imv_roi, 1,0)
+        self._plot_grid_layout.addWidget(self.imv_roi_filtered,1,1)
+
+        self.plot_grid.setLayout(self._plot_grid_layout)
+        self._layout.addWidget(self.plot_grid)
         
         calc_btn = QtWidgets.QPushButton('Correlate')
         #_buttons_layout_bottom.addWidget(calc_btn)

@@ -23,14 +23,15 @@ import numpy as np
 class ImageAnalysisModel():
     def __init__(self):
         self.image = None
-        self.load_file("/Users/hrubiak/GitHub/sonicPy/ia/resources/logo_og.png")
+        self.src = None
+        #self.load_file("/Users/hrubiak/GitHub/sonicPy/ia/resources/logo_og.png")
         
 
     
     def load_file(self, fname):
-        src = cv2.imread(fname,0)
+        self.src = cv2.imread(fname,0)
         #image = cv2.transpose(src)
-        self.image = medfilt2d(src,kernel_size=3)
+        self.image = medfilt2d(self.src,kernel_size=3)
 
     def compute_edges(self):
         image = self.image
@@ -46,9 +47,9 @@ class ImageAnalysisModel():
 
         # Below code convert image gradient in y direction
         sobely= cv2.Sobel(image,cv2.CV_64F, dx=0,dy=1)
-        sobely = np.uint8(np.absolute(sobely))
+        self.sobely = np.uint8(np.absolute(sobely))
 
-        results = sobely
+        results = self.sobely
         return results
 
     def save_result(self, filename):

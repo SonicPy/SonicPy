@@ -34,6 +34,8 @@ class ImageAnalysisController(QObject):
         
         self.make_connections()
         self.display_window.raise_widget()
+
+        
         
         '''filename='resources/ultrasonic/4000psi-300K_+21MHz000.csv'
         self.update_data(filename=filename)'''
@@ -41,8 +43,16 @@ class ImageAnalysisController(QObject):
     def make_connections(self): 
         self.display_window.open_btn.clicked.connect(self.update_data)
         self.display_window.save_btn.clicked.connect(self.save_result)
-
+        self.display_window.crop_roi.sigRegionChanged.connect(self.update_cropped)
     
+
+    def update_cropped(self):
+        if self.model.src is not None:
+            roi = self.display_window.crop_roi
+            img = self.display_window.imgs[3]
+            
+            selected = roi.getArrayRegion(self.model.sobely, img)
+            self.display_window.imgs[1].setImage(selected)
 
     def save_result(self):
         if self.fname is not None:
@@ -76,18 +86,21 @@ class ImageAnalysisController(QObject):
             filename = open_file_dialog(None, "Load File(s).",filter='*.png;*.tif;*.bmp')
         if len(filename):
             self.model.load_file(filename)
+            self.display_window.imgs[0].setImage(self.model.src)
             image = self.model.image
             
             
             ## Display the data and assign each frame a time value from 1.0 to 3.0
-            self.display_window.imv.setImage(image)
+            self.display_window.imgs[2].setImage(image)
 
             filtered = self.model.compute_edges()
-            self.display_window.imv_filtered.setImage(filtered)
+            self.display_window.imgs[3].setImage(filtered)
     
 
     def show_window(self):
         self.display_window.raise_widget()
+
+   
 
     def cursor_dragged(self, cursor):
         pos = cursor.getYPos()

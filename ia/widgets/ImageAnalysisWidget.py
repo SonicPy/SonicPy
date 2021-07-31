@@ -14,6 +14,9 @@ import numpy as np
 from um.widgets.PltWidget import SimpleDisplayWidget, customWidget
 from functools import partial
 
+# Interpret image data as row-major instead of col-major
+pg.setConfigOptions(imageAxisOrder='row-major')
+
 class ImageAnalysisWidget(QMainWindow):
     
     preferences_signal = pyqtSignal()
@@ -42,7 +45,7 @@ class ImageAnalysisWidget(QMainWindow):
 
     def create_plots(self):
 
-        pass
+        self.make_roi()
         
 
     def get_echo_bounds(self, i):
@@ -84,20 +87,30 @@ class ImageAnalysisWidget(QMainWindow):
         self.buttons_widget_top.setLayout(self._buttons_layout_top)
         self._layout.addWidget(self.buttons_widget_top)
 
-        self.plot_grid = QtWidgets.QWidget(self.my_widget)
-        self._plot_grid_layout = QtWidgets.QGridLayout(self.plot_grid)
+        self.plot_grid = pg.GraphicsLayoutWidget(self.my_widget)
+        self.plot_grid.setBackground((255,255,255))
+        #self._plot_grid_layout = QtWidgets.QGridLayout(self.plot_grid)
 
-        params = "Image echo analysis", 'Amplitude', 'Time'
-        self.imv = pg.ImageView(self.my_widget)
-        self.imv_filtered = pg.ImageView(self.my_widget)
-        self.imv_roi = pg.ImageView(self.my_widget)
-        self.imv_roi_filtered = pg.ImageView(self.my_widget)
-        self._plot_grid_layout.addWidget(self.imv, 0,0)
-        self._plot_grid_layout.addWidget(self.imv_filtered,0,1)
-        self._plot_grid_layout.addWidget(self.imv_roi, 1,0)
-        self._plot_grid_layout.addWidget(self.imv_roi_filtered,1,1)
+        plots_labels = ['src','cropped','median', 'Sobel']
+        self.imgs = []
+        self.plots = []
+        col = 0
+        for plot_label in plots_labels:
+            
+            if col >1:
+                col = 0
+                self.plot_grid.nextRow()
+            plt = self.plot_grid.addPlot(title=plot_label)
+            view = plt.getViewBox()
+            view.setAspectLocked(True)
+            img = pg.ImageItem()
+            plt.addItem(img)
+            self.imgs.append(img)
+            self.plots.append(plt)
+            col = col + 1
+            
 
-        self.plot_grid.setLayout(self._plot_grid_layout)
+
         self._layout.addWidget(self.plot_grid)
         
         calc_btn = QtWidgets.QPushButton('Correlate')
@@ -109,7 +122,18 @@ class ImageAnalysisWidget(QMainWindow):
         self.buttons_widget_bottom.setLayout(self._buttons_layout_bottom)
         self._layout.addWidget(self.buttons_widget_bottom)
         self.my_widget.setLayout(self._layout)
+
+    
+
+    def make_roi(self):
+        # Custom ROI for selecting an image region
+        self.crop_roi = pg.ROI([300, 200], [1000, 1000])
+        self.crop_roi.addScaleHandle([0, 1], [1, 0])
+        self.crop_roi.addScaleHandle([1, 0], [0, 1])
+        self.crop_roi.setZValue(10)  # make sure ROI is drawn above image
+        self.plots[3].addItem(self.crop_roi)
         
+
 
     def closeEvent(self, QCloseEvent, *event):
         self.panelClosedSignal.emit()

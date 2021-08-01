@@ -35,7 +35,7 @@ class ImageAnalysisController(QObject):
         self.make_connections()
         self.display_window.raise_widget()
 
-        
+        self.update_data(filename='/Users/ross/GitHub/sonicPy/ia/resources/SYLG_400psi_C.tif')
         
         '''filename='resources/ultrasonic/4000psi-300K_+21MHz000.csv'
         self.update_data(filename=filename)'''
@@ -49,10 +49,29 @@ class ImageAnalysisController(QObject):
     def update_cropped(self):
         if self.model.src is not None:
             roi = self.display_window.crop_roi
-            img = self.display_window.imgs[3]
+            img = self.display_window.imgs[0]
             
-            selected = roi.getArrayRegion(self.model.sobely, img)
-            self.display_window.imgs[1].setImage(selected)
+            selected = roi.getArrayRegion(self.model.image, img)
+            
+
+            img_bg = self.model.get_background(selected, 20,80 )
+
+            self.display_window.imgs[5].setImage(img_bg)
+
+            #self.display_window.imgs[5].setImage(img_bg)
+
+            bg_removed = selected - img_bg
+
+
+            sobel_yx, horizontal_edges, sobely = self.model.compute_canny(bg_removed)
+            #horizontal_edges = 1* (horizontal_edges == 1)
+            self.display_window.imgs[1].setImage(sobel_yx)
+
+            mean_peak = sobely.mean(axis=1)
+
+            self.display_window.plots[2].plot(mean_peak, clear=True)
+            self.display_window.imgs[4].setImage(horizontal_edges)
+    
 
     def save_result(self):
         if self.fname is not None:
@@ -86,33 +105,25 @@ class ImageAnalysisController(QObject):
             filename = open_file_dialog(None, "Load File(s).",filter='*.png;*.tif;*.bmp')
         if len(filename):
             self.model.load_file(filename)
+            self.display_window.fname_lbl.setText(filename)
             self.display_window.imgs[0].setImage(self.model.src)
             image = self.model.image
             
             
             ## Display the data and assign each frame a time value from 1.0 to 3.0
-            self.display_window.imgs[2].setImage(image)
+            #self.display_window.imgs[3].setImage(image)
 
-            filtered = self.model.compute_edges()
-            self.display_window.imgs[3].setImage(filtered)
+            filtered = self.model.compute_sobel()
+            #self.display_window.imgs[5].setImage(filtered)
+            
+
+            self.display_window.plots[3].plot(filtered.mean(axis=1), clear=True)
     
 
     def show_window(self):
         self.display_window.raise_widget()
 
    
-
-    def cursor_dragged(self, cursor):
-        pos = cursor.getYPos()
-        c1 = self.display_window.hLine1
-        c2 = self.display_window.hLine2
-        
-        ind = int(math.floor(pos))
-        self.show_waveform(ind)
-        if c1 is not cursor:
-            c1.setPos(pos)
-        if c2 is not cursor:
-            c2.setPos(pos)
 
     def up_down_signal_callback(self, event):
         new_ind = self.waveform_index

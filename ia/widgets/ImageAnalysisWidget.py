@@ -48,8 +48,7 @@ class ImageAnalysisWidget(QMainWindow):
         self.make_roi()
         
 
-    def get_echo_bounds(self, i):
-        return self.echo_bounds[i].getRegion()
+
 
     def update_view(self, image):
         
@@ -91,22 +90,31 @@ class ImageAnalysisWidget(QMainWindow):
         self.plot_grid.setBackground((255,255,255))
         #self._plot_grid_layout = QtWidgets.QGridLayout(self.plot_grid)
 
-        plots_labels = ['src','cropped','median', 'Sobel']
+        plots_labels = {'src':'img','cropped':'img','something':'plot','sobel summed':'plot', 'canny':'img', 'Background':'img'}
         self.imgs = []
+        
         self.plots = []
         col = 0
         for plot_label in plots_labels:
             
-            if col >1:
+            if col >2:
                 col = 0
                 self.plot_grid.nextRow()
-            plt = self.plot_grid.addPlot(title=plot_label)
-            view = plt.getViewBox()
-            view.setAspectLocked(True)
-            img = pg.ImageItem()
-            plt.addItem(img)
-            self.imgs.append(img)
-            self.plots.append(plt)
+
+            plot_type = plots_labels[plot_label]
+            if plot_type == 'img':
+                plt = self.plot_grid.addPlot(title=plot_label)
+                view = plt.getViewBox()
+                #view.setAspectLocked(True)
+                img = pg.ImageItem()
+                plt.addItem(img)
+                self.imgs.append(img)
+                self.plots.append(plt)
+            elif plot_type == 'plot':
+                plt = self.plot_grid.addPlot(title=plot_label)
+                
+                self.imgs.append(None)
+                self.plots.append(plt)
             col = col + 1
             
 
@@ -127,11 +135,11 @@ class ImageAnalysisWidget(QMainWindow):
 
     def make_roi(self):
         # Custom ROI for selecting an image region
-        self.crop_roi = pg.ROI([300, 200], [1000, 1000])
+        self.crop_roi = pg.ROI([50, 200], [150, 100])
         self.crop_roi.addScaleHandle([0, 1], [1, 0])
         self.crop_roi.addScaleHandle([1, 0], [0, 1])
         self.crop_roi.setZValue(10)  # make sure ROI is drawn above image
-        self.plots[3].addItem(self.crop_roi)
+        self.plots[0].addItem(self.crop_roi)
         
 
 

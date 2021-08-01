@@ -34,7 +34,7 @@ class ImageAnalysisModel():
 
     
     def load_file(self, fname):
-        src = np.asarray(cv2.imread(fname,0))
+        src = np.asarray(cv2.imread(fname,0),dtype=np.float)
 
         
         

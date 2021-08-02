@@ -8,6 +8,7 @@ from PyQt5.QtCore import QObject, pyqtSignal
 import numpy as np
 
 from numpy import arange
+from numpy.core.fromnumeric import amax
 from utilities.utilities import *
 from ia.widgets.ImageAnalysisWidget import ImageAnalysisWidget
 
@@ -19,6 +20,7 @@ from utilities.HelperModule import increment_filename, increment_filename_extra
 from um.widgets.UtilityWidgets import open_file_dialog
 
 from .. import resources_path
+
 
 ############################################################
 
@@ -44,13 +46,13 @@ class ImageAnalysisController(QObject):
     def make_connections(self): 
         self.display_window.open_btn.clicked.connect(self.update_data)
         self.display_window.save_btn.clicked.connect(self.save_result)
-        self.display_window.crop_roi.sigRegionChanged.connect(self.update_cropped)
+        self.display_window.edge_roi.sigRegionChanged.connect(self.update_cropped)
     
 
     def update_cropped(self):
         if self.model.src is not None:
-            roi = self.display_window.crop_roi
-            img = self.display_window.imgs[0]
+            roi = self.display_window.edge_roi
+            img = self.display_window.imgs[6]
             
             selected = roi.getArrayRegion(self.model.image, img)
             
@@ -59,19 +61,21 @@ class ImageAnalysisController(QObject):
 
             self.display_window.imgs[5].setImage(img_bg)
 
-            #self.display_window.imgs[5].setImage(img_bg)
-
+            
+            
             bg_removed = selected - img_bg
+            self.display_window.imgs[11].setImage(bg_removed)
 
-
-            sobel_yx, horizontal_edges, sobely = self.model.compute_canny(bg_removed)
+            image, horizontal_edges, sobely = self.model.compute_canny(bg_removed)
             #horizontal_edges = 1* (horizontal_edges == 1)
-            self.display_window.imgs[1].setImage(sobel_yx)
+            self.display_window.imgs[1].setImage(image)
+            mean_peak = image.mean(axis=1)
+            mean_peak_sobel = sobely.mean(axis=1)
 
-            mean_peak = sobely.mean(axis=1)
-
-            self.display_window.plots[2].plot(mean_peak, clear=True)
+            self.display_window.plots[8].plot(mean_peak, clear=True)
+            self.display_window.plots[2].plot(mean_peak_sobel, clear=True)
             self.display_window.imgs[4].setImage(horizontal_edges)
+            self.display_window.imgs[7].setImage(sobely)
     
 
     def save_result(self):
@@ -115,11 +119,22 @@ class ImageAnalysisController(QObject):
             #self.display_window.imgs[3].setImage(image)
 
             filtered = self.model.compute_sobel()
-            #self.display_window.imgs[5].setImage(filtered)
+            self.display_window.imgs[9].setImage(image)
             
+            sobel_mean_vertical = filtered[:,35:65].mean(axis=1)
+            
+            self.model.estimate_edges()
+            self.display_window.plots[3].plot(sobel_mean_vertical, clear=True)
+            self.display_window.plots[3].plot(self.model.blured_sobel_mean_vertical )
+            self.display_window.imgs[6].setImage(self.model.src_resized )
 
-            self.display_window.plots[3].plot(filtered.mean(axis=1), clear=True)
-    
+            self.display_window.imgs[10].setImage(filtered)
+
+            #self.display_window.imgs[11].setImage(self.model.base_surface)
+
+            self.display_window.crop_roi.setPos((self.model.crop_limits[0][0],self.model.crop_limits[0][1]))
+            self.display_window.crop_roi.setSize((self.model.crop_limits[1][0],self.model.crop_limits[1][1]))
+            #self.display_window.plots[7].plot(self.model.ver, clear=True)
 
     def show_window(self):
         self.display_window.raise_widget()

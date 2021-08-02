@@ -8,6 +8,7 @@ from PyQt5.QtCore import QObject, pyqtSignal, Qt
 
 import pyqtgraph as pg
 from pyqtgraph import QtCore, mkPen, mkColor, hsvColor, ViewBox
+from pyqtgraph.functions import pseudoScatter
 from um.widgets.CustomWidgets import HorizontalSpacerItem, VerticalSpacerItem, FlatButton
 import numpy as np
 
@@ -32,7 +33,7 @@ class ImageAnalysisWidget(QMainWindow):
 
         self.setWindowTitle('Image Analysis')
 
-        self.resize(1250, 800)
+        self.resize(1600, 1000)
         
         self.make_widget()
 
@@ -46,7 +47,7 @@ class ImageAnalysisWidget(QMainWindow):
     def create_plots(self):
 
         self.make_roi()
-        
+        self.make_edge_roi(self.plots[6])
 
 
 
@@ -90,14 +91,17 @@ class ImageAnalysisWidget(QMainWindow):
         self.plot_grid.setBackground((255,255,255))
         #self._plot_grid_layout = QtWidgets.QGridLayout(self.plot_grid)
 
-        plots_labels = {'src':'img','cropped':'img','something':'plot','sobel summed':'plot', 'canny':'img', 'Background':'img'}
+        plots_labels = {'src':'img','roi absorbance':'img','roi sobel vertical mean':'plot',
+                        'sobel vertical mean':'plot', 'roi canny':'img', 'roi background':'img', 
+                        'frame cropped':'img','roi sobel y':'img','roi vertical mean':'plot',
+                        'absorbance':'img', 'sobel y': 'img', 'base_surface':'img'}
         self.imgs = []
         
         self.plots = []
         col = 0
         for plot_label in plots_labels:
             
-            if col >2:
+            if col >3:
                 col = 0
                 self.plot_grid.nextRow()
 
@@ -140,7 +144,14 @@ class ImageAnalysisWidget(QMainWindow):
         self.crop_roi.addScaleHandle([1, 0], [0, 1])
         self.crop_roi.setZValue(10)  # make sure ROI is drawn above image
         self.plots[0].addItem(self.crop_roi)
-        
+
+    def make_edge_roi(self, plot):
+        # Custom ROI for selecting an image region
+        self.edge_roi = pg.ROI([5, 100], [100, 100])
+        self.edge_roi.addScaleHandle([0, 1], [1, 0])
+        self.edge_roi.addScaleHandle([1, 0], [0, 1])
+        self.edge_roi.setZValue(10)  # make sure ROI is drawn above image
+        plot.addItem(self.edge_roi)
 
 
     def closeEvent(self, QCloseEvent, *event):
@@ -156,6 +167,8 @@ class ImageAnalysisWidget(QMainWindow):
         if event is not None:
             self.up_down_signal.emit(event)
 
+
+    
 
     def style_widgets(self):
         

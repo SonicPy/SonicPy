@@ -3,6 +3,7 @@ import os.path, sys
 from token import NAME
 
 from numpy.core.fromnumeric import transpose
+from numpy.lib.type_check import imag
 from utilities.utilities import *
 from utilities.HelperModule import move_window_relative_to_screen_center, get_partial_index, get_partial_value
 import numpy as np
@@ -24,6 +25,10 @@ from skimage import feature
 from skimage import data, color
 from skimage.transform import rescale, resize, downscale_local_mean
 from scipy import interpolate
+import copy
+
+from scipy.ndimage import gaussian_filter1d
+from scipy.signal import find_peaks
 
 class ImageAnalysisModel():
     def __init__(self):
@@ -37,15 +42,20 @@ class ImageAnalysisModel():
         src = np.asarray(cv2.imread(fname,0),dtype=np.float)
 
         
-        
+        self.src = src
 
         image = medfilt2d(src,kernel_size=3)
 
-        horizontal_bin = 6
+        self.crop_limits = [hor_first, ver_first],[width, height] = self.crop_frame(image)
+        self.cropped = image[ver_first: ver_first+height,hor_first: hor_first+ width]
+
+        image = self.cropped
+
+        horizontal_bin = 10
         image_resized = resize(image, (image.shape[0] , image.shape[1] // horizontal_bin),
                        anti_aliasing=True)
 
-        self.src = image_resized
+        self.src_resized = image_resized
 
         tsrc = -1* np.log(image_resized/255)
         mn = np.amin(tsrc)
@@ -59,7 +69,28 @@ class ImageAnalysisModel():
         #image = cv2.transpose(src)
         image = medfilt2d(tsrc,kernel_size=3)
         
-        self.image = image
+        
+
+        #self.base_surface = self.get_base_surface(image)
+
+        self.image = image# - self.base_surface
+        
+    def find_edges(self, img):
+        pass
+
+
+    def get_base_surface(self, img, iterations = 30):
+        sig_work = copy.copy(img)
+        
+
+        for i in range(iterations):
+        
+            f = cv2.GaussianBlur(sig_work,(21,21),sigmaX=21, sigmaY=21)
+            less = f <= sig_work
+            sig_work[less] = f[less]
+
+        f = cv2.GaussianBlur(sig_work,(21,21),sigmaX=21, sigmaY=21)
+        return f
 
     def get_background(self, img, min_x, max_x):
 
@@ -83,10 +114,55 @@ class ImageAnalysisModel():
 
         znew = f(y, x)
 
-        bg_image = cv2.GaussianBlur(znew,(25,25),sigmaX=51, sigmaY=51)
+        bg_image = cv2.GaussianBlur(znew,(17,17),sigmaX=17, sigmaY=17)
 
         return bg_image
 
+    def estimate_edges(self):
+
+        
+        filtered = self.compute_sobel()
+        y_size = filtered.shape[1]
+        print(y_size)
+        min_y=(int(y_size*0.4))
+        max_y=(int(y_size*0.6))
+        sobel_mean_vertical = filtered[:,35:65].mean(axis=1)
+        self.blured_sobel_mean_vertical = gaussian_filter1d(sobel_mean_vertical,10)
+
+        peaks = find_peaks(self.blured_sobel_mean_vertical/np.amax(self.blured_sobel_mean_vertical), height=0.2 )
+
+        peaks_heights = {}
+        for i, peak in enumerate(peaks[1]['peak_heights']):
+            peaks_heights[round(peak,4)] = peaks[0][i]
+
+        sorted_peaks_height = sorted(list(peaks_heights.keys()),reverse=True)
+        sorted_peaks = []
+        for peak in sorted_peaks_height:
+            sorted_peaks.append(peaks_heights[peak])
+        peaks_edges = sorted(sorted_peaks[:2])
+        print( peaks_edges)
+
+    def crop_frame(self, img):
+
+        hor = img.mean(axis=0)
+        ver = img.mean(axis=1)
+        m = min( min(hor), min(ver))
+        crop_tightness = 5
+        crop_limit = m*5
+
+        hor_first, hor_last = self.get_1d_limits(hor,crop_limit, pad=36)
+        ver_first, ver_last = self.get_1d_limits(ver,crop_limit, pad=24)
+        width = hor_last -hor_first
+        height = ver_last- ver_first
+
+        
+
+        return [hor_first, ver_first],[width, height]
+
+    def get_1d_limits(self, profile, limit, pad=0):
+        first = np.argmax(profile>limit) + pad
+        last = len(profile) - np.argmax(np.flip(profile)> limit) - pad
+        return [first,last]
 
     def compute_canny(self, img):
 
@@ -108,7 +184,8 @@ class ImageAnalysisModel():
         
         sobel_yx = 1.0 * (sobely > sobelx )
 
-        edges2 = 1* feature.canny(img, sigma=3)
+
+        edges2 = 1* feature.canny(img/np.amax(img), sigma=3, low_threshold=.15)
         
         horizontal_edges = edges2 * sobel_yx
 

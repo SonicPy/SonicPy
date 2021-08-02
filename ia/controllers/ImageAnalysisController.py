@@ -46,25 +46,29 @@ class ImageAnalysisController(QObject):
     def make_connections(self): 
         self.display_window.open_btn.clicked.connect(self.update_data)
         self.display_window.save_btn.clicked.connect(self.save_result)
-        self.display_window.edge_roi.sigRegionChanged.connect(self.update_cropped)
-    
+        self.display_window.edge_roi_1.sigRegionChanged.connect(self.update_cropped)
+        self.display_window.edge_roi_2.sigRegionChanged.connect(self.update_cropped) 
 
     def update_cropped(self):
         if self.model.src is not None:
-            roi = self.display_window.edge_roi
+            roi1 = self.display_window.edge_roi_1
+            roi2 = self.display_window.edge_roi_2
             img = self.display_window.imgs[6]
             
-            selected = roi.getArrayRegion(self.model.image, img)
-            
+            selected = roi1.getArrayRegion(self.model.image, img)
+            selected2 = roi2.getArrayRegion(self.model.image, img)
 
-            img_bg = self.model.get_background(selected, 20,80 )
+            img_bg = self.model.get_background(selected, 15 )
+            img_bg2 = self.model.get_background(selected2, 15 )
 
             self.display_window.imgs[5].setImage(img_bg)
 
             
             
             bg_removed = selected - img_bg
-            self.display_window.imgs[11].setImage(bg_removed)
+            bg_removed2 = selected2 - img_bg2
+
+            self.display_window.imgs[11].setImage(bg_removed2)
 
             image, horizontal_edges, sobely = self.model.compute_canny(bg_removed)
             #horizontal_edges = 1* (horizontal_edges == 1)
@@ -123,7 +127,10 @@ class ImageAnalysisController(QObject):
             
             sobel_mean_vertical = filtered[:,35:65].mean(axis=1)
             
-            self.model.estimate_edges()
+            edges = self.model.estimate_edges()
+            self.display_window.edge_roi_1.setPos(5, edges[0]-50)
+            self.display_window.edge_roi_2.setPos(5, edges[1]-50)
+
             self.display_window.plots[3].plot(sobel_mean_vertical, clear=True)
             self.display_window.plots[3].plot(self.model.blured_sobel_mean_vertical )
             self.display_window.imgs[6].setImage(self.model.src_resized )

@@ -92,10 +92,11 @@ class ImageAnalysisModel():
         f = cv2.GaussianBlur(sig_work,(21,21),sigmaX=21, sigmaY=21)
         return f
 
-    def get_background(self, img, min_x, max_x):
+    def get_background(self, img, pad ):
 
         (m,n) = img.shape
-        remove_index_x= range(min_x, max_x)
+
+        remove_index_x= range(pad, m-pad)
 
 
         img_del = np.delete(img, remove_index_x, 0)
@@ -123,10 +124,10 @@ class ImageAnalysisModel():
         
         filtered = self.compute_sobel()
         y_size = filtered.shape[1]
-        print(y_size)
+        
         min_y=(int(y_size*0.4))
         max_y=(int(y_size*0.6))
-        sobel_mean_vertical = filtered[:,35:65].mean(axis=1)
+        sobel_mean_vertical = filtered[:,min_y:max_y].mean(axis=1)
         self.blured_sobel_mean_vertical = gaussian_filter1d(sobel_mean_vertical,10)
 
         peaks = find_peaks(self.blured_sobel_mean_vertical/np.amax(self.blured_sobel_mean_vertical), height=0.2 )
@@ -140,7 +141,8 @@ class ImageAnalysisModel():
         for peak in sorted_peaks_height:
             sorted_peaks.append(peaks_heights[peak])
         peaks_edges = sorted(sorted_peaks[:2])
-        print( peaks_edges)
+        
+        return peaks_edges
 
     def crop_frame(self, img):
 

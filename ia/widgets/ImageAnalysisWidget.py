@@ -147,11 +147,18 @@ class ImageAnalysisWidget(QMainWindow):
 
     def make_edge_roi(self, plot):
         # Custom ROI for selecting an image region
-        self.edge_roi = pg.ROI([5, 100], [100, 100])
-        self.edge_roi.addScaleHandle([0, 1], [1, 0])
-        self.edge_roi.addScaleHandle([1, 0], [0, 1])
-        self.edge_roi.setZValue(10)  # make sure ROI is drawn above image
-        plot.addItem(self.edge_roi)
+        self.edge_roi_1 = pg.ROI([5, 100], [100, 100])
+        self.edge_roi_1.addScaleHandle([0, 1], [1, 0])
+        self.edge_roi_1.addScaleHandle([1, 0], [0, 1])
+        self.edge_roi_1.setZValue(10)  # make sure ROI is drawn above image
+        plot.addItem(self.edge_roi_1)
+
+        # Custom ROI for selecting an image region
+        self.edge_roi_2 = pg.ROI([5, 800], [100, 100])
+        self.edge_roi_2.addScaleHandle([0, 1], [1, 0])
+        self.edge_roi_2.addScaleHandle([1, 0], [0, 1])
+        self.edge_roi_2.setZValue(10)  # make sure ROI is drawn above image
+        plot.addItem(self.edge_roi_2)
 
 
     def closeEvent(self, QCloseEvent, *event):

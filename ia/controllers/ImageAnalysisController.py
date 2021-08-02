@@ -18,7 +18,7 @@ import math
 from utilities.HelperModule import increment_filename, increment_filename_extra
 from um.widgets.UtilityWidgets import open_file_dialog
 
-
+from .. import resources_path
 
 ############################################################
 
@@ -35,7 +35,8 @@ class ImageAnalysisController(QObject):
         self.make_connections()
         self.display_window.raise_widget()
 
-        self.update_data(filename='/Users/ross/GitHub/sonicPy/ia/resources/SYLG_400psi_C.tif')
+        fname = os.path.join(resources_path, 'SYLG_400psi_C.tif')
+        self.update_data(filename=fname)
         
         '''filename='resources/ultrasonic/4000psi-300K_+21MHz000.csv'
         self.update_data(filename=filename)'''

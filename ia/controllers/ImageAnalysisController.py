@@ -18,9 +18,9 @@ import math
 
 from utilities.HelperModule import increment_filename, increment_filename_extra
 from um.widgets.UtilityWidgets import open_file_dialog
-
+import pyqtgraph as pg
 from .. import resources_path
-
+import copy
 
 ############################################################
 
@@ -35,6 +35,9 @@ class ImageAnalysisController(QObject):
         self.display_window = ImageAnalysisWidget()
         
         self.make_connections()
+        self.edge1_plt = self.display_window.plots['edge1 fit'].plot([], pen = pg.mkPen((255,0,0, 180),width=3,style=pg.QtCore.Qt.DotLine))
+        self.edge2_plt = self.display_window.plots['edge2 fit'].plot([], pen = pg.mkPen((255,0,0, 180),width=3,style=pg.QtCore.Qt.DotLine))
+
         self.display_window.raise_widget()
 
         fname = os.path.join(resources_path, 'SYLG_400psi_C.tif')
@@ -45,42 +48,47 @@ class ImageAnalysisController(QObject):
 
     def make_connections(self): 
         self.display_window.open_btn.clicked.connect(self.update_data)
+        self.display_window.compute_btn.clicked.connect(self.update_cropped)
         self.display_window.save_btn.clicked.connect(self.save_result)
-        self.display_window.edge_roi_1.sigRegionChanged.connect(self.update_cropped)
-        self.display_window.edge_roi_2.sigRegionChanged.connect(self.update_cropped) 
+      
+        self.display_window.edge_roi_1.sigRegionChangeFinished.connect(self.update_roi)
+        self.display_window.edge_roi_2.sigRegionChangeFinished.connect(self.update_roi) 
+        #self.display_window.crop_roi.sigRegionChangeFinished.connect(self.update_frame)
 
-    def update_cropped(self):
+    def update_roi(self):
         if self.model.src is not None:
             roi1 = self.display_window.edge_roi_1
             roi2 = self.display_window.edge_roi_2
-            img = self.display_window.imgs[6]
+            img = self.display_window.imgs['frame cropped']
             
             selected = roi1.getArrayRegion(self.model.image, img)
             selected2 = roi2.getArrayRegion(self.model.image, img)
+            self.model.rois[0].pos =  roi1.pos() 
+            self.model.rois[1].pos =  roi2.pos()
+            self.model.rois[0].size =  roi1.size()
+            self.model.rois[1].size =  roi2.size()
+            self.model.rois[0].image = selected
+            self.model.rois[1].image = selected2
 
-            img_bg = self.model.get_background(selected, 15 )
-            img_bg2 = self.model.get_background(selected2, 15 )
-
-            self.display_window.imgs[5].setImage(img_bg)
-
+    def update_cropped(self):
+        if self.model.src is not None :
             
+            threshold = 0.3
+            order = 3
+
+            roi1 = self.model.rois[0]
+            masked_img, x_fit, y_fit = roi1.compute(threshold = threshold, order = order)
             
-            bg_removed = selected - img_bg
-            bg_removed2 = selected2 - img_bg2
+            roi2 = self.model.rois[1]
+            masked_img2, x_fit2, y_fit2 = roi2.compute(threshold = threshold, order = order)
 
-            self.display_window.imgs[11].setImage(bg_removed2)
+            self.display_window.imgs['edge1 fit'].setImage(masked_img)
+            self.display_window.imgs['edge2 fit'].setImage(masked_img2)
+            
+            self.edge1_plt.setData(x_fit, y_fit)
+            self.edge2_plt.setData(x_fit2, y_fit2)
 
-            image, horizontal_edges, sobely = self.model.compute_canny(bg_removed)
-            #horizontal_edges = 1* (horizontal_edges == 1)
-            self.display_window.imgs[1].setImage(image)
-            mean_peak = image.mean(axis=1)
-            mean_peak_sobel = sobely.mean(axis=1)
-
-            self.display_window.plots[8].plot(mean_peak, clear=True)
-            self.display_window.plots[2].plot(mean_peak_sobel, clear=True)
-            self.display_window.imgs[4].setImage(horizontal_edges)
-            self.display_window.imgs[7].setImage(sobely)
-    
+   
 
     def save_result(self):
         if self.fname is not None:
@@ -105,43 +113,64 @@ class ImageAnalysisController(QObject):
     def saveFile(self, filename, params = {}):
         pass
 
- 
     
+ 
+    def update_frame(self):
+        image = self.model.image
+
+        filtered = self.model.compute_sobel()
+        self.display_window.imgs['absorbance'].setImage(image)
+        
+        sobel_mean_vertical = filtered[:,35:65].mean(axis=1)
+        
+        edges = self.model.estimate_edges()
+
+
+        self.display_window.edge_roi_1.sigRegionChangeFinished.disconnect(self.update_roi)
+        self.display_window.edge_roi_2.sigRegionChangeFinished.disconnect(self.update_roi) 
+
+        roi1 = self.display_window.edge_roi_1
+        roi2 = self.display_window.edge_roi_2
+
+        roi1.setPos(5, edges[0]-50)
+        roi2.setPos(5, edges[1]-50)
+        img = self.display_window.imgs['frame cropped'] 
+
+        selected = roi1.getArrayRegion(self.model.image, img)
+        selected2 = roi2.getArrayRegion(self.model.image, img)
+
+        self.model.rois = []
+        
+        self.model.add_ROI(selected, roi1.pos(), roi1.size())
+        self.model.add_ROI(selected2, roi2.pos(), roi1.size())
+
+        self.display_window.plots['sobel vertical mean'].plot(sobel_mean_vertical, clear=True)
+        self.display_window.plots['sobel vertical mean'].plot(self.model.blured_sobel_mean_vertical )
+        self.display_window.imgs['frame cropped'].setImage(self.model.src_resized )
+
+        self.display_window.imgs['sobel y'].setImage(filtered)
+
+        self.update_roi()
+        self.display_window.edge_roi_1.sigRegionChangeFinished.connect(self.update_roi)
+        self.display_window.edge_roi_2.sigRegionChangeFinished.connect(self.update_roi) 
         
     def update_data(self, *args, **kwargs):
         filename = kwargs.get('filename', None)
         if filename is None:
             filename = open_file_dialog(None, "Load File(s).",filter='*.png;*.tif;*.bmp')
         if len(filename):
-            self.model.load_file(filename)
+            crop = self.display_window.crop_btn.isChecked()
+            
+            self.model.load_file(filename, autocrop=crop)
+            self.model.filter_image()
+            
             self.display_window.fname_lbl.setText(filename)
-            self.display_window.imgs[0].setImage(self.model.src)
-            image = self.model.image
-            
-            
-            ## Display the data and assign each frame a time value from 1.0 to 3.0
-            #self.display_window.imgs[3].setImage(image)
-
-            filtered = self.model.compute_sobel()
-            self.display_window.imgs[9].setImage(image)
-            
-            sobel_mean_vertical = filtered[:,35:65].mean(axis=1)
-            
-            edges = self.model.estimate_edges()
-            self.display_window.edge_roi_1.setPos(5, edges[0]-50)
-            self.display_window.edge_roi_2.setPos(5, edges[1]-50)
-
-            self.display_window.plots[3].plot(sobel_mean_vertical, clear=True)
-            self.display_window.plots[3].plot(self.model.blured_sobel_mean_vertical )
-            self.display_window.imgs[6].setImage(self.model.src_resized )
-
-            self.display_window.imgs[10].setImage(filtered)
-
-            #self.display_window.imgs[11].setImage(self.model.base_surface)
+            self.display_window.imgs['src'].setImage(self.model.src)
 
             self.display_window.crop_roi.setPos((self.model.crop_limits[0][0],self.model.crop_limits[0][1]))
             self.display_window.crop_roi.setSize((self.model.crop_limits[1][0],self.model.crop_limits[1][1]))
-            #self.display_window.plots[7].plot(self.model.ver, clear=True)
+
+            self.update_frame()
 
     def show_window(self):
         self.display_window.raise_widget()

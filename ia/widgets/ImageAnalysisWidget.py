@@ -128,11 +128,14 @@ class ImageAnalysisWidget(QMainWindow):
         self.plot_grid.setBackground((255,255,255))
         #self._plot_grid_layout = QtWidgets.QGridLayout(self.plot_grid)
 
-        plots_settings = {'src':['img','Source'],'frame cropped':['img','Cropped Frame'],
-                        'edge1 fit':['img','Edge 1 Fit'],'edge2 fit':['img', 'Edge 2 Fit'],
-                        
-                        'absorbance':['img', "Absorbance"], 'sobel y': ['img','Sobel y filter'],
-                        'sobel vertical mean':['plot','Sobel y filter vertical mean']   }
+        plots_settings = {'src':['img','Source',True],
+                        'frame cropped':['img','Cropped Frame',False],
+                        'edge1 fit':['img','Edge 1 Fit', False],
+                        'edge2 fit':['img', 'Edge 2 Fit', False],
+                
+                        'absorbance':['img', "Absorbance", False], 
+                        'sobel y': ['img','Sobel y filter', False],
+                        'sobel vertical mean':['plot','Sobel y filter vertical mean',False]   }
         self.imgs = {}
         
         self.plots = {}
@@ -146,10 +149,13 @@ class ImageAnalysisWidget(QMainWindow):
 
             plot_type = plots_settings[plot_label][0]
             title = plots_settings[plot_label][1]
+            
             if plot_type == 'img':
+                square = plots_settings[plot_label][2]
                 plt = self.plot_grid.addPlot(title=title)
                 view = plt.getViewBox()
-                #view.setAspectLocked(True)
+                if square:
+                    view.setAspectLocked(True)
                 img = pg.ImageItem()
                 plt.addItem(img)
                 self.imgs[plot_label] =img

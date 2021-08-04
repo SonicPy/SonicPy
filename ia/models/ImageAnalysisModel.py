@@ -51,7 +51,7 @@ class ImageROI():
         mask = normalized < 0
         masked = copy.deepcopy(normalized)
         masked[mask]= 0
-        self.x_fit, self.y_fit = self.fit(masked, order = order, threshold=0.01)
+        self.x_fit, self.y_fit = self.fit(masked, order = order, threshold=0.1)
         return masked, self.x_fit, self.y_fit
         
     def fit(self, I_orig, order = 3, threshold=0.2):

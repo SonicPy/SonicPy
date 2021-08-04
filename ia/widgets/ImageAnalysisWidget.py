@@ -157,6 +157,13 @@ class ImageAnalysisWidget(QMainWindow):
                 if square:
                     view.setAspectLocked(True)
                 img = pg.ImageItem()
+                '''pos = np.array([0., 1., 0.5, 0.25, 0.75])
+                color = [[20, 133, 212, 255], [53, 42, 135, 255], [48, 174, 170, 255],
+                        [210, 184, 87, 255], [249, 251, 14, 255]]
+                color = np.array(color, dtype=np.ubyte)
+                map = pg.colormap.ColorMap(pos, color
+                            )
+                img.setLookupTable(map.getLookupTable())'''
                 plt.addItem(img)
                 self.imgs[plot_label] =img
                 self.plots[plot_label]=plt
@@ -186,6 +193,7 @@ class ImageAnalysisWidget(QMainWindow):
     def make_roi(self):
         # Custom ROI for selecting an image region
         self.crop_roi = pg.ROI([50, 200], [150, 100])
+        self.crop_roi.setPen(pg.mkPen((255,0,0), width=2))
         self.crop_roi.addScaleHandle([0, 1], [1, 0])
         self.crop_roi.addScaleHandle([1, 0], [0, 1])
         self.crop_roi.setZValue(10)  # make sure ROI is drawn above image
@@ -194,13 +202,16 @@ class ImageAnalysisWidget(QMainWindow):
     def make_edge_roi(self, plot):
         # Custom ROI for selecting an image region
         self.edge_roi_1 = pg.ROI([5, 100], [60, 100])
-        self.edge_roi_1.addScaleHandle([0, 1], [1, 0])
-        self.edge_roi_1.addScaleHandle([1, 0], [0, 1])
+        self.edge_roi_1.setPen(pg.mkPen((0,200,0), width=2))
+        handle1 = self.edge_roi_1.addScaleHandle([0, 1], [1, 0])
+        
+        handle2 = self.edge_roi_1.addScaleHandle([1, 0], [0, 1])
         self.edge_roi_1.setZValue(10)  # make sure ROI is drawn above image
         plot.addItem(self.edge_roi_1)
 
         # Custom ROI for selecting an image region
         self.edge_roi_2 = pg.ROI([5, 800], [60, 100])
+        self.edge_roi_2.setPen(pg.mkPen((0,200,0), width=2))
         self.edge_roi_2.addScaleHandle([0, 1], [1, 0])
         self.edge_roi_2.addScaleHandle([1, 0], [0, 1])
         self.edge_roi_2.setZValue(10)  # make sure ROI is drawn above image

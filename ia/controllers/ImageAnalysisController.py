@@ -40,7 +40,7 @@ class ImageAnalysisController(QObject):
 
         self.display_window.raise_widget()
 
-        fname = os.path.join(resources_path, 'SYLG_400psi_C.tif')
+        fname = os.path.join(resources_path, '6031psi_049.tif')
         self.update_data(filename=fname)
         
         '''filename='resources/ultrasonic/4000psi-300K_+21MHz000.csv'
@@ -117,13 +117,16 @@ class ImageAnalysisController(QObject):
  
     def update_frame(self):
         image = self.model.image
+        img_shape = image.shape
 
         filtered = self.model.compute_sobel()
+        
         self.display_window.imgs['absorbance'].setImage(image)
         
         sobel_mean_vertical = filtered[:,35:65].mean(axis=1)
         
-        edges = self.model.estimate_edges()
+        edges_dict = self.model.estimate_edges()
+        edges = list(edges_dict.keys())
 
 
         self.display_window.edge_roi_1.sigRegionChangeFinished.disconnect(self.update_roi)
@@ -132,8 +135,13 @@ class ImageAnalysisController(QObject):
         roi1 = self.display_window.edge_roi_1
         roi2 = self.display_window.edge_roi_2
 
-        roi1.setPos(5, edges[0]-50)
-        roi2.setPos(5, edges[1]-50)
+        
+
+
+        roi1.setPos(0, edges[0]-edges_dict[edges[0]][1]/2-40)
+        roi2.setPos(0, edges[1]-edges_dict[edges[1]][1]/2-40)
+        roi1.setSize((img_shape[1], edges_dict[edges[0]][1]+80))
+        roi2.setSize((img_shape[1], edges_dict[edges[1]][1]+80))
         img = self.display_window.imgs['frame cropped'] 
 
         selected = roi1.getArrayRegion(self.model.image, img)

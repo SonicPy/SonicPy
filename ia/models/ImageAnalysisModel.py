@@ -128,7 +128,7 @@ class ImageAnalysisModel():
         self.image = image# - self.base_surface
 
     def load_file(self, fname, autocrop=False):
-        src = np.flip(np.asarray(cv2.imread(fname,0),dtype=np.float),axis=1)
+        src = np.flip(np.asarray(cv2.imread(fname,0),dtype=np.float),axis=0)
         self.src = src
         if autocrop:
             self.crop()
@@ -151,16 +151,37 @@ class ImageAnalysisModel():
         max_y=(int(y_size*0.6))
         sobel_mean_vertical = filtered[:,min_y:max_y].mean(axis=1)
         self.blured_sobel_mean_vertical = gaussian_filter1d(sobel_mean_vertical,10)
-        peaks = find_peaks(self.blured_sobel_mean_vertical/np.amax(self.blured_sobel_mean_vertical), height=0.2 )
+        peaks = find_peaks(self.blured_sobel_mean_vertical/np.amax(self.blured_sobel_mean_vertical), height=0.2, width=5 )
+        
         peaks_heights = {}
         for i, peak in enumerate(peaks[1]['peak_heights']):
-            peaks_heights[round(peak,4)] = peaks[0][i]
-        sorted_peaks_height = sorted(list(peaks_heights.keys()),reverse=True)
-        sorted_peaks = []
-        for peak in sorted_peaks_height:
-            sorted_peaks.append(peaks_heights[peak])
-        peaks_edges = sorted(sorted_peaks[:2])
-        return peaks_edges
+            w = peaks[1]['widths'][i]
+            peaks_heights[round(peak,4)] = [peaks[0][i],w]
+        #sorted_peaks_height = sorted(list(peaks_heights.keys()),reverse=True)
+
+        print(peaks_heights)
+        
+        edges_combined = {}
+        for edge in peaks_heights:
+            new_edge = True
+            for i, combined_edge in enumerate(edges_combined.keys()):
+                diff = abs(combined_edge-peaks_heights[edge][0])
+                if diff< 100:
+                    new_edge=False
+                    break
+            if new_edge:
+                edges_combined[peaks_heights[edge][0]] = (edge, peaks_heights[edge][1])
+            else:
+                
+                average_edge=round((combined_edge+peaks_heights[edge][0])/2)
+                average_height=round(((edges_combined[combined_edge][0]+edge)/2),4)
+                new_width = edges_combined[combined_edge][0]/2+peaks_heights[edge][1]/2+diff
+                edges_combined[average_edge]=(average_height,new_width)
+                del(edges_combined[combined_edge])
+
+        print(edges_combined)
+
+        return edges_combined
 
     def auto_crop_frame(self, img):
         hor = img.mean(axis=0)

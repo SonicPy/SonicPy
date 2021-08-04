@@ -196,6 +196,8 @@ class ImageAnalysisWidget(QMainWindow):
         self.crop_roi.setPen(pg.mkPen((255,0,0), width=2))
         self.crop_roi.addScaleHandle([0, 1], [1, 0])
         self.crop_roi.addScaleHandle([1, 0], [0, 1])
+        self.crop_roi.addScaleHandle([0, 0], [1, 1])
+        self.crop_roi.addScaleHandle([1, 1], [0, 0])
         self.crop_roi.setZValue(10)  # make sure ROI is drawn above image
         self.plots['src'].addItem(self.crop_roi)
 

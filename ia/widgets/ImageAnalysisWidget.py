@@ -49,7 +49,7 @@ class ImageAnalysisWidget(QMainWindow):
     def create_plots(self):
 
         self.make_roi()
-        self.make_edge_roi(self.plots['frame cropped'])
+        self.make_edge_roi(self.plots['absorbance'])
 
 
 
@@ -126,9 +126,10 @@ class ImageAnalysisWidget(QMainWindow):
 
         self._edge_options_widget_layout.addWidget(self.edge_000_btn)
         self._edge_options_widget_layout.addWidget(self.edge_010_btn)
+        self._edge_options_widget_layout.addWidget(self.edge_001_btn)
         self._edge_options_widget_layout.addWidget(self.edge_100_btn)
         self._edge_options_widget_layout.addWidget(self.edge_101_btn)
-        self._edge_options_widget_layout.addWidget(self.edge_001_btn)
+        
         self._edge_options_widget_layout.addSpacerItem(HorizontalSpacerItem())
         self.edge_options_widget.setLayout(self._edge_options_widget_layout)
         self._layout.addWidget(self.edge_options_widget)
@@ -137,14 +138,15 @@ class ImageAnalysisWidget(QMainWindow):
         self.plot_grid.setBackground((255,255,255))
         #self._plot_grid_layout = QtWidgets.QGridLayout(self.plot_grid)
 
-        plots_settings = {'src':['img','Source',True],
-                        'frame cropped':['img','Cropped Frame',False],
-                        'edge1 fit':['img','Edge 1 Fit', False],
-                        'edge2 fit':['img', 'Edge 2 Fit', False],
+        plots_settings = {  'src':['img','Source image, (𝛪/𝛪<sub>0</sub>)',True],
+                            'absorbance':['img', u'Absorbance (𝛢) = -log<sub>10</sub>(𝛪/𝛪<sub>0</sub>) ', False], 
+                            #'frame cropped':['img','Cropped Frame',False],
+                            'edge1 fit':['img','Edge 1 Fit', False],
+                            'edge2 fit':['img', 'Edge 2 Fit', False],
                 
-                        'absorbance':['img', "Absorbance", False], 
-                        'sobel y': ['img','Sobel y filter', False],
-                        'sobel vertical mean':['plot','Sobel y filter vertical mean',False]   }
+                        
+                            'sobel y': ['img',u'Vertical gradient |𝜕<sub>𝑦</sub>𝛢|', False],
+                            'sobel vertical mean':['plot','Sobel y filter vertical mean',False]   }
         self.imgs = {}
         
         self.plots = {}
@@ -183,6 +185,8 @@ class ImageAnalysisWidget(QMainWindow):
                 self.plots[plot_label]=plt
             col = col + 1
             
+        self.edge1_plt = self.plots['edge1 fit'].plot([], pen = pg.mkPen((255,0,0, 180),width=3,style=pg.QtCore.Qt.DotLine))
+        self.edge2_plt = self.plots['edge2 fit'].plot([], pen = pg.mkPen((255,0,0, 180),width=3,style=pg.QtCore.Qt.DotLine))
 
 
         self._layout.addWidget(self.plot_grid)

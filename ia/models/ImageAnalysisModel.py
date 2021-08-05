@@ -33,16 +33,29 @@ from scipy.signal import find_peaks
 class ImageROI():
     def __init__(self, image, pos, size):
         self.image = image
+        
         self.pos = pos
         self.width = size
         self.edge_type = 0  # 0 - foil, 1 - edge
 
+    def get_sobel_y(self):
+        image = self.image
+        sobely= cv2.Sobel(image,cv2.CV_64F, dx=0,dy=1)
+        sobely= abs(sobely)
+        results = sobely
+        return results
+
 
     def compute(self, threshold=0.2, order = 3):
-        self.img_bg = self.get_background( 15 )
+
+        if self.edge_type == 0:
+            img = self.image
+        else:
+            img = self.get_sobel_y()
+
+        img_bg = self.get_background(img, 15 )
        
-        
-        bg_removed = self.image - self.img_bg
+        bg_removed = img - img_bg
        
         mx = np.amax(bg_removed)
         th = np.amax(bg_removed)*threshold
@@ -58,6 +71,7 @@ class ImageROI():
         
         #order = 3
         self.w_weighted = pixel_cluster_polynom_fit(I_orig, order=order, threshold = threshold)
+        #print(self.w_weighted)
         
         # Generate test points
         n_samples = 50
@@ -68,8 +82,8 @@ class ImageROI():
         y_test_weighted = X_test.dot(self.w_weighted)
         return x_test, y_test_weighted
 
-    def get_background(self, pad ):
-        img = self.image
+    def get_background(self, img, pad ):
+        
         (m,n) = img.shape
         remove_index_x= range(pad, m-pad)
         img_del = np.delete(img, remove_index_x, 0)
@@ -87,7 +101,16 @@ class ImageAnalysisModel():
     def __init__(self):
         self.image = None
         self.src = None
+        self.cropped = None
+        self.cropped_resized = None
         self.rois = []
+        self.settings = {'horizontal_bin':15, 
+                         'median_kernel_size':3, 
+                         'image_bits':8,
+                         'crop_limits':[],
+                         'edges_roi':  [],
+                         'edge_polynomial_order':[2,2],
+                         'edge_fit_threshold':[0.3,0.3]} 
 
     def add_ROI(self, selected,pos, size):
 
@@ -95,44 +118,46 @@ class ImageAnalysisModel():
         roi = ImageROI(selected, pos, size)
         self.rois.append(roi)
 
-    def crop(self):
-        src = self.src
-        image = medfilt2d(src,kernel_size=3)
-        self.crop_limits = [hor_first, ver_first],[width, height] = self.auto_crop_frame(image)
-        
 
-    
+    def crop(self):
+        crop_limits=self.settings['crop_limits']
+
+        src = self.src
+        [[x, y],[width, height]] = crop_limits
+        self.cropped = src[y: y+height,x: x+ width]
+
 
     def filter_image(self):
-        src = self.src
-        image = medfilt2d(src,kernel_size=3) 
-        [hor_first, ver_first],[width, height] = self.crop_limits
-        self.cropped = image[ver_first: ver_first+height,hor_first: hor_first+ width]
-        image = self.cropped
+        horizontal_bin = self.settings['horizontal_bin']
+        median_kernel_size= self.settings['median_kernel_size']
+        image_bits = self.settings['image_bits']
+     
+        max_bit = 2**image_bits
+        cropped = self.cropped
+        image = medfilt2d(cropped,kernel_size=median_kernel_size) 
+        
 
-        horizontal_bin = 15
         image_resized = resize(image, (image.shape[0] , image.shape[1] // horizontal_bin),
                        anti_aliasing=True)
 
-        self.src_resized = image_resized
+        self.cropped_resized = image_resized
 
-        tsrc = -1* np.log(image_resized/255)
+        # confert to absrobance
+        tsrc = -1* np.log10 (image_resized/max_bit)
         mn = np.amin(tsrc)
         tsrc = tsrc - mn
 
         m = np.amax(tsrc)
-        tsrc = tsrc/m*255
+        tsrc = tsrc/m*max_bit
+        image = tsrc
         #image = cv2.transpose(src)
-        image = medfilt2d(tsrc,kernel_size=3)
+        #image = medfilt2d(tsrc,kernel_size=median_kernel_size)
         #self.base_surface = self.get_base_surface(image)
-        self.image = image# - self.base_surface
+        self.image = image # - self.base_surface
 
     def load_file(self, fname, autocrop=False):
         src = np.flip(np.asarray(cv2.imread(fname,0),dtype=np.float),axis=0)
         self.src = src
-        if autocrop:
-            self.crop()
-        
         
 
     def get_base_surface(self, img, iterations = 30):
@@ -147,19 +172,16 @@ class ImageAnalysisModel():
     def estimate_edges(self):
         filtered = self.compute_sobel()
         y_size = filtered.shape[1]
-        min_y=(int(y_size*0.4))
-        max_y=(int(y_size*0.6))
-        sobel_mean_vertical = filtered[:,min_y:max_y].mean(axis=1)
-        self.blured_sobel_mean_vertical = gaussian_filter1d(sobel_mean_vertical,10)
+        min_y=(int(y_size*0.25))
+        max_y=(int(y_size*0.75))
+        self.sobel_mean_vertical = filtered[:,min_y:max_y].mean(axis=1)
+        self.blured_sobel_mean_vertical = gaussian_filter1d(self.sobel_mean_vertical,10)
         peaks = find_peaks(self.blured_sobel_mean_vertical/np.amax(self.blured_sobel_mean_vertical), height=0.2, width=5 )
         
         peaks_heights = {}
         for i, peak in enumerate(peaks[1]['peak_heights']):
             w = peaks[1]['widths'][i]
             peaks_heights[round(peak,4)] = [peaks[0][i],w]
-        #sorted_peaks_height = sorted(list(peaks_heights.keys()),reverse=True)
-
-        print(peaks_heights)
         
         edges_combined = {}
         for edge in peaks_heights:
@@ -172,18 +194,19 @@ class ImageAnalysisModel():
             if new_edge:
                 edges_combined[peaks_heights[edge][0]] = (edge, peaks_heights[edge][1])
             else:
-                
                 average_edge=round((combined_edge+peaks_heights[edge][0])/2)
                 average_height=round(((edges_combined[combined_edge][0]+edge)/2),4)
                 new_width = edges_combined[combined_edge][0]/2+peaks_heights[edge][1]/2+diff
                 edges_combined[average_edge]=(average_height,new_width)
                 del(edges_combined[combined_edge])
 
-        print(edges_combined)
-
         return edges_combined
 
-    def auto_crop_frame(self, img):
+    def get_auto_crop_limits(self):
+        median_kernel_size= self.settings['median_kernel_size']
+        src = self.src
+        img = medfilt2d(src,kernel_size=median_kernel_size)
+
         hor = img.mean(axis=0)
         ver = img.mean(axis=1)
         m = min( min(hor), min(ver))
@@ -228,8 +251,8 @@ class ImageAnalysisModel():
         lap = np.uint8(np.absolute(lap))
         '''
         # Below code convert image gradient in x direction
-        sobelx= cv2.Sobel(image,cv2.CV_64F, dx=1,dy=0)
-        sobelx= abs(sobelx)
+        #sobelx= cv2.Sobel(image,cv2.CV_64F, dx=1,dy=0)
+        #sobelx= abs(sobelx)
         # Below code convert image gradient in y direction
         sobely= cv2.Sobel(image,cv2.CV_64F, dx=0,dy=1)
         sobely= abs(sobely)
@@ -244,8 +267,6 @@ class ImageAnalysisModel():
                 json.dump(data, json_file,indent = 2)    
 
     
-def rgb2gray(rgb):
-    return np.dot(rgb[...,:3], [0.299, 0.587, 0.114])
 
 def feature(x, order=3):
     """Generate polynomial feature of the form
@@ -257,7 +278,7 @@ def feature(x, order=3):
 
 def pixel_cluster_polynom_fit(I, order=3, threshold = .2):
     '''
-    Basically we find all (xi, yi) coordinates of the bright regions, 
+    We find all (xi, yi) coordinates of the bright regions, 
     then set up a regularized least squares system where the we want to 
     find the vector of weights, (w0, ..., wd) such that 
     yi = w0 + w1 xi + w2 xi^2 + ... + wd xi^d "as close as possible" 

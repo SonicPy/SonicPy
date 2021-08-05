@@ -103,11 +103,20 @@ class ImageAnalysisWidget(QMainWindow):
         self.edge_001_btn = QtWidgets.QPushButton()
         self.edge_101_btn = QtWidgets.QPushButton()
         self.edge_010_btn = QtWidgets.QPushButton()
+
+        self.edge_000_btn.setObjectName('edge_000_btn')
+        self.edge_100_btn.setObjectName('edge_100_btn')
+        self.edge_001_btn.setObjectName('edge_001_btn')
+        self.edge_101_btn.setObjectName('edge_101_btn')
+        self.edge_010_btn.setObjectName('edge_010_btn')
+
         self.edge_000_btn.setCheckable(True)
         self.edge_100_btn.setCheckable(True)
         self.edge_001_btn.setCheckable(True)
         self.edge_101_btn.setCheckable(True)
         self.edge_010_btn.setCheckable(True)
+        
+        
         self.edge_options.addButton(self.edge_000_btn)
         self.edge_options.addButton(self.edge_100_btn)
         self.edge_options.addButton(self.edge_001_btn)

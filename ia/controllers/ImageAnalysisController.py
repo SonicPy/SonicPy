@@ -55,6 +55,8 @@ class ImageAnalysisController(QObject):
         self.display_window.edge_roi_2.sigRegionChangeFinished.connect(self.update_roi) 
         #self.display_window.crop_roi.sigRegionChangeFinished.connect(self.update_frame)
 
+        self.display_window.edge_options.buttonClicked.connect(self.edge_type_selection_btn_callback)
+
     def update_roi(self):
         if self.model.src is not None:
             roi1 = self.display_window.edge_roi_1
@@ -183,6 +185,10 @@ class ImageAnalysisController(QObject):
     def show_window(self):
         self.display_window.raise_widget()
 
+    def edge_type_selection_btn_callback(self, *args, **kwargs):
+        btn = args[0]
+        lbl = btn.objectName()[5:8]
+        print(lbl)
    
 
     def up_down_signal_callback(self, event):

@@ -126,9 +126,9 @@ class ImageAnalysisWidget(QMainWindow):
 
         self._edge_options_widget_layout.addWidget(self.edge_000_btn)
         self._edge_options_widget_layout.addWidget(self.edge_010_btn)
-        self._edge_options_widget_layout.addWidget(self.edge_001_btn)
-        self._edge_options_widget_layout.addWidget(self.edge_101_btn)
         self._edge_options_widget_layout.addWidget(self.edge_100_btn)
+        self._edge_options_widget_layout.addWidget(self.edge_101_btn)
+        self._edge_options_widget_layout.addWidget(self.edge_001_btn)
         self._edge_options_widget_layout.addSpacerItem(HorizontalSpacerItem())
         self.edge_options_widget.setLayout(self._edge_options_widget_layout)
         self._layout.addWidget(self.edge_options_widget)

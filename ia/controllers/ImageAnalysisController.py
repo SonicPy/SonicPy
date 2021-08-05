@@ -188,8 +188,19 @@ class ImageAnalysisController(QObject):
     def edge_type_selection_btn_callback(self, *args, **kwargs):
         btn = args[0]
         lbl = btn.objectName()[5:8]
-        print(lbl)
-   
+
+        '''possible values for lbl should be '000', '100', '001', '101', '010', 
+        where 0 = low Z layer, 1 = high Z layer
+        edge type determine whether edge fitting is done using the 
+        absorbance image (0-type edges) or the sobel-Y filtered image (1-type edges)
+        '''
+        
+        edge1 = 1*(lbl[0]!=lbl[1])
+        edge2 = 1*(lbl[1]!=lbl[2])
+        
+        if len(self.model.rois) == 2:
+            self.model.rois[0].edge_type = edge1
+            self.model.rois[1].edge_type = edge2
 
     def up_down_signal_callback(self, event):
         new_ind = self.waveform_index

@@ -35,7 +35,7 @@ class ImageROI():
         self.image = image
         self.pos = pos
         self.width = size
-        self.type = 0  # 0 - foil, 1 - edge
+        self.edge_type = 0  # 0 - foil, 1 - edge
 
 
     def compute(self, threshold=0.2, order = 3):

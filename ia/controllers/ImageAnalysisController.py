@@ -39,6 +39,9 @@ class ImageAnalysisController(QObject):
         order = self.model.settings['edge_polynomial_order'][0]
         self.display_window.order_options.buttons()[order-1].setChecked(True)
 
+        fit_threshold = self.model.settings['edge_fit_threshold'][0]
+        self.display_window.threshold_num.setValue(fit_threshold)
+
         bins = self.model.settings['horizontal_bin']
         self.display_window.plots['absorbance'].getAxis('bottom').setScale(bins)
         self.display_window.plots['edge1 fit'].getAxis('bottom').setScale(bins)
@@ -68,6 +71,13 @@ class ImageAnalysisController(QObject):
 
         self.display_window.edge_options.buttonClicked.connect(self.edge_type_selection_btn_callback)
         self.display_window.order_options.buttonClicked.connect(self.order_options_callback)
+
+        self.display_window.threshold_num.editingFinished.connect(self.threshold_num_callback)
+
+    def threshold_num_callback(self):
+        num = self.display_window.threshold_num.value()
+        
+        self.model.settings['edge_fit_threshold'] = [num,num]
 
     def order_options_callback(self):
         btn = self.display_window.order_options.checkedButton()
@@ -102,12 +112,15 @@ class ImageAnalysisController(QObject):
             abs_plot = self.display_window.abs_plt
             
             abs_datas = []
+            #legends = [self.display_window.edge1_plt_legend, self.display_window.edge2_plt_legend]
         
             for i, roi in enumerate(self.model.rois):
                 masked_img, x_fit, y_fit = roi.compute(threshold = thresholds[i], order = orders[i])
                 img_plots[i].setImage(masked_img)
                 edge_plots[i].setData(x_fit, y_fit)
-        
+                '''p = roi.text
+                note =  "y(x) = p[0]*x<sup>n</sup>+p[1]*x<sup>n-1</sup>+...+p[n]; p=" + p
+                legends[i].renameItem(0,note)'''
                 abs_datas.append([x_fit + roi.pos[0], y_fit + roi.pos[1]])
 
             roi1 = self.display_window.edge_roi_1
@@ -191,7 +204,8 @@ class ImageAnalysisController(QObject):
         
         auto_crop = self.display_window.crop_btn.isChecked()
         if auto_crop :
-            self.model.settings['crop_limits'] = self.model.get_auto_crop_limits()
+            v_crop = self.get_vertical_autocrop()
+            self.model.settings['crop_limits'] = self.model.get_auto_crop_limits(y=v_crop)
         self.model.crop()
         
         crop_limits = self.model.settings['crop_limits']
@@ -238,6 +252,13 @@ class ImageAnalysisController(QObject):
 
         edges = [ 1*(lbl[1]!=lbl[2]), 1*(lbl[0]!=lbl[1])]
         return edges
+
+    def get_vertical_autocrop(self):
+        btn = self.display_window.edge_options.checkedButton()
+        lbl = btn.objectName()[5:8]
+        v_crop = lbl[0] == '0' and lbl[2] == '0'
+        return v_crop
+
 
     def set_edge_types(self, edges):
         

@@ -9,11 +9,12 @@ from PyQt5.QtCore import QObject, pyqtSignal, Qt
 import pyqtgraph as pg
 from pyqtgraph import QtCore, mkPen, mkColor, hsvColor, ViewBox
 from pyqtgraph.functions import pseudoScatter
-from um.widgets.CustomWidgets import HorizontalSpacerItem, VerticalSpacerItem, FlatButton
+from um.widgets.CustomWidgets import HorizontalSpacerItem, VerticalSpacerItem, FlatButton, NumberTextField
 import numpy as np
 
 from um.widgets.PltWidget import SimpleDisplayWidget, customWidget
 from functools import partial
+from ia.widgets.ExLegendItem import LegendItem
 
 # Interpret image data as row-major instead of col-major
 pg.setConfigOptions(imageAxisOrder='row-major')
@@ -84,13 +85,13 @@ class ImageAnalysisWidget(QMainWindow):
         self._buttons_layout_top.addWidget(self.open_btn)
         
         self._buttons_layout_top.addWidget(self.compute_btn)
-        self._buttons_layout_top.addWidget(QtWidgets.QLabel("File"))
+        self._buttons_layout_top.addWidget(QtWidgets.QLabel("   File"))
         self._buttons_layout_top.addWidget(self.fname_lbl)
        
         
-        self._buttons_layout_top.addWidget(QtWidgets.QLabel("Thickness"))
+        self._buttons_layout_top.addWidget(QtWidgets.QLabel("   Thickness"))
         self._buttons_layout_top.addWidget(self.result_lbl)
-        self._buttons_layout_top.addWidget(self.save_btn)
+        #self._buttons_layout_top.addWidget(self.save_btn)
         self._buttons_layout_top.addSpacerItem(HorizontalSpacerItem())
     
         self.buttons_widget_top.setLayout(self._buttons_layout_top)
@@ -103,7 +104,7 @@ class ImageAnalysisWidget(QMainWindow):
 
         self._menu_bar_layout.addWidget(self.crop_btn)
 
-        self._menu_bar_layout.addWidget(QtWidgets.QLabel('Sample type'))
+        self._menu_bar_layout.addWidget(QtWidgets.QLabel('      Sample type'))
 
         self.edge_options_widget = QtWidgets.QWidget(self.my_widget)
         self._edge_options_widget_layout = QtWidgets.QHBoxLayout(self.edge_options_widget)
@@ -169,8 +170,18 @@ class ImageAnalysisWidget(QMainWindow):
         self._order_btns_widget_layout.addWidget(self.order_3_btn)
         self.order_btns_widget.setLayout(self._order_btns_widget_layout)
 
-        self._menu_bar_layout.addWidget(QtWidgets.QLabel('Polynomial order'))
+        self._menu_bar_layout.addWidget(QtWidgets.QLabel('   Polynomial order'))
         self._menu_bar_layout.addWidget(self.order_btns_widget)
+
+        self.threshold_num = NumberTextField()
+        self.threshold_num.setMinimum(0)
+        self.threshold_num.setMaximum(1)
+        self.threshold_num.setValue(0.3)
+
+        self.threshold_num.setMaximumWidth(50)
+        self._menu_bar_layout.addWidget(QtWidgets.QLabel('   Fit threshold'))
+        self._menu_bar_layout.addWidget(self.threshold_num)
+
         self._menu_bar_layout.addSpacerItem(HorizontalSpacerItem())
 
         
@@ -183,10 +194,10 @@ class ImageAnalysisWidget(QMainWindow):
         #self._plot_grid_layout = QtWidgets.QGridLayout(self.plot_grid)
 
         plots_settings = {  'src':['img','Source image, (𝛪/𝛪<sub>0</sub>)',True],
-                            'edge2 fit':['img', 'Edge 2 Fit', False],
+                            'edge2 fit':['img', 'Edge 2', False],
                             'absorbance':['img', u'Absorbance (𝛢) = -log<sub>10</sub>(𝛪/𝛪<sub>0</sub>) ', False], 
                             #'frame cropped':['img','Cropped Frame',False],
-                            'edge1 fit':['img','Edge 1 Fit', False]
+                            'edge1 fit':['img','Edge 1', False]
                             
                             #'sobel y': ['img',u'Vertical gradient |𝜕<sub>𝑦</sub>𝛢|', False],
                             #'sobel vertical mean':['plot','Sobel y filter vertical mean',False]   
@@ -204,41 +215,38 @@ class ImageAnalysisWidget(QMainWindow):
 
             plot_type = plots_settings[plot_label][0]
             title = plots_settings[plot_label][1]
-            
+            plt = self.plot_grid.addPlot(title=title)
             if plot_type == 'img':
                 square = plots_settings[plot_label][2]
-                plt = self.plot_grid.addPlot(title=title)
-                
-                p = pg.PlotItem()
-                
-                
                 view = plt.getViewBox()
-                
                 if square:
                     view.setAspectLocked(True)
                 img = pg.ImageItem()
-                '''pos = np.array([0., 1., 0.5, 0.25, 0.75])
-                color = [[20, 133, 212, 255], [53, 42, 135, 255], [48, 174, 170, 255],
-                        [210, 184, 87, 255], [249, 251, 14, 255]]
-                color = np.array(color, dtype=np.ubyte)
-                map = pg.colormap.ColorMap(pos, color
-                            )
-                img.setLookupTable(map.getLookupTable())'''
                 plt.addItem(img)
                 self.imgs[plot_label] =img
                 self.plots[plot_label]=plt
             elif plot_type == 'plot':
-                plt = self.plot_grid.addPlot(title=title)
-                
                 
                 self.plots[plot_label]=plt
+            
+        
             col = col + 1
             
         self.edge1_plt = self.plots['edge1 fit'].plot([], pen = pg.mkPen((255,0,0, 180),width=4,style=pg.QtCore.Qt.DotLine))
+        '''self.edge1_plt_legend = myLegendItem(horSpacing=20, box=False, verSpacing=-3, labelAlignment='center', showLines=True)
+        self.edge1_plt_legend.addItem(self.edge1_plt, '') 
+        self.edge1_plt_legend.setParentItem(self.edge1_plt.getViewBox())
+        self.edge1_plt_legend.anchor(itemPos=(0.5, 0), parentPos=(0.5, 0), offset=(0, 10))'''
         self.edge2_plt = self.plots['edge2 fit'].plot([], pen = pg.mkPen((255,0,0, 180),width=4,style=pg.QtCore.Qt.DotLine))
-        
+        '''self.edge2_plt_legend = myLegendItem(horSpacing=20, box=False, verSpacing=-3, labelAlignment='center', showLines=True)
+        self.edge2_plt_legend.addItem(self.edge2_plt, '') 
+        self.edge2_plt_legend.setParentItem(self.edge2_plt.getViewBox())
+        self.edge2_plt_legend.anchor(itemPos=(0.5, 0), parentPos=(0.5, 0), offset=(0, 10))'''
         self.abs_plt = self.plots['absorbance'].plot([], pen = pg.mkPen((255,0,0, 180),width=4,style=pg.QtCore.Qt.DotLine),connect='finite')
-
+        '''self.abs_plt_legend = myLegendItem(horSpacing=20, box=False, verSpacing=-3, labelAlignment='center', showLines=False)
+        self.abs_plt_legend.addItem(self.abs_plt, '') 
+        self.abs_plt_legend.setParentItem(self.abs_plt.getViewBox())
+        self.abs_plt_legend.anchor(itemPos=(0.5, 0), parentPos=(0.5, 0), offset=(0, 10))'''
 
         self._layout.addWidget(self.plot_grid)
         
@@ -426,3 +434,12 @@ class ImageAnalysisWidget(QMainWindow):
 
 
 
+class myLegendItem(LegendItem):
+    def __init__(self, size=None, offset=None, horSpacing=25, verSpacing=0, box=True, labelAlignment='center', showLines=True):
+        super().__init__(size=size, offset=offset, horSpacing=horSpacing, verSpacing=verSpacing, box=box, labelAlignment=labelAlignment, showLines=showLines)
+
+    def my_hoverEvent(self, ev):
+        pass
+
+    def mouseDragEvent(self, ev):
+        pass

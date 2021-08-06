@@ -498,3 +498,29 @@ QFrame#main_frame {
    border-top-left-radius:8px;
    border-bottom-left-radius: 8px;
 }
+
+#order_1_btn, #order_2_btn, #order_3_btn {
+    font: normal 12px;
+    border-radius: 1px;
+}
+#order_1_btn{
+    border-top-left-radius:8px;
+   border-bottom-left-radius: 8px;
+ }
+ #order_3_btn{
+    border-top-right-radius:8px;
+   border-bottom-right-radius: 8px;
+ }
+
+ #edge_000_btn, #edge_100_btn, #edge_001_btn , #edge_010_btn, #edge_101_btn{
+    font: normal 12px;
+    border-radius: 1px;
+}
+#edge_000_btn{
+    border-top-left-radius:8px;
+   border-bottom-left-radius: 8px;
+ }
+ #edge_101_btn{
+    border-top-right-radius:8px;
+   border-bottom-right-radius: 8px;
+ }

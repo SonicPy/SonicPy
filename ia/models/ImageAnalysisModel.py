@@ -76,11 +76,15 @@ class ImageROI():
         # Generate test points
         n_samples = 50
         x_test = np.linspace(0, I_orig.shape[1], n_samples)
-        X_test = feature(x_test, order)
-
-        # Predict y coordinates at test points
-        y_test_weighted = X_test.dot(self.w_weighted)
+        
+        y_test_weighted = self.predict(x_test,order)
         return x_test, y_test_weighted
+
+    def predict(self, x, order):
+        # Predict y coordinates at test points
+        x = feature(x, order)
+        y_test_weighted = x.dot(self.w_weighted)
+        return y_test_weighted
 
     def get_background(self, img, pad ):
         

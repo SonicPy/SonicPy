@@ -3,6 +3,7 @@
 
 
 import os.path, sys
+from posixpath import abspath
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QObject, pyqtSignal
 import numpy as np
@@ -28,13 +29,22 @@ class ImageAnalysisController(QObject):
     def __init__(self, app=None, offline = False):
         super().__init__()
         self.model = ImageAnalysisModel()
+
         self.fname = None
     
         if app is not None:
             self.setStyle(app)
         self.display_window = ImageAnalysisWidget()
         
+        order = self.model.settings['edge_polynomial_order'][0]
+        self.display_window.order_options.buttons()[order-1].setChecked(True)
 
+        bins = self.model.settings['horizontal_bin']
+        self.display_window.plots['absorbance'].getAxis('bottom').setScale(bins)
+        self.display_window.plots['edge1 fit'].getAxis('bottom').setScale(bins)
+        self.display_window.plots['edge2 fit'].getAxis('bottom').setScale(bins)
+        #self.display_window.plots['sobel vertical mean'].getAxis('bottom').setScale(bins)
+       
         
         self.make_connections()
         self.display_window.raise_widget()
@@ -57,7 +67,12 @@ class ImageAnalysisController(QObject):
         self.display_window.crop_roi.sigRegionChangeFinished.connect(self.crop_roi_changed_callback)
 
         self.display_window.edge_options.buttonClicked.connect(self.edge_type_selection_btn_callback)
+        self.display_window.order_options.buttonClicked.connect(self.order_options_callback)
 
+    def order_options_callback(self):
+        btn = self.display_window.order_options.checkedButton()
+        order  = int(btn.objectName()[6:7])
+        self.model.settings['edge_polynomial_order'] = [order,order]
 
     def roi_changed_callback(self):
         self.update_roi()
@@ -84,11 +99,44 @@ class ImageAnalysisController(QObject):
 
             img_plots = [self.display_window.imgs['edge1 fit'],self.display_window.imgs['edge2 fit']]
             edge_plots = [self.display_window.edge1_plt, self.display_window.edge2_plt]
-
+            abs_plot = self.display_window.abs_plt
+            
+            abs_datas = []
+        
             for i, roi in enumerate(self.model.rois):
                 masked_img, x_fit, y_fit = roi.compute(threshold = thresholds[i], order = orders[i])
                 img_plots[i].setImage(masked_img)
                 edge_plots[i].setData(x_fit, y_fit)
+        
+                abs_datas.append([x_fit + roi.pos[0], y_fit + roi.pos[1]])
+
+            roi1 = self.display_window.edge_roi_1
+            roi2 = self.display_window.edge_roi_2
+            r1_xmin = roi1.pos()[0]
+            r1_xmax = roi1.pos()[0] + roi1.size()[0]
+            r2_xmin = roi2.pos()[0]
+            r2_xmax = roi2.pos()[0] + roi2.size()[0]
+
+            min_x = min(r1_xmin,r2_xmin)
+            max_x = max(r1_xmax,r2_xmax)
+            
+            n_samples = 50
+            x_test = np.linspace(min_x, max_x, n_samples)
+            edge1_y = self.model.rois[0].predict(x_test-self.model.rois[0].pos[0],orders[0])+ self.model.rois[0].pos[1]
+            edge2_y = self.model.rois[1].predict(x_test-self.model.rois[1].pos[0],orders[1])+ self.model.rois[1].pos[1]
+            y_diff = abs(np.mean(edge2_y - edge1_y))
+            std_dev = np.std(edge2_y - edge1_y)
+
+            output_txt = "mean: " + str(round(y_diff,4)) + '; std: ' +str(round(std_dev,4))
+            self.display_window.result_lbl.setText(output_txt)
+
+            data_x = np.array([])
+            data_y = np.array([])
+    
+            data_x = np.append(np.append(x_test,np.nan),x_test)
+            data_y = np.append(np.append(edge1_y,np.nan),edge2_y)
+                
+            abs_plot.setData(data_x, data_y)
 
     def update_frame(self):
         image = self.model.image
@@ -99,14 +147,14 @@ class ImageAnalysisController(QObject):
         self.display_window.imgs['absorbance'].setImage(image)
 
         #self.display_window.imgs['frame cropped'].setImage(image )
-        self.display_window.imgs['sobel y'].setImage(filtered)
+        #self.display_window.imgs['sobel y'].setImage(filtered)
         
 
         edges_dict = self.model.estimate_edges()
         edges = list(edges_dict.keys())[:2]
         
-        self.display_window.plots['sobel vertical mean'].plot(self.model.sobel_mean_vertical, clear=True)
-        self.display_window.plots['sobel vertical mean'].plot(self.model.blured_sobel_mean_vertical )
+        #self.display_window.plots['sobel vertical mean'].plot(self.model.sobel_mean_vertical, clear=True)
+        #self.display_window.plots['sobel vertical mean'].plot(self.model.blured_sobel_mean_vertical )
 
         rois = [self.display_window.edge_roi_1,self.display_window.edge_roi_2]
         self.model.rois = []

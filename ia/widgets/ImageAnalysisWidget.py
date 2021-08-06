@@ -33,9 +33,9 @@ class ImageAnalysisWidget(QMainWindow):
         self.spectrum = None
 
 
-        self.setWindowTitle('Image Analysis')
+        self.setWindowTitle('Sample thickness analysis')
 
-        self.resize(1600, 1000)
+        self.resize(1500, 1000)
         
         self.make_widget()
 
@@ -56,7 +56,6 @@ class ImageAnalysisWidget(QMainWindow):
     def update_view(self, image):
         
         print(image)
-
 
 
     def make_widget(self):
@@ -80,23 +79,35 @@ class ImageAnalysisWidget(QMainWindow):
         self.fname_lbl = QtWidgets.QLineEdit('')
         
         self.save_btn = QtWidgets.QPushButton('Save result')
-        
-        
+        self.result_lbl = QtWidgets.QLineEdit('')
+
         self._buttons_layout_top.addWidget(self.open_btn)
-        self._buttons_layout_top.addWidget(self.crop_btn)
+        
         self._buttons_layout_top.addWidget(self.compute_btn)
+        self._buttons_layout_top.addWidget(QtWidgets.QLabel("File"))
         self._buttons_layout_top.addWidget(self.fname_lbl)
        
         
+        self._buttons_layout_top.addWidget(QtWidgets.QLabel("Thickness"))
+        self._buttons_layout_top.addWidget(self.result_lbl)
         self._buttons_layout_top.addWidget(self.save_btn)
         self._buttons_layout_top.addSpacerItem(HorizontalSpacerItem())
-        
-
+    
         self.buttons_widget_top.setLayout(self._buttons_layout_top)
         self._layout.addWidget(self.buttons_widget_top)
 
+
+        self.menu_bar = QtWidgets.QWidget(self.my_widget)
+        self._menu_bar_layout = QtWidgets.QHBoxLayout(self.menu_bar)
+        self._menu_bar_layout.setContentsMargins(0,0,0,0)
+
+        self._menu_bar_layout.addWidget(self.crop_btn)
+
+        self._menu_bar_layout.addWidget(QtWidgets.QLabel('Sample type'))
+
         self.edge_options_widget = QtWidgets.QWidget(self.my_widget)
         self._edge_options_widget_layout = QtWidgets.QHBoxLayout(self.edge_options_widget)
+        self._edge_options_widget_layout.setSpacing(0)
         self.edge_options = QtWidgets.QButtonGroup(self.edge_options_widget)
         self.edge_000_btn = QtWidgets.QPushButton()
         self.edge_100_btn = QtWidgets.QPushButton()
@@ -116,7 +127,6 @@ class ImageAnalysisWidget(QMainWindow):
         self.edge_101_btn.setCheckable(True)
         self.edge_010_btn.setCheckable(True)
         
-        
         self.edge_options.addButton(self.edge_000_btn)
         self.edge_options.addButton(self.edge_100_btn)
         self.edge_options.addButton(self.edge_001_btn)
@@ -127,26 +137,60 @@ class ImageAnalysisWidget(QMainWindow):
         self._edge_options_widget_layout.addWidget(self.edge_000_btn)
         self._edge_options_widget_layout.addWidget(self.edge_010_btn)
         self._edge_options_widget_layout.addWidget(self.edge_001_btn)
-        self._edge_options_widget_layout.addWidget(self.edge_100_btn)
+        self._edge_options_widget_layout.addWidget(self.edge_100_btn)  
         self._edge_options_widget_layout.addWidget(self.edge_101_btn)
-        
-        self._edge_options_widget_layout.addSpacerItem(HorizontalSpacerItem())
+
         self.edge_options_widget.setLayout(self._edge_options_widget_layout)
-        self._layout.addWidget(self.edge_options_widget)
+
+        self._menu_bar_layout.addWidget(self.edge_options_widget)
+
+        
+
+
+        self.order_options = QtWidgets.QButtonGroup(self.my_widget)
+        self.order_btns_widget = QtWidgets.QWidget(self.my_widget)
+        self._order_btns_widget_layout = QtWidgets.QHBoxLayout(self.order_btns_widget)
+        self._order_btns_widget_layout.setSpacing(0)
+        self.order_1_btn = QtWidgets.QPushButton('1')
+        self.order_2_btn = QtWidgets.QPushButton('2')
+        self.order_3_btn = QtWidgets.QPushButton('3')
+        self.order_1_btn.setObjectName('order_1_btn')
+        self.order_2_btn.setObjectName('order_2_btn')
+        self.order_3_btn.setObjectName('order_3_btn')
+        self.order_1_btn.setCheckable(True)
+        self.order_2_btn.setCheckable(True)
+        self.order_3_btn.setCheckable(True)
+        self.order_options.addButton(self.order_1_btn)
+        self.order_options.addButton(self.order_2_btn)
+        self.order_options.addButton(self.order_3_btn)
+        self.order_2_btn.setChecked(True)
+        self._order_btns_widget_layout.addWidget(self.order_1_btn)
+        self._order_btns_widget_layout.addWidget(self.order_2_btn)
+        self._order_btns_widget_layout.addWidget(self.order_3_btn)
+        self.order_btns_widget.setLayout(self._order_btns_widget_layout)
+
+        self._menu_bar_layout.addWidget(QtWidgets.QLabel('Polynomial order'))
+        self._menu_bar_layout.addWidget(self.order_btns_widget)
+        self._menu_bar_layout.addSpacerItem(HorizontalSpacerItem())
+
+        
+
+        self._layout.addWidget(self.menu_bar)
 
         self.plot_grid = pg.GraphicsLayoutWidget(self.my_widget)
+        
         self.plot_grid.setBackground((255,255,255))
         #self._plot_grid_layout = QtWidgets.QGridLayout(self.plot_grid)
 
         plots_settings = {  'src':['img','Source image, (𝛪/𝛪<sub>0</sub>)',True],
+                            'edge2 fit':['img', 'Edge 2 Fit', False],
                             'absorbance':['img', u'Absorbance (𝛢) = -log<sub>10</sub>(𝛪/𝛪<sub>0</sub>) ', False], 
                             #'frame cropped':['img','Cropped Frame',False],
-                            'edge1 fit':['img','Edge 1 Fit', False],
-                            'edge2 fit':['img', 'Edge 2 Fit', False],
-                
-                        
-                            'sobel y': ['img',u'Vertical gradient |𝜕<sub>𝑦</sub>𝛢|', False],
-                            'sobel vertical mean':['plot','Sobel y filter vertical mean',False]   }
+                            'edge1 fit':['img','Edge 1 Fit', False]
+                            
+                            #'sobel y': ['img',u'Vertical gradient |𝜕<sub>𝑦</sub>𝛢|', False],
+                            #'sobel vertical mean':['plot','Sobel y filter vertical mean',False]   
+                            }
         self.imgs = {}
         
         self.plots = {}
@@ -154,7 +198,7 @@ class ImageAnalysisWidget(QMainWindow):
         col = 0
         for plot_label in plots_settings:
             
-            if col >3:
+            if col >1:
                 col = 0
                 self.plot_grid.nextRow()
 
@@ -164,7 +208,12 @@ class ImageAnalysisWidget(QMainWindow):
             if plot_type == 'img':
                 square = plots_settings[plot_label][2]
                 plt = self.plot_grid.addPlot(title=title)
+                
+                p = pg.PlotItem()
+                
+                
                 view = plt.getViewBox()
+                
                 if square:
                     view.setAspectLocked(True)
                 img = pg.ImageItem()
@@ -185,8 +234,10 @@ class ImageAnalysisWidget(QMainWindow):
                 self.plots[plot_label]=plt
             col = col + 1
             
-        self.edge1_plt = self.plots['edge1 fit'].plot([], pen = pg.mkPen((255,0,0, 180),width=3,style=pg.QtCore.Qt.DotLine))
-        self.edge2_plt = self.plots['edge2 fit'].plot([], pen = pg.mkPen((255,0,0, 180),width=3,style=pg.QtCore.Qt.DotLine))
+        self.edge1_plt = self.plots['edge1 fit'].plot([], pen = pg.mkPen((255,0,0, 180),width=4,style=pg.QtCore.Qt.DotLine))
+        self.edge2_plt = self.plots['edge2 fit'].plot([], pen = pg.mkPen((255,0,0, 180),width=4,style=pg.QtCore.Qt.DotLine))
+        
+        self.abs_plt = self.plots['absorbance'].plot([], pen = pg.mkPen((255,0,0, 180),width=4,style=pg.QtCore.Qt.DotLine),connect='finite')
 
 
         self._layout.addWidget(self.plot_grid)
@@ -206,29 +257,57 @@ class ImageAnalysisWidget(QMainWindow):
     def make_roi(self):
         # Custom ROI for selecting an image region
         self.crop_roi = pg.ROI([50, 200], [150, 100])
-        self.crop_roi.setPen(pg.mkPen((255,0,0), width=2))
+        self.crop_roi.setPen(pg.mkPen((255,0,0), width=3))
         self.crop_roi.addScaleHandle([0, 1], [1, 0])
         self.crop_roi.addScaleHandle([1, 0], [0, 1])
         self.crop_roi.addScaleHandle([0, 0], [1, 1])
         self.crop_roi.addScaleHandle([1, 1], [0, 0])
+
+        self.crop_roi.addScaleHandle([0, .5], [1, .5])
+        self.crop_roi.addScaleHandle([1, .5], [0, .5])
+
+        self.crop_roi.addScaleHandle([.5, 0], [0.5, 1])
+        self.crop_roi.addScaleHandle([.5, 1], [0.5, 0])
+        
         self.crop_roi.setZValue(10)  # make sure ROI is drawn above image
         self.plots['src'].addItem(self.crop_roi)
 
     def make_edge_roi(self, plot):
         # Custom ROI for selecting an image region
         self.edge_roi_1 = pg.ROI([5, 100], [60, 100])
-        self.edge_roi_1.setPen(pg.mkPen((0,200,0), width=2))
+        self.edge_roi_1.setPen(pg.mkPen((0,200,0), width=3))
         handle1 = self.edge_roi_1.addScaleHandle([0, 1], [1, 0])
-        
         handle2 = self.edge_roi_1.addScaleHandle([1, 0], [0, 1])
+
+        self.edge_roi_1.addScaleHandle([0, 0], [1, 1])
+        self.edge_roi_1.addScaleHandle([1, 1], [0, 0])
+
+        self.edge_roi_1.addScaleHandle([0, .5], [1, .5])
+        self.edge_roi_1.addScaleHandle([1, .5], [0, .5])
+
+        self.edge_roi_1.addScaleHandle([.5, 0], [0.5, 1])
+        self.edge_roi_1.addScaleHandle([.5, 1], [0.5, 0])
+
+
+
         self.edge_roi_1.setZValue(10)  # make sure ROI is drawn above image
         plot.addItem(self.edge_roi_1)
 
         # Custom ROI for selecting an image region
         self.edge_roi_2 = pg.ROI([5, 800], [60, 100])
-        self.edge_roi_2.setPen(pg.mkPen((0,200,0), width=2))
+        self.edge_roi_2.setPen(pg.mkPen((0,200,0), width=3))
         self.edge_roi_2.addScaleHandle([0, 1], [1, 0])
         self.edge_roi_2.addScaleHandle([1, 0], [0, 1])
+
+        self.edge_roi_2.addScaleHandle([0, 0], [1, 1])
+        self.edge_roi_2.addScaleHandle([1, 1], [0, 0])
+
+        self.edge_roi_2.addScaleHandle([0, .5], [1, .5])
+        self.edge_roi_2.addScaleHandle([1, .5], [0, .5])
+
+        self.edge_roi_2.addScaleHandle([.5, 0], [0.5, 1])
+        self.edge_roi_2.addScaleHandle([.5, 1], [0.5, 0])
+
         self.edge_roi_2.setZValue(10)  # make sure ROI is drawn above image
         plot.addItem(self.edge_roi_2)
 

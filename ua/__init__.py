@@ -46,7 +46,7 @@ def main():
     
     return app.exec_()
 
-def arrow_plot():
+    '''def arrow_plot():
     from ua.controllers.ArrowPlotController import ArrowPlotController
     if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
         QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
@@ -59,7 +59,7 @@ def arrow_plot():
     app.aboutToQuit.connect(app.deleteLater)
     
     controller = ArrowPlotController(app = app)
-    controller.show_window()
+    controller.show_window()'''
     '''
     controller.update_data( filenames=
                             ['resources/ultrasonic/4000psi-300K_+15MHz000.csv.json',
@@ -75,6 +75,7 @@ def arrow_plot():
                             'resources/ultrasonic/4000psi-300K_+39MHz000.csv.json',
                             'resources/ultrasonic/4000psi-300K_+42MHz000.csv.json']
                             )                            
-    '''
+    
     
     return app.exec_()
+    '''

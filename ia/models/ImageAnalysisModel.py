@@ -38,6 +38,8 @@ class ImageROI():
         self.width = size
         self.edge_type = 0  # 0 - foil, 1 - edge
 
+        self.text = ''
+
     def get_sobel_y(self):
         image = self.image
         sobely= cv2.Sobel(image,cv2.CV_64F, dx=0,dy=1)
@@ -72,6 +74,14 @@ class ImageROI():
         #order = 3
         self.w_weighted = pixel_cluster_polynom_fit(I_orig, order=order, threshold = threshold)
         #print(self.w_weighted)
+        '''w_weighted = copy.copy(self.w_weighted)
+        w_weighted[0]=w_weighted[0]+self.pos[1]
+        w_strings = []
+        for w in w_weighted:
+            text = "{:.3e}".format(w)
+            w_strings.append(text)
+
+        self.text = '['+ ','.join(w_strings) +']'''
         
         # Generate test points
         n_samples = 50
@@ -206,20 +216,32 @@ class ImageAnalysisModel():
 
         return edges_combined
 
-    def get_auto_crop_limits(self):
+    def get_auto_crop_limits(self, x=True, y=True):
         median_kernel_size= self.settings['median_kernel_size']
         src = self.src
         img = medfilt2d(src,kernel_size=median_kernel_size)
+        crop_tightness = 5
+        
 
         hor = img.mean(axis=0)
         ver = img.mean(axis=1)
         m = min( min(hor), min(ver))
-        crop_tightness = 5
         crop_limit = m*crop_tightness
-        hor_first, hor_last = self.get_1d_limits(hor,crop_limit, pad=36)
-        ver_first, ver_last = self.get_1d_limits(ver,crop_limit, pad=24)
+        
+        if x:
+            hor_first, hor_last = self.get_1d_limits(hor,crop_limit, pad=36)
+        else:
+            hor_first, hor_last = 0, img.shape[1]-1
+        if y:
+            ver_first, ver_last = self.get_1d_limits(ver,crop_limit, pad=24)
+        else:
+            ver_first, ver_last = 0, img.shape[0]-1
         width = hor_last -hor_first
         height = ver_last- ver_first
+
+        
+
+
         return [hor_first, ver_first],[width, height]
 
     def get_1d_limits(self, profile, limit, pad=0):

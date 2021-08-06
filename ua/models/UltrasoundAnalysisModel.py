@@ -126,7 +126,7 @@ class UltrasoundAnalysisModel():
             with open(filename, 'w') as json_file:
                 json.dump(data, json_file,indent = 2)    
 
-    def calculate_data_bkp(self, c1, c2):
+    '''def calculate_data_bkp(self, c1, c2):
         
         
         if t is not None and spectrum is not None:
@@ -250,7 +250,7 @@ class UltrasoundAnalysisModel():
             plot2_overlay_t = t1 + self.c_diff_optimized
 
             self.plot1_bg = (plot1_overlay_t, plot1_overlay)
-            self.plot2_bg = (plot2_overlay_t, plot2_overlay)
+            self.plot2_bg = (plot2_overlay_t, plot2_overlay)'''
 
   
 

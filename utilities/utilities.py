@@ -8,19 +8,31 @@ import csv
 from um.models.tek_fileIO import read_tek_csv
 import math
 
-def read_multiple_spectra(filenames, ):
+def read_multiple_spectra(filenames, subsample = 1):
     spectra = []
     f = filenames[0]
-    X,Y = read_tek_csv(f, return_x=True)
+    X,Y = read_tek_csv(f, return_x=True, subsample=subsample)
     
     for f in filenames:
-        Y = read_tek_csv(f, return_x=False)
+        Y = read_tek_csv(f, return_x=False, subsample=subsample)
         y = Y
         
         spectra.append(y)
     return spectra, X
 
-
+def read_multiple_spectra_dict(filenames, subsample = 1):
+    spectra = []
+    f = filenames[0]
+    X,Y = read_tek_csv(f, return_x=True, subsample=subsample)
+    x = np.asarray(X)
+    for f in filenames:
+        if f is not None:
+            Y = read_tek_csv(f, return_x=False, subsample=subsample)
+            y = np.asarray(Y)
+            spectra.append({ 'filename':f,'waveform':[x, y]})
+        
+        
+    return spectra
 
 
 def butter_bandstop_filter(data, lowcut, highcut, order):

@@ -789,19 +789,22 @@ class PltWidget(pg.PlotWidget):
         self.setLabel('bottom', xLabel) 
 
     def plotData(self, xAxis,data,roiHorz=[],roiData=[], xLabel='', dataLabel=''):
-        self.xAxis = xAxis
-        self.yData = data
-        if self.plotForeground == None:
-            self.create_plots(xAxis,data,roiHorz,roiData, xLabel)
+        if len(xAxis)==len(data):
+            self.xAxis = xAxis
+            self.yData = data
+            if self.plotForeground == None:
+                self.create_plots(xAxis,data,roiHorz,roiData, xLabel)
+            else:
+                self.plotForeground.setData(xAxis, data) 
+                self.plotRoi.setData(roiHorz, roiData) 
+            # if nonzero ROI data, show ROI legend on plot
+            if len(roiHorz) > 0: roiLabel = 'ROIs'
+            else:   roiLabel = ''
+            self.legend.renameItem(0, dataLabel)
+            self.legend.renameItem(1, roiLabel)
+            self.setLabel('bottom', xLabel)     
         else:
-            self.plotForeground.setData(xAxis, data) 
-            self.plotRoi.setData(roiHorz, roiData) 
-        # if nonzero ROI data, show ROI legend on plot
-        if len(roiHorz) > 0: roiLabel = 'ROIs'
-        else:   roiLabel = ''
-        self.legend.renameItem(0, dataLabel)
-        self.legend.renameItem(1, roiLabel)
-        self.setLabel('bottom', xLabel)     
+            print('x and y arrays not the same length')
 
     def lin_reg_mode(self, mode,**kwargs):
         if mode == 'Add':

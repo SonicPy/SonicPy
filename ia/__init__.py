@@ -1,7 +1,6 @@
 
 __version__ = "0.5.0"
 
-import sys
 import os
 
 theme = 1
@@ -17,7 +16,7 @@ home_path = str(Path.home())
 import platform
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
-import pyqtgraph
+
 
 def main():
     from ia.controllers.ImageAnalysisController import ImageAnalysisController

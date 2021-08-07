@@ -46,7 +46,8 @@ class WaterfallModel( ):
         offset = 1
         clip = self.settings['clip' ]
 
-        fnames = sorted( list(self.scans[0].keys()))
+        fnames = list(self.scans[0].keys())
+        
         
         if len(fnames):
             x = np.empty([0])

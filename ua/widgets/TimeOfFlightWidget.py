@@ -57,8 +57,10 @@ class TimeOfFlightWidget(QMainWindow):
         self._buttons_layout_top = QtWidgets.QHBoxLayout()
         self._buttons_layout_top.setContentsMargins(0, 0, 0, 0)
         self.buttons_widget_bottom = QtWidgets.QWidget()
+        
         self._buttons_layout_bottom = QtWidgets.QHBoxLayout()
         self._buttons_layout_bottom.setContentsMargins(0, 0, 0, 0)
+        
         self.open_btn = QtWidgets.QPushButton("Open")
         self.fname_lbl = QtWidgets.QLineEdit('')
         self.scale_lbl = QtWidgets.QLabel('   Scale:')
@@ -83,8 +85,8 @@ class TimeOfFlightWidget(QMainWindow):
 
         self.buttons_widget_top.setLayout(self._buttons_layout_top)
         self._layout.addWidget(self.buttons_widget_top)
-        params = "Ultrasound echo analysis", 'Amplitude', 'Time'
-        self.win = WaterfallWidget()
+        params = ["Waterfall plot", 'Pressure point', 'Time']
+        self.win = WaterfallWidget(params=params)
         self._layout.addWidget(self.win)
 
         
@@ -93,10 +95,34 @@ class TimeOfFlightWidget(QMainWindow):
         #_buttons_layout_bottom.addWidget(QtWidgets.QLabel('2-way travel time:'))
         output_ebx = QtWidgets.QLineEdit('')
         #_buttons_layout_bottom.addWidget(output_ebx)
-        self._buttons_layout_bottom.addSpacerItem(HorizontalSpacerItem())
+       
+        
         self.buttons_widget_bottom.setLayout(self._buttons_layout_bottom)
         self._layout.addWidget(self.buttons_widget_bottom)
         self.my_widget.setLayout(self._layout)
+
+    def set_freq_buttons(self, num):
+
+        self.freqs_widget = QtWidgets.QWidget(self.buttons_widget_bottom)
+        self._freqs_widget_layout = QtWidgets.QHBoxLayout(self.freqs_widget )
+        self._freqs_widget_layout.setSpacing(0)
+
+        self.freq_btns = QtWidgets.QButtonGroup( self.freqs_widget)
+        self.freq_btns_list = []
+        for f in range(num):
+            btn = QtWidgets.QPushButton(str(f))
+            btn.setObjectName('freq_btn')
+            btn.setCheckable(True)
+            self.freq_btns_list.append(btn)
+            self.freq_btns.addButton(btn)
+            self._freqs_widget_layout.addWidget(btn)
+
+        self.freq_btns_list[0].setObjectName('freq_btn_first')
+        self.freq_btns_list[-1].setObjectName('freq_btn_last')
+        
+        self.freqs_widget.setLayout(self._freqs_widget_layout)
+        self._buttons_layout_bottom.addWidget(self.freqs_widget)
+        #self._buttons_layout_bottom.addSpacerItem(HorizontalSpacerItem())
         
 
     def closeEvent(self, QCloseEvent, *event):

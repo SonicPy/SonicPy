@@ -23,7 +23,7 @@ import time
 class TimeOfFlightModel():
     def __init__(self):
         
-        self.spectra = []
+        self.spectra = {}
         
         self.fp = ''
         self.fps_psi = {}
@@ -32,12 +32,14 @@ class TimeOfFlightModel():
         self.waterfall = WaterfallModel()
 
 
-    def load_multiple_files(self, fnames):
+    def load_multiple_files(self, freq):
         
+        fnames = self.fps_Hz[freq]
         start_time = time.time()
-        self.spectra = read_multiple_spectra_dict(fnames)
-        
-        self.waterfall.add_multiple_waveforms(self.spectra)
+        if not freq in self.spectra:
+            self.spectra[freq] = read_multiple_spectra_dict(fnames)
+
+        self.waterfall.add_multiple_waveforms(self.spectra[freq])
         self.waterfall.rescale_waveforms()
 
         print("Loaded " + str(len(fnames)) + " files in %s seconds." % (time.time() - start_time))

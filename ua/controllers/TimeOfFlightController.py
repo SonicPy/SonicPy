@@ -39,6 +39,8 @@ class TimeOfFlightController(QObject):
         self.widget = TimeOfFlightWidget()
         self.make_connections()
         self.line_plots = {}
+
+        self.set_US_folder(folder = '/Users/ross/Globus/s16bmb-20210717-e244302-Aihaiti/sam1/US')
         
     def make_connections(self):  
 
@@ -46,6 +48,7 @@ class TimeOfFlightController(QObject):
         self.widget.waterfall_plt_btn.clicked.connect(self.waterfall_plt_btn_callback)
         self.widget.scale_ebx.valueChanged.connect(self.scale_changed_callback )
         self.widget.clip_cbx.clicked.connect(self.clip_changed_callback )
+        
 
     def preferences_module(self, *args, **kwargs):
         pass
@@ -61,30 +64,50 @@ class TimeOfFlightController(QObject):
         
         self.re_plot()
 
+    def freq_btns_callback(self, btn):
+        index = self.widget.freq_btns_list.index(btn)
+        self.set_frequency(index)
+
     def waterfall_plt_btn_callback(self):
         self.update_data()
 
     def open_btn_callback(self):
         self.set_US_folder()
 
-    def set_US_folder(self):
-        folder = QtWidgets.QFileDialog.getExistingDirectory(self.widget, caption='Select US folder',
+    def set_US_folder(self, *args, **kwargs):
+
+        default_index = 5
+        if 'folder' in kwargs:
+            folder = kwargs['folder']
+        else:
+            folder = QtWidgets.QFileDialog.getExistingDirectory(self.widget, caption='Select US folder',
                                                      directory='/Users/ross/Globus/s16bmb-20210717-e244302-Aihaiti')
        
         # All files ending with .txt
         self.model.set_folder_path(folder)
+        freqs = list(self.model.fps_Hz.keys())
+        self.widget.set_freq_buttons(len(freqs))
+        
+        self.widget.freq_btns_list[default_index].setChecked(True)
+
+        self.widget.fname_lbl.setText(folder)
+        
+        self.set_frequency(default_index)
+        self.widget.freq_btns.buttonClicked.connect(self.freq_btns_callback)
+
+    def set_frequency(self, index):
         self.model.waterfall.clear()
-        fnames = self.model.fps_Hz['003']
+        freqs = list(self.model.fps_Hz.keys())
+        freq = freqs[index]
+        
         self.model.waterfall.set_clip(self.widget.clip_cbx.checkState())
         self.model.waterfall.set_scale(self.widget.scale_ebx.value())
-        self.model.load_multiple_files(fnames)
+        self.model.load_multiple_files(freq)
         self.re_plot()
 
     def re_plot(self):
-
-        
         self.model.waterfall.rescale_waveforms()
-        
+    
         waterfall_waveform = self.model.waterfall.waterfall_out['waveform']
         self.widget.win.clear_plot()
         

@@ -498,3 +498,16 @@ QFrame#main_frame {
    border-top-left-radius:8px;
    border-bottom-left-radius: 8px;
 }
+
+#freq_btn, #freq_btn_first, #freq_btn_last {
+    font: normal 12px;
+    border-radius: 1px;
+}
+#freq_btn_first{
+    border-top-left-radius:8px;
+   border-bottom-left-radius: 8px;
+ }
+ #freq_btn_last{
+    border-top-right-radius:8px;
+   border-bottom-right-radius: 8px;
+ }

@@ -10,13 +10,13 @@ import numpy as np
 
 class WaterfallWidget(QtWidgets.QWidget):
     panelClosedSignal = pyqtSignal()
-    def __init__(self, ctrls = []):
+    def __init__(self, ctrls = [],params=["Waterfall plot", 'Scan point', 'Time']):
         super().__init__()
         
         self._layout = QtWidgets.QVBoxLayout()
         self._layout.setSpacing(0)
         self._layout.setContentsMargins(8, 0, 8, 0)
-        params = "Waterfall plot", 'Scan point', 'Time'
+        
         self.plot_widget = customWidget(params)
         
         self.button_widget = QtWidgets.QWidget()

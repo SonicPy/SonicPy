@@ -8,15 +8,15 @@ from pyqtgraph import QtCore, mkPen, mkColor, hsvColor, ViewBox
 from um.widgets.CustomWidgets import HorizontalSpacerItem, VerticalSpacerItem, FlatButton
 import numpy as np
 
-class afgWidget(QtWidgets.QWidget):
+class WaterfallWidget(QtWidgets.QWidget):
     panelClosedSignal = pyqtSignal()
-    def __init__(self, ctrls = []):
+    def __init__(self, ctrls = [],params=["Waterfall plot", 'Scan point', 'Time']):
         super().__init__()
         
         self._layout = QtWidgets.QVBoxLayout()
         self._layout.setSpacing(0)
         self._layout.setContentsMargins(8, 0, 8, 0)
-        params = "plot title", 'Amplitude', 'Time'
+        
         self.plot_widget = SimpleDisplayWidget(params)
         
         self.button_widget = QtWidgets.QWidget()
@@ -25,11 +25,10 @@ class afgWidget(QtWidgets.QWidget):
         self._button_layout.setSpacing(10)
         self._button_layout.setContentsMargins(0, 8, 0, 12)
 
-        self._button_layout.addWidget(QtWidgets.QLabel('Arbitrary Function Generator user1 waveform preview'))
+        self._button_layout.addWidget(QtWidgets.QLabel('Scan view'))
       
         self._status_layout = QtWidgets.QVBoxLayout()
 
-       
         self.button_widget.setLayout(self._button_layout)
 
         self._layout.addWidget(self.button_widget)
@@ -40,8 +39,8 @@ class afgWidget(QtWidgets.QWidget):
 
         fig = self.plot_widget.fig 
         fig.create_plots()
-        self.CH1_plot = fig.win.plotForeground
-        self.bg_plot = fig.win.plotRoi
+        self._CH1_plot = fig.win.plotForeground
+        self._plot_selected = fig.win.plotRoi
       
 
         self.setStyleSheet("""
@@ -63,13 +62,19 @@ class afgWidget(QtWidgets.QWidget):
                 self._button_layout.addWidget(ctrl)
 
     def plot(self,waveform):
-        plot = self.plot_widget.fig.win
+        plot = self._CH1_plot
         if plot is not None:
-            plot.plotData(waveform[0], waveform[1])
+            plot.setData(waveform[0], waveform[1])
+
+    def plot_selected(self,waveform):
+        plot = self._plot_selected
+        if plot is not None:
+            plot.setData(waveform[0], waveform[1])
 
     def clear_plot(self,):
-        
-        self.plot([np.asarray([]),np.asarray([])])
+        plot = self._CH1_plot
+        if plot is not None:
+            plot.setData([], [])
         #self.status_lbl.setText(' ')
 
 

@@ -11,10 +11,9 @@ from pyqtgraph import QtCore, mkPen, mkColor, hsvColor, ViewBox
 from um.widgets.CustomWidgets import HorizontalSpacerItem, VerticalSpacerItem, FlatButton
 import numpy as np
 
-from um.widgets.PltWidget import SimpleDisplayWidget, customWidget
 from functools import partial
 
-from um.widgets.WaterfallWidget import WaterfallWidget
+from ua.widgets.WaterfallWidget import WaterfallWidget
 
 class TimeOfFlightWidget(QMainWindow):
     

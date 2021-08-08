@@ -11,7 +11,7 @@ from pyqtgraph import QtCore, mkPen, mkColor, hsvColor, ViewBox
 from um.widgets.CustomWidgets import HorizontalSpacerItem, VerticalSpacerItem, FlatButton
 import numpy as np
 
-from um.widgets.PltWidget import SimpleDisplayWidget, customWidget
+from um.widgets.PltWidget import SimpleDisplayWidget
 from functools import partial
 
 class UltrasoundAnalysisWidget(QMainWindow):
@@ -176,13 +176,13 @@ class UltrasoundAnalysisWidget(QMainWindow):
         buttons_widget_top.setLayout(_buttons_layout_top)
         _layout.addWidget(buttons_widget_top)
         params = "Ultrasound echo analysis", 'Amplitude', 'Time'
-        win = customWidget(params)
+        win = SimpleDisplayWidget(params)
         _layout.addWidget(win)
 
         detail1 = "Ultrasound echo 1", 'Amplitude', 'Time'
-        detail_win1 = customWidget(detail1)
+        detail_win1 = SimpleDisplayWidget(detail1)
         detail2 = "Ultrasound echo 2", 'Amplitude', 'Time'
-        detail_win2 = customWidget(detail2)
+        detail_win2 = SimpleDisplayWidget(detail2)
         _detail_layout.addWidget(detail_win1)
         _detail_layout.addWidget(detail_win2)
         detail_widget.setLayout(_detail_layout)

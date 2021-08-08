@@ -48,7 +48,20 @@ class TimeOfFlightController(QObject):
         self.widget.waterfall_plt_btn.clicked.connect(self.waterfall_plt_btn_callback)
         self.widget.scale_ebx.valueChanged.connect(self.scale_changed_callback )
         self.widget.clip_cbx.clicked.connect(self.clip_changed_callback )
+        self.widget.win.plot_widget.cursor_y_signal.connect(self.cursor_y_signal_callback )
+
+    def cursor_y_signal_callback(self, y_pos):
+
+        index = round(y_pos)
         
+        fnames = list(self.model.waterfall.scans[0].keys())
+        if index >=0 and index < len(fnames):
+
+            self.selected_fname = fnames[index]
+            
+            limits = self.model.waterfall.waveform_limits[self.selected_fname]
+            self.re_plot(limits)
+
 
     def preferences_module(self, *args, **kwargs):
         pass
@@ -105,19 +118,32 @@ class TimeOfFlightController(QObject):
         self.model.load_multiple_files(freq)
         self.re_plot()
 
-    def re_plot(self):
+    def re_plot(self, limits=[]):
         self.model.waterfall.rescale_waveforms()
     
         waterfall_waveform = self.model.waterfall.waterfall_out['waveform']
+
+        if len(limits):
+            selected = [waterfall_waveform[0] [limits[0]:limits[1]],
+                        waterfall_waveform[1] [limits[0]:limits[1]]]
+            waterfall_waveform = [ np.append(waterfall_waveform[0] [:limits[0]], waterfall_waveform[0] [limits[1]:]),
+                                   np.append(waterfall_waveform[1] [:limits[0]], waterfall_waveform[1] [limits[1]:])]
+        else:
+            selected = [[],[]]
+
         self.widget.win.clear_plot()
         
         self.update_plot(waterfall_waveform)
-        
+        self.update_selected(selected)
        
 
     def update_plot(self, waveform):
         if waveform is not None:
             self.widget.win.plot(waveform)
+
+    def update_selected(self, waveform):
+        if waveform is not None:
+            self.widget.win.plot_selected(waveform)
             
 
     def save_result(self):

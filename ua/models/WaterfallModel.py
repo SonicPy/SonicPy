@@ -6,7 +6,7 @@ class WaterfallModel( ):
 
     def __init__(self ):
        
-     
+        self.nelem = 0
         self.scans = [{}]
         self.settings = {'scale':1.0,
                          'clip':False}
@@ -52,6 +52,10 @@ class WaterfallModel( ):
         if len(fnames):
             x = np.empty([0])
             y = np.empty([0])
+
+            self.waveform_limits = {}
+
+        
             
             for i, f in enumerate(fnames):
                 
@@ -66,12 +70,16 @@ class WaterfallModel( ):
                 y_next = y_next + i * float(offset)
                 
                 
+                pos_pre = len(x)
                 if len(x):
                     x = np.append(x,np.nan)
                     y = np.append(y,np.nan)
                 
                 x = np.append(x,x_next)
                 y = np.append(y,y_next)
+                pos_post = len(x)
+                self.waveform_limits[f] = [pos_pre,pos_post]
+
             waveform = [x,y]
             out = {'waveform':waveform}
           

@@ -24,6 +24,7 @@ class ImageAnalysisWidget(QMainWindow):
 
     def __init__(self):
         super().__init__()
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.initialized = False
         self.t = None
         self.spectrum = None

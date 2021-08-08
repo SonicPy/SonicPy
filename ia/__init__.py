@@ -16,7 +16,7 @@ home_path = str(Path.home())
 import platform
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
-
+import pyqtgraph
 
 def main():
     from ia.controllers.ImageAnalysisController import ImageAnalysisController
@@ -28,7 +28,7 @@ def main():
     _platform = platform.system()
 
     app = QtWidgets.QApplication([])
-    app.aboutToQuit.connect(app.deleteLater)
+    #app.aboutToQuit.connect(app.deleteLater)
     
     controller = ImageAnalysisController(app = app, offline= True)
     controller.show_window()
@@ -43,6 +43,7 @@ def main():
         menu = window.menuBar
         menu.addMenu(pmenu)
     
-    return app.exec_()
+    app.exec_()
+
 
    

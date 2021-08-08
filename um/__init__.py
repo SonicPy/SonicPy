@@ -20,7 +20,7 @@ home_path = str(Path.home())
 import platform
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
-import pyqtgraph
+import pyqtgraph as pg
 
 
 def main(offline= True):
@@ -34,7 +34,7 @@ def main(offline= True):
     _platform = platform.system()
     Theme = 1
     app = QtWidgets.QApplication([])
-    app.aboutToQuit.connect(app.deleteLater)
+    #app.aboutToQuit.connect(app.deleteLater)
     controller = UltrasoundController(app, _platform, Theme, offline= offline )
     controller.show_window()
 
@@ -49,4 +49,5 @@ def main(offline= True):
         menu.addMenu(pmenu)
     
     app.exec_()
+   
     #del app

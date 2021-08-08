@@ -7,7 +7,7 @@ import os.path
 from PyQt5.QtCore import QObject
 import numpy as np
 
-from utilities.utilities import *
+#from utilities.utilities import *
 from ia.widgets.ImageAnalysisWidget import ImageAnalysisWidget
 
 from ia.models.ImageAnalysisModel import  ImageAnalysisModel

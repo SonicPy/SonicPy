@@ -57,7 +57,7 @@ def TOF():
     _platform = platform.system()
 
     app = QtWidgets.QApplication([])
-    app.aboutToQuit.connect(app.deleteLater)
+    #app.aboutToQuit.connect(app.deleteLater)
     
     controller = TimeOfFlightController(app = app)
     controller.show_window()

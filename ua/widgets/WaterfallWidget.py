@@ -37,10 +37,10 @@ class WaterfallWidget(QtWidgets.QWidget):
 
         self.setLayout(self._layout)
 
-        fig = self.plot_widget.fig 
-        fig.create_plots()
-        self._CH1_plot = fig.win.plotForeground
-        self._plot_selected = fig.win.plotRoi
+        fig = self.plot_widget.fig.win 
+        fig.create_plots([],[],[],[],'Time')
+        self._CH1_plot = fig.plotForeground
+        self._plot_selected = fig.plotRoi
       
 
         self.setStyleSheet("""
@@ -61,22 +61,18 @@ class WaterfallWidget(QtWidgets.QWidget):
             else:
                 self._button_layout.addWidget(ctrl)
 
-    def plot(self,waveform):
-        plot = self._CH1_plot
-        if plot is not None:
-            plot.setData(waveform[0], waveform[1])
-
-    def plot_selected(self,waveform):
-        plot = self._plot_selected
-        if plot is not None:
-            plot.setData(waveform[0], waveform[1])
+    def plot(self, x,y,sel_x=[],sel_y=[], xLabel='Time', dataLabel=''):
+        fig = self.plot_widget.fig.win 
+        fig.plotData(x,y,sel_x,sel_y, xLabel, dataLabel)
 
     def clear_plot(self,):
-        plot = self._CH1_plot
-        if plot is not None:
-            plot.setData([], [])
-        #self.status_lbl.setText(' ')
+        self.plot([],[])
 
+    def set_selected_name (self, text):
+        self. plot_widget.setText(text , 1)
+
+    def set_name (self, text):
+        self. plot_widget.setText(text , 0)
 
     def raise_widget(self):
         self.show()

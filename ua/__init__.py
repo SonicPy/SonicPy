@@ -32,7 +32,8 @@ def main():
     app.aboutToQuit.connect(app.deleteLater)
     
     controller = UltrasoundAnalysisController(app = app, offline= True)
-    controller.show_window()
+    controller.display_window.show()
+    
 
     if _platform == "Darwin":    #macOs has a 'special' way of handling preferences menu
         window = controller.display_window
@@ -41,9 +42,7 @@ def main():
         pact.setMenuRole(QtWidgets.QAction.PreferencesRole)
         pmenu = QtWidgets.QMenu('Preferences')
         pmenu.addAction(pact)
-        menu = window.menuBar
-        menu.addMenu(pmenu)
-    
+ 
     return app.exec_()
 
 
@@ -69,9 +68,8 @@ def TOF():
         pact.setMenuRole(QtWidgets.QAction.PreferencesRole)
         pmenu = QtWidgets.QMenu('Preferences')
         pmenu.addAction(pact)
-        menu = window.menuBar
-        menu.addMenu(pmenu)
-    
+        
+      
     return app.exec_()
 
 

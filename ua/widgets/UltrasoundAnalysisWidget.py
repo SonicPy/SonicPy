@@ -3,7 +3,7 @@
 
 import os, os.path, sys, platform, copy
 from PyQt5 import uic, QtWidgets,QtCore
-from PyQt5.QtWidgets import QMainWindow, QInputDialog, QMessageBox, QErrorMessage
+from PyQt5.QtWidgets import QMainWindow, QInputDialog, QMessageBox, QErrorMessage, QWidget
 from PyQt5.QtCore import QObject, pyqtSignal, Qt
 
 import pyqtgraph as pg
@@ -14,7 +14,7 @@ import numpy as np
 from um.widgets.PltWidget import SimpleDisplayWidget
 from functools import partial
 
-class UltrasoundAnalysisWidget(QMainWindow):
+class UltrasoundAnalysisWidget(QWidget):
     
     preferences_signal = pyqtSignal()
     up_down_signal = pyqtSignal(str)
@@ -29,19 +29,19 @@ class UltrasoundAnalysisWidget(QMainWindow):
 
         self.setWindowTitle('Ultrasound Analysis')
 
-        self.resize(1250, 800)
+        #self.resize(1250, 800)
         
 
-        self.my_widget, self.win, self.detail_win1, \
+        self.win, self.detail_win1, \
             self.detail_win2, self.open_btn, self.calc_btn,\
                  self.output_ebx, self.fname_lbl = self.make_widget()
 
 
-        self.setCentralWidget(self.my_widget)
+        
 
         self.create_plots()
-        self.create_menu()
-        self.style_widgets()
+    
+ 
 
     def create_plots(self):
 
@@ -139,7 +139,7 @@ class UltrasoundAnalysisWidget(QMainWindow):
 
 
     def make_widget(self):
-        my_widget = QtWidgets.QWidget()
+        
         _layout = QtWidgets.QVBoxLayout()
         _layout.setContentsMargins(10, 10, 10, 10)
         detail_widget = QtWidgets.QWidget()
@@ -195,79 +195,8 @@ class UltrasoundAnalysisWidget(QMainWindow):
         _buttons_layout_bottom.addSpacerItem(HorizontalSpacerItem())
         buttons_widget_bottom.setLayout(_buttons_layout_bottom)
         _layout.addWidget(buttons_widget_bottom)
-        my_widget.setLayout(_layout)
-        return my_widget, win, detail_win1, detail_win2, open_btn, calc_btn, output_ebx, fname_lbl
-
-    def closeEvent(self, QCloseEvent, *event):
-        self.panelClosedSignal.emit()
-        
-
-    def keyPressEvent(self, e):
-        event = None
-        if e.key() == Qt.Key_Up:
-            event = 'up'
-        if e.key() == Qt.Key_Down:
-            event = 'down'
-        if event is not None:
-            self.up_down_signal.emit(event)
-
-
-    def style_widgets(self):
-        
-        self.setStyleSheet("""
-            #scope_waveform_widget FlatButton {
-                min-width: 70;
-                max-width: 70;
-            }
-            #scope_waveform_widget QLabel {
-                min-width: 110;
-                max-width: 110;
-            }
-            #controls_sidebar QLineEdit {
-                min-width: 120;
-                max-width: 120;
-            }
-            #controls_sidebar QLabel {
-                min-width: 110;
-                max-width: 110;
-            }
-            
-        """)
- 
- 
-    def create_menu(self):
-
-        self.menuBar = QtWidgets.QMenuBar(self)
-        self.menuBar.setGeometry(QtCore.QRect(0, 0, 793, 22))
-        #self.file_menu = self.menuBar.addMenu('Tools')
-        self.file_save_hdf5_act = QtWidgets.QAction('Save to HDF5', self)    
-        self.actionSave_next = QtWidgets.QAction("Save", self)
-        self.actionSave_As = QtWidgets.QAction("Save as...", self)
-        self.actionPreferences = QtWidgets.QAction("Preferences", self)
-        self.actionBG = QtWidgets.QAction("Overlay", self)
-        self.actionBGclose = QtWidgets.QAction("Close overlay", self)
-        self.actionCursors = QtWidgets.QAction("Phase", self)
-        self.actionArrowPlot = QtWidgets.QAction("Arrow Plot", self)
-        #self.file_menu.addAction(self.actionSave_As)    
-        #self.file_menu.addAction(self.actionPreferences)  
-        #self.file_menu.addAction(self.actionBG) 
-        #self.file_menu.addAction(self.actionCursors) 
-        #self.file_menu.addAction(self.actionArrowPlot) 
-        #self.opts_menu = self.menuBar.addMenu('Arb')
-        self.ActionRecallSetup = QtWidgets.QAction('Recall setup', self)        
-        self.ActionSaveSetup = QtWidgets.QAction('Save setup', self)   
-        self.ActionSetUserWaveform = QtWidgets.QAction('Edit user waveform', self)   
-        self.setMenuBar(self.menuBar)
-
-    def preferences_module(self):
-        self.preferences_signal.emit()
-
-    def raise_widget(self):
-        self.show()
-        self.setWindowState(self.windowState() & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
-        self.activateWindow()
-        self.raise_()  
-
+        self.setLayout(_layout)
+        return win, detail_win1, detail_win2, open_btn, calc_btn, output_ebx, fname_lbl
 
 
 

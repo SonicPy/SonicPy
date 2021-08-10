@@ -18,6 +18,7 @@ from functools import partial
 from scipy.signal import argrelextrema
 
 
+
 class SimpleDisplayWidget(QtWidgets.QWidget):
     widget_closed = QtCore.pyqtSignal()
     fast_cursor_changed_singal = QtCore.pyqtSignal(float)
@@ -114,7 +115,7 @@ class plotWindow(QtWidgets.QWidget):
         self.win.setLogMode(False,False)
         #self.win.vLineFast.setObjectName(title+'vLineFast')
         self.win.setWindowTitle(title)
-        #self.win.setBackground(background=(0,0,0))
+        self.win.setBackground(background=(0,0,0))
         
         self.win.setLabel('left',left_label)
         self.win.setLabel('bottom', bottom_label)
@@ -144,9 +145,9 @@ class plotWindow(QtWidgets.QWidget):
     def set_cursor(self, pos):
         self.win.set_cursor_pos(pos)
 
-    '''def create_plots(self):
+    def create_plots(self):
         self.win.create_plots([],[],[],[],'Time (s)')
-        self.win.set_colors({'data_color':'FFFF00','rois_color': '#00b4ff'})'''
+        self.win.set_colors({'data_color':'FFFF00','rois_color': '#00b4ff'})
         
     '''
     def add_line_plot(self, x=[],y=[],color = (0,0,0),Width = 1):
@@ -228,7 +229,7 @@ class CustomViewBox(pg.ViewBox):
         self.setMouseMode(self.RectMode)
         self.addItem(self.vLine, ignoreBounds=True)
         self.addItem(self.vLineFast, ignoreBounds=True)
-        self.enableAutoRange(self.XYAxes, True)
+        self.enableAutoRange(self.XYAxes, enable = True)
         self.cursorPoint = 0
         self.cursorPoint_y = 0
         # Enable dragging and dropping onto the GUI 
@@ -286,8 +287,8 @@ class PltWidget(pg.PlotWidget):
        
         self.cursorPoints = [nan,nan]
         # defined default colors
-        self.colors = { 'plot_background_color': '#000000',\
-                        'data_color': '#FFFF00',\
+        self.colors = { 'plot_background_color': '#ffffff',\
+                        'data_color': '#2f2f2f',\
                         'rois_color': '#00b4ff', \
                         'roi_cursor_color': '#ff0000', \
                         'xrf_lines_color': '#969600', \
@@ -337,8 +338,6 @@ class PltWidget(pg.PlotWidget):
         self.set_log_mode(False,True)
         self.xAxis = None
         self.yData = None
-
-        self.set_colors({'data_color':self.colors['data_color'],'rois_color': self.colors['rois_color']})
 
         
     def set_cursorFast_pos(self, pos):
@@ -414,7 +413,7 @@ class PltWidget(pg.PlotWidget):
         # plot legend items 
         self.legend.addItem(self.plotForeground, '') # can display name in upper right corner in same color 
         self.legend.setParentItem(self.viewBox)
-        self.legend.anchor(itemPos=(1, 0), parentPos=(1, 0), offset=(-10, -10))
+        self.legend.anchor(itemPos=(0, 0), parentPos=(0, 0), offset=(0, 00))
         self.phases_legend.setParentItem(self.viewBox)
         self.phases_legend.anchor(itemPos=(0, 0), parentPos=(0, 0), offset=(0, -10))
         self.xrf_legend.setParentItem(self.viewBox)

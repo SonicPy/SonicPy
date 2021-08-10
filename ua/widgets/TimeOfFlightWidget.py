@@ -21,29 +21,27 @@ class TimeOfFlightWidget(QMainWindow):
     up_down_signal = pyqtSignal(str)
     panelClosedSignal = pyqtSignal()
 
-    def __init__(self):
+    def __init__(self, overview_widget, analysis_widget):
         super().__init__()
-        self.initialized = False
-        self.t = None
-        self.spectrum = None
+        
+        self.overview_widget = overview_widget
+        
+        self.analysis_widget = analysis_widget
+        #self.analysis_widget.resize(800,800)
 
 
         self.setWindowTitle('Time-of-flight analysis')
 
-        self.resize(1250, 800)
+        self.resize(1600, 900)
         
         self.make_widget()
 
         self.setCentralWidget(self.my_widget)
 
-        self.create_plots()
         self.create_menu()
         self.style_widgets()
 
-    def create_plots(self):
-
-        pass
-
+ 
 
     def make_widget(self):
         self.my_widget = QtWidgets.QWidget()
@@ -84,9 +82,23 @@ class TimeOfFlightWidget(QMainWindow):
 
         self.buttons_widget_top.setLayout(self._buttons_layout_top)
         self._layout.addWidget(self.buttons_widget_top)
-        params = ["Waterfall plot", 'Pressure point', 'Time']
-        self.win = WaterfallWidget(params=params)
-        self._layout.addWidget(self.win)
+        
+        
+        self.center_widget = QtWidgets.QWidget(self)
+        self._center_widget_layout = QtWidgets.QHBoxLayout(self.center_widget)
+
+        
+
+        self.splitter_horizontal = QtWidgets.QSplitter(Qt.Horizontal)
+        self.splitter_horizontal.addWidget(self.overview_widget)
+        self.splitter_horizontal.addWidget(self.analysis_widget)
+        self.splitter_horizontal.setSizes([800,800])
+
+        self._center_widget_layout.addWidget(self.splitter_horizontal)
+
+
+        self.center_widget.setLayout(self._center_widget_layout)
+        self._layout.addWidget(self.center_widget)
 
         
         calc_btn = QtWidgets.QPushButton('Correlate')
@@ -100,29 +112,7 @@ class TimeOfFlightWidget(QMainWindow):
         self._layout.addWidget(self.buttons_widget_bottom)
         self.my_widget.setLayout(self._layout)
 
-    def set_freq_buttons(self, num):
-
-        self.freqs_widget = QtWidgets.QWidget(self.buttons_widget_bottom)
-        self._freqs_widget_layout = QtWidgets.QHBoxLayout(self.freqs_widget )
-        self._freqs_widget_layout.setSpacing(0)
-
-        self.freq_btns = QtWidgets.QButtonGroup( self.freqs_widget)
-        self.freq_btns_list = []
-        for f in range(num):
-            btn = QtWidgets.QPushButton(str(f))
-            btn.setObjectName('freq_btn')
-            btn.setCheckable(True)
-            self.freq_btns_list.append(btn)
-            self.freq_btns.addButton(btn)
-            self._freqs_widget_layout.addWidget(btn)
-
-        self.freq_btns_list[0].setObjectName('freq_btn_first')
-        self.freq_btns_list[-1].setObjectName('freq_btn_last')
-        
-        self.freqs_widget.setLayout(self._freqs_widget_layout)
-        self._buttons_layout_bottom.addWidget(self.freqs_widget)
-        #self._buttons_layout_bottom.addSpacerItem(HorizontalSpacerItem())
-        
+    
 
     def closeEvent(self, QCloseEvent, *event):
         self.panelClosedSignal.emit()

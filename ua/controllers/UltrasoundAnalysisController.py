@@ -45,7 +45,7 @@ class UltrasoundAnalysisController(QObject):
         self.display_window = UltrasoundAnalysisWidget()
         self.arrow_plot_controller = ArrowPlotController()
         self.make_connections()
-        self.display_window.raise_widget()
+       
         
         '''filename='resources/ultrasonic/4000psi-300K_+21MHz000.csv'
         self.update_data(filename=filename)'''
@@ -165,8 +165,6 @@ class UltrasoundAnalysisController(QObject):
 
     
 
-    def show_window(self):
-        self.display_window.raise_widget()
 
     def cursor_dragged(self, cursor):
         pos = cursor.getYPos()

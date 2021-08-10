@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.core.defchararray import asarray
 
 
 class WaterfallModel( ):
@@ -46,7 +47,7 @@ class WaterfallModel( ):
         offset = 1
         clip = self.settings['clip' ]
 
-        fnames = list(self.scans[0].keys())
+        fnames = list(self.scans[0].keys())+[" "," "] # pad the list with two empty items to have better scaling of the plot, there should be a better way to do it.
         
         
         if len(fnames):
@@ -60,8 +61,11 @@ class WaterfallModel( ):
             for i, f in enumerate(fnames):
                 
                 key = f
-                waveform = self.scans[0][key]
-                
+                if key in self.scans[0]:
+                    waveform = self.scans[0][key]
+                else:
+                    waveform = [np.asarray([0]),np.asarray([0])]
+                    
                 x_next = waveform[0]
                 y_next = waveform[1]*float(scale)
                 if clip:
@@ -79,6 +83,7 @@ class WaterfallModel( ):
                 y = np.append(y,y_next)
                 pos_post = len(x)
                 self.waveform_limits[f] = [pos_pre,pos_post]
+                
 
             waveform = [x,y]
             out = {'waveform':waveform}

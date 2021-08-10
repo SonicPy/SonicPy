@@ -5,12 +5,14 @@ from numpy.core.defchararray import asarray
 class WaterfallModel( ):
     ''' synchronous version of the waterfall model '''
 
-    def __init__(self ):
+    def __init__(self , common_value):
        
-        self.nelem = 0
+        self.common_value = common_value
+        
         self.scans = [{}]
         self.settings = {'scale':1.0,
                          'clip':False}
+        self.waterfall_out = {}
 
     def add_multiple_waveforms(self, params ):
         for p in params:
@@ -41,7 +43,7 @@ class WaterfallModel( ):
         self.settings['clip'] = clip
         
 
-    def rescale_waveforms(self):
+    def get_rescaled_waveforms(self):
         out = {}
         scale = self.settings['scale' ]
         offset = 1
@@ -49,15 +51,16 @@ class WaterfallModel( ):
 
         fnames = list(self.scans[0].keys())+[" "," "] # pad the list with two empty items to have better scaling of the plot, there should be a better way to do it.
         
+        if len(self.waterfall_out):
+            if scale == self.waterfall_out['scale'] and clip == self.waterfall_out['clip'] and fnames == self. waterfall_out['fnames']:
+                #save time by not recalculating waterfall with same settings
+                return self.waterfall_out
         
         if len(fnames):
             x = np.empty([0])
             y = np.empty([0])
 
             self.waveform_limits = {}
-
-        
-            
             for i, f in enumerate(fnames):
                 
                 key = f
@@ -86,7 +89,10 @@ class WaterfallModel( ):
                 
 
             waveform = [x,y]
-            out = {'waveform':waveform}
+            out = {'waveform':waveform,
+                    'scale':scale,
+                    'clip':clip,
+                    'fnames':fnames}
           
         self.waterfall_out = out
 

@@ -90,8 +90,11 @@ class TimeOfFlightWidget(QMainWindow):
         
 
         self.splitter_horizontal = QtWidgets.QSplitter(Qt.Horizontal)
+
         self.splitter_horizontal.addWidget(self.overview_widget)
+
         self.splitter_horizontal.addWidget(self.analysis_widget)
+        
         self.splitter_horizontal.setSizes([800,800])
 
         self._center_widget_layout.addWidget(self.splitter_horizontal)

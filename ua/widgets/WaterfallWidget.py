@@ -25,7 +25,7 @@ class WaterfallWidget(QtWidgets.QWidget):
         self._button_layout.setSpacing(10)
         self._button_layout.setContentsMargins(0, 8, 0, 12)
 
-        self._button_layout.addWidget(QtWidgets.QLabel('Scan view'))
+        #self._button_layout.addWidget(QtWidgets.QLabel('Scan view'))
       
         self._status_layout = QtWidgets.QVBoxLayout()
 

@@ -34,8 +34,8 @@ class OverViewWidget(QWidget):
         
         self.make_widget()
 
-        
-
+        self.freq_btns_list = []
+        self.cond_btns_list = []
 
 
     def make_widget(self):
@@ -48,10 +48,13 @@ class OverViewWidget(QWidget):
         self.buttons_widget_top = QtWidgets.QWidget()
         self._buttons_layout_top = QtWidgets.QHBoxLayout()
         self._buttons_layout_top.setContentsMargins(0, 0, 0, 0)
-        self.buttons_widget_bottom = QtWidgets.QWidget()
+        self.buttons_widget_bottom_single_frequency = QtWidgets.QWidget()
+        self.buttons_widget_bottom_single_condition = QtWidgets.QWidget()
         
-        self._buttons_layout_bottom = QtWidgets.QHBoxLayout()
-        self._buttons_layout_bottom.setContentsMargins(0, 0, 0, 0)
+        self._buttons_layout_bottom_single_frequency = QtWidgets.QHBoxLayout()
+        self._buttons_layout_bottom_single_frequency.setContentsMargins(0, 0, 0, 0)
+        self._buttons_layout_bottom_single_condition = QtWidgets.QHBoxLayout()
+        self._buttons_layout_bottom_single_condition.setContentsMargins(0, 0, 0, 0)
         
         self.open_btn = QtWidgets.QPushButton("Open")
         self.fname_lbl = QtWidgets.QLineEdit('')
@@ -63,8 +66,7 @@ class OverViewWidget(QWidget):
         self.clip_cbx = QtWidgets.QCheckBox('Clip')
         self.clip_cbx.setChecked(True)
         self.save_btn = QtWidgets.QPushButton('Save result')
-        self.waterfall_plt_btn = QtWidgets.QPushButton('Waterfall')
-        
+       
         self._buttons_layout_top.addWidget(self.open_btn)
         self._buttons_layout_top.addWidget(self.fname_lbl)
         self._buttons_layout_top.addWidget(self.scale_lbl)
@@ -73,34 +75,59 @@ class OverViewWidget(QWidget):
         
         self._buttons_layout_top.addWidget(self.save_btn)
         self._buttons_layout_top.addSpacerItem(HorizontalSpacerItem())
-        self._buttons_layout_top.addWidget(self.waterfall_plt_btn)
+        
 
         self.buttons_widget_top.setLayout(self._buttons_layout_top)
         self._layout.addWidget(self.buttons_widget_top)
-        params = ["Waterfall plot", 'Pressure point', 'Time']
-        self.win = WaterfallWidget(params=params)
-        self._layout.addWidget(self.win)
 
-        
-        calc_btn = QtWidgets.QPushButton('Correlate')
-        #_buttons_layout_bottom.addWidget(calc_btn)
-        #_buttons_layout_bottom.addWidget(QtWidgets.QLabel('2-way travel time:'))
-        output_ebx = QtWidgets.QLineEdit('')
-        #_buttons_layout_bottom.addWidget(output_ebx)
-       
-        
-        self.buttons_widget_bottom.setLayout(self._buttons_layout_bottom)
-        self._layout.addWidget(self.buttons_widget_bottom)
+        self.plots_tab_widget= QtWidgets.QTabWidget(self)
+        self.plots_tab_widget.setObjectName("plots_tab_widget")
+
+        self.single_frequency_widget = QtWidgets.QWidget(self.plots_tab_widget)
+        self._single_frequency_widget_layout = QtWidgets.QVBoxLayout(self.single_frequency_widget)
+        self._single_frequency_widget_layout.setContentsMargins(0,0,0,0)
+        params = ["Waterfall plot", 'Pressure point', 'Time']
+        self.single_frequency_waterfall = WaterfallWidget(params=params)
+        self._single_frequency_widget_layout.addWidget(self.single_frequency_waterfall)
+        self.freqs_widget = QtWidgets.QWidget(self.buttons_widget_bottom_single_frequency)
+        self._freqs_widget_layout = QtWidgets.QHBoxLayout(self.freqs_widget )
+        self._freqs_widget_layout.setSpacing(0)
+        self.freq_btns = QtWidgets.QButtonGroup( self.freqs_widget)
+        self.freqs_widget.setLayout(self._freqs_widget_layout)
+        self._buttons_layout_bottom_single_frequency.addWidget(self.freqs_widget)
+        self.buttons_widget_bottom_single_frequency.setLayout(self._buttons_layout_bottom_single_frequency)
+        self._single_frequency_widget_layout.addWidget(self.buttons_widget_bottom_single_frequency)
+        self.plots_tab_widget.addTab(self.single_frequency_widget, 'Single Frequency')
+
+        self.single_condition_widget = QtWidgets.QWidget(self.plots_tab_widget)
+        self._single_condition_widget_layout = QtWidgets.QVBoxLayout(self.single_condition_widget)
+        self._single_condition_widget_layout.setContentsMargins(0,0,0,0)
+        params = ["Waterfall plot", 'Frequency point', 'Time']
+        self.single_condition_waterfall = WaterfallWidget(params=params)
+        self._single_condition_widget_layout.addWidget(self.single_condition_waterfall)
+        self.conds_widget = QtWidgets.QWidget(self.buttons_widget_bottom_single_condition)
+        self._conds_widget_layout = QtWidgets.QHBoxLayout(self.conds_widget )
+        self._conds_widget_layout.setSpacing(0)
+        self.cond_btns = QtWidgets.QButtonGroup( self.conds_widget)
+        self.conds_widget.setLayout(self._conds_widget_layout)
+        self._buttons_layout_bottom_single_condition.addWidget(self.conds_widget)
+        self.buttons_widget_bottom_single_condition.setLayout(self._buttons_layout_bottom_single_condition)
+        self._single_condition_widget_layout.addWidget(self.buttons_widget_bottom_single_condition)
+        self.plots_tab_widget.addTab(self.single_condition_widget, 'Single P-T Condition')
+
+
+        self._layout.addWidget(self.plots_tab_widget)
         self.setLayout(self._layout)
 
     def set_freq_buttons(self, num):
 
-        self.freqs_widget = QtWidgets.QWidget(self.buttons_widget_bottom)
-        self._freqs_widget_layout = QtWidgets.QHBoxLayout(self.freqs_widget )
-        self._freqs_widget_layout.setSpacing(0)
+        for b in self.freq_btns_list:
+            self._freqs_widget_layout.removeWidget(b)
+            self.freq_btns.removeButton(b)
+            b.deleteLater()
+            b= None
+        self.freq_btns_list.clear()
 
-        self.freq_btns = QtWidgets.QButtonGroup( self.freqs_widget)
-        self.freq_btns_list = []
         for f in range(num):
             btn = QtWidgets.QPushButton(str(f))
             btn.setObjectName('freq_btn')
@@ -112,9 +139,25 @@ class OverViewWidget(QWidget):
         self.freq_btns_list[0].setObjectName('freq_btn_first')
         self.freq_btns_list[-1].setObjectName('freq_btn_last')
         
-        self.freqs_widget.setLayout(self._freqs_widget_layout)
-        self._buttons_layout_bottom.addWidget(self.freqs_widget)
-        #self._buttons_layout_bottom.addSpacerItem(HorizontalSpacerItem())
+    def set_cond_buttons(self, num):
+
+        for b in self.cond_btns_list:
+            self._conds_widget_layout.removeWidget(b)
+            self.cond_btns.removeButton(b)
+            b.deleteLater()
+            b= None
+        self.cond_btns_list.clear()
+
+        for f in range(num):
+            btn = QtWidgets.QPushButton(str(f))
+            btn.setObjectName('cond_btn')
+            btn.setCheckable(True)
+            self.cond_btns_list.append(btn)
+            self.cond_btns.addButton(btn)
+            self._conds_widget_layout.addWidget(btn)
+
+        self.cond_btns_list[0].setObjectName('cond_btn_first')
+        self.cond_btns_list[-1].setObjectName('cond_btn_last')    
         
 
     def raise_widget(self):

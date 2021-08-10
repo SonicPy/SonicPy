@@ -26,23 +26,59 @@ class OverViewModel():
         self.spectra = {}
         
         self.fp = ''
-        self.fps_psi = {}
+        self.fps_cond = {}
         self.fps_Hz = {}
 
-        self.waterfall = WaterfallModel()
+        self.waterfalls = {} 
+        self.folder_suffix = 'psi'
+        self.file_type = '.csv'
 
+        self.settings = {'scale':10,
+                         'clip':True}
 
-    def load_multiple_files(self, freq):
+    def clear(self):
+        self.__init__()
+
+    def set_scale(self, scale):
+
+        for key in self.waterfalls:
+            w = self.waterfalls[key]
+            w.settings['scale']=scale
+
+    def set_clip(self, clip):
+
+        for key in self.waterfalls:
+            w = self.waterfalls[key]
+            w.settings['clip']=clip
+
+    def load_multiple_files_by_frequency(self, freq):
         
         fnames = self.fps_Hz[freq]
         start_time = time.time()
         if not freq in self.spectra:
             self.spectra[freq] = read_multiple_spectra_dict(fnames)
 
-        self.waterfall.add_multiple_waveforms(self.spectra[freq])
-        self.waterfall.rescale_waveforms()
+            self.waterfalls[freq] = WaterfallModel(freq)
+            self.waterfalls[freq].settings =  self.settings
+            self.waterfalls[freq].add_multiple_waveforms(self.spectra[freq])
+            #self.waterfalls[freq].get_rescaled_waveforms()
 
         print("Loaded " + str(len(fnames)) + " files in %s seconds." % (time.time() - start_time))
+
+    def load_multiple_files_by_condition(self, cond):
+        
+        fnames = self.fps_cond[cond]
+        start_time = time.time()
+        if not cond in self.spectra:
+            self.spectra[cond] = read_multiple_spectra_dict(fnames)
+
+            self.waterfalls[cond] = WaterfallModel(cond)
+            self.waterfalls[cond].settings =  self.settings
+            self.waterfalls[cond].add_multiple_waveforms(self.spectra[cond])
+            #self.waterfalls[cond].get_rescaled_waveforms()
+
+        print("Loaded " + str(len(fnames)) + " files in %s seconds." % (time.time() - start_time))
+
 
     def set_folder_path(self, folder):
         # All files ending with .txt
@@ -51,25 +87,27 @@ class OverViewModel():
         
 
     def understand_folder_structure(self):
+        folder_suffix = self.folder_suffix
         folder = self.fp
-        pressures_search = os.path.join(folder,'*psi')
-        pressures = glob.glob(pressures_search)
+        file_type = self.file_type
+        conditions_search = os.path.join(folder,'*'+folder_suffix)
+        conditions = glob.glob(conditions_search)
         
-        pressures_base = []
-        suffix = os.path.basename(pressures[0])[-3:]
-        for p in pressures:
+        conditions_base = []
+        suffix = os.path.basename(conditions[0])[-3:]
+        for p in conditions:
             try:
                 num = int(os.path.basename(p)[:-3])
-                pressures_base.append(num)
+                conditions_base.append(num)
             except:
                 pass
-        pressures_num = sorted(pressures_base)
-        pressures_folders_sorted = []
-        for p in pressures_num:
-            pressures_folders_sorted.append(str(p)+suffix)
+        conditions_num = sorted(conditions_base)
+        conditions_folders_sorted = []
+        for p in conditions_num:
+            conditions_folders_sorted.append(str(p)+suffix)
 
-        pressure_0 = pressures_folders_sorted[0]
-        freq_search = os.path.join(folder,pressure_0,'*.csv')
+        condition_0 = conditions_folders_sorted[0]
+        freq_search = os.path.join(folder,condition_0,'*'+file_type)
         freqs = glob.glob(freq_search) 
 
         freqs_base = []
@@ -80,14 +118,14 @@ class OverViewModel():
             freqs_base.append(num)
         freqs_sorted = sorted(freqs_base)
  
-        for p in pressures_folders_sorted:
-            pressures_search = os.path.join(folder,p,suffix_freq)
-            res = glob.glob(pressures_search)
-            self.fps_psi[p] = res
+        for p in conditions_folders_sorted:
+            conditions_search = os.path.join(folder,p,'*'+suffix_freq)
+            res = sorted(glob.glob(conditions_search))
+            self.fps_cond[p] = res
       
         for f in freqs_sorted:
             p_list = []
-            for p in pressures_folders_sorted:
+            for p in conditions_folders_sorted:
 
                 freq_search = os.path.join(folder,p,'*'+f+suffix_freq)
                 res = glob.glob(freq_search)
@@ -97,8 +135,8 @@ class OverViewModel():
                     p_list.append(None)
             self.fps_Hz[f] = p_list
 
-        print('found pressures: '+str(len(pressures_folders_sorted)))
-        print('found frequencies: '+str(len(freqs_sorted)))
+        print('found conditions: '+str(conditions_folders_sorted))
+        print('found frequencies: '+str(freqs_sorted))
 
 
 

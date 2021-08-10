@@ -81,7 +81,7 @@ class TimeOfFlightWidget(QMainWindow):
         self._buttons_layout_top.addWidget(self.waterfall_plt_btn)
 
         self.buttons_widget_top.setLayout(self._buttons_layout_top)
-        self._layout.addWidget(self.buttons_widget_top)
+        #self._layout.addWidget(self.buttons_widget_top)
         
         
         self.center_widget = QtWidgets.QWidget(self)

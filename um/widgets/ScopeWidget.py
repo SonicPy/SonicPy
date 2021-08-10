@@ -36,10 +36,10 @@ class scopeWidget(QtWidgets.QWidget):
 
         self.setLayout(self._layout)
 
-        fig = self.plot_widget.fig 
-        fig.create_plots()
-        self.CH1_plot = fig.win.plotForeground
-        self.bg_plot = fig.win.plotRoi
+        fig = self.plot_widget.fig.win
+        fig.create_plots([],[],[],[],'Time')
+        self.CH1_plot = fig.plotForeground
+        self.bg_plot = fig.plotRoi
       
 
         self.setStyleSheet("""
@@ -60,15 +60,18 @@ class scopeWidget(QtWidgets.QWidget):
             else:
                 self._button_layout.addWidget(ctrl)
 
-    def plot(self,waveform):
-        plot = self.plot_widget.fig.win
-        if plot is not None:
-            plot.plotData(waveform[0], waveform[1])
+    def plot(self, x,y,sel_x=[],sel_y=[], xLabel='Time', dataLabel=''):
+        fig = self.plot_widget.fig.win 
+        fig.plotData(x,y,sel_x,sel_y, xLabel, dataLabel)
 
     def clear_plot(self,):
-        
-        self.plot([np.asarray([]),np.asarray([])])
-        #self.status_lbl.setText(' ')
+        self.plot([],[])
+
+    def set_selected_name (self, text):
+        self. plot_widget.setText(text , 1)
+
+    def set_name (self, text):
+        self. plot_widget.setText(text , 0)
 
 
     def raise_widget(self):

@@ -46,7 +46,7 @@ class TimeOfFlightWidget(QMainWindow):
     def make_widget(self):
         self.my_widget = QtWidgets.QWidget()
         self._layout = QtWidgets.QVBoxLayout()
-        self._layout.setContentsMargins(10, 10, 10, 10)
+        self._layout.setContentsMargins(0, 0, 0, 0)
         self.detail_widget = QtWidgets.QWidget()
         self._detail_layout = QtWidgets.QHBoxLayout()
         self._detail_layout.setContentsMargins(0, 0, 0, 0)
@@ -58,28 +58,11 @@ class TimeOfFlightWidget(QMainWindow):
         self._buttons_layout_bottom = QtWidgets.QHBoxLayout()
         self._buttons_layout_bottom.setContentsMargins(0, 0, 0, 0)
         
-        self.open_btn = QtWidgets.QPushButton("Open")
-        self.fname_lbl = QtWidgets.QLineEdit('')
-        self.scale_lbl = QtWidgets.QLabel('   Scale:')
-        self.scale_ebx = QtWidgets.QDoubleSpinBox()
-        self.scale_ebx.setMaximum(100)
-        self.scale_ebx.setMinimum(1)
-        self.scale_ebx.setValue(21)
-        self.clip_cbx = QtWidgets.QCheckBox('Clip')
-        self.clip_cbx.setChecked(True)
-        self.save_btn = QtWidgets.QPushButton('Save result')
-        self.waterfall_plt_btn = QtWidgets.QPushButton('Waterfall')
         
-        self._buttons_layout_top.addWidget(self.open_btn)
-        self._buttons_layout_top.addWidget(self.fname_lbl)
-        self._buttons_layout_top.addWidget(self.scale_lbl)
-        self._buttons_layout_top.addWidget(self.scale_ebx)
-        self._buttons_layout_top.addWidget(self.clip_cbx)
-        
-        self._buttons_layout_top.addWidget(self.save_btn)
-        self._buttons_layout_top.addSpacerItem(HorizontalSpacerItem())
-        self._buttons_layout_top.addWidget(self.waterfall_plt_btn)
 
+        
+        self._buttons_layout_top.addSpacerItem(HorizontalSpacerItem())
+        
         self.buttons_widget_top.setLayout(self._buttons_layout_top)
         #self._layout.addWidget(self.buttons_widget_top)
         
@@ -112,7 +95,7 @@ class TimeOfFlightWidget(QMainWindow):
        
         
         self.buttons_widget_bottom.setLayout(self._buttons_layout_bottom)
-        self._layout.addWidget(self.buttons_widget_bottom)
+        #self._layout.addWidget(self.buttons_widget_bottom)
         self.my_widget.setLayout(self._layout)
 
     

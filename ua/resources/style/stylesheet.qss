@@ -491,11 +491,11 @@ QFrame#main_frame {
     font: normal 12px;
     border-radius: 1px;
 }
-#freq_btn_first{
+#freq_btn_first, #p_wave_btn{
     border-top-left-radius:8px;
    border-bottom-left-radius: 8px;
  }
- #freq_btn_last{
+ #freq_btn_last, #s_wave_btn{
     border-top-right-radius:8px;
    border-bottom-right-radius: 8px;
  }

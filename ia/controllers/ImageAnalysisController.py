@@ -134,7 +134,7 @@ class ImageAnalysisController(QObject):
             y_diff = abs(np.mean(edge2_y - edge1_y))
             std_dev = np.std(edge2_y - edge1_y)
 
-            output_txt = "mean: " + str(round(y_diff,4)) + '; std: ' +str(round(std_dev,4))
+            output_txt = "mean: " + str(round(y_diff,1)) + '; std: ' +str(round(std_dev,1))
             self.display_window.result_lbl.setText(output_txt)
 
             data_x = np.array([])

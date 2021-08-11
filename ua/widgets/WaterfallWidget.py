@@ -38,7 +38,9 @@ class WaterfallWidget(QtWidgets.QWidget):
         self.setLayout(self._layout)
 
         fig = self.plot_widget.fig.win 
+        
         fig.create_plots([],[],[],[],'Time')
+        fig.set_colors({'rois_color': '#7AE7FF'})
         self._CH1_plot = fig.plotForeground
         self._plot_selected = fig.plotRoi
       

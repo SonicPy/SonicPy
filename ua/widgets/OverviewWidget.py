@@ -8,7 +8,7 @@ from PyQt5.QtCore import QObject, pyqtSignal, Qt
 
 import pyqtgraph as pg
 from pyqtgraph import QtCore, mkPen, mkColor, hsvColor, ViewBox
-from um.widgets.CustomWidgets import HorizontalSpacerItem, VerticalSpacerItem, FlatButton
+from um.widgets.CustomWidgets import HorizontalSpacerItem, VerticalSpacerItem, FlatButton, DoubleSpinBoxAlignRight
 import numpy as np
 
 from functools import partial
@@ -54,7 +54,7 @@ class OverViewWidget(QWidget):
         self.fname_lbl = QtWidgets.QLineEdit('')
         self.fname_lbl.setMinimumWidth(300)
         self.scale_lbl = QtWidgets.QLabel('   Scale:')
-        self.scale_ebx = QtWidgets.QDoubleSpinBox()
+        self.scale_ebx = DoubleSpinBoxAlignRight()
         self.scale_ebx.setMaximum(100)
         self.scale_ebx.setMinimum(1)
         self.scale_ebx.setValue(21)
@@ -67,9 +67,32 @@ class OverViewWidget(QWidget):
         self._buttons_layout_top.addWidget(self.scale_lbl)
         self._buttons_layout_top.addWidget(self.scale_ebx)
         self._buttons_layout_top.addWidget(self.clip_cbx)
+
+        self._buttons_layout_top.addSpacerItem(HorizontalSpacerItem())
+
+        self.freq_start = DoubleSpinBoxAlignRight(self.buttons_widget_top)
+        self.freq_start.setMinimumWidth(70)
+        self.freq_start.setMinimum(1e-9)
+        self.freq_start.setSingleStep(1)
+        self.freq_start.setValue(24)
+        
+        self.freq_step = DoubleSpinBoxAlignRight(self.buttons_widget_top)
+        self.freq_step.setMinimumWidth(70)
+        self.freq_step.setMinimum(1e-9)
+        self.freq_step.setSingleStep(0.5)
+        self.freq_step.setValue(2)
+        #self.freq_end = QtWidgets.QSpinBox(self.buttons_widget_top)
+        #self.freq_end.setMinimumWidth(70)
+
+        self._buttons_layout_top.addWidget(QtWidgets.QLabel('𝑓 start [MHz]'))
+        self._buttons_layout_top.addWidget(self.freq_start)
+        self._buttons_layout_top.addWidget(QtWidgets.QLabel('𝑓 step [MHz]'))
+        self._buttons_layout_top.addWidget(self.freq_step)
+        #self._buttons_layout_top.addWidget(QtWidgets.QLabel('𝑓 N'))
+        #self._buttons_layout_top.addWidget(self.freq_end)
         
         #self._buttons_layout_top.addWidget(self.save_btn)
-        self._buttons_layout_top.addSpacerItem(HorizontalSpacerItem())
+        
         
 
         self.buttons_widget_top.setLayout(self._buttons_layout_top)

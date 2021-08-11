@@ -36,6 +36,7 @@ from um.widgets.UtilityWidgets import open_file_dialog
 
 class UltrasoundAnalysisController(QObject):
     cursor_position_signal = pyqtSignal(float)
+    correlation_saved_signal = pyqtSignal(dict)
     def __init__(self, app=None, offline = False):
         super().__init__()
         self.model = UltrasoundAnalysisModel()
@@ -71,6 +72,12 @@ class UltrasoundAnalysisController(QObject):
         self.display_window.echo1_cursor_btn.clicked.connect(partial(self.set_echo_region_position,0))
         self.display_window.echo2_cursor_btn.clicked.connect(partial(self.set_echo_region_position,1))
     
+        self.display_window.p_wave_btn.clicked.connect(partial(self.p_s_wave_btn_callback,'P'))
+        self.display_window.s_wave_btn.clicked.connect(partial(self.p_s_wave_btn_callback,'S'))
+
+
+    def p_s_wave_btn_callback(self, wave_type):
+        self.model.wave_type = wave_type
 
     def ArrowPlotShow(self):
         self.arrow_plot_controller.arrow_plot_window.raise_widget()
@@ -78,7 +85,10 @@ class UltrasoundAnalysisController(QObject):
     def save_result(self):
         if self.fname is not None:
             filename = self.fname + '.json'
-            self.model.save_result(filename)
+            out = self.model.save_result(self.fname)
+            if out['saved']:
+                self.correlation_saved_signal.emit(out['data'])
+
 
     def emit_cursor(self, pos):
         self.cursor_position_signal.emit(pos)
@@ -173,7 +183,7 @@ class UltrasoundAnalysisController(QObject):
  
     def load_file(self, filename):
         
-        t, spectrum = read_tek_csv(filename, subsample=2)
+        t, spectrum = read_tek_csv(filename, subsample=1)
         t, spectrum = zero_phase_highpass_filter([t,spectrum],1e4,1)
         return t,spectrum, filename
         

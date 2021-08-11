@@ -8,7 +8,8 @@ from PyQt5.QtCore import QObject, pyqtSignal, Qt
 
 import pyqtgraph as pg
 from pyqtgraph import QtCore, mkPen, mkColor, hsvColor, ViewBox
-from um.widgets.CustomWidgets import HorizontalSpacerItem, VerticalSpacerItem, FlatButton
+#from pyqtgraph.Qt import qWait
+from um.widgets.CustomWidgets import HorizontalSpacerItem, VerticalSpacerItem, FlatButton, DoubleSpinBoxAlignRight
 import numpy as np
 
 from um.widgets.PltWidget import SimpleDisplayWidget
@@ -44,8 +45,8 @@ class UltrasoundAnalysisWidget(QWidget):
         self.plot_win = self.plot_widget.fig.win 
         self.plot_win.create_plots([],[],[],[],'Time')
         self.plot_win.set_colors( { 
-                        'data_color': '#ffffff',\
-                        'rois_color': '#ffffff', \
+                        'data_color': '#7AE7FF',\
+                        'rois_color': '#FF6977', \
                         })
         self._CH1_plot = self.plot_win.plotForeground
         self._plot_selected = self.plot_win.plotRoi
@@ -164,29 +165,31 @@ class UltrasoundAnalysisWidget(QWidget):
         
         self._layout = QtWidgets.QVBoxLayout()
         self._layout.setContentsMargins(10, 10, 10, 10)
-        self.detail_widget = QtWidgets.QWidget()
+        self.detail_widget = QWidget()
         self._detail_layout = QtWidgets.QHBoxLayout()
         self._detail_layout.setContentsMargins(0, 0, 0, 0)
-        self.buttons_widget_top = QtWidgets.QWidget()
+        self.buttons_widget_top = QWidget()
         self._buttons_layout_top = QtWidgets.QHBoxLayout()
         self._buttons_layout_top.setContentsMargins(0, 0, 0, 0)
-        self.buttons_widget_bottom = QtWidgets.QWidget()
+        self.buttons_widget_bottom = QWidget()
         self._buttons_layout_bottom = QtWidgets.QHBoxLayout()
         self._buttons_layout_bottom.setContentsMargins(0, 0, 0, 0)
         self.open_btn = QtWidgets.QPushButton("Open")
         self.fname_lbl = QtWidgets.QLineEdit('')
         self.freq_lbl = QtWidgets.QLabel('   Frequency (MHz):')
-        self.freq_ebx = QtWidgets.QDoubleSpinBox()
+        self.freq_ebx = DoubleSpinBoxAlignRight()
         self.freq_ebx.setMaximum(100)
         self.freq_ebx.setMinimum(1)
         self.freq_ebx.setValue(21)
         self.N_cbx = QtWidgets.QCheckBox('+/-')
         self.N_cbx.setChecked(True)
         self.save_btn = QtWidgets.QPushButton('Save correlation')
-        self.arrow_plt_btn = QtWidgets.QPushButton('Arrow plot')
+        self.arrow_plt_btn = QtWidgets.QPushButton(u'Inverse 𝑓')
 
         self.echo1_cursor_btn = QtWidgets.QPushButton('Echo 1')
         self.echo2_cursor_btn = QtWidgets.QPushButton('Echo 2')
+
+        
         
         self._buttons_layout_top.addWidget(self.open_btn)
         #self._buttons_layout_top.addWidget(self.fname_lbl)
@@ -196,6 +199,25 @@ class UltrasoundAnalysisWidget(QWidget):
         self._buttons_layout_top.addWidget(self.echo1_cursor_btn)
         self._buttons_layout_top.addWidget(self.echo2_cursor_btn)
         #self._buttons_layout_top.addWidget(self.N_cbx)
+
+        self.p_s_widget = QWidget(self.buttons_widget_top)
+        self._p_s_widget_layout = QtWidgets.QHBoxLayout(self.p_s_widget)
+        self._p_s_widget_layout.setContentsMargins(0,0,0,0)
+        self._p_s_widget_layout.setSpacing(0)
+        self.p_wave_btn = QtWidgets.QPushButton('P-wave')
+        self.p_wave_btn.setObjectName('p_wave_btn')
+        self.p_wave_btn.setCheckable(True)
+        self.s_wave_btn = QtWidgets.QPushButton('S-wave')
+        self.s_wave_btn.setObjectName('s_wave_btn')
+        self.s_wave_btn.setCheckable(True)
+        self._p_s_widget_layout.addWidget(self.p_wave_btn)
+        self._p_s_widget_layout.addWidget(self.s_wave_btn)
+        self.p_s_widget.setLayout(self._p_s_widget_layout)
+        self.wave_btn_group = QtWidgets.QButtonGroup()
+        self.wave_btn_group.addButton(self.p_wave_btn)
+        self.wave_btn_group.addButton(self.s_wave_btn)
+        self.p_wave_btn.setChecked(True)
+        self._buttons_layout_top.addWidget(self.p_s_widget)
   
         self._buttons_layout_top.addWidget(self.save_btn)
         self._buttons_layout_top.addSpacerItem(HorizontalSpacerItem())

@@ -60,15 +60,26 @@ class TimeOfFlightController(QObject):
         self.overview_controller.cursor_position_signal.connect(self.correlation_controller.sync_cursors)
         self.correlation_controller.cursor_position_signal.connect(self.overview_controller.sync_cursors)
 
+        self.correlation_controller.correlation_saved_signal.connect(self.correlation_saved_signal_callback)
+
+    def correlation_saved_signal_callback(self, correlation):
+        self.overview_controller.correlation_echoes_added(correlation)
     
     def folder_selected_signal_callback(self, folder):
         self.widget.setWindowTitle("Time-of-flight analysis. © R. Hrubiak, 2021. Folder: "+folder)
 
     def file_selected_signal_callback(self, fname):
+
+        f_start = self.overview_controller.widget.freq_start.value()
+        f_step = self.overview_controller.widget.freq_step.value()
+        fbase = os.path.split(fname)[-1].split('_')[-1][:-4]
+        f_freq_ind = int(fbase)
+        freq = f_start + f_freq_ind * f_step
+
         self.correlation_controller.update_data(filename=fname)
         
-        #remove this next line if setting frequency instead
-        self.correlation_controller.calculate_data()
+        # setting frequency input triggers calculation of correlation
+        self.correlation_controller.display_window.freq_ebx.setValue(freq)
 
 
     def preferences_module(self, *args, **kwargs):

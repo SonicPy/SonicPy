@@ -426,7 +426,7 @@ class PltWidget(pg.PlotWidget):
         # initialize roi plot 
         rois_color = self.colors['rois_color']
         self.plotRoi = pg.PlotDataItem(roiHorz, roiData, 
-            antialias=True, pen=rois_color, connect="finite", width=2)
+            antialias=True, pen=rois_color, connect="finite", width=1)
         self.addItem(self.plotRoi)  
         self.legend.addItem(self.plotRoi, '')
         self.setLabel('bottom', xLabel) 

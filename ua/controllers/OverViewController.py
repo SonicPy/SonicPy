@@ -74,6 +74,12 @@ class OverViewController(QObject):
         self.widget.single_frequency_waterfall.plot_widget.fig.set_cursor(pos)
         self.widget.single_condition_waterfall.plot_widget.fig.set_cursor(pos)
 
+    def correlation_echoes_added(self,correlation):
+        filename_waweform = correlation['filename_waweform']
+        bounds = correlation['echo_bounds']
+        print(filename_waweform)
+        print(bounds)
+
     def single_frequency_cursor_y_signal_callback(self, y_pos):
 
         index = round(y_pos)

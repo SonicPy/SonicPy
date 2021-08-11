@@ -57,7 +57,7 @@ class UltrasoundAnalysisController(QObject):
         self.display_window.lr2.sigRegionChangeFinished.connect(self.calculate_data)
         self.display_window.N_cbx.stateChanged.connect(self.calculate_data)
 
-        self.display_window.win.cursor_changed_singal.connect(self.sync_cursors)
+        self.display_window.plot_widget.cursor_changed_singal.connect(self.sync_cursors)
         self.display_window.detail_win1.cursor_changed_singal.connect(self.sync_cursors)
 
         self.display_window.save_btn.clicked.connect(self.save_result)
@@ -75,7 +75,7 @@ class UltrasoundAnalysisController(QObject):
 
 
     def sync_cursors(self, pos):
-        self.display_window.win.fig.set_cursor(pos)
+        self.display_window.plot_widget.fig.set_cursor(pos)
         self.display_window.detail_win1.fig.set_cursor(pos)
 
     def calculate_data(self):
@@ -109,7 +109,7 @@ class UltrasoundAnalysisController(QObject):
                 out = self.model.maxima
             else:
                 out = self.model.minima
-            self.display_window.detail_plot2_bg.setData(*out)
+            #self.display_window.detail_plot2_bg.setData(*out)
             #self.display_window.output_ebx.setText('%.5e' % (self.model.c_diff_optimized))
 
 
@@ -151,7 +151,7 @@ class UltrasoundAnalysisController(QObject):
  
     def load_file(self, filename):
         
-        t, spectrum = read_tek_csv(filename, subsample=4)
+        t, spectrum = read_tek_csv(filename, subsample=2)
         t, spectrum = zero_phase_highpass_filter([t,spectrum],1e4,1)
         return t,spectrum, filename
         
@@ -162,6 +162,8 @@ class UltrasoundAnalysisController(QObject):
         if len(filename):
             self.model.t, self.model.spectrum, self.fname = self.load_file(filename)
             self.display_window.update_view(self.model.t, self.model.spectrum, self.fname)
+            name = os.path.split(self.fname)[-1]
+            self.display_window.plot_widget.setText(name,0)
 
     
 

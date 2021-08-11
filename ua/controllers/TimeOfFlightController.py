@@ -63,6 +63,9 @@ class TimeOfFlightController(QObject):
 
     def file_selected_signal_callback(self, fname):
         self.correlation_controller.update_data(filename=fname)
+        
+        #remove this next line if setting frequency instead
+        self.correlation_controller.calculate_data()
 
 
     def preferences_module(self, *args, **kwargs):

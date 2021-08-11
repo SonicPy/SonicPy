@@ -31,13 +31,8 @@ class UltrasoundAnalysisWidget(QWidget):
 
         #self.resize(1250, 800)
         
+        self.make_widget()
 
-        self.win, self.detail_win1, \
-            self.detail_win2, self.open_btn, self.calc_btn,\
-                 self.output_ebx, self.fname_lbl = self.make_widget()
-
-
-        
 
         self.create_plots()
     
@@ -45,27 +40,48 @@ class UltrasoundAnalysisWidget(QWidget):
 
     def create_plots(self):
 
-        self.plot_win = self.win.fig.win
-        self.main_plot = pg.PlotDataItem([], [], title="",
-                        antialias=True, pen=pg.mkPen(color=(255,255,0), width=1), connect="finite" )
-        self.plot_win.addItem(self.main_plot)
+        
+        self.plot_win = self.plot_widget.fig.win 
+        self.plot_win.create_plots([],[],[],[],'Time')
+        self.plot_win.set_colors( { 
+                        'data_color': '#ffffff',\
+                        'rois_color': '#ffffff', \
+                        })
+        self._CH1_plot = self.plot_win.plotForeground
+        self._plot_selected = self.plot_win.plotRoi
+
+
+        self.main_plot = self.plot_win.plotForeground
+        
         self.plot_win_detail1 = self.detail_win1.fig.win
+
         self.plot_win_detail2 = self.detail_win2.fig.win
         
 
-        self.detail_plot1 = pg.PlotDataItem([],[], title="",
-                        antialias=True, pen=pg.mkPen(color=(0,200,255), width=1), connect="finite" )
-        self.detail_plot1_bg = pg.PlotDataItem([], [], title="",
-                        antialias=True, pen=pg.mkPen(color=(255,0,100), width=1), connect="finite" )
-        self.plot_win_detail1.addItem(self.detail_plot1)
-        self.plot_win_detail1.addItem(self.detail_plot1_bg)
+        detail_plot1 = self.detail_win1.fig.win
+        detail_plot1.create_plots([],[],[],[],'Time')
+        detail_plot1.set_colors( { 
+                        'data_color': (0,200,255),\
+                        'rois_color': (255,0,100), \
+                        })
+        self.detail_plot1 = detail_plot1.plotForeground
+        self.detail_plot1_bg = detail_plot1.plotRoi
+        self.detail_win1.setText('Echo 1' , 0)
+        self.detail_win1.setText('Echo 2' , 1)
 
-        self.detail_plot2 = pg.PlotDataItem([], [], title="",
-                        antialias=True, pen=pg.mkPen(color=(0,255,100), width=1), connect="finite" )
+        detail_plot2 = self.detail_win2.fig.win
+        detail_plot2.create_plots([],[],[],[],'Time')
+        detail_plot2.set_colors( { 
+                        'data_color': (0,255,100),\
+                        })
+        
+        self.detail_plot2 = detail_plot2.plotForeground
         self.detail_plot2_bg = pg.PlotDataItem([], [], title="",
-                        antialias=True, pen=None, symbolBrush=(255,0,255,70), symbolPen=None)
-        self.plot_win_detail2.addItem(self.detail_plot2)
+                        antialias=True, pen=None, symbolBrush=(255,0,255,150), symbolPen=None)
         self.plot_win_detail2.addItem(self.detail_plot2_bg)
+        self.detail_win1.setText('Correlation' , 0)
+        
+        
 
         self.lr1 = pg.LinearRegionItem()
         self.lr1.setZValue(-10)
@@ -90,8 +106,10 @@ class UltrasoundAnalysisWidget(QWidget):
             if not self.initialized:
 
                 self.init_region_items(self.t)
-            self.fname_lbl.setText(self.fname)
+            #self.fname_lbl.setText(self.fname)
 
+    def set_name (self, text):
+        self. plot_widget.setText(text , 0)
 
     def updatePlot1(self):
         self.lr1r = self.lr1.getRegion()
@@ -140,20 +158,20 @@ class UltrasoundAnalysisWidget(QWidget):
 
     def make_widget(self):
         
-        _layout = QtWidgets.QVBoxLayout()
-        _layout.setContentsMargins(10, 10, 10, 10)
-        detail_widget = QtWidgets.QWidget()
-        _detail_layout = QtWidgets.QHBoxLayout()
-        _detail_layout.setContentsMargins(0, 0, 0, 0)
-        buttons_widget_top = QtWidgets.QWidget()
-        _buttons_layout_top = QtWidgets.QHBoxLayout()
-        _buttons_layout_top.setContentsMargins(0, 0, 0, 0)
-        buttons_widget_bottom = QtWidgets.QWidget()
-        _buttons_layout_bottom = QtWidgets.QHBoxLayout()
-        _buttons_layout_bottom.setContentsMargins(0, 0, 0, 0)
-        open_btn = QtWidgets.QPushButton("Open")
-        fname_lbl = QtWidgets.QLineEdit('')
-        freq_lbl = QtWidgets.QLabel('   Frequency (MHz):')
+        self._layout = QtWidgets.QVBoxLayout()
+        self._layout.setContentsMargins(10, 10, 10, 10)
+        self.detail_widget = QtWidgets.QWidget()
+        self._detail_layout = QtWidgets.QHBoxLayout()
+        self._detail_layout.setContentsMargins(0, 0, 0, 0)
+        self.buttons_widget_top = QtWidgets.QWidget()
+        self._buttons_layout_top = QtWidgets.QHBoxLayout()
+        self._buttons_layout_top.setContentsMargins(0, 0, 0, 0)
+        self.buttons_widget_bottom = QtWidgets.QWidget()
+        self._buttons_layout_bottom = QtWidgets.QHBoxLayout()
+        self._buttons_layout_bottom.setContentsMargins(0, 0, 0, 0)
+        self.open_btn = QtWidgets.QPushButton("Open")
+        self.fname_lbl = QtWidgets.QLineEdit('')
+        self.freq_lbl = QtWidgets.QLabel('   Frequency (MHz):')
         self.freq_ebx = QtWidgets.QDoubleSpinBox()
         self.freq_ebx.setMaximum(100)
         self.freq_ebx.setMinimum(1)
@@ -163,40 +181,40 @@ class UltrasoundAnalysisWidget(QWidget):
         self.save_btn = QtWidgets.QPushButton('Save result')
         self.arrow_plt_btn = QtWidgets.QPushButton('Arrow plot')
         
-        _buttons_layout_top.addWidget(open_btn)
-        _buttons_layout_top.addWidget(fname_lbl)
-        _buttons_layout_top.addWidget(freq_lbl)
-        _buttons_layout_top.addWidget(self.freq_ebx)
-        _buttons_layout_top.addWidget(self.N_cbx)
-        
-        _buttons_layout_top.addWidget(self.save_btn)
-        _buttons_layout_top.addSpacerItem(HorizontalSpacerItem())
-        _buttons_layout_top.addWidget(self.arrow_plt_btn)
+        self._buttons_layout_top.addWidget(self.open_btn)
+        #self._buttons_layout_top.addWidget(self.fname_lbl)
+        self._buttons_layout_top.addWidget(self.freq_lbl)
+        self._buttons_layout_top.addWidget(self.freq_ebx)
+        #self._buttons_layout_top.addWidget(self.N_cbx)
+  
+        self._buttons_layout_top.addWidget(self.save_btn)
+        self._buttons_layout_top.addSpacerItem(HorizontalSpacerItem())
+        self._buttons_layout_top.addWidget(self.arrow_plt_btn)
 
-        buttons_widget_top.setLayout(_buttons_layout_top)
-        _layout.addWidget(buttons_widget_top)
+        self.buttons_widget_top.setLayout(self._buttons_layout_top)
+        self._layout.addWidget(self.buttons_widget_top)
         params = "Ultrasound echo analysis", 'Amplitude', 'Time'
-        win = SimpleDisplayWidget(params)
-        _layout.addWidget(win)
+        self.plot_widget = SimpleDisplayWidget(params)
+        self._layout.addWidget(self.plot_widget)
 
-        detail1 = "Ultrasound echo 1", 'Amplitude', 'Time'
-        detail_win1 = SimpleDisplayWidget(detail1)
-        detail2 = "Ultrasound echo 2", 'Amplitude', 'Time'
-        detail_win2 = SimpleDisplayWidget(detail2)
-        _detail_layout.addWidget(detail_win1)
-        _detail_layout.addWidget(detail_win2)
-        detail_widget.setLayout(_detail_layout)
-        _layout.addWidget(detail_widget)
-        calc_btn = QtWidgets.QPushButton('Correlate')
+        self.detail1 = "Ultrasound echo 1", 'Amplitude', 'Time'
+        self.detail_win1 = SimpleDisplayWidget(self.detail1)
+        self.detail2 = "Ultrasound echo 2", 'Amplitude', 'Time'
+        self.detail_win2 = SimpleDisplayWidget(self.detail2)
+        self._detail_layout.addWidget(self.detail_win1)
+        self._detail_layout.addWidget(self.detail_win2)
+        self.detail_widget.setLayout(self._detail_layout)
+        self._layout.addWidget(self.detail_widget)
+        self.calc_btn = QtWidgets.QPushButton('Correlate')
         #_buttons_layout_bottom.addWidget(calc_btn)
         #_buttons_layout_bottom.addWidget(QtWidgets.QLabel('2-way travel time:'))
-        output_ebx = QtWidgets.QLineEdit('')
+        self.output_ebx = QtWidgets.QLineEdit('')
         #_buttons_layout_bottom.addWidget(output_ebx)
-        _buttons_layout_bottom.addSpacerItem(HorizontalSpacerItem())
-        buttons_widget_bottom.setLayout(_buttons_layout_bottom)
-        _layout.addWidget(buttons_widget_bottom)
-        self.setLayout(_layout)
-        return win, detail_win1, detail_win2, open_btn, calc_btn, output_ebx, fname_lbl
+        self._buttons_layout_bottom.addSpacerItem(HorizontalSpacerItem())
+        self.buttons_widget_bottom.setLayout(self._buttons_layout_bottom)
+        self._layout.addWidget(self.buttons_widget_bottom)
+        self.setLayout(self._layout)
+        
 
 
 

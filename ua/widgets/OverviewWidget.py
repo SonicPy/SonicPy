@@ -50,8 +50,9 @@ class OverViewWidget(QWidget):
         self._buttons_layout_top.setContentsMargins(0, 0, 0, 0)
         
         
-        self.open_btn = QtWidgets.QPushButton("Open")
+        self.open_btn = QtWidgets.QPushButton("Open folder")
         self.fname_lbl = QtWidgets.QLineEdit('')
+        self.fname_lbl.setMinimumWidth(300)
         self.scale_lbl = QtWidgets.QLabel('   Scale:')
         self.scale_ebx = QtWidgets.QDoubleSpinBox()
         self.scale_ebx.setMaximum(100)
@@ -62,12 +63,12 @@ class OverViewWidget(QWidget):
         self.save_btn = QtWidgets.QPushButton('Save result')
        
         self._buttons_layout_top.addWidget(self.open_btn)
-        self._buttons_layout_top.addWidget(self.fname_lbl)
+        #self._buttons_layout_top.addWidget(self.fname_lbl)
         self._buttons_layout_top.addWidget(self.scale_lbl)
         self._buttons_layout_top.addWidget(self.scale_ebx)
         self._buttons_layout_top.addWidget(self.clip_cbx)
         
-        self._buttons_layout_top.addWidget(self.save_btn)
+        #self._buttons_layout_top.addWidget(self.save_btn)
         self._buttons_layout_top.addSpacerItem(HorizontalSpacerItem())
         
 
@@ -84,7 +85,7 @@ class OverViewWidget(QWidget):
         self.single_frequency_waterfall = WaterfallWidget(params=params)
         self._single_frequency_widget_layout.addWidget(self.single_frequency_waterfall)
         
-        self.plots_tab_widget.addTab(self.single_frequency_widget, 'Single Frequency')
+        self.plots_tab_widget.addTab(self.single_frequency_widget, 'Frequency')
 
         self.single_condition_widget = QtWidgets.QWidget(self.plots_tab_widget)
         self._single_condition_widget_layout = QtWidgets.QVBoxLayout(self.single_condition_widget)
@@ -93,7 +94,7 @@ class OverViewWidget(QWidget):
         self.single_condition_waterfall = WaterfallWidget(params=params)
         self._single_condition_widget_layout.addWidget(self.single_condition_waterfall)
 
-        self.plots_tab_widget.addTab(self.single_condition_widget, 'Single P-T Condition')
+        self.plots_tab_widget.addTab(self.single_condition_widget, 'P-T Condition')
 
         self._layout.addWidget(self.plots_tab_widget)
 

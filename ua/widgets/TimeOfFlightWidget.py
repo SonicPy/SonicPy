@@ -30,7 +30,7 @@ class TimeOfFlightWidget(QMainWindow):
         #self.analysis_widget.resize(800,800)
 
 
-        self.setWindowTitle('Time-of-flight analysis')
+        self.setWindowTitle('Time-of-flight analysis. (C) R. Hrubiak 2021')
 
         self.resize(1600, 900)
         

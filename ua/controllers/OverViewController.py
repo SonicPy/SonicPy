@@ -32,6 +32,7 @@ import glob
 class OverViewController(QObject):
 
     file_selected_signal = pyqtSignal(str)
+    folder_selected_signal = pyqtSignal(str)
     def __init__(self, app = None):
         super().__init__()
         self.model = OverViewModel()
@@ -46,7 +47,8 @@ class OverViewController(QObject):
         self.line_plots = {}
         self.selected_fname = ''
         self.freq = 0
-        self.set_US_folder(folder = '/Users/ross/Globus/s16bmb-20210717-e244302-Aihaiti/sam2/US')
+        self.cond = 0
+        
         
         
     def make_connections(self):  
@@ -67,8 +69,13 @@ class OverViewController(QObject):
             
             self.selected_fname = fnames[index]
             
-            
             self.re_plot_single_frequency()
+
+            cond = self.model.file_cond_dict[self.selected_fname]
+            conds = list(self.model.fps_cond.keys())
+            ind  = conds.index(cond)
+            self.set_condition(ind)
+
             self.file_selected_signal.emit(self.selected_fname)
 
     def single_condition_cursor_y_signal_callback(self, y_pos):
@@ -80,11 +87,14 @@ class OverViewController(QObject):
             
             self.selected_fname = fnames[index]
             
-            
             self.re_plot_single_condition()
-            self.file_selected_signal.emit(self.selected_fname)
-            
 
+            freq = self.model.file_freq_dict[self.selected_fname]
+            freqs = list(self.model.fps_Hz.keys())
+            ind  = freqs.index(freq)
+            self.set_frequency(ind)
+            
+            self.file_selected_signal.emit(self.selected_fname)
 
     def preferences_module(self, *args, **kwargs):
         pass
@@ -110,6 +120,12 @@ class OverViewController(QObject):
         index = self.widget.cond_btns_list.index(btn)
         self.set_condition(index)
 
+    def freq_scroll_callback(self, val):
+        self.set_frequency(val)
+
+    def cond_scroll_callback(self, val):
+        self.set_condition(val)
+
     def open_btn_callback(self):
         self.set_US_folder()
 
@@ -123,40 +139,50 @@ class OverViewController(QObject):
             folder = QtWidgets.QFileDialog.getExistingDirectory(self.widget, caption='Select US folder',
                                                      directory='/Users/ross/Globus/s16bmb-20210717-e244302-Aihaiti')
 
-        self.widget.fname_lbl.setText(folder)
+        self.folder_selected_signal.emit(folder)
        
         # All files ending with .txt
         self.model.set_folder_path(folder)
         freqs = list(self.model.fps_Hz.keys())
-        self.widget.set_freq_buttons(len(freqs))
+        #self.widget.set_freq_buttons(len(freqs))
 
         conds = list(self.model.fps_cond.keys())
-        self.widget.set_cond_buttons(len(conds))
+        #self.widget.set_cond_buttons(len(conds))
         
-        self.widget.freq_btns_list[default_frequency_index].setChecked(True)
-        self.widget.cond_btns_list[default_condition_index].setChecked(True)
+        '''self.widget.freq_btns_list[default_frequency_index].setChecked(True)
+        self.widget.cond_btns_list[default_condition_index].setChecked(True)'''
+        
         
         self.set_frequency(default_frequency_index)
-        self.widget.freq_btns.buttonClicked.connect(self.freq_btns_callback)
+        self.widget.freq_scroll.setMaximum(len(freqs)-1)
+        self.widget.freq_scroll.valueChanged .connect(self.freq_scroll_callback)
 
+
+        
         self.set_condition(default_condition_index)
-        self.widget.cond_btns.buttonClicked.connect(self.cond_btns_callback)
+        self.widget.cond_scroll.setMaximum(len(conds)-1)
+        self.widget.cond_scroll.valueChanged.connect(self.cond_scroll_callback)
 
     def set_frequency(self, index):
-        #self.model.waterfall.clear()
         freqs = list(self.model.fps_Hz.keys())
         self.freq = freqs[index]
-        
-        
         self.model.load_multiple_files_by_frequency(self.freq)
+        
+        self.widget.freq_scroll.blockSignals(True)
+        self.widget.freq_scroll.setValue(index)
+        self.widget.freq_scroll.blockSignals(False)
+        
         self.re_plot_single_frequency()
 
     def set_condition(self, index):
-        #self.model.waterfall.clear()
-        conidtions = list(self.model.fps_cond.keys())
-        self.cond = conidtions[index]
         
+        conds = list(self.model.fps_cond.keys())
+        self.cond = conds[index]
         self.model.load_multiple_files_by_condition(self.cond)
+
+        self.widget.cond_scroll.blockSignals(True)
+        self.widget.cond_scroll.setValue(index)
+        self.widget.cond_scroll.blockSignals(False)
         self.re_plot_single_condition()
 
     def re_plot_single_frequency(self ):

@@ -49,13 +49,18 @@ class TimeOfFlightController(QObject):
         
         
         self.make_connections()
+
+        self.overview_controller.set_US_folder(folder = '/Users/ross/Globus/s16bmb-20210717-e244302-Aihaiti/sam2/US')
         
     def make_connections(self):  
 
         self.overview_controller.file_selected_signal.connect(self.file_selected_signal_callback)
-        
+        self.overview_controller.folder_selected_signal.connect(self.folder_selected_signal_callback)
 
-       
+    
+    def folder_selected_signal_callback(self, folder):
+        self.widget.setWindowTitle("Time-of-flight analysis. © R. Hrubiak, 2021. Folder: "+folder)
+
     def file_selected_signal_callback(self, fname):
         self.correlation_controller.update_data(filename=fname)
 

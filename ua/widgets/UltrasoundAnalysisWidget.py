@@ -79,7 +79,7 @@ class UltrasoundAnalysisWidget(QWidget):
         self.detail_plot2_bg = pg.PlotDataItem([], [], title="",
                         antialias=True, pen=None, symbolBrush=(255,0,255,150), symbolPen=None)
         self.plot_win_detail2.addItem(self.detail_plot2_bg)
-        self.detail_win1.setText('Correlation' , 0)
+        self.detail_win2.setText('Correlation' , 0)
         
         
 
@@ -91,6 +91,10 @@ class UltrasoundAnalysisWidget(QWidget):
         
 
         self.echo_bounds = [self.lr1, self.lr2]
+        self.plot_win.addItem(self.lr1)
+        self.plot_win.addItem(self.lr2) 
+        self.lr1.setRegion([0, 0])
+        self.lr2.setRegion([0, 0])
 
     def get_echo_bounds(self, i):
         return self.echo_bounds[i].getRegion()
@@ -103,9 +107,9 @@ class UltrasoundAnalysisWidget(QWidget):
             #self.detail_plot1.setData(self.t, self.spectrum,)
             #self.detail_plot2.setData(self.t, self.spectrum,)
             
-            if not self.initialized:
+            '''if not self.initialized:
 
-                self.init_region_items(self.t)
+                self.init_region_items(self.t)'''
             #self.fname_lbl.setText(self.fname)
 
     def set_name (self, text):
@@ -125,7 +129,7 @@ class UltrasoundAnalysisWidget(QWidget):
     def updateRegion2(self):
         self.lr2.setRegion(self.detail_plot2.getViewBox().viewRange()[0])
 
-    def init_region_items(self, t):
+    '''def init_region_items(self, t):
         
         self.plot_win.addItem(self.lr1)
         self.plot_win.addItem(self.lr2) 
@@ -134,11 +138,11 @@ class UltrasoundAnalysisWidget(QWidget):
         self.lr1.setRegion([p1l, p1r])
         self.lr2.setRegion([p2l, p2r])
 
-        self.initialized = True
+        self.initialized = True'''
         
        
 
-    def get_initial_lr_positions(self, t):
+    '''def get_initial_lr_positions(self, t):
         mn = min(t)
         mx = max(t)
         r = mx-mn
@@ -153,7 +157,7 @@ class UltrasoundAnalysisWidget(QWidget):
         rng = lr[1] - lr[0]
         l = lr[0]+ rng*0.4
         r = lr[1] + rng*0.6
-        return l, r
+        return l, r'''
 
 
     def make_widget(self):
@@ -178,13 +182,19 @@ class UltrasoundAnalysisWidget(QWidget):
         self.freq_ebx.setValue(21)
         self.N_cbx = QtWidgets.QCheckBox('+/-')
         self.N_cbx.setChecked(True)
-        self.save_btn = QtWidgets.QPushButton('Save result')
+        self.save_btn = QtWidgets.QPushButton('Save correlation')
         self.arrow_plt_btn = QtWidgets.QPushButton('Arrow plot')
+
+        self.echo1_cursor_btn = QtWidgets.QPushButton('Echo 1')
+        self.echo2_cursor_btn = QtWidgets.QPushButton('Echo 2')
         
         self._buttons_layout_top.addWidget(self.open_btn)
         #self._buttons_layout_top.addWidget(self.fname_lbl)
         self._buttons_layout_top.addWidget(self.freq_lbl)
         self._buttons_layout_top.addWidget(self.freq_ebx)
+
+        self._buttons_layout_top.addWidget(self.echo1_cursor_btn)
+        self._buttons_layout_top.addWidget(self.echo2_cursor_btn)
         #self._buttons_layout_top.addWidget(self.N_cbx)
   
         self._buttons_layout_top.addWidget(self.save_btn)

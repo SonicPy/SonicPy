@@ -33,6 +33,8 @@ class OverViewController(QObject):
 
     file_selected_signal = pyqtSignal(str)
     folder_selected_signal = pyqtSignal(str)
+    cursor_position_signal = pyqtSignal(float)
+
     def __init__(self, app = None):
         super().__init__()
         self.model = OverViewModel()
@@ -59,6 +61,18 @@ class OverViewController(QObject):
         self.widget.clip_cbx.clicked.connect(self.clip_changed_callback )
         self.widget.single_frequency_waterfall.plot_widget.cursor_y_signal.connect(self.single_frequency_cursor_y_signal_callback )
         self.widget.single_condition_waterfall.plot_widget.cursor_y_signal.connect(self.single_condition_cursor_y_signal_callback )
+        self.widget.single_frequency_waterfall.plot_widget. cursor_changed_singal.connect(self.sync_cursors)
+        self.widget.single_condition_waterfall.plot_widget. cursor_changed_singal.connect(self.sync_cursors)
+        self.widget.single_frequency_waterfall.plot_widget. cursor_changed_singal.connect(self.emit_cursor)
+        self.widget.single_condition_waterfall.plot_widget. cursor_changed_singal.connect(self.emit_cursor)
+
+    def emit_cursor(self, pos):
+        self.cursor_position_signal.emit(pos)
+
+    def sync_cursors(self, pos):
+        
+        self.widget.single_frequency_waterfall.plot_widget.fig.set_cursor(pos)
+        self.widget.single_condition_waterfall.plot_widget.fig.set_cursor(pos)
 
     def single_frequency_cursor_y_signal_callback(self, y_pos):
 

@@ -26,20 +26,21 @@ class SimpleDisplayWidget(QtWidgets.QWidget):
     
     def __init__(self, fig_params):
         super().__init__()
+        self.cursor_pos = 0.0
         self._layout = QtWidgets.QVBoxLayout(self)
         self._layout.setContentsMargins(0,0,0,0)
         self.fig = plotWindow(*fig_params)
         self._layout.addWidget(self.fig)
-        self.cursor_fast = QLabel()
-        self.cursor_fast.setFixedWidth(70)
-        self.cursor = QLabel()
-        self.cursor.setFixedWidth(70)
+        self.cursor_fast_lbl = QLabel()
+        self.cursor_fast_lbl.setFixedWidth(70)
+        self.cursor_lbl  = QLabel()
+        self.cursor_lbl.setFixedWidth(70)
         self.cursor_widget = QWidget()
         self._cursor_widget_layout = QtWidgets.QHBoxLayout()
         self._cursor_widget_layout.setContentsMargins(0,0,0,0)
         self._cursor_widget_layout.addSpacerItem(HorizontalSpacerItem())
-        self._cursor_widget_layout.addWidget(self.cursor_fast)
-        self._cursor_widget_layout.addWidget(self.cursor)
+        self._cursor_widget_layout.addWidget(self.cursor_fast_lbl)
+        self._cursor_widget_layout.addWidget(self.cursor_lbl)
         self._cursor_widget_layout.addSpacerItem(HorizontalSpacerItem())
         self.cursor_widget.setLayout(self._cursor_widget_layout)
         self._layout.addWidget(self.cursor_widget)
@@ -71,20 +72,21 @@ class SimpleDisplayWidget(QtWidgets.QWidget):
 
     def update_fast_cursor(self, pos):
         c = '%.3e' % (pos)
-        self.cursor_fast.setText(c)
+        self.cursor_fast_lbl.setText(c)
         self.fig.set_fast_cursor(pos)
         self.fast_cursor_changed_singal.emit(pos)
 
     def update_cursor(self, pos):
         c = "<span style='color: #00CC00'>%0.3e</span>"  % (pos)
         #print(c)
-        self.cursor.setText(c)
+        self.cursor_lbl.setText(c)
+        self.cursor_pos = pos
         self.fig.set_cursor(pos)
         self.cursor_changed_singal.emit(pos)
 
     def update_cursor_y(self, pos):
         '''c = "<span style='color: #00CC00'>%0.3e</span>"  % (pos)
-        self.cursor.setText(c)
+        self.cursor_lbl.setText(c)
         self.fig.set_cursor(pos)'''
         self.cursor_y_signal.emit(pos)
 

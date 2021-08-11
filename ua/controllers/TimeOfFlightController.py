@@ -57,6 +57,9 @@ class TimeOfFlightController(QObject):
         self.overview_controller.file_selected_signal.connect(self.file_selected_signal_callback)
         self.overview_controller.folder_selected_signal.connect(self.folder_selected_signal_callback)
 
+        self.overview_controller.cursor_position_signal.connect(self.correlation_controller.sync_cursors)
+        self.correlation_controller.cursor_position_signal.connect(self.overview_controller.sync_cursors)
+
     
     def folder_selected_signal_callback(self, folder):
         self.widget.setWindowTitle("Time-of-flight analysis. © R. Hrubiak, 2021. Folder: "+folder)

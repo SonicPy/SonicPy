@@ -142,8 +142,8 @@ class OverViewModel():
             for p in p_list:
                 self.file_freq_dict[p]=f
 
-        print('found conditions: '+str(conditions_folders_sorted))
-        print('found frequencies: '+str(freqs_sorted))
+        #print('found conditions: '+str(conditions_folders_sorted))
+        #print('found frequencies: '+str(freqs_sorted))
 
 
 

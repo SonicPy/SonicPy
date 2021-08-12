@@ -13,9 +13,12 @@ from scipy.signal import argrelextrema, tukey
 from functools import partial
 from um.models.tek_fileIO import *
 from scipy import signal
+from scipy.signal import find_peaks
 import pyqtgraph as pg
 from utilities.utilities import zero_phase_bandpass_filter
 import json
+from utilities.CARSMath import fit_gaussian, polyfitw
+
 
 class UltrasoundAnalysisModel():
     def __init__(self):
@@ -122,8 +125,8 @@ class UltrasoundAnalysisModel():
         corr = self.cross_corr
         lag = self.cross_corr_shift
 
-        self.minima = get_optima(lag,corr,optima_type='min')
-        self.maxima = get_optima(lag,corr,optima_type='max')
+        self.minima = get_optima_peaks(lag,corr,optima_type='min')
+        self.maxima = get_optima_peaks(lag,corr,optima_type='max')
 
     def save_result(self, fname):
         oritinal_folder =  os.path.split(fname)[:-1]
@@ -188,6 +191,37 @@ def get_optima(xData,yData, optima_type=None):
         optima_y = yData[optima_ind]
         return optima_x, optima_y
     return ([],[])
+
+def get_optima_peaks(xData, yData, optima_type = None):
+    optima_x, optima_y = [],[]
+
+    if optima_type == 'max':
+        fit_yData = yData
+      
+    elif optima_type == 'min':
+       fit_yData = -1*yData
+    peaks = find_peaks(fit_yData,height=0)
+    optima_ind = peaks[0]
+
+    range_option = 5
+        
+    for opt_ind in optima_ind:
+        if opt_ind > range_option and opt_ind < ((len(xData))+range_option-1):
+            opt_x = xData[opt_ind]
+            opt_y = yData[opt_ind]
+            
+            opt_x = get_fractional_max_x(xData,fit_yData,opt_ind, range_option)
+            optima_x.append(opt_x)
+            optima_y.append(opt_y)
+    return (optima_x,optima_y)
+
+def get_fractional_max_x( xData, yData, opt_ind, fit_range):
+    fit_x = xData[opt_ind-fit_range:opt_ind+fit_range+1]
+    fit_y = yData[opt_ind-fit_range:opt_ind+fit_range+1]
+    fit_y = fit_y / np.amax(fit_y) * 1000 # must be rescaled before fitting because looks like fig_gaussian clips values smaller than 1
+    g = fit_gaussian(fit_x,fit_y)
+    return g[1]
+
 
 def get_local_optimum(x, xData, yData, optima_type=None):
 

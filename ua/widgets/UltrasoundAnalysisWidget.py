@@ -78,7 +78,7 @@ class UltrasoundAnalysisWidget(QWidget):
         
         self.detail_plot2 = detail_plot2.plotForeground
         self.detail_plot2_bg = pg.PlotDataItem([], [], title="",
-                        antialias=True, pen=None, symbolBrush=(255,0,255,150), symbolPen=None)
+                        antialias=True, pen=None, symbolBrush=(0,255,100,150), symbolPen=None)
         self.plot_win_detail2.addItem(self.detail_plot2_bg)
         self.detail_win2.setText('Correlation' , 0)
         

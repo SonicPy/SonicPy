@@ -136,12 +136,11 @@ class UltrasoundAnalysisController(QObject):
                 self.display_window.detail_plot1_bg.setData(*self.model.filtered2)
                 self.display_window.detail_plot2.setData(self.model.cross_corr_shift, self.model.cross_corr)
 
-                N = self.display_window.N_cbx.isChecked()
-                if N:
-                    out = self.model.maxima
-                else:
-                    out = self.model.minima
-                #self.display_window.detail_plot2_bg.setData(*out)
+            
+                
+                out = [np.append(self.model.maxima[0] ,self.model.minima[0]) , np.append(self.model.maxima[1] ,self.model.minima[1])]
+                
+                self.display_window.detail_plot2_bg.setData(*out)
                 #self.display_window.output_ebx.setText('%.5e' % (self.model.c_diff_optimized))
 
 

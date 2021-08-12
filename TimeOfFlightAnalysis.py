@@ -1,10 +1,8 @@
 
-# TODO library
-# hdf5
+# TODO hdf5 (data measurement and analysis)
 
-# TODO add red color for already selected echoes
-# TODO round saved correlation peaks
-# TODO fit correlation peaks
+# TODO add color for already selected echoes
+
 # TODO project file
 
 

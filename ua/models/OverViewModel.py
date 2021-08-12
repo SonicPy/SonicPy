@@ -39,6 +39,22 @@ class OverViewModel():
         self.settings = {'scale':10,
                          'clip':True}
 
+        
+
+    def add_echoes(self, correlation):
+        filename_waweform = correlation['filename_waweform']
+        bounds = correlation['echo_bounds']
+        wave_type = correlation['wave_type']
+
+        freq = self.file_freq_dict[filename_waweform]
+        freq_waterfall = self.waterfalls[freq]
+        cond = self.file_cond_dict[filename_waweform]
+        cond_waterfall = self.waterfalls[cond]
+
+        freq_waterfall.echoes[wave_type][filename_waweform]=bounds
+        cond_waterfall.echoes[wave_type][filename_waweform]=bounds
+     
+
     def clear(self):
         self.__init__()
 

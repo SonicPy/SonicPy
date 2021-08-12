@@ -104,7 +104,7 @@ class UltrasoundAnalysisController(QObject):
 
     def set_echo_region_position(self, index):
         center = self.display_window.plot_widget.cursor_pos
-        pad = 0.07e-6
+        pad = 0.06e-6
         echo = self.display_window.echo_bounds[index]
         echo.setRegion([center-pad, center+pad])
         
@@ -118,10 +118,10 @@ class UltrasoundAnalysisController(QObject):
         if t is not None and spectrum is not None:
 
             t_f, spectrum_f = zero_phase_lowpass_filter([t,spectrum],60e6,1)
-
+            min_roi = abs(t_f[1]-t_f[0])*10
             [l1, r1] = self.display_window.get_echo_bounds(0)
             [l2, r2] = self.display_window.get_echo_bounds(1)
-            if l1 >  0 and l2 >0:
+            if l1 >  0 and l2 >0 and abs(l1-r1) > min_roi and abs(l2-r2) > min_roi:
 
                 #pg.plot(np.asarray(spectrum_f), title="spectrum_f")
                 
@@ -142,7 +142,7 @@ class UltrasoundAnalysisController(QObject):
                 
                 self.display_window.detail_plot2_bg.setData(*out)
                 #self.display_window.output_ebx.setText('%.5e' % (self.model.c_diff_optimized))
-
+            
 
     '''def snap_cursors_to_optimum(self, c1, c2, t, spectrum):
         cor_range = 50
@@ -182,7 +182,7 @@ class UltrasoundAnalysisController(QObject):
  
     def load_file(self, filename):
         
-        t, spectrum = read_tek_csv(filename, subsample=1)
+        t, spectrum = read_tek_csv(filename, subsample=2)
         t, spectrum = zero_phase_highpass_filter([t,spectrum],1e4,1)
         return t,spectrum, filename
         

@@ -75,10 +75,9 @@ class OverViewController(QObject):
         self.widget.single_condition_waterfall.plot_widget.fig.set_cursor(pos)
 
     def correlation_echoes_added(self,correlation):
-        filename_waweform = correlation['filename_waweform']
-        bounds = correlation['echo_bounds']
-        print(filename_waweform)
-        print(bounds)
+        self.model.add_echoes(correlation)
+        self.re_plot_single_frequency()
+        self.re_plot_single_condition()
 
     def single_frequency_cursor_y_signal_callback(self, y_pos):
 
@@ -209,57 +208,51 @@ class OverViewController(QObject):
         waterfall = self.model.waterfalls[self.freq]
         waterfall.get_rescaled_waveforms()
     
-        waterfall_waveform = waterfall.waterfall_out['waveform']
-        limits=[]
-        if len(self.selected_fname):
-            fnames = list(waterfall.scans[0].keys())
-            if self.selected_fname in fnames:
-                limits = waterfall.waveform_limits[ self.selected_fname ]
-        
-
-        if len(limits):
-            selected = [waterfall_waveform[0] [limits[0]:limits[1]],
-                        waterfall_waveform[1] [limits[0]:limits[1]]]
-            waterfall_waveform = [ np.append(waterfall_waveform[0] [:limits[0]], waterfall_waveform[0] [limits[1]:]),
-                                   np.append(waterfall_waveform[1] [:limits[0]], waterfall_waveform[1] [limits[1]:])]
-            selected_name = os.path.split(self.selected_fname)[-1]
-        else:
-            selected = [[],[]]
-            selected_name = ''
+        selected_fname = self.selected_fname
+        waterfall_waveform, \
+            selected, \
+                selected_name_out = self.prepare_waveforms_for_plot(waterfall, selected_fname)
 
         self.widget.single_frequency_waterfall.clear_plot()
         
         self.update_plot_sigle_frequency(waterfall_waveform,selected)
         self.widget.single_frequency_waterfall.set_name ( self.freq)
-        self.widget.single_frequency_waterfall.set_selected_name (selected_name)
+        self.widget.single_frequency_waterfall.set_selected_name (selected_name_out)
 
     def re_plot_single_condition(self ):
         waterfall = self.model.waterfalls[self.cond]
         waterfall.get_rescaled_waveforms()
     
-        waterfall_waveform = waterfall.waterfall_out['waveform']
-        limits=[]
-        if len(self.selected_fname):
-            fnames = list(waterfall.scans[0].keys())
-            if self.selected_fname in fnames:
-                limits = waterfall.waveform_limits[ self.selected_fname ]
+        selected_fname = self.selected_fname
+
+        waterfall_waveform, \
+            selected, \
+                selected_name_out = self.prepare_waveforms_for_plot(waterfall, selected_fname)
+
+        self.widget.single_condition_waterfall.clear_plot()
         
+        self.update_plot_sigle_condition(waterfall_waveform,selected)
+        self.widget.single_condition_waterfall.set_name ( self.cond)
+        self.widget.single_condition_waterfall.set_selected_name (selected_name_out)
+
+    def prepare_waveforms_for_plot(self, waterfall, selected_fname):
+        limits=[]
+        if len(selected_fname):
+            fnames = list(waterfall.scans[0].keys())
+            if selected_fname in fnames:
+                limits = waterfall.waveform_limits[ selected_fname ]
+        waterfall_waveform = waterfall.waterfall_out['waveform']
 
         if len(limits):
             selected = [waterfall_waveform[0] [limits[0]:limits[1]],
                         waterfall_waveform[1] [limits[0]:limits[1]]]
             waterfall_waveform = [ np.append(waterfall_waveform[0] [:limits[0]], waterfall_waveform[0] [limits[1]:]),
                                    np.append(waterfall_waveform[1] [:limits[0]], waterfall_waveform[1] [limits[1]:])]
-            selected_name = os.path.split(self.selected_fname)[-1]
+            selected_name_out = os.path.split(selected_fname)[-1]
         else:
             selected = [[],[]]
-            selected_name = ''
-
-        self.widget.single_condition_waterfall.clear_plot()
-        
-        self.update_plot_sigle_condition(waterfall_waveform,selected)
-        self.widget.single_condition_waterfall.set_name ( self.cond)
-        self.widget.single_condition_waterfall.set_selected_name (selected_name)
+            selected_name_out = ''
+        return waterfall_waveform, selected, selected_name_out
        
 
     def update_plot_sigle_frequency(self, waveform,selected=[[],[]]):

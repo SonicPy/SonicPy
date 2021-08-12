@@ -14,6 +14,9 @@ class WaterfallModel( ):
                          'clip':False}
         self.waterfall_out = {}
 
+        self.echoes = {'P':{},'S':{}}
+     
+
     def add_multiple_waveforms(self, params ):
         for p in params:
             self. add_waveform(p)

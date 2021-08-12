@@ -182,7 +182,7 @@ class UltrasoundAnalysisController(QObject):
  
     def load_file(self, filename):
         
-        t, spectrum = read_tek_csv(filename, subsample=2)
+        t, spectrum = read_tek_csv(filename, subsample=4)
         t, spectrum = zero_phase_highpass_filter([t,spectrum],1e4,1)
         return t,spectrum, filename
         

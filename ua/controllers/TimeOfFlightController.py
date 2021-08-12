@@ -79,8 +79,11 @@ class TimeOfFlightController(QObject):
         self.correlation_controller.update_data(filename=fname)
         
         # setting frequency input triggers calculation of correlation
-        self.correlation_controller.display_window.freq_ebx.setValue(freq)
-
+        current_freq = self.correlation_controller.display_window.freq_ebx.value()
+        if current_freq != freq:
+            self.correlation_controller.display_window.freq_ebx.setValue(freq)
+        else:
+            self.correlation_controller.calculate_data()
 
     def preferences_module(self, *args, **kwargs):
         pass

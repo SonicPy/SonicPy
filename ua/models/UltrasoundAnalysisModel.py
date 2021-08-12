@@ -138,7 +138,7 @@ class UltrasoundAnalysisModel():
             except:
                 print('could not make subfolder: '+ subfolder)
                 
-        basename = os.path.basename(fname)+'.json'
+        basename = os.path.basename(fname)+'.'+str(round(self.freq*1e-6,1))+'_MHz.json'
 
         filename = os.path.join(subfolder,basename)
         data = {'frequency':self.freq,
@@ -216,11 +216,16 @@ def get_optima_peaks(xData, yData, optima_type = None):
     return (optima_x,optima_y)
 
 def get_fractional_max_x( xData, yData, opt_ind, fit_range):
+    near_x = xData[opt_ind]
     fit_x = xData[opt_ind-fit_range:opt_ind+fit_range+1]
     fit_y = yData[opt_ind-fit_range:opt_ind+fit_range+1]
     fit_y = fit_y / np.amax(fit_y) * 1000 # must be rescaled before fitting because looks like fig_gaussian clips values smaller than 1
     g = fit_gaussian(fit_x,fit_y)
-    return g[1]
+    fract_x = g[1]
+    if abs(fract_x - near_x)> abs(xData[1]-xData[0])*2:
+        # this means the fit failed
+        fract_x = near_x
+    return fract_x
 
 
 def get_local_optimum(x, xData, yData, optima_type=None):

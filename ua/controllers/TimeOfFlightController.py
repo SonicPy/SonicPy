@@ -26,7 +26,9 @@ from ua.controllers.UltrasoundAnalysisController import UltrasoundAnalysisContro
 import utilities.hpMCAutilities as mcaUtil
 from utilities.HelperModule import increment_filename, increment_filename_extra
 from um.widgets.UtilityWidgets import open_file_dialog, open_files_dialog 
-import glob
+import glob 
+
+from .. import resources_path
 
 
 ############################################################
@@ -50,7 +52,7 @@ class TimeOfFlightController(QObject):
         
         self.make_connections()
 
-        self.overview_controller.set_US_folder(folder = '/Users/ross/Globus/s16bmb-20210717-e244302-Aihaiti/sam2/US')
+        #self.overview_controller.set_US_folder(folder = '/Users/ross/Globus/s16bmb-20210717-e244302-Aihaiti/sam2/US')
         
     def make_connections(self):  
 

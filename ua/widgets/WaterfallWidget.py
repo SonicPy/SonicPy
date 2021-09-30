@@ -8,15 +8,15 @@ from pyqtgraph import QtCore, mkPen, mkColor, hsvColor, ViewBox
 from um.widgets.CustomWidgets import HorizontalSpacerItem, VerticalSpacerItem, FlatButton
 import numpy as np
 
-class afgWidget(QtWidgets.QWidget):
+class WaterfallWidget(QtWidgets.QWidget):
     panelClosedSignal = pyqtSignal()
-    def __init__(self, ctrls = []):
+    def __init__(self, ctrls = [],params=["Waterfall plot", 'Scan point', 'Time']):
         super().__init__()
         
         self._layout = QtWidgets.QVBoxLayout()
         self._layout.setSpacing(0)
         self._layout.setContentsMargins(8, 0, 8, 0)
-        params = "plot title", 'Amplitude', 'Time'
+        
         self.plot_widget = SimpleDisplayWidget(params)
         
         self.button_widget = QtWidgets.QWidget()
@@ -25,11 +25,10 @@ class afgWidget(QtWidgets.QWidget):
         self._button_layout.setSpacing(10)
         self._button_layout.setContentsMargins(0, 8, 0, 12)
 
-        self._button_layout.addWidget(QtWidgets.QLabel('Arbitrary Function Generator user1 waveform preview'))
+        #self._button_layout.addWidget(QtWidgets.QLabel('Scan view'))
       
         self._status_layout = QtWidgets.QVBoxLayout()
 
-       
         self.button_widget.setLayout(self._button_layout)
 
         self._layout.addWidget(self.button_widget)
@@ -38,10 +37,12 @@ class afgWidget(QtWidgets.QWidget):
 
         self.setLayout(self._layout)
 
-        fig = self.plot_widget.fig.win
+        fig = self.plot_widget.fig.win 
+        
         fig.create_plots([],[],[],[],'Time')
-        self.CH1_plot = fig.plotForeground
-        self.bg_plot = fig.plotRoi
+        fig.set_colors({'rois_color': '#7AE7FF'})
+        self._CH1_plot = fig.plotForeground
+        self._plot_selected = fig.plotRoi
       
 
         self.setStyleSheet("""
@@ -74,7 +75,6 @@ class afgWidget(QtWidgets.QWidget):
 
     def set_name (self, text):
         self. plot_widget.setText(text , 0)
-
 
     def raise_widget(self):
         self.show()

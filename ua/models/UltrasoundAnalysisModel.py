@@ -1,5 +1,8 @@
 
-import os.path, sys
+from operator import sub
+import os.path, sys, os
+
+from posixpath import basename
 from utilities.utilities import *
 from utilities.HelperModule import move_window_relative_to_screen_center, get_partial_index, get_partial_value
 import numpy as np
@@ -10,9 +13,12 @@ from scipy.signal import argrelextrema, tukey
 from functools import partial
 from um.models.tek_fileIO import *
 from scipy import signal
+from scipy.signal import find_peaks
 import pyqtgraph as pg
 from utilities.utilities import zero_phase_bandpass_filter
 import json
+from utilities.CARSMath import fit_gaussian, polyfitw
+
 
 class UltrasoundAnalysisModel():
     def __init__(self):
@@ -23,16 +29,21 @@ class UltrasoundAnalysisModel():
         self.plot1_bg=([],[])
         self.plot2_bg=([],[])
         self.c_diff_optimized = 0
+        self.bounds = [[0,0],[0,0]]
+        self.freq = 0
+        self.wave_type = 'P' # or 'S'
+        self.settings = {'tukey_alpha':0.2}
 
     def fit_func(self, x, a, b,c,d):
         return a * np.cos(b * x+c)+d
 
     def filter_echoes(self, l1, r1, l2, r2, freq):
         self.freq = freq
+        self.bounds = [[l1, r1],[l2, r2]]
         t = self.t
         spectrum = self.spectrum
         
-        tukey_alpha = 0.2
+        tukey_alpha = self.settings['tukey_alpha']
         
             
         # get partial indeces lo and hi for echo 1 and 2  
@@ -114,145 +125,44 @@ class UltrasoundAnalysisModel():
         corr = self.cross_corr
         lag = self.cross_corr_shift
 
-        self.minima = get_optima(lag,corr,optima_type='min')
-        self.maxima = get_optima(lag,corr,optima_type='max')
+        self.minima = get_optima_peaks(lag,corr,optima_type='min')
+        self.maxima = get_optima_peaks(lag,corr,optima_type='max')
 
-    def save_result(self, filename):
-        
-        data = {'frequency':self.freq,'minima_t':list(self.minima[0]),'minima':list(self.minima[1]), 
-                            'maxima_t':list(self.maxima[0]),'maxima':list(self.maxima[1])}
-        
-        if filename.endswith('.json'):
-            with open(filename, 'w') as json_file:
-                json.dump(data, json_file,indent = 2)    
-
-    def calculate_data_bkp(self, c1, c2):
-        
-        
-        if t is not None and spectrum is not None:
-            
-            cor_range = 250
-            
-            pilo1 = int(get_partial_index(t,c1))-int(cor_range/2)
-            pihi1 = int(get_partial_index(t,c1))+int(cor_range/2)
-
-            pilo2 = int(get_partial_index(t,c2))-int(cor_range/2)
-            pihi2 = int(get_partial_index(t,c2))+int(cor_range/2)
-            
-
-            picenter2 = int(get_partial_index(t,c2))
-
-            echo1 = np.asarray(spectrum)[pilo1:pihi1]
-            echo2 = np.asarray(spectrum)[pilo2:pihi2]
-            echo1_max = max(echo1)
-            echo2_max = max(echo2)
-            max_ratio = echo1_max/echo2_max
-            
-
-            pg.plot(np.asarray(echo1), title="echo1")
-            t1 = np.asarray(t)[pilo1:pihi1]
-        
-            shift_range = 30
-            cross_corr = []
-            for shift in range(shift_range):
-                pilo2 = picenter2 - int(cor_range/2) + int((shift-shift_range/2))
-                pihi2 = picenter2 + int(cor_range/2) + int((shift-shift_range/2))
-                echo2 = np.asarray(spectrum)[pilo2:pihi2]
-                c = np.correlate(echo1/echo1_max, echo2/echo2_max)[0]/cor_range
-                cross_corr.append(c)
-
-            pg.plot(np.asarray(cross_corr), title="cross_corr")
-            
-            y_data=np.asarray(cross_corr)
-            n = np.asarray(range(len(cross_corr)))
-            params, params_covariance = optimize.curve_fit(self.fit_func, n, y_data,p0=[.99,.011,.1, .1])
-            fitted = self.fit_func(n, params[0], params[1], params[2], params[3])
-
-            
-            pg.plot(np.asarray(fitted), title="fit")
-
-            print (params)
-            a = params[0]
-            b = params[1]
-            c = params[2]
-            x_max = None
-            neg_factor = 1
-            max_found = False
-            
-            
-            if a >= 0:
-                for n in range(15):
-                    x_max = (2*np.pi * (n-7) -c )/b
-                    if x_max >= 0 and x_max <= len(cross_corr):
-                        #print(x_max)
-                        #print(n)
-                        max_found = True
-                        break
-                if max_found:
-                    p_val = x_max - shift_range/2
-                else:
-                    for n in range(15):
-                        x_max = (2*np.pi *(n-7) -c + np.pi)/b
-                        if x_max >= 0 and x_max <= len(cross_corr):
-                            #print(x_max)
-                            #print(n)
-                            neg_factor = -1
-                            break
-                    p_val = x_max - shift_range/2
-
-            else:
-                for n in range(15):
-                    x_max = (2*np.pi *(n-7) -c + np.pi)/b
-                    if x_max >= 0 and x_max <= len(cross_corr):
-                        #print(x_max)
-                        #print(n)
-                        max_found = True
-                        break
-                if max_found:
-                    p_val = x_max - shift_range/2
-                else:
-                    for n in range(15):
-                        x_max = (2*np.pi * (n-7) -c )/b
-                        if x_max >= 0 and x_max <= len(cross_corr):
-                            #print(x_max)
-                            #print(n)
-                            neg_factor = -1
-                            break
-                    p_val = x_max - shift_range/2
+    def save_result(self, fname):
+        oritinal_folder =  os.path.split(fname)[:-1]
+        subfolder = os.path.join(*oritinal_folder,self.wave_type)
+        exists = os.path.exists(subfolder)
+        if not exists:
+            try:
+                os.mkdir(subfolder)
+            except:
+                print('could not make subfolder: '+ subfolder)
                 
-            if not max_found:
-                #print(x_max)
-                #print(n)
-                pass
-            t_step = t[1]-t[2]
-            t_max_shift = p_val * t_step
+        basename = os.path.basename(fname)+'.'+str(round(self.freq*1e-6,1))+'_MHz.json'
 
-            c1_new_pos = c1+t_max_shift
+        filename = os.path.join(subfolder,basename)
+        data = {'frequency':self.freq,
+                    'correlation':{
+                    'minima_t':list(np.around(self.minima[0],12)),
+                    'minima':list(np.around(self.minima[1],12)), 
+                    'maxima_t':list(np.around(self.maxima[0],12)),
+                    'maxima':list(np.around(self.maxima[1],12))},
+                    'filename_waweform':fname,
+                    'echo_bounds':self.bounds,
+                    'filter': {'tukey_alpha':self.settings['tukey_alpha']} ,
+                    'wave_type':self.wave_type}
+        
+        saved = False
+        try:
+            if filename.endswith('.json'):
+                with open(filename, 'w') as json_file:
+                    json.dump(data, json_file,indent = 2) 
+                    saved = True   
+        except:
+            print('could not save file: '+ filename)
+        
+        return {'saved':saved, 'data':data}
 
-            self.c_diff_optimized = c2-c1_new_pos
-
-
-            pilo2 = picenter2 - int(cor_range/2) 
-            pihi2 = picenter2 + int(cor_range/2) 
-            echo2 = np.asarray(spectrum)[pilo2:pihi2]
-            echo1_max = max(echo1)
-            
-            if neg_factor == -1: # invert?
-                echo2 = echo2 * -1
-            echo2_max = max(echo2)
-            norm = echo1_max/echo2_max
-            plot1_overlay = echo2 * norm
-            plot2_overlay = echo1 * neg_factor /norm
-            
-
-            t2 = np.asarray(t)[pilo2:pihi2]
-            plot1_overlay_t = t2 - self.c_diff_optimized
-            plot2_overlay_t = t1 + self.c_diff_optimized
-
-            self.plot1_bg = (plot1_overlay_t, plot1_overlay)
-            self.plot2_bg = (plot2_overlay_t, plot2_overlay)
-
-  
 
 
 def index_of_nearest(values, value):
@@ -281,6 +191,42 @@ def get_optima(xData,yData, optima_type=None):
         optima_y = yData[optima_ind]
         return optima_x, optima_y
     return ([],[])
+
+def get_optima_peaks(xData, yData, optima_type = None):
+    optima_x, optima_y = [],[]
+
+    if optima_type == 'max':
+        fit_yData = yData
+      
+    elif optima_type == 'min':
+       fit_yData = -1*yData
+    peaks = find_peaks(fit_yData,height=0)
+    optima_ind = peaks[0]
+
+    range_option = 5
+        
+    for opt_ind in optima_ind:
+        if opt_ind > range_option and opt_ind < ((len(xData))+range_option-1):
+            opt_x = xData[opt_ind]
+            opt_y = yData[opt_ind]
+            
+            opt_x = get_fractional_max_x(xData,fit_yData,opt_ind, range_option)
+            optima_x.append(opt_x)
+            optima_y.append(opt_y)
+    return (optima_x,optima_y)
+
+def get_fractional_max_x( xData, yData, opt_ind, fit_range):
+    near_x = xData[opt_ind]
+    fit_x = xData[opt_ind-fit_range:opt_ind+fit_range+1]
+    fit_y = yData[opt_ind-fit_range:opt_ind+fit_range+1]
+    fit_y = fit_y / np.amax(fit_y) * 1000 # must be rescaled before fitting because looks like fig_gaussian clips values smaller than 1
+    g = fit_gaussian(fit_x,fit_y)
+    fract_x = g[1]
+    if abs(fract_x - near_x)> abs(xData[1]-xData[0])*2:
+        # this means the fit failed
+        fract_x = near_x
+    return fract_x
+
 
 def get_local_optimum(x, xData, yData, optima_type=None):
 

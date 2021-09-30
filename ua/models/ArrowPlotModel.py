@@ -16,8 +16,8 @@ import json
 
 
 class optima():
-    def __init__(self, data):
-        self.freq = data['frequency']
+    def __init__(self, data, frequency):
+        self.freq = frequency
         self.minima = data['minima']
         self.maxima = data['maxima']
         self.minima_t = data['minima_t']
@@ -218,7 +218,11 @@ class ArrowPlotModel():
             
     def add_freq(self, data):
         freq = data['frequency']
-        data_pt = optima(data)
+        if 'correlation' in data:
+            correlation_optima = data['correlation']
+        else:
+            correlation_optima = data
+        data_pt = optima(correlation_optima, freq)
         self.optima[freq]=data_pt
         
 

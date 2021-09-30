@@ -26,6 +26,7 @@ class UltrasoundWidget(QMainWindow):
 
     def __init__(self,app,_platform,Theme):
         super().__init__()
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setWindowTitle('sonicPy')
         self.Theme = Theme
         self.app = app  # app object

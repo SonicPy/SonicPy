@@ -1,7 +1,6 @@
 
 __version__ = "0.5.0"
 
-import sys
 import os
 
 theme = 1
@@ -29,7 +28,7 @@ def main():
     _platform = platform.system()
 
     app = QtWidgets.QApplication([])
-    app.aboutToQuit.connect(app.deleteLater)
+    #app.aboutToQuit.connect(app.deleteLater)
     
     controller = ImageAnalysisController(app = app, offline= True)
     controller.show_window()
@@ -44,6 +43,7 @@ def main():
         menu = window.menuBar
         menu.addMenu(pmenu)
     
-    return app.exec_()
+    app.exec_()
+
 
    

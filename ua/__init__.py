@@ -32,7 +32,8 @@ def main():
     app.aboutToQuit.connect(app.deleteLater)
     
     controller = UltrasoundAnalysisController(app = app, offline= True)
-    controller.show_window()
+    controller.display_window.show()
+    
 
     if _platform == "Darwin":    #macOs has a 'special' way of handling preferences menu
         window = controller.display_window
@@ -41,10 +42,36 @@ def main():
         pact.setMenuRole(QtWidgets.QAction.PreferencesRole)
         pmenu = QtWidgets.QMenu('Preferences')
         pmenu.addAction(pact)
-        menu = window.menuBar
-        menu.addMenu(pmenu)
-    
+ 
     return app.exec_()
+
+
+def TOF():
+    from ua.controllers.TimeOfFlightController import TimeOfFlightController
+    if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
+        QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+    if hasattr(QtCore.Qt, 'AA_UseHighDpiPixmaps'):
+        QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
+
+    _platform = platform.system()
+
+    app = QtWidgets.QApplication([])
+    #app.aboutToQuit.connect(app.deleteLater)
+    
+    controller = TimeOfFlightController(app = app)
+    controller.show_window()
+
+    if _platform == "Darwin":    #macOs has a 'special' way of handling preferences menu
+        window = controller.widget
+        pact = QtWidgets.QAction('Preferences', app)
+        pact.triggered.connect(controller.preferences_module)
+        pact.setMenuRole(QtWidgets.QAction.PreferencesRole)
+        pmenu = QtWidgets.QMenu('Preferences')
+        pmenu.addAction(pact)
+        
+      
+    return app.exec_()
+
 
     '''def arrow_plot():
     from ua.controllers.ArrowPlotController import ArrowPlotController

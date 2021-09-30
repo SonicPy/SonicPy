@@ -1,20 +1,15 @@
 #!/usr/bin/env python
 
 
-import os, os.path, sys, platform, copy
+import os, os.path
 from PyQt5 import uic, QtWidgets,QtCore, QtGui
-from PyQt5.QtWidgets import QMainWindow, QInputDialog, QMessageBox, QErrorMessage
+from PyQt5.QtWidgets import QMainWindow 
 from PyQt5.QtCore import QObject, pyqtSignal, Qt
 
 import pyqtgraph as pg
-from pyqtgraph import QtCore, mkPen, mkColor, hsvColor, ViewBox
-from pyqtgraph.functions import pseudoScatter
+from pyqtgraph import QtCore 
 from um.widgets.CustomWidgets import HorizontalSpacerItem, VerticalSpacerItem, FlatButton, NumberTextField
-import numpy as np
 
-from um.widgets.PltWidget import SimpleDisplayWidget, customWidget
-from functools import partial
-from ia.widgets.ExLegendItem import LegendItem
 
 # Interpret image data as row-major instead of col-major
 pg.setConfigOptions(imageAxisOrder='row-major')
@@ -29,6 +24,7 @@ class ImageAnalysisWidget(QMainWindow):
 
     def __init__(self):
         super().__init__()
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.initialized = False
         self.t = None
         self.spectrum = None
@@ -233,20 +229,11 @@ class ImageAnalysisWidget(QMainWindow):
             col = col + 1
             
         self.edge1_plt = self.plots['edge1 fit'].plot([], pen = pg.mkPen((255,0,0, 180),width=4,style=pg.QtCore.Qt.DotLine))
-        '''self.edge1_plt_legend = myLegendItem(horSpacing=20, box=False, verSpacing=-3, labelAlignment='center', showLines=True)
-        self.edge1_plt_legend.addItem(self.edge1_plt, '') 
-        self.edge1_plt_legend.setParentItem(self.edge1_plt.getViewBox())
-        self.edge1_plt_legend.anchor(itemPos=(0.5, 0), parentPos=(0.5, 0), offset=(0, 10))'''
+      
         self.edge2_plt = self.plots['edge2 fit'].plot([], pen = pg.mkPen((255,0,0, 180),width=4,style=pg.QtCore.Qt.DotLine))
-        '''self.edge2_plt_legend = myLegendItem(horSpacing=20, box=False, verSpacing=-3, labelAlignment='center', showLines=True)
-        self.edge2_plt_legend.addItem(self.edge2_plt, '') 
-        self.edge2_plt_legend.setParentItem(self.edge2_plt.getViewBox())
-        self.edge2_plt_legend.anchor(itemPos=(0.5, 0), parentPos=(0.5, 0), offset=(0, 10))'''
+      
         self.abs_plt = self.plots['absorbance'].plot([], pen = pg.mkPen((255,0,0, 180),width=4,style=pg.QtCore.Qt.DotLine),connect='finite')
-        '''self.abs_plt_legend = myLegendItem(horSpacing=20, box=False, verSpacing=-3, labelAlignment='center', showLines=False)
-        self.abs_plt_legend.addItem(self.abs_plt, '') 
-        self.abs_plt_legend.setParentItem(self.abs_plt.getViewBox())
-        self.abs_plt_legend.anchor(itemPos=(0.5, 0), parentPos=(0.5, 0), offset=(0, 10))'''
+  
 
         self._layout.addWidget(self.plot_grid)
         
@@ -432,14 +419,3 @@ class ImageAnalysisWidget(QMainWindow):
         self.raise_()  
 
 
-
-
-class myLegendItem(LegendItem):
-    def __init__(self, size=None, offset=None, horSpacing=25, verSpacing=0, box=True, labelAlignment='center', showLines=True):
-        super().__init__(size=size, offset=offset, horSpacing=horSpacing, verSpacing=verSpacing, box=box, labelAlignment=labelAlignment, showLines=showLines)
-
-    def my_hoverEvent(self, ev):
-        pass
-
-    def mouseDragEvent(self, ev):
-        pass

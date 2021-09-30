@@ -407,13 +407,13 @@ QScrollBar:vertical {
 QScrollBar:horizontal {
     border: 2px solid #52595F;
     background: qlineargradient(spread:pad, x1:0, y1:1, x2:0, y2:0, stop:0 #323232, stop:1 #505050);
-	height: 12 px;
+	height: 14 px;
     margin: 0px 0px 0px 0px;
 }
 
 QScrollBar::handle:horizontal {
     background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #969696, stop:1 #CACACA);
-   border-radius: 3px;
+   border-radius: 5px;
     min-width: 20px;
   padding: 15px;
 }
@@ -485,16 +485,17 @@ QFrame#main_frame {
     border-radius: 3px;
 }
 
-#calibration_mode_btn, #mask_mode_btn, #integration_mode_btn {
+
+
+#freq_btn, #freq_btn_first, #freq_btn_last {
     font: normal 12px;
     border-radius: 1px;
 }
-
-#calibration_mode_btn {
-   border-top-right-radius:8px;
-   border-bottom-right-radius: 8px;
-}
-#integration_mode_btn {
-   border-top-left-radius:8px;
+#freq_btn_first, #p_wave_btn{
+    border-top-left-radius:8px;
    border-bottom-left-radius: 8px;
-}
+ }
+ #freq_btn_last, #s_wave_btn{
+    border-top-right-radius:8px;
+   border-bottom-right-radius: 8px;
+ }

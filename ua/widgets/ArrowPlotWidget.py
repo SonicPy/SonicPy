@@ -11,7 +11,7 @@ from pyqtgraph import QtCore, mkPen, mkColor, hsvColor, ViewBox
 from um.widgets.CustomWidgets import HorizontalSpacerItem, VerticalSpacerItem, FlatButton
 import numpy as np
 
-from um.widgets.PltWidget import SimpleDisplayWidget, customWidget
+from um.widgets.PltWidget import SimpleDisplayWidget
 from functools import partial
 
 class ArrowPlotWidget(QWidget):
@@ -26,7 +26,7 @@ class ArrowPlotWidget(QWidget):
         self.initialized = False
         self.t = None
         self.spectrum = None
-        self.setWindowTitle('Arrow Plot')
+        self.setWindowTitle('Inverse frequency analysis')
         self.resize(600, 800)
         self.make_widget()
         self.create_plots()
@@ -102,8 +102,8 @@ class ArrowPlotWidget(QWidget):
 
         buttons_widget_top.setLayout(_buttons_layout_top)
         _layout.addWidget(buttons_widget_top)
-        params = "Arrow Plot", 'Time delay', 'Inverse frequency'
-        self.win = customWidget(params)
+        params = "Arrow Plot", 'Time delay (s)', 'Inverse frequency (1/Hz)'
+        self.win = SimpleDisplayWidget(params)
         _layout.addWidget(self.win)
 
 

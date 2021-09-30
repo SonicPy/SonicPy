@@ -2,26 +2,20 @@
 
 
 
-import os.path, sys
-from posixpath import abspath
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import QObject, pyqtSignal
+import os.path
+
+from PyQt5.QtCore import QObject
 import numpy as np
 
-from numpy import arange
-from numpy.core.fromnumeric import amax
-from utilities.utilities import *
+#from utilities.utilities import *
 from ia.widgets.ImageAnalysisWidget import ImageAnalysisWidget
 
 from ia.models.ImageAnalysisModel import  ImageAnalysisModel
-from utilities.HelperModule import move_window_relative_to_screen_center, get_partial_index, get_partial_value
-import math
 
-from utilities.HelperModule import increment_filename, increment_filename_extra
 from um.widgets.UtilityWidgets import open_file_dialog
 import pyqtgraph as pg
 from .. import resources_path
-import copy
+
 
 ############################################################
 
@@ -52,8 +46,8 @@ class ImageAnalysisController(QObject):
         self.make_connections()
         self.display_window.raise_widget()
 
-        fname = os.path.join(resources_path, '6031psi_049.tif')
-        self.update_data(filename=fname)
+        #fname = os.path.join(resources_path, '6031psi_049.tif')
+        #self.update_data(filename=fname)
         
         '''filename='resources/ultrasonic/4000psi-300K_+21MHz000.csv'
         self.update_data(filename=filename)'''
@@ -140,7 +134,7 @@ class ImageAnalysisController(QObject):
             y_diff = abs(np.mean(edge2_y - edge1_y))
             std_dev = np.std(edge2_y - edge1_y)
 
-            output_txt = "mean: " + str(round(y_diff,4)) + '; std: ' +str(round(std_dev,4))
+            output_txt = "mean: " + str(round(y_diff,1)) + '; std: ' +str(round(std_dev,1))
             self.display_window.result_lbl.setText(output_txt)
 
             data_x = np.array([])

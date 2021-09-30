@@ -76,7 +76,7 @@ class WaterfallPlotController(QObject):
 
     def update_plot(self, waveform):
         if waveform is not None:
-            self.widget.plot(waveform)
+            self.widget.plot(waveform[0],waveform[1])
             self.dataPlotUpdated.emit()
 
 

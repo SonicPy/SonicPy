@@ -46,8 +46,8 @@ class ImageAnalysisController(QObject):
         self.make_connections()
         self.display_window.raise_widget()
 
-        fname = os.path.join(resources_path, '6031psi_049.tif')
-        self.update_data(filename=fname)
+        #fname = os.path.join(resources_path, '6031psi_049.tif')
+        #self.update_data(filename=fname)
         
         '''filename='resources/ultrasonic/4000psi-300K_+21MHz000.csv'
         self.update_data(filename=filename)'''

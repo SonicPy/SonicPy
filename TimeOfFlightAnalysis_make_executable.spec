@@ -16,7 +16,7 @@ from sys import platform as _platform
 
 
 extra_datas = [
-    ("ia/resources", "ia/resources"),
+    ("ua/resources", "ua/resources"),
     ("dask", "dask")
 ]
 
@@ -26,15 +26,15 @@ folder = ''
 
 if _platform == "linux" or _platform == "linux2":
     platform = "Linux"
-    name = "TravelDistance"
+    name = "TimeOfFlight"
 elif _platform == "win32" or _platform == "cygwin":
     platform = "Win"
-    name = "TravelDistance.exe"
+    name = "TimeOfFlight.exe"
  
 elif _platform == "darwin":
     platform = "Mac"
     extra_binaries=[ ]
-    name = "run_TravelDistance"
+    name = "run_TimeOfFlight"
 
 # checking whether the platform is 64 or 32 bit
 if sys.maxsize > 2 ** 32:
@@ -48,7 +48,7 @@ excl = ['matplotlib', 'PySide','PyQt4']
 
 print('start Analysis')
 
-a = Analysis(['ImageAnalysis.py'],
+a = Analysis(['TimeOfFlightAnalysis.py'],
              pathex=[folder],
              binaries=extra_binaries,
              datas=extra_datas,
@@ -112,7 +112,7 @@ pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 
 
-from ia import __version__
+from ua import __version__
 print('version ' + __version__)
 
 exe = EXE(pyz,
@@ -133,13 +133,13 @@ coll = COLLECT(exe,
                upx=True,
                upx_exclude=[],
 
-               name='TravelDistance_{}_{}'.format(platform, __version__))
+               name='TimeOfFlight_{}_{}'.format(platform, __version__))
 
 
 if _platform == "darwin":
     app = BUNDLE(coll,
-                 name='TravelDistance_{}.app'.format(__version__),
-                 icon='ia/resources/icons/icon.icns',
+                 name='TimeOfFlight_{}.app'.format(__version__),
+                 icon='ua/resources/icons/icon.icns',
                  bundle_identifier=None,
                  info_plist={
                     'NSPrincipalClass': 'NSApplication',

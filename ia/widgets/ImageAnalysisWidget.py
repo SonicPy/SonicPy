@@ -189,9 +189,9 @@ class ImageAnalysisWidget(QMainWindow):
         self.plot_grid.setBackground((255,255,255))
         #self._plot_grid_layout = QtWidgets.QGridLayout(self.plot_grid)
 
-        plots_settings = {  'src':['img','Source image, (𝛪/𝛪<sub>0</sub>)',True],
+        plots_settings = {  'src':['img','Source image, (<i>I</i>/<i>I</i><sub>0</sub>)',True],
                             'edge2 fit':['img', 'Edge 2', False],
-                            'absorbance':['img', u'Absorbance (𝛢) = -log<sub>10</sub>(𝛪/𝛪<sub>0</sub>) ', False], 
+                            'absorbance':['img', u'Absorbance (<i>A</i>) = -log<sub>10</sub>(<i>I</i>/<i>I</i><sub>0</sub>) ', False], 
                             #'frame cropped':['img','Cropped Frame',False],
                             'edge1 fit':['img','Edge 1', False]
                             

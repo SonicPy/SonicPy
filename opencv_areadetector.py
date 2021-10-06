@@ -1,6 +1,6 @@
 from PyQt5 import QtCore, QtWidgets, uic, QtGui
 import sys 
-import cv2 
+
 import numpy as np 
 #import threading 
 import time 
@@ -83,9 +83,9 @@ class MyWindowClass(QtWidgets.QMainWindow):
         
         im_np = img.astype(np.dtype('int8'))
         im_np = np.transpose(im_np, (0,1,2)).copy() 
-        #im_np_cpy = np.copy(im_np) 
+       
         shape = im_np.shape
-        #cv2.cvtColor(im_np,cv2.c)
+        
         qimage = QImage(im_np, im_np.shape[0], im_np.shape[1], QImage.Format_RGB888)  
         pixmap = QPixmap(qimage)                                                                                                                                                                               
         pixmap = pixmap.scaled(1800,1000, Qt.KeepAspectRatio)      

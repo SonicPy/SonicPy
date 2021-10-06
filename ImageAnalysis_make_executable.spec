@@ -16,7 +16,8 @@ from sys import platform as _platform
 
 
 extra_datas = [
-    ("ia/resources", "ia/resources")
+    ("ia/resources", "ia/resources"),
+    ("dask", "dask")
 ]
 
 platform = ''

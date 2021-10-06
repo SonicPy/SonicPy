@@ -1,3 +1,5 @@
+# -*- mode: python ; coding: utf-8 -*-
+
 from sys import platform as _platform
 import os
 from distutils.sysconfig import get_python_lib
@@ -7,12 +9,14 @@ sys.setrecursionlimit(5000)
 
 folder = os.getcwd()
 site_packages_path = get_python_lib()
+print(folder)
 
 block_cipher = None
 from sys import platform as _platform
 
+
 extra_datas = [
-    ("ia/resources", "ai/resources")
+    ("ia/resources", "ia/resources")
 ]
 
 platform = ''

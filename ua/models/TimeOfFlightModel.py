@@ -30,12 +30,12 @@ class TimeOfFlightModel():
 
  
  
-    def save_result(self, filename):
+    '''def save_result(self, filename):
         
         data = {'frequency':self.freq,'minima_t':list(self.minima[0]),'minima':list(self.minima[1]), 
                             'maxima_t':list(self.maxima[0]),'maxima':list(self.maxima[1])}
         
         if filename.endswith('.json'):
             with open(filename, 'w') as json_file:
-                json.dump(data, json_file,indent = 2)    
+                json.dump(data, json_file,indent = 2)    '''
 

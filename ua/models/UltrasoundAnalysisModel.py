@@ -37,56 +37,25 @@ class UltrasoundAnalysisModel():
     def fit_func(self, x, a, b,c,d):
         return a * np.cos(b * x+c)+d
 
+    def filter_echo(self, t, spectrum, l, r, freq, freq_range=0.1, order = 3, tukey_alpha=0.2):
+        pilo = int(get_partial_index(t,l))
+        pihi = int(get_partial_index(t,r))
+        echo = np.asarray(spectrum)[pilo:pihi]
+        tk = tukey(len(echo), tukey_alpha)
+        echo_tk = echo*tk
+        zero_pad = np.zeros(int(len(spectrum)))
+        zero_pad[pilo:pihi] = echo_tk
+        filtered = zero_phase_bandpass_filter([t,zero_pad],freq-freq*(freq_range/2),freq+freq*(freq_range/2), order)
+        return filtered
+    
     def filter_echoes(self, l1, r1, l2, r2, freq):
         self.freq = freq
         self.bounds = [[l1, r1],[l2, r2]]
         t = self.t
         spectrum = self.spectrum
-        
         tukey_alpha = self.settings['tukey_alpha']
-        
-            
-        # get partial indeces lo and hi for echo 1 and 2  
-        pilo1 = int(get_partial_index(t,l1))
-        pihi1 = int(get_partial_index(t,r1))
-
-        pilo2 = int(get_partial_index(t,l2))
-        pihi2 = int(get_partial_index(t,r2))
-
-        echo1 = np.asarray(spectrum)[pilo1:pihi1]
-        echo2 = np.asarray(spectrum)[pilo2:pihi2]
-
-        echo1_max = max(echo1)
-        echo2_max = max(echo2)
-        max_ratio = echo1_max/echo2_max
-
-        tk1 = tukey(len(echo1), tukey_alpha)
-        tk2 = tukey(len(echo2), tukey_alpha)
-
-        echo1_tk = echo1*tk1
-        echo2_tk = echo2*tk2
-
-        zero_pad1 = np.zeros(int(len(spectrum)))
-        zero_pad2 = np.zeros(int(len(spectrum)))
-
-        zero_pad1[pilo1:pihi1] = echo1_tk
-        zero_pad2[pilo2:pihi2] = echo2_tk
-
-        [_,filtered1] = zero_phase_bandpass_filter([t,zero_pad1],freq-freq*0.1,freq+freq*0.05, 1)
-        [_,filtered2] = zero_phase_bandpass_filter([t,zero_pad2],freq-freq*0.1,freq+freq*0.05, 1)
-
-        self.filtered1 = (t, filtered1)
-        self.filtered2 = (t, filtered2)
-        
-
-
-        '''shift_range = len(t1)
-        cross_corr = []
-        for shift in range(shift_range):
-            
-            echo2_shifted = filtered2[pilo2-int(shift_range/2)+shift:pihi2-int(shift_range/2)+shift]*tk2
-            c = np.correlate(echo1_filtered, echo2_shifted)[0]
-            cross_corr.append(c)'''
+        self.filtered1 = self.filter_echo(t,spectrum,l1,r1,freq,tukey_alpha)
+        self.filtered2 = self.filter_echo(t,spectrum,l2,r2,freq,tukey_alpha)
 
     def find_echo_bounds(self, echo):
         m = max(abs(echo))

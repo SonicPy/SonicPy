@@ -156,7 +156,7 @@ class OverViewController(QObject):
             folder = kwargs['folder']
         else:
             folder = QtWidgets.QFileDialog.getExistingDirectory(self.widget, caption='Select US folder',
-                                                     directory='/Users/ross/Globus/s16bmb-20210717-e244302-Aihaiti')
+                                                     directory='')
 
         self.folder_selected_signal.emit(folder)
        

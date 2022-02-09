@@ -133,7 +133,7 @@ class OverViewModel():
         
         suffix_freq = freqs[0].split('_')[-1][-4:]
         for p in freqs:
-            num = p.split('_')[-1][:-4]
+            num = p[-1*(len(file_type)+3):-1*len(file_type)]
             freqs_base.append(num)
         freqs_sorted = sorted(freqs_base)
  

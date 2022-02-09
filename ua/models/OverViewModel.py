@@ -102,7 +102,8 @@ class OverViewModel():
     def set_folder_path(self, folder):
         # All files ending with .txt
         self.fp = folder
-        self.understand_folder_structure()
+        if len(folder):
+            self.understand_folder_structure()
         
 
     def understand_folder_structure(self):

@@ -6,7 +6,7 @@ class WaterfallModel( ):
     ''' synchronous version of the waterfall model '''
 
     def __init__(self , common_value):
-       
+        super().__init__()
         self.common_value = common_value
         
         self.scans = [{}]
@@ -18,7 +18,13 @@ class WaterfallModel( ):
      
 
     def add_multiple_waveforms(self, params ):
-        for p in params:
+        
+        for d, p in enumerate(params):
+
+            '''if d % 2 == 0:
+                #update progress bar only every 10 files to save time
+                progress_dialog.setValue(d)
+                QtWidgets.QApplication.processEvents()'''
             self. add_waveform(p)
 
         

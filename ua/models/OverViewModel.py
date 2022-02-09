@@ -19,6 +19,8 @@ from ua.models.WaterfallModel import WaterfallModel
 import json
 import glob
 import time
+from PyQt5 import QtWidgets, QtCore
+from PyQt5.QtCore import QObject
 
 class OverViewModel():
     def __init__(self):
@@ -87,16 +89,26 @@ class OverViewModel():
     def load_multiple_files_by_condition(self, cond):
         
         fnames = self.fps_cond[cond]
-        start_time = time.time()
-        if not cond in self.spectra:
-            self.spectra[cond] = read_multiple_spectra_dict(fnames)
+        if len(fnames):
+            start_time = time.time()
+            if not cond in self.spectra:
+                progress_dialog = QtWidgets.QProgressDialog("Loading multiple waveforms.", "Abort Loading", 0, len(fnames),
+                                                                None)
+                progress_dialog.setWindowModality(QtCore.Qt.WindowModal)
+                progress_dialog.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+                progress_dialog.show()
+                QtWidgets.QApplication.processEvents()
 
-            self.waterfalls[cond] = WaterfallModel(cond)
-            self.waterfalls[cond].settings =  self.settings
-            self.waterfalls[cond].add_multiple_waveforms(self.spectra[cond])
-            #self.waterfalls[cond].get_rescaled_waveforms()
+                self.spectra[cond] = read_multiple_spectra_dict(fnames, progress_dialog=progress_dialog)
+                self.waterfalls[cond] = WaterfallModel(cond)
+                self.waterfalls[cond].settings =  self.settings
+                self.waterfalls[cond].add_multiple_waveforms(self.spectra[cond])
+                #self.waterfalls[cond].get_rescaled_waveforms()
 
-        #print("Loaded " + str(len(fnames)) + " files in %s seconds." % (time.time() - start_time))
+                progress_dialog.close()
+                QtWidgets.QApplication.processEvents()
+
+            #print("Loaded " + str(len(fnames)) + " files in %s seconds." % (time.time() - start_time))
 
 
     def set_folder_path(self, folder):

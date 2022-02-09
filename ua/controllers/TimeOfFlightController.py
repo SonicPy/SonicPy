@@ -68,13 +68,15 @@ class TimeOfFlightController(QObject):
         self.overview_controller.correlation_echoes_added(correlation)
     
     def folder_selected_signal_callback(self, folder):
-        self.widget.setWindowTitle("Time-of-flight analysis. © R. Hrubiak, 2021. Folder: "+folder)
+        self.widget.setWindowTitle("Time-of-flight analysis. © R. Hrubiak, 2021. Folder: "+ os.path.abspath( folder))
 
     def file_selected_signal_callback(self, fname):
 
         f_start = self.overview_controller.widget.freq_start.value()
         f_step = self.overview_controller.widget.freq_step.value()
-        fbase = os.path.split(fname)[-1].split('_')[-1][:-4]
+        name = os.path.split(fname)[-1]
+        fbase = name[-7:-4]
+        
         f_freq_ind = int(fbase)
         freq = f_start + f_freq_ind * f_step
 

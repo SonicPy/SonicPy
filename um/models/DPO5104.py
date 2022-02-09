@@ -42,7 +42,7 @@ class Scope_DPO5104(Scope, pvModel):
         
         
         
-        self.data_stop = 100000
+        self.data_stop = 10000
         self.selected_channel = 'CH1'
 
         self.acquisition_types = ['sample', 'peak', 'hires', 'envelope', 'average']
@@ -282,7 +282,7 @@ class Scope_DPO5104(Scope, pvModel):
 
         if self.connected:
             start = time.time()
-            wait_till = start+0.5
+            wait_till = start+0.1
             num_av = self.pvs['num_av']._val
             num_acq = self.pvs['num_acq']._val
             stop_after_preset = self.pvs['stop_after_num_av_preset']._val

@@ -87,7 +87,7 @@ class ScopePlotController(QObject):
             x = waveform[0]
             y = waveform[1]
         
-            R = 10
+            '''R = 10
 
             pad_size = math.ceil(float(x.size)/R)*R - x.size
 
@@ -99,7 +99,7 @@ class ScopePlotController(QObject):
             x = x.reshape(-1, R)
             x = nanmean(x.reshape(-1,R), axis=1)
             y = y.reshape(-1, R)
-            y = nanmean(y.reshape(-1,R), axis=1)
+            y = nanmean(y.reshape(-1,R), axis=1)'''
 
             
 

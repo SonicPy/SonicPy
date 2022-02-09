@@ -152,7 +152,7 @@ class SaveDataModel(pvModel):
             x = waveform[0]
             y = waveform[1]
         
-            R = 10
+            '''R = 10
 
             pad_size = math.ceil(float(x.size)/R)*R - x.size
 
@@ -166,7 +166,7 @@ class SaveDataModel(pvModel):
             y = y.reshape(-1, R)
             y = nanmean(y.reshape(-1,R), axis=1)
 
-            path, fname = os.path.split(filename)
+            path, fname = os.path.split(filename)'''
 
             '''subsample = np.arange(0,len(x),10)
             x = np.take(x, subsample)

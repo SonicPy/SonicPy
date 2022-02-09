@@ -1,4 +1,5 @@
 
+import enum
 import os.path, sys
 from utilities.utilities import *
 from utilities.HelperModule import move_window_relative_to_screen_center, get_partial_index, get_partial_value
@@ -92,21 +93,15 @@ class OverViewModel():
         if len(fnames):
             start_time = time.time()
             if not cond in self.spectra:
-                progress_dialog = QtWidgets.QProgressDialog("Loading multiple waveforms.", "Abort Loading", 0, len(fnames),
-                                                                None)
-                progress_dialog.setWindowModality(QtCore.Qt.WindowModal)
-                progress_dialog.setWindowFlags(QtCore.Qt.FramelessWindowHint)
-                progress_dialog.show()
-                QtWidgets.QApplication.processEvents()
+                
 
-                self.spectra[cond] = read_multiple_spectra_dict(fnames, progress_dialog=progress_dialog)
+                self.spectra[cond] = read_multiple_spectra_dict(fnames)
                 self.waterfalls[cond] = WaterfallModel(cond)
                 self.waterfalls[cond].settings =  self.settings
                 self.waterfalls[cond].add_multiple_waveforms(self.spectra[cond])
                 #self.waterfalls[cond].get_rescaled_waveforms()
 
-                progress_dialog.close()
-                QtWidgets.QApplication.processEvents()
+                
 
             #print("Loaded " + str(len(fnames)) + " files in %s seconds." % (time.time() - start_time))
 
@@ -118,6 +113,11 @@ class OverViewModel():
         
 
     def understand_folder_structure(self):
+        
+
+        start_time = time.time()
+     
+
         folder_suffix = self.folder_suffix
         folder = self.fp
         file_type = self.file_type
@@ -134,6 +134,8 @@ class OverViewModel():
                 pass
         conditions_num = sorted(conditions_base)
         conditions_folders_sorted = []
+        #print("conditions_num : %s seconds." % (time.time() - start_time))
+        start_time = time.time()
         for p in conditions_num:
             conditions_folders_sorted.append(str(p)+suffix)
 
@@ -148,32 +150,54 @@ class OverViewModel():
             num = p[-1*(len(file_type)+3):-1*len(file_type)]
             freqs_base.append(num)
         freqs_sorted = sorted(freqs_base)
- 
+        #print("freqs_sorted : %s seconds." % (time.time() - start_time))
+        start_time = time.time()
         for p in conditions_folders_sorted:
             conditions_search = os.path.join(folder,p,'*'+suffix_freq)
             res = sorted(glob.glob(conditions_search))
             self.fps_cond[p] = res
             for r in res:
                 self.file_cond_dict[r]=p
-      
-        for f in freqs_sorted:
-            p_list = []
-            for p in conditions_folders_sorted:
+        #print("file_cond_dict : %s seconds." % (time.time() - start_time))
+        start_time = time.time()
 
+        nfiles = len(freqs_sorted)*len(conditions_folders_sorted)
+        progress_dialog = QtWidgets.QProgressDialog("Loading multiple waveforms.", "Abort Loading", 0, nfiles, None)
+        progress_dialog.setMinimumWidth(300)
+        progress_dialog.setWindowModality(QtCore.Qt.WindowModal)
+        progress_dialog.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+        progress_dialog.show()
+        QtWidgets.QApplication.processEvents()
+
+        for m, f in enumerate(freqs_sorted):
+            p_list = []
+            for n, p in enumerate(conditions_folders_sorted):
+                d = n + m * len (conditions_folders_sorted)
+                if d % 2 == 0:
+                    #update progress bar only every 2 files to save time
+                    progress_dialog.setValue(d)
+                    QtWidgets.QApplication.processEvents()
                 freq_search = os.path.join(folder,p,'*'+f+suffix_freq)
                 res = glob.glob(freq_search)
                 if len(res):
                     p_list.append(res[0])
                 else:
                     p_list.append(None)
+                if progress_dialog.wasCanceled():
+                    break
             self.fps_Hz[f] = p_list
+            
             for p in p_list:
                 self.file_freq_dict[p]=f
-
+            if progress_dialog.wasCanceled():
+                    break
+        #print("file_freq_dict : %s seconds." % (time.time() - start_time))
+        
         #print('found conditions: '+str(conditions_folders_sorted))
         #print('found frequencies: '+str(freqs_sorted))
 
-
+        progress_dialog.close()
+        QtWidgets.QApplication.processEvents()
 
     def add_result_from_file(self, filename):
         data = self.read_result_file(filename)

@@ -21,7 +21,7 @@ def read_multiple_spectra(filenames, subsample = 1):
         spectra.append(y)
     return spectra, X
 
-def read_multiple_spectra_dict(filenames, subsample = 1 , progress_dialog=None):
+def read_multiple_spectra_dict(filenames, subsample = 1 ):
     spectra = []
     f = filenames[0]
     X,Y = read_tek_csv(f, return_x=True, subsample=subsample)
@@ -29,11 +29,7 @@ def read_multiple_spectra_dict(filenames, subsample = 1 , progress_dialog=None):
     missing_couner = 1
     missing_waveform = [np.asarray([]),np.asarray([])]
     for d, f in enumerate(filenames):
-        if progress_dialog != None:
-            if d % 2 == 0:
-                #update progress bar only every 2 files to save time
-                progress_dialog.setValue(d)
-                QtWidgets.QApplication.processEvents()
+        
         if f is not None:
             Y = read_tek_csv(f, return_x=False, subsample=subsample)
             y = np.asarray(Y)

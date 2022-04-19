@@ -499,3 +499,16 @@ QFrame#main_frame {
     border-top-right-radius:8px;
    border-bottom-right-radius: 8px;
  }
+
+#cond_btn, #cond_btn_first, #cond_btn_last {
+    font: normal 12px;
+    border-radius: 1px;
+}
+#cond_btn_first, #p_wave_btn{
+    border-top-left-radius:8px;
+   border-bottom-left-radius: 8px;
+ }
+ #cond_btn_last, #s_wave_btn{
+    border-top-right-radius:8px;
+   border-bottom-right-radius: 8px;
+ }

@@ -128,19 +128,35 @@ class OverViewWidget(QWidget):
 
     def make_bottom_combo_widgets(self):
         
+
         self.freq_scroll = QtWidgets.QScrollBar(orientation=Qt.Horizontal, parent=self.freqs_widget)
         self.freq_scroll.setMinimum(0)
         self.freq_scroll.setMaximum(17)
         self.freq_scroll.setSingleStep(1)
+        self.freq_minus_btn = QtWidgets.QPushButton(str("-"))
+        self.freq_minus_btn.setMaximumWidth(35)
+        self.freq_minus_btn.setObjectName('freq_btn_first')
+        self.freq_plus_btn = QtWidgets.QPushButton(str("+"))
+        self.freq_plus_btn.setMaximumWidth(35)
+        self.freq_plus_btn.setObjectName('freq_btn_last')
+        self._freqs_widget_layout.addWidget(self.freq_minus_btn)
         self._freqs_widget_layout.addWidget(self.freq_scroll)
+        self._freqs_widget_layout.addWidget(self.freq_plus_btn)
         
         
         self.cond_scroll = QtWidgets.QScrollBar(orientation=Qt.Horizontal, parent=self.conds_widget)
         self.cond_scroll.setMinimum(0)
         self.cond_scroll.setMaximum(17)
         self.cond_scroll.setSingleStep(1)
+        self.cond_minus_btn = QtWidgets.QPushButton(str("-"))
+        self.cond_minus_btn.setMaximumWidth(35)
+        self.cond_minus_btn.setObjectName('cond_btn_first')
+        self.cond_plus_btn = QtWidgets.QPushButton(str("+"))
+        self.cond_plus_btn.setMaximumWidth(35)
+        self.cond_plus_btn.setObjectName('cond_btn_last')
+        self._conds_widget_layout.addWidget(self.cond_minus_btn)
         self._conds_widget_layout.addWidget(self.cond_scroll)
-        
+        self._conds_widget_layout.addWidget(self.cond_plus_btn)
 
     def make_bottom_btn_widgets(self):
         self.buttons_widget_bottom_single_frequency = QtWidgets.QWidget()
@@ -149,7 +165,7 @@ class OverViewWidget(QWidget):
         self.freqs_widget = QtWidgets.QWidget(self.buttons_widget_bottom_single_frequency)
         self._freqs_widget_layout = QtWidgets.QHBoxLayout(self.freqs_widget )
         self._freqs_widget_layout.setSpacing(0)
-        self.freq_btns = QtWidgets.QButtonGroup( self.freqs_widget)
+        #self.freq_btns = QtWidgets.QButtonGroup( self.freqs_widget)
         self.freqs_widget.setLayout(self._freqs_widget_layout)
         self._buttons_layout_bottom_single_frequency.addWidget(self.freqs_widget)
         self.buttons_widget_bottom_single_frequency.setLayout(self._buttons_layout_bottom_single_frequency)
@@ -161,13 +177,13 @@ class OverViewWidget(QWidget):
         self.conds_widget = QtWidgets.QWidget(self.buttons_widget_bottom_single_condition)
         self._conds_widget_layout = QtWidgets.QHBoxLayout(self.conds_widget )
         self._conds_widget_layout.setSpacing(0)
-        self.cond_btns = QtWidgets.QButtonGroup( self.conds_widget)
+        #self.cond_btns = QtWidgets.QButtonGroup( self.conds_widget)
         self.conds_widget.setLayout(self._conds_widget_layout)
         self._buttons_layout_bottom_single_condition.addWidget(self.conds_widget)
         self.buttons_widget_bottom_single_condition.setLayout(self._buttons_layout_bottom_single_condition)
         self._single_condition_widget_layout.addWidget(self.buttons_widget_bottom_single_condition)
 
-    def set_freq_buttons(self, num):
+    '''def set_freq_buttons(self, num):
 
         for b in self.freq_btns_list:
             self._freqs_widget_layout.removeWidget(b)
@@ -185,7 +201,7 @@ class OverViewWidget(QWidget):
             #self._freqs_widget_layout.addWidget(btn)
 
         self.freq_btns_list[0].setObjectName('freq_btn_first')
-        self.freq_btns_list[-1].setObjectName('freq_btn_last')
+        self.freq_btns_list[-1].setObjectName('freq_btn_last')'''
         
     def set_cond_buttons(self, num):
 

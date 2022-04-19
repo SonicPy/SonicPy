@@ -191,9 +191,16 @@ class UltrasoundAnalysisController(QObject):
         if filename is None:
             filename = open_file_dialog(None, "Load File(s).",filter='*.csv')
         if len(filename):
+
+
             self.model.t, self.model.spectrum, self.fname = self.load_file(filename)
             self.display_window.update_view(self.model.t, self.model.spectrum, self.fname)
-            name = os.path.split(self.fname)[-1]
+            
+
+            path = os.path.normpath(self.fname)
+            fldr = path.split(os.sep)[-2]
+            file = path.split(os.sep)[-1]
+            name = os.path.join( fldr,file)
             self.display_window.plot_widget.setText(name,0)
 
     

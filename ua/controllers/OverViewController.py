@@ -86,16 +86,17 @@ class OverViewController(QObject):
         fnames = list(self.model.waterfalls[self.freq].scans[0].keys())
         if index >=0 and index < len(fnames):
             
-            self.selected_fname = fnames[index]
-            
-            self.re_plot_single_frequency()
+            if fnames[index] in self.model.file_cond_dict:
+                self.selected_fname = fnames[index]
+                
+                self.re_plot_single_frequency()
+                
+                cond = self.model.file_cond_dict[self.selected_fname]
+                conds = list(self.model.fps_cond.keys())
+                ind  = conds.index(cond)
+                self.set_condition(ind)
 
-            cond = self.model.file_cond_dict[self.selected_fname]
-            conds = list(self.model.fps_cond.keys())
-            ind  = conds.index(cond)
-            self.set_condition(ind)
-
-            self.file_selected_signal.emit(self.selected_fname)
+                self.file_selected_signal.emit(self.selected_fname)
 
     def single_condition_cursor_y_signal_callback(self, y_pos):
 
@@ -103,17 +104,17 @@ class OverViewController(QObject):
         
         fnames = list(self.model.waterfalls[self.cond].scans[0].keys())
         if index >=0 and index < len(fnames):
-            
-            self.selected_fname = fnames[index]
-            
-            self.re_plot_single_condition()
+            if fnames[index] in self.model.file_freq_dict:
+                self.selected_fname = fnames[index]
+                
+                self.re_plot_single_condition()
 
-            freq = self.model.file_freq_dict[self.selected_fname]
-            freqs = list(self.model.fps_Hz.keys())
-            ind  = freqs.index(freq)
-            self.set_frequency(ind)
-            
-            self.file_selected_signal.emit(self.selected_fname)
+                freq = self.model.file_freq_dict[self.selected_fname]
+                freqs = list(self.model.fps_Hz.keys())
+                ind  = freqs.index(freq)
+                self.set_frequency(ind)
+                
+                self.file_selected_signal.emit(self.selected_fname)
 
     def preferences_module(self, *args, **kwargs):
         pass
@@ -248,7 +249,11 @@ class OverViewController(QObject):
                         waterfall_waveform[1] [limits[0]:limits[1]]]
             waterfall_waveform = [ np.append(waterfall_waveform[0] [:limits[0]], waterfall_waveform[0] [limits[1]:]),
                                    np.append(waterfall_waveform[1] [:limits[0]], waterfall_waveform[1] [limits[1]:])]
-            selected_name_out = os.path.split(selected_fname)[-1]
+
+            path = os.path.normpath(selected_fname)
+            fldr = path.split(os.sep)[-2]
+            file = path.split(os.sep)[-1]
+            selected_name_out = os.path.join( fldr,file)
         else:
             selected = [[],[]]
             selected_name_out = ''

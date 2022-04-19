@@ -1,4 +1,5 @@
 
+from argparse import FileType
 import enum
 import os.path, sys
 from utilities.utilities import *
@@ -22,6 +23,20 @@ import glob
 import time
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtCore import QObject
+
+# Python program to sort a list of
+# tuples by the second Item using sort()
+
+# Function to sort hte list by second item of tuple
+def Sort_Tuple(tup):
+
+    # reverse = None (Sorts in Ascending order)
+    # key is set to sort using second element of
+    # sublist lambda has been used
+    tup.sort(key = lambda x: x[1])
+    return tup
+
+
 
 class OverViewModel():
     def __init__(self):
@@ -112,6 +127,10 @@ class OverViewModel():
         self.understand_folder_structure()
         
 
+    
+
+
+
     def understand_folder_structure(self):
         
 
@@ -121,7 +140,25 @@ class OverViewModel():
         folder_suffix = self.folder_suffix
         folder = self.fp
         file_type = self.file_type
-        conditions_search = os.path.join(folder,'*'+folder_suffix)
+        subfolders = glob.glob(os.path.join(folder,'*/'), recursive = False)
+        sf = {} # dict {folder:[files]}
+        tm = [] # list [(folder,timestamp)]
+        for subfolder in subfolders:
+            path = os.path.normpath(subfolder)
+            fldr = path.split(os.sep)[-1]
+            file_search_str = os.path.join(subfolder,'*' + file_type)
+            files_in_subfolder = glob.glob(file_search_str, recursive = False)
+            
+
+            sf[fldr] = files_in_subfolder
+            time_modified = os. path. getmtime(files_in_subfolder[0])
+            tm.append ((fldr, time_modified))
+        tm = Sort_Tuple(tm)
+        conditions_folders_sorted = []
+        for t in tm:
+            conditions_folders_sorted.append(t[0])
+
+        '''conditions_search = os.path.join(folder,'*'+folder_suffix)
         conditions = glob.glob(conditions_search)
         
         conditions_base = []
@@ -137,7 +174,8 @@ class OverViewModel():
         #print("conditions_num : %s seconds." % (time.time() - start_time))
         start_time = time.time()
         for p in conditions_num:
-            conditions_folders_sorted.append(str(p)+suffix)
+            conditions_folders_sorted.append(str(p)+suffix)'''
+
 
         condition_0 = conditions_folders_sorted[0]
         freq_search = os.path.join(folder,condition_0,'*'+file_type)

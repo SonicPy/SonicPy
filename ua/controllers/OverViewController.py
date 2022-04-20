@@ -66,6 +66,9 @@ class OverViewController(QObject):
         self.widget.single_frequency_waterfall.plot_widget. cursor_changed_singal.connect(self.emit_cursor)
         self.widget.single_condition_waterfall.plot_widget. cursor_changed_singal.connect(self.emit_cursor)
 
+        self.widget.freq_scroll.valueChanged .connect(self.freq_scroll_callback)
+        self.widget.cond_scroll.valueChanged.connect(self.cond_scroll_callback)
+
     def emit_cursor(self, pos):
         self.cursor_position_signal.emit(pos)
 
@@ -132,13 +135,14 @@ class OverViewController(QObject):
         self.re_plot_single_frequency()
         self.re_plot_single_condition()
 
-    def freq_btns_callback(self, btn):
+    ### Navigating PT points and frequencies with scorllbar and buttons:
+    '''def freq_btns_callback(self, btn):
         index = self.widget.freq_btns_list.index(btn)
         self.set_frequency(index)
 
     def cond_btns_callback(self, btn):
         index = self.widget.cond_btns_list.index(btn)
-        self.set_condition(index)
+        self.set_condition(index)'''
 
     def freq_scroll_callback(self, val):
         self.set_frequency(val)
@@ -146,6 +150,16 @@ class OverViewController(QObject):
     def cond_scroll_callback(self, val):
         self.set_condition(val)
 
+    def freq_btn_callback(self, direction):
+        val = 0
+        self.freq_scroll_callback(val)
+
+    def cond_btn_callback(self, direction):
+        val = 0 
+        self.cond_scroll_callback(val)
+
+
+    ### opening a folder:
     def open_btn_callback(self):
         self.set_US_folder()
 
@@ -175,35 +189,37 @@ class OverViewController(QObject):
         
         self.set_frequency(default_frequency_index)
         self.widget.freq_scroll.setMaximum(len(freqs)-1)
-        self.widget.freq_scroll.valueChanged .connect(self.freq_scroll_callback)
+        
 
 
         
         self.set_condition(default_condition_index)
         self.widget.cond_scroll.setMaximum(len(conds)-1)
-        self.widget.cond_scroll.valueChanged.connect(self.cond_scroll_callback)
+        
 
     def set_frequency(self, index):
         freqs = list(self.model.fps_Hz.keys())
-        self.freq = freqs[index]
-        self.model.load_multiple_files_by_frequency(self.freq)
-        
-        self.widget.freq_scroll.blockSignals(True)
-        self.widget.freq_scroll.setValue(index)
-        self.widget.freq_scroll.blockSignals(False)
-        
-        self.re_plot_single_frequency()
+        if len(freqs) >index:
+            self.freq = freqs[index]
+            self.model.load_multiple_files_by_frequency(self.freq)
+            
+            self.widget.freq_scroll.blockSignals(True)
+            self.widget.freq_scroll.setValue(index)
+            self.widget.freq_scroll.blockSignals(False)
+            
+            self.re_plot_single_frequency()
 
     def set_condition(self, index):
         
         conds = list(self.model.fps_cond.keys())
-        self.cond = conds[index]
-        self.model.load_multiple_files_by_condition(self.cond)
+        if len(conds) >index:
+            self.cond = conds[index]
+            self.model.load_multiple_files_by_condition(self.cond)
 
-        self.widget.cond_scroll.blockSignals(True)
-        self.widget.cond_scroll.setValue(index)
-        self.widget.cond_scroll.blockSignals(False)
-        self.re_plot_single_condition()
+            self.widget.cond_scroll.blockSignals(True)
+            self.widget.cond_scroll.setValue(index)
+            self.widget.cond_scroll.blockSignals(False)
+            self.re_plot_single_condition()
 
     def re_plot_single_frequency(self ):
         waterfall = self.model.waterfalls[self.freq]

@@ -69,6 +69,11 @@ class OverViewController(QObject):
         self.widget.freq_scroll.valueChanged .connect(self.freq_scroll_callback)
         self.widget.cond_scroll.valueChanged.connect(self.cond_scroll_callback)
 
+        self.widget.cond_minus_btn.clicked.connect(partial(self.cond_btn_callback,-1))
+        self.widget.cond_plus_btn.clicked.connect(partial(self.cond_btn_callback,1))
+        self.widget.freq_minus_btn.clicked.connect(partial(self.freq_btn_callback,-1))
+        self.widget.freq_plus_btn.clicked.connect(partial(self.freq_btn_callback,1))
+
     def emit_cursor(self, pos):
         self.cursor_position_signal.emit(pos)
 
@@ -150,13 +155,23 @@ class OverViewController(QObject):
     def cond_scroll_callback(self, val):
         self.set_condition(val)
 
-    def freq_btn_callback(self, direction):
-        val = 0
-        self.freq_scroll_callback(val)
+    def freq_btn_callback(self, step):
+        val = self.widget.freq_scroll.value()
+        min = self.widget.freq_scroll.minimum()
+        max = self.widget.freq_scroll.maximum()
+        new_val = val + step
+        if new_val >= min and new_val <= max:
+            self.widget.freq_scroll.setValue(new_val)
 
-    def cond_btn_callback(self, direction):
-        val = 0 
-        self.cond_scroll_callback(val)
+    def cond_btn_callback(self, step):
+        
+        val = self.widget.cond_scroll.value()
+        min = self.widget.cond_scroll.minimum()
+        max = self.widget.cond_scroll.maximum()
+        new_val = val + step
+        if new_val >= min and new_val <= max:
+            self.widget.cond_scroll.setValue(new_val)
+        
 
 
     ### opening a folder:

@@ -47,8 +47,7 @@ class OverViewModel():
         self.fps_cond = {}
         self.fps_Hz = {}
 
-        self.file_freq_dict = {}
-        self.file_cond_dict = {}
+        self.file_dict = {}
 
         self.waterfalls = {} 
         self.folder_suffix = 'psi'
@@ -92,25 +91,56 @@ class OverViewModel():
         
         fnames = self.fps_Hz[freq]
         start_time = time.time()
+        conditions = list(self.fps_cond.keys())
+        
         if not freq in self.spectra:
-            self.spectra[freq] = read_multiple_spectra_dict(fnames)
+            loaded_files = {}
+            read_files = read_multiple_spectra_dict(fnames)
+            for condition in conditions:
+                for loaded_fname in read_files:
+                    path = loaded_fname['filename']
+                    fldr = path.split(os.sep)[-2] # this is the pt condition name
+                    if fldr == condition:
+                        loaded_files[condition]= loaded_fname
+                        break
+                if not condition in loaded_files:
+                    loaded_files[condition] = {'filename':'','waveform':[np.asarray([0]),np.asarray([0])]}
+
+            self.spectra[freq] = loaded_files
 
             self.waterfalls[freq] = WaterfallModel(freq)
             self.waterfalls[freq].settings =  self.settings
+
             self.waterfalls[freq].add_multiple_waveforms(self.spectra[freq])
             #self.waterfalls[freq].get_rescaled_waveforms()
 
-        #print("Loaded " + str(len(fnames)) + " files in %s seconds." % (time.time() - start_time))
+            #print("Loaded " + str(len(fnames)) + " files in %s seconds." % (time.time() - start_time))
 
     def load_multiple_files_by_condition(self, cond):
         
         fnames = self.fps_cond[cond]
+        frequencies = list(self.fps_Hz.keys())
         if len(fnames):
             start_time = time.time()
             if not cond in self.spectra:
-                
+                loaded_files = {}
+                read_files = read_multiple_spectra_dict(fnames)
+                res = read_files[0]['filename']
+                first_num = res[-1*(len('.csv')+3):-1*len('.csv')]
+                for frequency in frequencies:
+                    for loaded_fname in read_files:
+                        path = loaded_fname['filename']
 
-                self.spectra[cond] = read_multiple_spectra_dict(fnames)
+                        f = int(path[-1*(len('.csv')+3):-1*len('.csv')]) - int(first_num)
+                        f_num = f'{f:03d}' 
+
+                        if f_num == frequency:
+                            loaded_files[frequency]= loaded_fname
+                            break
+                    if not frequency in loaded_files:
+                        loaded_files[frequency] = {'filename':'','waveform':[np.asarray([0]),np.asarray([0])]}
+
+                self.spectra[cond] = loaded_files
                 self.waterfalls[cond] = WaterfallModel(cond)
                 self.waterfalls[cond].settings =  self.settings
                 self.waterfalls[cond].add_multiple_waveforms(self.spectra[cond])
@@ -171,11 +201,12 @@ class OverViewModel():
                 pass
         conditions_num = sorted(conditions_base)
         conditions_folders_sorted = []
-        #print("conditions_num : %s seconds." % (time.time() - start_time))
-        start_time = time.time()
+        
         for p in conditions_num:
             conditions_folders_sorted.append(str(p)+suffix)'''
 
+        #print("conditions_num : %s seconds." % (time.time() - start_time))
+        start_time = time.time()
 
         condition_0 = conditions_folders_sorted[0]
         freq_search = os.path.join(folder,condition_0,'*'+file_type)
@@ -194,10 +225,26 @@ class OverViewModel():
             conditions_search = os.path.join(folder,p,'*'+suffix_freq)
             res = sorted(glob.glob(conditions_search))
             self.fps_cond[p] = res
-            for r in res:
-                self.file_cond_dict[r]=p
-        #print("file_cond_dict : %s seconds." % (time.time() - start_time))
-        start_time = time.time()
+            first_num = res[0][-1*(len(file_type)+3):-1*len(file_type)]
+            for i, r in enumerate(res):
+                f = int(r[-1*(len(file_type)+3):-1*len(file_type)]) - int(first_num)
+                f_num = f'{f:03d}' 
+                
+                
+                self.file_dict[r]=(p,f_num)
+                
+                if f_num in self.fps_Hz:
+                    p_list = self.fps_Hz[f_num]
+                else:
+                    p_list = []
+                
+                p_list.append(r)
+                self.fps_Hz[f_num] = p_list
+                
+
+        print("file_cond_dict : %s seconds." % (time.time() - start_time))
+        
+        '''start_time = time.time()
 
         nfiles = len(freqs_sorted)*len(conditions_folders_sorted)
         progress_dialog = QtWidgets.QProgressDialog("Loading multiple waveforms.", "Abort Loading", 0, nfiles, None)
@@ -235,7 +282,7 @@ class OverViewModel():
         #print('found frequencies: '+str(freqs_sorted))
 
         progress_dialog.close()
-        QtWidgets.QApplication.processEvents()
+        QtWidgets.QApplication.processEvents()'''
 
     def add_result_from_file(self, filename):
         data = self.read_result_file(filename)

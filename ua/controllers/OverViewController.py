@@ -94,14 +94,14 @@ class OverViewController(QObject):
         fnames = list(self.model.waterfalls[self.freq].scans[0].keys())
         if index >=0 and index < len(fnames):
             
-            if fnames[index] in self.model.file_cond_dict:
+            if fnames[index] in self.model.file_dict:
                 self.selected_fname = fnames[index]
                 
                 self.re_plot_single_frequency()
                 
-                cond = self.model.file_cond_dict[self.selected_fname]
+                cond = self.model.file_dict[self.selected_fname]
                 conds = list(self.model.fps_cond.keys())
-                ind  = conds.index(cond)
+                ind  = conds.index(cond[0])
                 self.set_condition(ind)
 
                 self.file_selected_signal.emit(self.selected_fname)
@@ -112,14 +112,14 @@ class OverViewController(QObject):
         
         fnames = list(self.model.waterfalls[self.cond].scans[0].keys())
         if index >=0 and index < len(fnames):
-            if fnames[index] in self.model.file_freq_dict:
+            if fnames[index] in self.model.file_dict:
                 self.selected_fname = fnames[index]
                 
                 self.re_plot_single_condition()
 
-                freq = self.model.file_freq_dict[self.selected_fname]
+                freq = self.model.file_dict[self.selected_fname]
                 freqs = list(self.model.fps_Hz.keys())
-                ind  = freqs.index(freq)
+                ind  = freqs.index(freq[1])
                 self.set_frequency(ind)
                 
                 self.file_selected_signal.emit(self.selected_fname)

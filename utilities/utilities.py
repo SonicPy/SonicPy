@@ -30,7 +30,7 @@ def read_multiple_spectra_dict(filenames, subsample = 1 ):
     missing_waveform = [np.asarray([]),np.asarray([])]
     for d, f in enumerate(filenames):
         
-        if f is not None:
+        if f is not None and len(f):
             Y = read_tek_csv(f, return_x=False, subsample=subsample)
             y = np.asarray(Y)
             spectra.append({ 'filename':f,'waveform':[x, y]})

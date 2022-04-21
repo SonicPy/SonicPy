@@ -1,6 +1,6 @@
 import numpy as np
 from numpy.core.defchararray import asarray
-
+import time
 
 class WaterfallModel( ):
     ''' synchronous version of the waterfall model '''
@@ -25,7 +25,7 @@ class WaterfallModel( ):
                 #update progress bar only every 10 files to save time
                 progress_dialog.setValue(d)
                 QtWidgets.QApplication.processEvents()'''
-            self. add_waveform(p)
+            self. add_waveform(params[p])
 
         
 
@@ -33,10 +33,14 @@ class WaterfallModel( ):
         # param is a dict {'filename': "./*.csv", 'waveform':[x1,x2, ..., yn], [y1, y2, ..., yn] }
         fname = param['filename']
         wform = param['waveform']
-        x = wform[0].reshape(-1, 4).mean(axis=1)
+        x = wform[0]
+        y = wform[1]
+        if len(x)>100:
+            x = x.reshape(-1, 4).mean(axis=1)
      
-        y = wform[1].reshape(-1, 4).mean(axis=1)
+            y = y.reshape(-1, 4).mean(axis=1)
         wform = [x,y]
+
         self.scans[0][fname]=wform
 
 
@@ -58,7 +62,7 @@ class WaterfallModel( ):
         offset = 1
         clip = self.settings['clip' ]
 
-        fnames = list(self.scans[0].keys())+[" "," "] # pad the list with two empty items to have better scaling of the plot, there should be a better way to do it.
+        fnames = list(self.scans[0].keys())#+[" "," "] # pad the list with two empty items to have better scaling of the plot, there should be a better way to do it.
         
         if len(self.waterfall_out):
             if scale == self.waterfall_out['scale'] and clip == self.waterfall_out['clip'] and fnames == self. waterfall_out['fnames']:
@@ -70,6 +74,9 @@ class WaterfallModel( ):
             y = np.empty([0])
 
             self.waveform_limits = {}
+
+            first_num = int(fnames[0][-1*(len('.csv')+3):-1*len('.csv')])
+            start_time = time.time()
             for i, f in enumerate(fnames):
                 
                 key = f
@@ -84,7 +91,6 @@ class WaterfallModel( ):
                     y_next[y_next>(offset/2* 0.9)] = offset/2 * 0.9
                     y_next[y_next<(-1*offset/2* 0.9)] = -1*offset/2 * 0.9
                 y_next = y_next + i * float(offset)
-                
                 
                 pos_pre = len(x)
                 if len(x):
@@ -102,7 +108,7 @@ class WaterfallModel( ):
                     'scale':scale,
                     'clip':clip,
                     'fnames':fnames}
-          
+            print("waterfall composed from  " + str(len(fnames)) + " files in %s seconds." % (time.time() - start_time))
         self.waterfall_out = out
 
 

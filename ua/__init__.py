@@ -33,6 +33,7 @@ def main():
     
     controller = UltrasoundAnalysisController(app = app, offline= True)
     controller.display_window.show()
+  
     
 
     if _platform == "Darwin":    #macOs has a 'special' way of handling preferences menu
@@ -60,6 +61,7 @@ def TOF():
     
     controller = TimeOfFlightController(app = app)
     controller.show_window()
+    controller.overview_controller.set_US_folder(folder='/Users/hrubiak/Desktop/Sturtevant-e251032/Exp3/US/75')
 
     if _platform == "Darwin":    #macOs has a 'special' way of handling preferences menu
         window = controller.widget

@@ -104,20 +104,23 @@ class OverViewWidget(QWidget):
         self.single_frequency_widget = QtWidgets.QWidget(self.plots_tab_widget)
         self._single_frequency_widget_layout = QtWidgets.QVBoxLayout(self.single_frequency_widget)
         self._single_frequency_widget_layout.setContentsMargins(0,0,0,0)
-        params = ["Waterfall plot", 'Pressure point', 'Time']
+        params = ["Waterfall plot", 'P-T step', 'Time']
         self.single_frequency_waterfall = WaterfallWidget(params=params)
         self._single_frequency_widget_layout.addWidget(self.single_frequency_waterfall)
-        
+        self.frequency_lbl = QtWidgets.QLabel()
+        #self._single_frequency_widget_layout.addWidget(self.frequency_lbl)
         self.plots_tab_widget.addTab(self.single_frequency_widget, 'Frequency')
 
         self.single_condition_widget = QtWidgets.QWidget(self.plots_tab_widget)
         self._single_condition_widget_layout = QtWidgets.QVBoxLayout(self.single_condition_widget)
         self._single_condition_widget_layout.setContentsMargins(0,0,0,0)
-        params = ["Waterfall plot", 'Frequency point', 'Time']
+        params = ["Waterfall plot", 'Frequency step', 'Time']
         self.single_condition_waterfall = WaterfallWidget(params=params)
         self._single_condition_widget_layout.addWidget(self.single_condition_waterfall)
+        self.condition_lbl = QtWidgets.QLabel()
+        #self._single_condition_widget_layout.addWidget(self.condition_lbl)
 
-        self.plots_tab_widget.addTab(self.single_condition_widget, 'P-T Condition')
+        self.plots_tab_widget.addTab(self.single_condition_widget, 'P-T Step')
 
         self._layout.addWidget(self.plots_tab_widget)
 

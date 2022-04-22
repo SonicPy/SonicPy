@@ -34,6 +34,7 @@ class OverViewController(QObject):
     file_selected_signal = pyqtSignal(str)
     folder_selected_signal = pyqtSignal(str)
     cursor_position_signal = pyqtSignal(float)
+    freq_settings_changed_signal = pyqtSignal(float)
 
     def __init__(self, app = None):
         super().__init__()
@@ -48,8 +49,8 @@ class OverViewController(QObject):
         self.make_connections()
         self.line_plots = {}
         self.selected_fname = ''
-        self.freq = 0
-        self.cond = 0
+        self.freq = '000'
+        self.cond = '0psi'
         
         
         
@@ -73,6 +74,17 @@ class OverViewController(QObject):
         self.widget.cond_plus_btn.clicked.connect(partial(self.cond_btn_callback,1))
         self.widget.freq_minus_btn.clicked.connect(partial(self.freq_btn_callback,-1))
         self.widget.freq_plus_btn.clicked.connect(partial(self.freq_btn_callback,1))
+
+        self.widget.freq_start.valueChanged.connect(self.freq_start_step_callback)
+        self.widget.freq_step.valueChanged.connect(self.freq_start_step_callback)
+        
+
+    def freq_start_step_callback(self, *args, **kwargs):
+        f_start = self.widget.freq_start.value()
+        f_step = self.widget.freq_step.value()
+        display_freq = f_start + int(self.freq) * f_step
+        self.widget.single_frequency_waterfall.set_name ( str(display_freq) + ' MHz')
+        self.freq_settings_changed_signal.emit(display_freq)
 
     def emit_cursor(self, pos):
         self.cursor_position_signal.emit(pos)
@@ -223,6 +235,7 @@ class OverViewController(QObject):
             self.widget.freq_scroll.blockSignals(False)
             
             self.re_plot_single_frequency()
+            self.widget.frequency_lbl.setText(str(self.freq))
 
     def set_condition(self, index):
         
@@ -235,6 +248,7 @@ class OverViewController(QObject):
             self.widget.cond_scroll.setValue(index)
             self.widget.cond_scroll.blockSignals(False)
             self.re_plot_single_condition()
+            self.widget.condition_lbl.setText(str(self.cond))
 
     def re_plot_single_frequency(self ):
         waterfall = self.model.waterfalls[self.freq]
@@ -248,7 +262,10 @@ class OverViewController(QObject):
         self.widget.single_frequency_waterfall.clear_plot()
         
         self.update_plot_sigle_frequency(waterfall_waveform,selected)
-        self.widget.single_frequency_waterfall.set_name ( self.freq)
+        f_start = self.widget.freq_start.value()
+        f_step = self.widget.freq_step.value()
+        display_freq = f_start + int(self.freq) * f_step
+        self.widget.single_frequency_waterfall.set_name ( str(display_freq) + ' MHz')
         self.widget.single_frequency_waterfall.set_selected_name (selected_name_out)
 
     def re_plot_single_condition(self ):

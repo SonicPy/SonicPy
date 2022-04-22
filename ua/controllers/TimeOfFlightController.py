@@ -58,6 +58,7 @@ class TimeOfFlightController(QObject):
 
         self.overview_controller.file_selected_signal.connect(self.file_selected_signal_callback)
         self.overview_controller.folder_selected_signal.connect(self.folder_selected_signal_callback)
+        self.overview_controller.freq_settings_changed_signal.connect(self.freq_settings_changed_signal_callback)
 
         self.overview_controller.cursor_position_signal.connect(self.correlation_controller.sync_cursors)
         self.correlation_controller.cursor_position_signal.connect(self.overview_controller.sync_cursors)
@@ -69,6 +70,11 @@ class TimeOfFlightController(QObject):
     
     def folder_selected_signal_callback(self, folder):
         self.widget.setWindowTitle("Time-of-flight analysis. © R. Hrubiak, 2021. Folder: "+ os.path.abspath( folder))
+
+    def freq_settings_changed_signal_callback(self, freq):
+        
+
+        self.correlation_controller.display_window.freq_ebx.setValue(freq)
 
     def file_selected_signal_callback(self, fname):
 
@@ -88,6 +94,7 @@ class TimeOfFlightController(QObject):
             self.correlation_controller.display_window.freq_ebx.setValue(freq)
         else:
             self.correlation_controller.calculate_data()
+    
 
     def preferences_module(self, *args, **kwargs):
         pass

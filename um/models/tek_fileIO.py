@@ -98,14 +98,26 @@ def read_tek_csv(fname, return_x=True, subsample=1):
 
 
 def read_tek_csv_files_2d(paths, subsample=1, *args, **kwargs):
-    #fit2d or dioptas chi type file
+    ''' this is anew reader for tek csv files, supposed to work slightly faster than the old one
+    the speed gain is due to creating a full-size empty 2d array before starting the reading the files
+    optional progress dialog has been commented out for now
+
+    returns:
+    dict r
+    r['files_loaded'] = files_loaded
+    r['header'] = header of the first file
+    r['voltage'] = 2d voltage array
+    r['time'] = horizontal scale values
+
+    '''
+    
 
     '''if 'progress_dialog' in kwargs:
         progress_dialog = kwargs['progress_dialog']
     else:
         progress_dialog = QtWidgets.QProgressDialog()'''
 
-    #paths = paths [:self.max_spectra]
+
     nfiles = len (paths)   
 
     

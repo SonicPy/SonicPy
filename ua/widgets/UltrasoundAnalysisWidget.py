@@ -176,7 +176,7 @@ class UltrasoundAnalysisWidget(QWidget):
         self._buttons_layout_bottom.setContentsMargins(0, 0, 0, 0)
         self.open_btn = QtWidgets.QPushButton("Open")
         self.fname_lbl = QtWidgets.QLineEdit('')
-        self.freq_lbl = QtWidgets.QLabel('   Frequency (MHz):')
+        self.freq_lbl = QtWidgets.QLabel('   𝑓 [MHz]:')
         self.freq_ebx = DoubleSpinBoxAlignRight()
         self.freq_ebx.setMaximum(100)
         self.freq_ebx.setMinimum(1)

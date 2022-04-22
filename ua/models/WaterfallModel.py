@@ -62,7 +62,7 @@ class WaterfallModel( ):
         offset = 1
         clip = self.settings['clip' ]
 
-        fnames = list(self.scans[0].keys())#+[" "," "] # pad the list with two empty items to have better scaling of the plot, there should be a better way to do it.
+        fnames = list(self.scans[0].keys())+[" "," "] # pad the list with two empty items to have better scaling of the plot, there should be a better way to do it.
         
         if len(self.waterfall_out):
             if scale == self.waterfall_out['scale'] and clip == self.waterfall_out['clip'] and fnames == self. waterfall_out['fnames']:
@@ -108,7 +108,7 @@ class WaterfallModel( ):
                     'scale':scale,
                     'clip':clip,
                     'fnames':fnames}
-            print("waterfall composed from  " + str(len(fnames)) + " files in %s seconds." % (time.time() - start_time))
+            #print("waterfall composed from  " + str(len(fnames)) + " files in %s seconds." % (time.time() - start_time))
         self.waterfall_out = out
 
 

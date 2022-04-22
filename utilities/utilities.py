@@ -5,9 +5,10 @@ from scipy.signal import hilbert
 from scipy.fftpack import rfft, irfft, fftfreq, fft
 import scipy.fftpack
 import csv
-from um.models.tek_fileIO import read_tek_csv
+from um.models.tek_fileIO import read_tek_csv, read_tek_csv_files_2d
 import math
 from PyQt5 import QtCore, QtWidgets
+import time
 
 def read_multiple_spectra(filenames, subsample = 1):
     spectra = []
@@ -22,6 +23,7 @@ def read_multiple_spectra(filenames, subsample = 1):
     return spectra, X
 
 def read_multiple_spectra_dict(filenames, subsample = 1 ):
+
     spectra = []
     f = filenames[0]
     X,Y = read_tek_csv(f, return_x=True, subsample=subsample)
@@ -36,6 +38,20 @@ def read_multiple_spectra_dict(filenames, subsample = 1 ):
             spectra.append({ 'filename':f,'waveform':[x, y]})
         else:
             spectra.append({ 'filename':'missing_file_'+str(missing_couner),'waveform':missing_waveform})
+        
+        
+    return spectra
+
+def read_2D_spectra_dict(filenames, subsample = 1 ):
+
+    spectra = []
+   
+    r = read_tek_csv_files_2d(filenames, subsample=subsample)
+    
+    for d, f in enumerate(filenames):
+        
+       
+        spectra.append({ 'filename':f,'waveform':[r['time'], r['voltage'][d]]})
         
         
     return spectra

@@ -1,11 +1,12 @@
+import imp, os, glob
 import struct
 import csv
 #from pandas import read_csv
 import numpy as np
 
 from numpy import format_float_scientific
-
-
+import time
+from PyQt5 import QtWidgets
 
 
 def read_file_TEKAFG3000( filename=''):
@@ -95,6 +96,86 @@ def read_tek_csv(fname, return_x=True, subsample=1):
     else: 
         return [y]
 
+
+def read_tek_csv_files_2d(paths, subsample=1, *args, **kwargs):
+    #fit2d or dioptas chi type file
+
+    '''if 'progress_dialog' in kwargs:
+        progress_dialog = kwargs['progress_dialog']
+    else:
+        progress_dialog = QtWidgets.QProgressDialog()'''
+
+    #paths = paths [:self.max_spectra]
+    nfiles = len (paths)   
+
+    
+    file = paths[0]
+    file_text = open(file, "r")
+    row = 0
+    a = True
+    header = {}
+    while a:
+        file_line = file_text.readline()
+        tokens = file_line.split(',')
+        if len(tokens[0]):
+            header[tokens[0]]=(tokens[1],tokens[2])
+        else:
+            a = False
+        
+        row +=1
+
+    file_text.close()
+    nchans = int(header['Record Length'][0])
+    sample_period = float(header['Sample Interval'][0])
+
+    data = np.zeros([nfiles, nchans])
+    files_loaded = []
+    times = []
+
+    x = np.array(range(nchans))*sample_period*subsample
+    
+    #QtWidgets.QApplication.processEvents()
+    for d, file in enumerate(paths):
+        '''if d % 2 == 0:
+            #update progress bar only every 10 files to save time
+            progress_dialog.setValue(d)
+            QtWidgets.QApplication.processEvents()'''
+        try:
+            file_text = open(file, "r")
+
+            a = True
+            row = 0
+            for row in range(nchans-3):
+                data[d][row]=float(file_text.readline().split(',')[4])
+            files_loaded.append(file)
+            file_text.close()
+        except:
+            pass
+        
+        
+        '''if progress_dialog.wasCanceled():
+            break'''
+    '''QtWidgets.QApplication.processEvents()'''
+    r = {}
+    r['files_loaded'] = files_loaded
+    r['header'] = header
+    r['voltage'] = data
+    r['time'] = x
+    return r
+
+'''folder = '/Users/hrubiak/Desktop/Sturtevant-e251032/Exp3/US/75/1000psi' 
+
+paths = glob.glob(folder + '/*', recursive = False)
+start_time = time.time()
+
+r = read_tek_csv_files_2d(paths)
+print("read csv file 2D in %s seconds." % (time.time() - start_time))
+
+start_time = time.time()
+
+for path in paths:
+    r = read_tek_csv(path)
+print("read csv file old in %s seconds." % (time.time() - start_time))'''
 
 
 def write_tek_csv(fname, x,y, params = {}):

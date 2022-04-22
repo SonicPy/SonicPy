@@ -95,7 +95,11 @@ class OverViewModel():
         
         if not freq in self.spectra:
             loaded_files = {}
-            read_files = read_multiple_spectra_dict(fnames)
+          
+            #read_files = read_multiple_spectra_dict(fnames) #old
+            
+            read_files = read_2D_spectra_dict(fnames) #new, replaced old
+            
             for condition in conditions:
                 for loaded_fname in read_files:
                     path = loaded_fname['filename']
@@ -121,10 +125,12 @@ class OverViewModel():
         fnames = self.fps_cond[cond]
         frequencies = list(self.fps_Hz.keys())
         if len(fnames):
-            start_time = time.time()
+            
             if not cond in self.spectra:
                 loaded_files = {}
-                read_files = read_multiple_spectra_dict(fnames)
+                
+                read_files = read_2D_spectra_dict(fnames)
+                
                 res = read_files[0]['filename']
                 first_num = res[-1*(len('.csv')+3):-1*len('.csv')]
                 for frequency in frequencies:
@@ -242,7 +248,7 @@ class OverViewModel():
                 self.fps_Hz[f_num] = p_list
                 
 
-        print("file_cond_dict : %s seconds." % (time.time() - start_time))
+        #print("file_cond_dict : %s seconds." % (time.time() - start_time))
         
         '''start_time = time.time()
 

@@ -230,9 +230,20 @@ class OverViewModel():
         for p in conditions_folders_sorted:
             conditions_search = os.path.join(folder,p,'*'+suffix_freq)
             res = sorted(glob.glob(conditions_search))
+            
+            fls = []
+            for r in res:
+                suffix = r[-7:-4]
+                fls.append((r,suffix))
+            fls = Sort_Tuple(fls)
+            freqs_sorted = []
+            for fl in fls:
+                freqs_sorted.append(fl[0])
+            res = freqs_sorted
             self.fps_cond[p] = res
             first_num = res[0][-1*(len(file_type)+3):-1*len(file_type)]
             for i, r in enumerate(res):
+                time_modified = os. path. getmtime(r)
                 f = int(r[-1*(len(file_type)+3):-1*len(file_type)]) - int(first_num)
                 f_num = f'{f:03d}' 
                 

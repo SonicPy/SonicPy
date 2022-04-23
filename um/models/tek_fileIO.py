@@ -130,7 +130,7 @@ def read_tek_csv_files_2d(paths, subsample=1, *args, **kwargs):
         file_line = file_text.readline()
         tokens = file_line.split(',')
         if len(tokens[0]):
-            header[tokens[0]]=(tokens[1],tokens[2])
+            header[tokens[0].strip('"')]=(tokens[1],tokens[2])
         else:
             a = False
         

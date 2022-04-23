@@ -16,7 +16,7 @@ from ua.widgets.UltrasoundAnalysisWidget import UltrasoundAnalysisWidget
 from ua.widgets.ArrowPlotWidget import ArrowPlotWidget
 from ua.models.UltrasoundAnalysisModel import get_local_optimum, UltrasoundAnalysisModel
 from utilities.HelperModule import move_window_relative_to_screen_center, get_partial_index, get_partial_value
-import math
+import math, time
 
 from ua.controllers.ArrowPlotController import ArrowPlotController
 from functools import partial
@@ -125,12 +125,12 @@ class UltrasoundAnalysisController(QObject):
 
                 #pg.plot(np.asarray(spectrum_f), title="spectrum_f")
                 
-                
+                start_time = time.time()
                 self.model.filter_echoes(l1, r1, l2, r2, freq)
 
                 self.model.cross_correlate()
                 self.model.exract_optima()
-
+                print("cross correlated in %s seconds." % (time.time() - start_time))
 
                 self.display_window.detail_plot1.setData(*self.model.filtered1)
                 self.display_window.detail_plot1_bg.setData(*self.model.filtered2)

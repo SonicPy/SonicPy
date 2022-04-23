@@ -84,7 +84,7 @@ class OverViewController(QObject):
         f_step = self.widget.freq_step.value()
         display_freq = f_start + int(self.freq) * f_step
         self.widget.single_frequency_waterfall.set_name ( str(display_freq) + ' MHz')
-        self.freq_settings_changed_signal.emit(display_freq)
+        #self.freq_settings_changed_signal.emit(display_freq)
 
     def emit_cursor(self, pos):
         self.cursor_position_signal.emit(pos)

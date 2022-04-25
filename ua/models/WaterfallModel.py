@@ -6,7 +6,7 @@ class WaterfallModel( ):
     ''' synchronous version of the waterfall model '''
 
     def __init__(self , common_value):
-        super().__init__()
+       
         self.common_value = common_value
         
         self.scans = [{}]

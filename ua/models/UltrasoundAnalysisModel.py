@@ -19,6 +19,8 @@ from utilities.utilities import zero_phase_bandpass_filter
 import json
 from utilities.CARSMath import fit_gaussian, polyfitw
 
+from .. models.SelectedEchoesModel import SelectedEchoesModel
+
 
 class UltrasoundAnalysisModel():
     def __init__(self):
@@ -35,20 +37,29 @@ class UltrasoundAnalysisModel():
         self.settings = {'tukey_alpha':0.2}
 
     def fit_func(self, x, a, b,c,d):
+        '''
+        calculated a cosine function, can be used for regression
+        '''
         return a * np.cos(b * x+c)+d
 
     def filter_echo(self, t, spectrum, l, r, freq, freq_range=0.1, order = 3, tukey_alpha=0.2):
+        '''
+        applies tuckey window and bandpass filter to an echo
+        '''
         pilo = int(get_partial_index(t,l))
         pihi = int(get_partial_index(t,r))
         echo = np.asarray(spectrum)[pilo:pihi]
         tk = tukey(len(echo), tukey_alpha)
         echo_tk = echo*tk
-        zero_pad = np.zeros(int(len(spectrum)))
+        zero_pad = np.zeros(len(spectrum))
         zero_pad[pilo:pihi] = echo_tk
         filtered = zero_phase_bandpass_filter([t,zero_pad],freq-freq*(freq_range/2),freq+freq*(freq_range/2), order)
         return filtered
     
     def filter_echoes(self, l1, r1, l2, r2, freq):
+        '''
+        windows and filters selected echoes
+        '''
         self.freq = freq
         self.bounds = [[l1, r1],[l2, r2]]
         t = self.t
@@ -57,14 +68,23 @@ class UltrasoundAnalysisModel():
         self.filtered1 = self.filter_echo(t,spectrum,l1,r1,freq,tukey_alpha)
         self.filtered2 = self.filter_echo(t,spectrum,l2,r2,freq,tukey_alpha)
 
-    def find_echo_bounds(self, echo):
+    def find_echo_bounds(self, echo, echo_bounds_cutoff = 0.05):
+        '''
+        input: echo, windowed and filtered echo
+        return: left bound (lb) and right bound (rb) for a region 
+        the amplitude of the echo is more than echo_bounds_cutoff
+        '''
         m = max(abs(echo))
         echo_norm = abs(echo/m)
-        lb = np.argmax(echo_norm> 0.05)
-        rb = len(echo)- np.argmax(np.flip(echo_norm)>0.05)
+        lb = np.argmax(echo_norm> echo_bounds_cutoff)
+        rb = len(echo)- np.argmax(np.flip(echo_norm)>echo_bounds_cutoff)
         return lb, rb
 
     def cross_correlate(self):
+        '''
+        computes correlation values between 
+        two echoes for diffeent values of shift
+        '''
         echo1 = self.filtered1[1]
         echo2 = self.filtered2[1]
         max1_ind = np.argmax(echo1)
@@ -91,6 +111,10 @@ class UltrasoundAnalysisModel():
         self.cross_corr_shift = np.asarray(shifts) * dt
 
     def exract_optima(self):
+        '''
+        extracts opitima from previusly computed 
+        cross correlation between two echoes
+        '''
         corr = self.cross_corr
         lag = self.cross_corr_shift
 
@@ -98,6 +122,9 @@ class UltrasoundAnalysisModel():
         self.maxima = get_optima_peaks(lag,corr,optima_type='max')
 
     def save_result(self, fname):
+        '''
+        saves result of correlation between two echoes to file
+        '''
         oritinal_folder =  os.path.split(fname)[:-1]
         subfolder = os.path.join(*oritinal_folder,self.wave_type)
         exists = os.path.exists(subfolder)
@@ -134,7 +161,7 @@ class UltrasoundAnalysisModel():
 
 
 
-def index_of_nearest(values, value):
+'''def index_of_nearest(values, value):
     items = []
     for ind, v in enumerate(values):
         diff = abs(v-value)
@@ -145,10 +172,10 @@ def index_of_nearest(values, value):
     s = sorted(items, key=getKey)
     closest = s[0][1]
     closest_ind = s[0][2]
-    return closest_ind
+    return closest_ind'''
 
 
-def get_optima(xData,yData, optima_type=None):
+'''def get_optima(xData,yData, optima_type=None):
     f = None
     if optima_type == 'min':
         f = less
@@ -159,7 +186,7 @@ def get_optima(xData,yData, optima_type=None):
         optima_x = xData[optima_ind]
         optima_y = yData[optima_ind]
         return optima_x, optima_y
-    return ([],[])
+    return ([],[])'''
 
 def get_optima_peaks(xData, yData, optima_type = None):
     optima_x, optima_y = [],[]
@@ -197,7 +224,7 @@ def get_fractional_max_x( xData, yData, opt_ind, fit_range):
     return fract_x
 
 
-def get_local_optimum(x, xData, yData, optima_type=None):
+'''def get_local_optimum(x, xData, yData, optima_type=None):
 
     if len(xData) and len(yData):
         pind = get_partial_index(xData,x)
@@ -244,4 +271,4 @@ def get_local_optimum(x, xData, yData, optima_type=None):
         
         #print (optima_x)
         #print (optima_type)
-        return (optima_x, optima_y), optima_type
+        return (optima_x, optima_y), optima_type'''

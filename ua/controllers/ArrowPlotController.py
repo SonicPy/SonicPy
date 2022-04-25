@@ -14,7 +14,7 @@ from numpy import arange
 from utilities.utilities import *
 from ua.widgets.UltrasoundAnalysisWidget import UltrasoundAnalysisWidget
 from ua.widgets.ArrowPlotWidget import ArrowPlotWidget
-from ua.models.UltrasoundAnalysisModel import get_local_optimum, UltrasoundAnalysisModel
+from ua.models.UltrasoundAnalysisModel import UltrasoundAnalysisModel
 from utilities.HelperModule import move_window_relative_to_screen_center, get_partial_index, get_partial_value
 import math
 

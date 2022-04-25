@@ -61,7 +61,7 @@ def TOF():
     
     controller = TimeOfFlightController(app = app)
     controller.show_window()
-    #controller.overview_controller.set_US_folder(folder='/Users/hrubiak/Desktop/Sturtevant-e251032/Exp3/US/75')
+    controller.overview_controller.set_US_folder(folder='/Users/ross/Globus/s16bmb-20220414-e252780-LANL/HDPE-11/US')
 
     if _platform == "Darwin":    #macOs has a 'special' way of handling preferences menu
         window = controller.widget

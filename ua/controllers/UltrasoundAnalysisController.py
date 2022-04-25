@@ -14,7 +14,7 @@ from numpy import arange
 from utilities.utilities import *
 from ua.widgets.UltrasoundAnalysisWidget import UltrasoundAnalysisWidget
 from ua.widgets.ArrowPlotWidget import ArrowPlotWidget
-from ua.models.UltrasoundAnalysisModel import get_local_optimum, UltrasoundAnalysisModel
+from ua.models.UltrasoundAnalysisModel import UltrasoundAnalysisModel
 from utilities.HelperModule import move_window_relative_to_screen_center, get_partial_index, get_partial_value
 import math, time
 
@@ -185,15 +185,25 @@ class UltrasoundAnalysisController(QObject):
         t, spectrum = read_tek_csv(filename, subsample=1)
         t, spectrum = zero_phase_highpass_filter([t,spectrum],1e4,1)
         return t,spectrum, filename
-        
+
     def update_data(self, *args, **kwargs):
         filename = kwargs.get('filename', None)
         if filename is None:
             filename = open_file_dialog(None, "Load File(s).",filter='*.csv')
         if len(filename):
+            t, spectrum, fname = self.load_file(filename)
 
+            if len(spectrum):
+                self._update_spectrum (t, spectrum, fname)
 
-            self.model.t, self.model.spectrum, self.fname = self.load_file(filename)
+    def update_data_by_dict(self, data):
+        t, spectrum, fname = data['t'], data['spectrum'], data['fname']
+        self._update_spectrum(t, spectrum, fname)
+        
+    def _update_spectrum(self, t, spectrum, fname):
+        
+        if len(spectrum):
+            self.model.t, self.model.spectrum, self.fname = t, spectrum, fname
             self.display_window.update_view(self.model.t, self.model.spectrum, self.fname)
             
 
@@ -202,8 +212,6 @@ class UltrasoundAnalysisController(QObject):
             file = path.split(os.sep)[-1]
             name = os.path.join( fldr,file)
             self.display_window.plot_widget.setText(name,0)
-
-    
 
 
     def cursor_dragged(self, cursor):

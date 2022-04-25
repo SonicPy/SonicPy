@@ -12,10 +12,11 @@ import copy
 from pathlib import Path
 from numpy import arange
 from numpy.core.einsumfunc import _parse_possible_contraction
+#from pyrsistent import T
 from utilities.utilities import *
 from ua.widgets.UltrasoundAnalysisWidget import UltrasoundAnalysisWidget
 from ua.widgets.OverviewWidget import OverViewWidget
-from ua.models.UltrasoundAnalysisModel import get_local_optimum, UltrasoundAnalysisModel
+from ua.models.UltrasoundAnalysisModel import  UltrasoundAnalysisModel
 from utilities.HelperModule import move_window_relative_to_screen_center, get_partial_index, get_partial_value
 import math
 
@@ -31,7 +32,7 @@ import glob
 
 class OverViewController(QObject):
 
-    file_selected_signal = pyqtSignal(str)
+    file_selected_signal = pyqtSignal(dict)
     folder_selected_signal = pyqtSignal(str)
     cursor_position_signal = pyqtSignal(float)
     freq_settings_changed_signal = pyqtSignal(float)
@@ -107,16 +108,26 @@ class OverViewController(QObject):
         if index >=0 and index < len(fnames):
             
             if fnames[index] in self.model.file_dict:
-                self.selected_fname = fnames[index]
+                self.selected_fname = fname = fnames[index]
                 
                 self.re_plot_single_frequency()
                 
-                cond = self.model.file_dict[self.selected_fname]
+                cond = self.model.file_dict[self.selected_fname][0]
                 conds = list(self.model.fps_cond.keys())
-                ind  = conds.index(cond[0])
+                ind  = conds.index(cond)
                 self.set_condition(ind)
+                
+                data = {}
+                
+                data['fname'] = self.selected_fname
+                data['cond'] = cond
 
-                self.file_selected_signal.emit(self.selected_fname)
+                selected = self.model.spectra[cond][self.freq]['waveform']
+               
+                data['t'] = selected[0]
+                data['spectrum'] = selected[1]
+                
+                self.file_selected_signal.emit(data)
 
     def single_condition_cursor_y_signal_callback(self, y_pos):
 
@@ -129,12 +140,23 @@ class OverViewController(QObject):
                 
                 self.re_plot_single_condition()
 
-                freq = self.model.file_dict[self.selected_fname]
+                freq = self.model.file_dict[self.selected_fname][1]
                 freqs = list(self.model.fps_Hz.keys())
-                ind  = freqs.index(freq[1])
+                ind  = freqs.index(freq)
                 self.set_frequency(ind)
+
+                data = {}
                 
-                self.file_selected_signal.emit(self.selected_fname)
+                data['fname'] = self.selected_fname
+                data['cond'] = self.cond
+                data['freq'] = freq
+
+                selected = self.model.spectra[self.cond][freq]['waveform']
+               
+                data['t'] = selected[0]
+                data['spectrum'] = selected[1]
+                
+                self.file_selected_signal.emit(data)
 
     def preferences_module(self, *args, **kwargs):
         pass

@@ -15,7 +15,7 @@ from numpy.core.einsumfunc import _parse_possible_contraction
 from utilities.utilities import *
 from ua.widgets.UltrasoundAnalysisWidget import UltrasoundAnalysisWidget
 from ua.widgets.TimeOfFlightWidget import TimeOfFlightWidget
-from ua.models.UltrasoundAnalysisModel import get_local_optimum, UltrasoundAnalysisModel
+from ua.models.UltrasoundAnalysisModel import  UltrasoundAnalysisModel
 from utilities.HelperModule import move_window_relative_to_screen_center, get_partial_index, get_partial_value
 import math
 
@@ -76,7 +76,9 @@ class TimeOfFlightController(QObject):
 
         self.correlation_controller.display_window.freq_ebx.setValue(freq)
 
-    def file_selected_signal_callback(self, fname):
+    def file_selected_signal_callback(self, data):
+
+        fname = data['fname']
 
         f_start = self.overview_controller.widget.freq_start.value()
         f_step = self.overview_controller.widget.freq_step.value()
@@ -86,7 +88,9 @@ class TimeOfFlightController(QObject):
         f_freq_ind = int(fbase)
         freq = f_start + f_freq_ind * f_step
 
-        self.correlation_controller.update_data(filename=fname)
+        
+
+        self.correlation_controller.update_data_by_dict(data)
         
         # setting frequency input triggers calculation of correlation
         current_freq = self.correlation_controller.display_window.freq_ebx.value()

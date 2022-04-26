@@ -177,89 +177,90 @@ class OverViewModel():
         folder = self.fp
         file_type = self.file_type
         subfolders = glob.glob(os.path.join(folder,'*/'), recursive = False)
-        sf = {} # dict {folder:[files]}
-        tm = [] # list [(folder,timestamp)]
-        for subfolder in subfolders:
-            path = os.path.normpath(subfolder)
-            fldr = path.split(os.sep)[-1]
-            file_search_str = os.path.join(subfolder,'*' + file_type)
-            files_in_subfolder = glob.glob(file_search_str, recursive = False)
+        if len(subfolders):
+            sf = {} # dict {folder:[files]}
+            tm = [] # list [(folder,timestamp)]
+            for subfolder in subfolders:
+                path = os.path.normpath(subfolder)
+                fldr = path.split(os.sep)[-1]
+                file_search_str = os.path.join(subfolder,'*' + file_type)
+                files_in_subfolder = glob.glob(file_search_str, recursive = False)
+                
+
+                sf[fldr] = files_in_subfolder
+                time_modified = os. path. getmtime(files_in_subfolder[0])
+                tm.append ((fldr, time_modified))
+            tm = Sort_Tuple(tm)
+            conditions_folders_sorted = []
+            for t in tm:
+                conditions_folders_sorted.append(t[0])
+
+            '''conditions_search = os.path.join(folder,'*'+folder_suffix)
+            conditions = glob.glob(conditions_search)
             
-
-            sf[fldr] = files_in_subfolder
-            time_modified = os. path. getmtime(files_in_subfolder[0])
-            tm.append ((fldr, time_modified))
-        tm = Sort_Tuple(tm)
-        conditions_folders_sorted = []
-        for t in tm:
-            conditions_folders_sorted.append(t[0])
-
-        '''conditions_search = os.path.join(folder,'*'+folder_suffix)
-        conditions = glob.glob(conditions_search)
-        
-        conditions_base = []
-        suffix = os.path.basename(conditions[0])[-3:]
-        for p in conditions:
-            try:
-                num = int(os.path.basename(p)[:-3])
-                conditions_base.append(num)
-            except:
-                pass
-        conditions_num = sorted(conditions_base)
-        conditions_folders_sorted = []
-        
-        for p in conditions_num:
-            conditions_folders_sorted.append(str(p)+suffix)'''
-
-        #print("conditions_num : %s seconds." % (time.time() - start_time))
-        start_time = time.time()
-
-        condition_0 = conditions_folders_sorted[0]
-        freq_search = os.path.join(folder,condition_0,'*'+file_type)
-        freqs = glob.glob(freq_search) 
-
-        freqs_base = []
-        
-        suffix_freq = freqs[0].split('_')[-1][-4:]
-        for p in freqs:
-            num = p[-1*(len(file_type)+3):-1*len(file_type)]
-            freqs_base.append(num)
-        freqs_sorted = sorted(freqs_base)
-        #print("freqs_sorted : %s seconds." % (time.time() - start_time))
-        start_time = time.time()
-        for p in conditions_folders_sorted:
-            conditions_search = os.path.join(folder,p,'*'+suffix_freq)
-            res = sorted(glob.glob(conditions_search))
+            conditions_base = []
+            suffix = os.path.basename(conditions[0])[-3:]
+            for p in conditions:
+                try:
+                    num = int(os.path.basename(p)[:-3])
+                    conditions_base.append(num)
+                except:
+                    pass
+            conditions_num = sorted(conditions_base)
+            conditions_folders_sorted = []
             
-            fls = []
-            for r in res:
-                suffix = r[-7:-4]
-                fls.append((r,suffix))
-            fls = Sort_Tuple(fls)
-            freqs_sorted = []
-            for fl in fls:
-                freqs_sorted.append(fl[0])
-            res = freqs_sorted
-            self.fps_cond[p] = res
-            first_num = res[0][-1*(len(file_type)+3):-1*len(file_type)]
-            for i, r in enumerate(res):
-                time_modified = os. path. getmtime(r)
-                f = int(r[-1*(len(file_type)+3):-1*len(file_type)]) - int(first_num)
-                f_num = f'{f:03d}' 
-                
-                
-                self.file_dict[r]=(p,f_num)
-                
-                if f_num in self.fps_Hz:
-                    p_list = self.fps_Hz[f_num]
-                else:
-                    p_list = []
-                
-                p_list.append(r)
-                self.fps_Hz[f_num] = p_list
-                
+            for p in conditions_num:
+                conditions_folders_sorted.append(str(p)+suffix)'''
 
-        #print("file_cond_dict : %s seconds." % (time.time() - start_time))
+            #print("conditions_num : %s seconds." % (time.time() - start_time))
+            start_time = time.time()
+
+            condition_0 = conditions_folders_sorted[0]
+            freq_search = os.path.join(folder,condition_0,'*'+file_type)
+            freqs = glob.glob(freq_search) 
+
+            freqs_base = []
+            
+            suffix_freq = freqs[0].split('_')[-1][-4:]
+            for p in freqs:
+                num = p[-1*(len(file_type)+3):-1*len(file_type)]
+                freqs_base.append(num)
+            freqs_sorted = sorted(freqs_base)
+            #print("freqs_sorted : %s seconds." % (time.time() - start_time))
+            start_time = time.time()
+            for p in conditions_folders_sorted:
+                conditions_search = os.path.join(folder,p,'*'+suffix_freq)
+                res = sorted(glob.glob(conditions_search))[:len(freqs_sorted)]
+                
+                '''fls = []
+                for r in res:
+                    suffix = r[-7:-4]
+                    fls.append((r,suffix))
+                fls = Sort_Tuple(fls)'''
+                '''freqs_sorted = []
+                for fl in fls:
+                    freqs_sorted.append(fl[0])
+                res = freqs_sorted'''
+                self.fps_cond[p] = res
+                first_num = res[0][-1*(len(file_type)+3):-1*len(file_type)]
+                for i, r in enumerate(res):
+                    time_modified = os. path. getmtime(r)
+                    f = int(r[-1*(len(file_type)+3):-1*len(file_type)]) - int(first_num)
+                    f_num = f'{f:03d}' 
+                    
+                    
+                    self.file_dict[r]=(p,f_num)
+                    
+                    if f_num in self.fps_Hz:
+                        p_list = self.fps_Hz[f_num]
+                    else:
+                        p_list = []
+                    
+                    p_list.append(r)
+                    self.fps_Hz[f_num] = p_list
+                    
+
+            #print("file_cond_dict : %s seconds." % (time.time() - start_time))
         
         '''start_time = time.time()
 

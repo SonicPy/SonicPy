@@ -75,7 +75,7 @@ class WaterfallModel( ):
 
             self.waveform_limits = {}
 
-            first_num = int(fnames[0][-1*(len('.csv')+3):-1*len('.csv')])
+            #first_num = int(fnames[0][-1*(len('.csv')+3):-1*len('.csv')])
             start_time = time.time()
             for i, f in enumerate(fnames):
                 

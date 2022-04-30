@@ -1,5 +1,5 @@
 
-__version__ = "0.5.1"
+__version__ = "0.5.5"
 
 import sys
 import os
@@ -62,7 +62,7 @@ def TOF():
     controller = TimeOfFlightController(app = app)
     controller.show_window()
     #controller.overview_controller.set_US_folder(folder='/Users/ross/Globus/s16bmb-20220414-e252780-LANL/HDPE-11/US')
-    controller.overview_controller.set_US_folder(folder='/Users/hrubiak/Desktop/Aihaiti-e244302/sam2/US')
+    #controller.overview_controller.set_US_folder(folder='/Users/hrubiak/Desktop/Aihaiti-e244302/sam2/US')
 
     if _platform == "Darwin":    #macOs has a 'special' way of handling preferences menu
         window = controller.widget

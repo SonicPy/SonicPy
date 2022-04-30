@@ -130,7 +130,7 @@ class UltrasoundAnalysisController(QObject):
 
                 self.model.cross_correlate()
                 self.model.exract_optima()
-                print("cross correlated in %s seconds." % (time.time() - start_time))
+                #print("cross correlated in %s seconds." % (time.time() - start_time))
 
                 self.display_window.detail_plot1.setData(*self.model.filtered1)
                 self.display_window.detail_plot1_bg.setData(*self.model.filtered2)

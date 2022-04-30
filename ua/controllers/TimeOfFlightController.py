@@ -28,7 +28,7 @@ from utilities.HelperModule import increment_filename, increment_filename_extra
 from um.widgets.UtilityWidgets import open_file_dialog, open_files_dialog 
 import glob 
 
-from .. import resources_path
+from .. import resources_path, __version__
 
 
 ############################################################
@@ -44,6 +44,7 @@ class TimeOfFlightController(QObject):
 
         self.model = OverViewModel()
         self.widget = TimeOfFlightWidget(overview_widget, analysis_widget)
+        self.widget.setWindowTitle("Time-of-flight analysis. ver." + __version__ + "  © R. Hrubiak, 2022.")
         
 
         if app is not None:
@@ -69,7 +70,7 @@ class TimeOfFlightController(QObject):
         self.overview_controller.correlation_echoes_added(correlation)
     
     def folder_selected_signal_callback(self, folder):
-        self.widget.setWindowTitle("Time-of-flight analysis. © R. Hrubiak, 2021. Folder: "+ os.path.abspath( folder))
+        self.widget.setWindowTitle("Time-of-flight analysis. V." + __version__ + "  © R. Hrubiak, 2022. Folder: "+ os.path.abspath( folder))
 
     def freq_settings_changed_signal_callback(self, freq):
         

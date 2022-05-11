@@ -15,6 +15,14 @@ The Time-of-Flight program is used to determine the time shift between a series 
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Ultrasound measurement:
+   
+   beamline
+
+.. toctree::
+   :maxdepth: 2
+   :caption: User guide:
    
    beforeyoubegin
+   imageanalysis
+   tof_analysis

@@ -15,7 +15,7 @@ Shortcuts are the two icons at the upper left of the desktop separate from every
 1.
 Click "Open" button upper left
 Navigate to location of image files
-- PEC drive -> data -> 2021-2 -> CDAC -> Aihaiti
+
 
 Open respective images
 Workings:

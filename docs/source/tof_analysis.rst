@@ -84,12 +84,12 @@ First, calculate with the "plus" setting, then calculate with the "minus" settin
 The result you should use for calculations is the one where the blue set has the flattest slope
 - This is because, for example, "plus" might not be as flat as "minus"
 - The choice actually depends on the material and the impedances between it and the buffer rod
-  - If buffer rod impedance lower or higher then sample impedence) then it will get reflected with a phase shift (either inverts ot doesn't invert)
+- If buffer rod impedance lower or higher then sample impedence) then it will get reflected with a phase shift (either inverts ot doesn't invert)
 The time delay is listed at the bottom of the window, with standard deviation next to it
 Now copy these values to the spreadsheet to keep track of them
 
 Extra Tip(s): 
 - The data contained in the spreadsheet is for analysis
 - It is your choice to keep data on ANL computer or personal computer
-  - It is reccomended to keep a copy at Argonne in case your personal data is lost
-  - Our specific experiment folder can be resynced for Globus if original data is needed
+- It is reccomended to keep a copy at Argonne in case your personal data is lost
+- Our specific experiment folder can be resynced for Globus if original data is needed

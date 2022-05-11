@@ -13,8 +13,8 @@ Workflow
 First, enter information about Ultrasonic measurements so the program knows which frequency you started and ended at (enter in upper top middle left boxes)
 2.
 Then click "open folder" in the upper left
-Find folder with ultrasound data
-- PEC -> Data -> 2021-2 -> CDAC -> Aihiati-e244302 -> sam2 -> US then click "select folder"
+Find and select folder with ultrasound data
+
 3.
 Two tabs = frequency and P-T condition
 Science: in frequency tab, looking at spectra with same frequency, but different pressures (0-8100psi)

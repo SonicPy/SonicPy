@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'sonicPy'
-copyright = '2022, R. Hrubiak'
+copyright = 'Argonne National Laboratory'
 author = 'R. Hrubiak'
 
 # The full version, including alpha/beta/rc tags

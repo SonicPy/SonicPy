@@ -7,7 +7,7 @@ This section describes Time of flight analysis
 
 
 Workflow
-------------
+---------
 
 1.
 First, enter information about Ultrasonic measurements so the program knows which frequency you started and ended at (enter in upper top middle left boxes)

@@ -70,7 +70,7 @@ Source image
 Absorbance
 **********
 
-   This panel displays the computed anborbance, (A) = -log\ :sub:`10` (I/I\ :sub:`0`), taken 
+   This panel displays the computed absorbance, (A) = -log\ :sub:`10` (I/I\ :sub:`0`), taken 
    from the region of interest selected in the Source image.
 
    .. figure:: /images/edge_selection.png

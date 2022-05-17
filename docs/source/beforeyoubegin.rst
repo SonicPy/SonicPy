@@ -11,7 +11,9 @@ wave travel distance (\ :math:`d`) and the wave travel time (\ :math:`{\tau}`)
 
 \ :math:`v = d/{\tau}`	 
 
-The data analysis package sonicPy consists of two GUI programs, :ref:`Image-Analysis <imageanalysis>` and :ref:`Time-of-Flight <tof_analysis>` that allow to estimate the values of d and t, respectively.  
+The data analysis package sonicPy consists of two GUI programs, :ref:`Image-Analysis <imageanalysis>` 
+and :ref:`Time-of-Flight <tof_analysis>` that allow to estimate the values of (\ :math:`d`) 
+and (\ :math:`{\tau}`), respectively.  
 
 The goal of the Image-Analysis program is to perform measurements of the sample-thickness 
 in the experimentally recorded radiography images. The sample-thickness corresponds to 

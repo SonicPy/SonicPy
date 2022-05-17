@@ -24,7 +24,7 @@ The latest release of the executable version of **sonicPy** can be downloaded fr
 GUI basics
 ----------
 
-This section describes the basics for data plots exploration in the image and waveform widgets available in :ref:`Image-Analysis <imageanalysis>` and :ref:`Time-of-Flight <tof_analysis>` 
+This section describes the mouse interaction basics for the image and waveform plots in :ref:`Image-Analysis <imageanalysis>` and :ref:`Time-of-Flight <tof_analysis>` 
  
 All of the data plot panels support the following mouse commands:
 

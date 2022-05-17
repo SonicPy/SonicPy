@@ -10,11 +10,11 @@ GUI basics
 ----------
 
 .. figure:: /images/ia_start.png
-   :alt: image_analysis_start_screen
+   :alt: image_analysis_start_screen 
    :width: 720px
    :align: center
    
-   Image analysis window after start-up.
+   Image analysis window
 
 Control panel
 ^^^^^^^^^^^^^

@@ -63,9 +63,13 @@ class OverViewModel():
         bounds = correlation['echo_bounds']
         wave_type = correlation['wave_type']
 
-        freq = self.file_freq_dict[filename_waweform]
+        freq_cond = self.file_dict[filename_waweform]
+
+
+
+        freq = freq_cond[1]
         freq_waterfall = self.waterfalls[freq]
-        cond = self.file_cond_dict[filename_waweform]
+        cond = freq_cond[0]
         cond_waterfall = self.waterfalls[cond]
 
         freq_waterfall.echoes[wave_type][filename_waweform]=bounds

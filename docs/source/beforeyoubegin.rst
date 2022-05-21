@@ -12,7 +12,7 @@ wave travel distance (\ :math:`d`) and the wave travel time (\ :math:`{\tau}`)
 \ :math:`v = d/{\tau}`	 
 
 .. figure:: /images/cell_schematic.png
-   :alt: cell_schematic 
+   :alt: cell_schematic  
    :width: 450px
    :align: center
 

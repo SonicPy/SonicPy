@@ -10,3 +10,4 @@ Welcome to sonicPy's user guide!
    beforeyoubegin
    imageanalysis
    tof_analysis
+   references

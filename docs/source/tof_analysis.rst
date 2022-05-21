@@ -6,13 +6,13 @@ Time of flight analysis
 This section describes Time of flight analysis
 
 
-Workflow
----------
+Workflow Jonathan
+-----------------
 
 1.
 First, enter information about Ultrasonic measurements so the program knows which frequency you started and ended at (enter in upper top middle left boxes)
 2.
-Then click "open folder" in the upper left
+Then click "open folder" in the upper left 
 Find and select folder with ultrasound data
 
 3.
@@ -41,7 +41,7 @@ Select second echo with ROI and click "echo two" (still p-wave)
 Science: cyan and magenta waves are filtered to get just frequency
 Science: based on fourier transform - the signal is a combo of many frequencies - we are singling out the frequency of interest
 Science: So we are shift the signals in time and see when they produce the most constructive interference (or when they overlap the most)
-Science: The phase shift that produces the largest constructive interference is the value that contains our travel time (check with Ross/Muhetaer on this)
+Science: The phase shift that produces the largest constructive interference is the value that contains our travel time (check on this)
 The green plot is a plot of the phase shift between the cyan & magenta signals and the interference it produces at each phase shift
 - We will get a plot of maxima and minima as the signals go in and out of phase where the x-axis lists the current phase shift and the y-axis is the amplitude of interference
 - This data is exported to create an inverse frequency graph which is the last step before we determine the travel time
@@ -93,3 +93,65 @@ Extra Tip(s):
 - It is your choice to keep data on ANL computer or personal computer
 - It is reccomended to keep a copy at Argonne in case your personal data is lost
 - Our specific experiment folder can be resynced for Globus if original data is needed
+
+Workflow Anne
+-------------
+
+* Time – of – flight analysis software:
+
+difference between R1 reflection & R2 reflection = double travel time
+	
+    * R2-R1 = 2 τ
+
+Multiple freq method
+->	Pantea et al. Rev. Sci. Instr. 2005
+Cross- correlation : measures the interference between 2 wave-forms.
+->	calculate the time delay between 2 pulses.
+In software:
+Open folder
+Left plot: data @ fixed frequency
+	
+    * stacked @ # Pressures.
+
+Scale bar @ bottom: to change frequency.
+R0 : reflection @ ~ 4 µsec
+Distance shifts as P↑ cos sample gets thinner
+Clip or not clip (box @ top): might help w/visualization (or not).
+Select 1 waveform -> sown on top right plot.
+Start freq & freq step : enter it from our notebook.
+(P-T stop tab – data stacked as function of freq for fixed P-T.)
+Vp	Select a peak, place vertical line at center
+Click Echo 1 -> define region
+Select second peak
+Click Echo 2
+->	does the cross correlation (bottom right plots).
+There’s some flexibility on peak selection.
+Vs	Click on S-wave (top right)
+Make sure to click on “save correlation” each time*
+Back to P-wave & P-T step -> save correlation individually
+* = for each T & each frequency.
+
+Compressional signal : maximized @ high freq
+Shear signal: visible @ low freq
+
+* Create inverse freq. plot: using the files collected above. Done in the same software.
+
+Top right: “inverse f” button -> click on it
+->	window appears -> open 
+
+*	select file
+
+Plot is time delay as a function of frequency.
+Click Auto -> fits the lines
+Calculates the delay @ ∞ freq
+(@ the bottom of plot).
+Typo = time delay axis -> unit is not sec.
+The calculated time delay is the double travel time -> ÷2.
+
+->	We now have sample thickness & travel time
+-->Vp & Vs can be calculated
+
+Sample 3: R1 starts @4.6 µs.
+At lower time: R0 & electrical noise
+R2: likely @ 4.8 µs (not 4.9)->R3
+Inverse freq. plot: to remove data @ specific freq: either do not select the files or select these data + calculate again.

@@ -3,8 +3,12 @@
 Image analysis
 ==================
 
-Image analysis software is used to determine the sample thickness.
-This section describes the Image analysis software and provides an example Workflow for determining the sample thickness.
+Image analysis software is used to determine the sample thickness which corresponds to the ulstrasound 
+wave travel distance (\ :math:`d`).
+This chapter describes the :ref:`GUI basics <gui>` of the Image analysis software and provides an :ref:`example Workflow <workflow>` for determining the sample thickness.
+
+
+.. _gui:
 
 GUI basics
 ----------
@@ -181,6 +185,8 @@ If the fit is not good, it may help to adjust the following:
       :alt: edges_fitted
       :width: 600px
       :align: center
+
+.. _workflow:
 
 Workflow
 --------

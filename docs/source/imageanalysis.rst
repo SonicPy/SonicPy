@@ -34,11 +34,18 @@ Control panel
 Open
 ****
 
+Click :guilabel:`Open` button to navigate to and select an radiography image file. Typically the 
+radiography files are saved in the ``Images`` folder
+and have an extension ``*.tif``.
 
 .. _opened_file:
 
 Opened file
 ***********
+
+Displays the file name of the opened image.
+
+.. hint:: The file name can be copied by ``ctrl+C`` and pasted into a spreadsheet program, e.g. Excel.
 
 .. _compute:
 
@@ -52,27 +59,50 @@ The program extracts positions of the lower (Edge 1) and upper (Edge 2) edges by
 Thickness
 *********
 
+The thickness of the sample and standard deviation are displayed in units of nubmer of pixels. 
+   
+   .. note:: Use an appropriate 
+      \ :math:`{\mu}m / pixel` resolution for your camera to calculate the thickness 
+      The relolution can be found in your calibration folder, typically in a file :file:`manta_resolution.docx`.
+
 .. _autocrop:
 
 Auto crop
 *********
+
+The relevant part of the image is automatically selected by a red box each time when a new image is opened. 
+
+For cases where a manual selection is needed or if you want to keep the same red box position when opening new images, 
+you can disable the autotomatic selection by un-selecting the :guilabel:`Auto crop` button. 
+
+If you have manually adjusted the red box position and would like to go back to the automatic selection, 
+select the :guilabel:`Auto crop` button. 
+   
 
 .. _sample_type:
 
 Sample type
 ***********
 
-.. figure:: /images/edge_types.png
-   :alt: edge_types
-   :width: 250px
-   :align: center
+Click the appropriate icon that looks closest to your sample edge configuration. 
+For exaple, the image below has two thin gold foils as edges, in this case we select the first choice from the left:
+
+   .. figure:: /images/i_0.png
+      :alt: i/i_0
+      :width: 500px
+      :align: center
+
+   .. figure:: /images/edge_types.png
+      :alt: edge_types
+      :width: 250px
+      :align: center
 
 .. _poly_order:
 
 Polynomial order
 ****************
 
-If an edge is very deformed try to use the polynomial of order 3.
+If an edge is very deformed try to use the option of polynomial order 3.
 
 .. note:: 
    The average sample thickness obtained from tilted or deformed edges 
@@ -96,12 +126,14 @@ Plot panels
 Source image 
 ************
 
-   This panel displays the normalized image counts from the image, (I/I\ :sub:`0`).
+   The top left panel displays the normalized image counts from the image, (I/I\ :sub:`0`).
+
+   The red box delimits the relevant part of the image that will be used for finding the edges.
 
 .. _crop:   
 
-   .. note:: The cropping-rechangle (red) can be adjusted by dragging the 
-             diamond handles using a mouse. The region-of-interest selected by the cropping-rengangle 
+   .. note:: The red box can be adjusted by dragging the 
+             diamond handles using a mouse. The region-of-interest selected by the red box
              will be used for subsequent computations and edge finding.
 
    .. figure:: /images/i_0.png
@@ -114,15 +146,17 @@ Source image
 Absorbance
 **********
 
-   This panel displays the computed absorbance, (A) = -log\ :sub:`10` (I/I\ :sub:`0`), taken 
-   from the region of interest selected in the Source image.
+   The bottom left panel displays the computed absorbance, (A) = -log\ :sub:`10` (I/I\ :sub:`0`), taken 
+   from the part of the image selected by the red box in the :ref:`Source image <source_image>`. 
+
+   The program will try to automatically find the edges after opening the image 
+   file and select each edge with a region-of-interest box (green).
 
 .. _edge_selection:  
 
-   .. note:: The program will try to automatically find the edges after opening the image 
-      file and select each edge with a region-of-interest box (green).
-      If the automatic edge finding fails, please select the edges manually 
-      using the green rengangles. The boxes can be adjusted by dragging the diamond handles using a mouse.
+   .. note:: 
+      If the automatic edge finding fails, please select the edges manually. 
+      The boxes can be adjusted by dragging the diamond handles using a mouse.
       In the case below the edges are the gold (Au) foils. 
 
    .. figure:: /images/edge_selection.png
@@ -130,10 +164,23 @@ Absorbance
       :width: 500px
       :align: center
 
+.. _edge_result:
+
 Edge 1 (bottom edge) and Edge 2 (top edge)
 ******************************************
 
-   
+The top right and the bottom right panels will display the edge fit results (red dashed lines), overlaid over
+the observed edges. Check that the fit is good by checking that the red dashed lines match well the positions of the edges. 
+If the fit is not good, it may help to adjust the following:
+
+   *  :ref:`Edge selection <edge_selection>`
+   *  :ref:`Fit threshold <fit_theshold>`
+   *  :ref:`Polynomial order <poly_order>`
+
+   .. figure:: /images/edges_fitted.png
+      :alt: edges_fitted
+      :width: 600px
+      :align: center
 
 Workflow
 --------
@@ -142,14 +189,13 @@ Workflow
 
 1. Click :guilabel:`Open` button in the upper left corner. 
    Navigate to location of image file and open the file. The :ref:`source image <source_image>` will be displayed
-   in the top left image panel. The red box delimits the 
-   relevant part of the image that will be used for finding the edges (top left panel).
+   in the top left image panel. 
 
    .. note:: 
       The relevant part of the image is automatically selected, but manual :ref:`selection adjustment <crop>` may be needed.
              
    .. hint::
-      Use the mouse scroll-wheel to zoom in and out of any of the images; the little "a" button in the lower left resets the zoom.
+      Use the mouse scroll-wheel to zoom in and out of any of the images; the little :guilabel:`A` button in the lower left resets the zoom.
 
    .. figure:: /images/i_0.png
       :alt: i/i_0
@@ -168,16 +214,10 @@ Workflow
       :width: 500px
       :align: center
 
-3. Select the sample edge type based on your particular sample configuration. Click the appropriate
-   icon that looks closest to your sample edge configuration. For exaple, the image in :ref:`step 1 <step1>` above 
-   has two thin gold foils as edges, in this case we select the first choice from the left:
+3. Select the :ref:`sample edge type <sample_type>` based on your particular sample configuration. 
 
-   .. figure:: /images/edge_types.png
-      :alt: edge_types
-      :width: 250px
-      :align: center
-
-4. Once image cropped properly, click :guilabel:`Compute` in upper left corner.
+4. Once image cropped properly, click :guilabel:`Compute` in upper left corner. The fitted edge polynomials
+   will be displayed in the :ref:`Edge panels <edge_result>`. 
 
    .. note:: 
       You may need to adjust the :ref:`fit threshold <fit_theshold>` for edges with non-uniform contrast. 
@@ -190,18 +230,17 @@ Workflow
       :width: 600px
       :align: center
 
-5. The thickness of the sample and standard deviation, in pixels, are displayed at the top of the window. 
-   
-   .. note:: Use an appropriate 
-      \ :math:`{\mu}m / pixel` resolution for your camera to calculate the thickness 
-      The relolution can be found in your calibration folder, typically in a file :file:`manta_resolution.docx`.
+5. The thickness of the sample and standard deviation are displayed at the top of the 
+   window in the units of number of pixels.  
+
+   .. hint:: The file name and thickness output can be copied by ``ctrl+C`` and pasted into a 
+      spreadsheet program, e.g. Excel.
 
 6. Repeat steps 1-5 for each image that you recorded and record the 
    fitted distances and standard deviations 
    in a spreadsheet
    
-   .. hint:: The file name and thickness output can be copied ``ctrl+C`` and pasted into a 
-      spreadsheet program, e.g. Excel.
+
 
    .. note:: If you recorded multiple images per data-point (e.g. left + center + right), 
       use may need to compute the average thickness for the sound velocity estimation.

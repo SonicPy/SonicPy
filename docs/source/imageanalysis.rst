@@ -147,14 +147,13 @@ Source image
       
 .. _absorbance:
 
-Absorbance
-**********
+Edge selection
+**************
 
    The bottom left panel displays the computed absorbance, (A) = -log\ :sub:`10` (I/I\ :sub:`0`), taken 
    from the part of the image selected by the red box in the :ref:`Source image <source_image>`. 
 
-   The program will try to automatically find the edges after opening the image 
-   file and select each edge with a region-of-interest box (green).
+   The program will automatically locate the top and the bottom edges and overlay each edge with a green box.
 
 .. _edge_selection:  
 
@@ -208,8 +207,8 @@ Workflow
       :width: 500px
       :align: center
 
-2. The program displays the computed :ref:`absorbance image <absorbance>` in the bottom left panel and tries to find 
-   the edges automatically. Green boxes are overlaid over the found edges.
+2. The program displays the :ref:`selected edges <absorbance>`
+   automatically. Adjustable green boxes are overlaid over the selected edges.
 
    .. note:: 
       Make  sure make sure the edges are selected correctly by the green boxes.

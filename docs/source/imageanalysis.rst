@@ -45,7 +45,7 @@ Opened file
 Compute
 *******
 
-.. note:: Science: We want to fit the absorbance instead of the raw image
+The program extracts positions of the lower (Edge 1) and upper (Edge 2) edges by fitting a polynomial to edge pixel positions weighted by the the pixel intensities. 
 
 .. _thickness:
 
@@ -177,9 +177,7 @@ Workflow
       :width: 250px
       :align: center
 
-4. Once image cropped properly, click :guilabel:`Compute` in upper left corner. The program 
-   extracts positions of the lower (Edge 1) and upper (Edge 2) edges by fitting a polynomial 
-   to edge pixel positions weighted by the the pixel intensities. 
+4. Once image cropped properly, click :guilabel:`Compute` in upper left corner.
 
    .. note:: 
       You may need to adjust the :ref:`fit threshold <fit_theshold>` for edges with non-uniform contrast. 

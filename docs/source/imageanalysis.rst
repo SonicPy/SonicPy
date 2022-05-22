@@ -187,8 +187,8 @@ If the fit is not good, it may help to adjust the following:
 
 .. _workflow:
 
-Workflow
---------
+Example workflow
+----------------
 
 .. _step1:
 
@@ -196,16 +196,18 @@ Workflow
    Navigate to location of image file and open the file. The :ref:`source image <source_image>` will be displayed
    in the top left image panel. 
 
+   .. figure:: /images/i_0.png
+      :alt: i/i_0
+      :width: 500px
+      :align: center
+
    .. note:: 
       The relevant part of the image is automatically selected, but manual :ref:`selection adjustment <crop>` may be needed.
              
    .. hint::
       Use the mouse scroll-wheel to zoom in and out of any of the images; the little :guilabel:`A` button in the lower left resets the zoom.
 
-   .. figure:: /images/i_0.png
-      :alt: i/i_0
-      :width: 500px
-      :align: center
+   
 
 2. The program displays the :ref:`selected edges <absorbance>`
    automatically. Adjustable green boxes are overlaid over the selected edges.

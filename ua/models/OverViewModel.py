@@ -198,7 +198,7 @@ class OverViewModel():
             if time_m < time_c:
                 time_func = os. path. getmtime
             else:
-                fime_func = os. path. getctime
+                time_func = os. path. getctime
 
 
 

@@ -181,9 +181,27 @@ class OverViewModel():
         folder = self.fp
         file_type = self.file_type
         subfolders = glob.glob(os.path.join(folder,'*/'), recursive = False)
+
+        
+
         if len(subfolders):
             sf = {} # dict {folder:[files]}
             tm = [] # list [(folder,timestamp)]
+
+            # determine whether to use getmtime or getctime (some Windows file systems will switch modified time and the created time for a file)
+            subfolder = subfolders[0]
+            file_search_str = os.path.join(subfolder,'*' + file_type)
+            files_in_subfolder = glob.glob(file_search_str, recursive = False)
+            time_m = os. path. getmtime(files_in_subfolder[0])
+            time_c = os. path. getctime(files_in_subfolder[0])
+
+            if time_m < time_c:
+                time_func = os. path. getmtime
+            else:
+                fime_func = os. path. getctime
+
+
+
             for subfolder in subfolders:
                 path = os.path.normpath(subfolder)
                 fldr = path.split(os.sep)[-1]
@@ -192,7 +210,7 @@ class OverViewModel():
                 
 
                 sf[fldr] = files_in_subfolder
-                time_modified = os. path. getmtime(files_in_subfolder[0])
+                time_modified = time_func(files_in_subfolder[0])
                 tm.append ((fldr, time_modified))
             tm = Sort_Tuple(tm)
             conditions_folders_sorted = []
@@ -248,7 +266,7 @@ class OverViewModel():
                 self.fps_cond[p] = res
                 first_num = res[0][-1*(len(file_type)+3):-1*len(file_type)]
                 for i, r in enumerate(res):
-                    time_modified = os. path. getmtime(r)
+                    time_modified = time_func(r)
                     f = int(r[-1*(len(file_type)+3):-1*len(file_type)]) - int(first_num)
                     f_num = f'{f:03d}' 
                     

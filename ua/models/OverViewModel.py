@@ -192,7 +192,7 @@ class OverViewModel():
                 
 
                 sf[fldr] = files_in_subfolder
-                time_modified = os. path. getmtime(files_in_subfolder[0])
+                time_modified = os. path. getctime(files_in_subfolder[0])
                 tm.append ((fldr, time_modified))
             tm = Sort_Tuple(tm)
             conditions_folders_sorted = []
@@ -248,7 +248,7 @@ class OverViewModel():
                 self.fps_cond[p] = res
                 first_num = res[0][-1*(len(file_type)+3):-1*len(file_type)]
                 for i, r in enumerate(res):
-                    time_modified = os. path. getmtime(r)
+                    time_modified = os. path. getctime(r)
                     f = int(r[-1*(len(file_type)+3):-1*len(file_type)]) - int(first_num)
                     f_num = f'{f:03d}' 
                     

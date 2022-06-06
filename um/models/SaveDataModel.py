@@ -165,8 +165,8 @@ class SaveDataModel(pvModel):
             x = nanmean(x.reshape(-1,R), axis=1)
             y = y.reshape(-1, R)
             y = nanmean(y.reshape(-1,R), axis=1)
-
-            path, fname = os.path.split(filename)'''
+            '''
+            path, fname = os.path.split(filename)
 
             '''subsample = np.arange(0,len(x),10)
             x = np.take(x, subsample)

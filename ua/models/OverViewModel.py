@@ -56,7 +56,7 @@ class OverViewModel():
         self.settings = {'scale':10,
                          'clip':True}
 
-        
+        self.conditions_folders_sorted = []
 
     def add_echoes(self, correlation):
         filename_waweform = correlation['filename_waweform']
@@ -154,7 +154,7 @@ class OverViewModel():
                 self.waterfalls[cond] = WaterfallModel(cond)
                 self.waterfalls[cond].settings =  self.settings
                 self.waterfalls[cond].add_multiple_waveforms(self.spectra[cond])
-                #self.waterfalls[cond].get_rescaled_waveforms()
+                
 
                 
 
@@ -163,32 +163,28 @@ class OverViewModel():
 
     def set_folder_path(self, folder):
         # All files ending with .txt
+        
         self.fp = folder
         self.understand_folder_structure()
         
 
     
+    def get_conditions_folders(self):
 
-
-
-    def understand_folder_structure(self):
-        
-
-        start_time = time.time()
-     
-
-        folder_suffix = self.folder_suffix
+      
         folder = self.fp
         file_type = self.file_type
         subfolders = glob.glob(os.path.join(folder,'*/'), recursive = False)
 
-        
+        conditions_folders_sorted = []
 
         if len(subfolders):
             sf = {} # dict {folder:[files]}
             tm = [] # list [(folder,timestamp)]
 
             # determine whether to use getmtime or getctime (some Windows file systems will switch modified time and the created time for a file)
+            # sometimes all time stamps get screwed up and files have to be sorted anothe way or manually
+
             subfolder = subfolders[0]
             file_search_str = os.path.join(subfolder,'*' + file_type)
             files_in_subfolder = glob.glob(file_search_str, recursive = False)
@@ -213,116 +209,77 @@ class OverViewModel():
                 time_modified = time_func(files_in_subfolder[0])
                 tm.append ((fldr, time_modified))
             tm = Sort_Tuple(tm)
-            conditions_folders_sorted = []
+            
             for t in tm:
                 conditions_folders_sorted.append(t[0])
 
-            '''conditions_search = os.path.join(folder,'*'+folder_suffix)
-            conditions = glob.glob(conditions_search)
-            
-            conditions_base = []
-            suffix = os.path.basename(conditions[0])[-3:]
-            for p in conditions:
-                try:
-                    num = int(os.path.basename(p)[:-3])
-                    conditions_base.append(num)
-                except:
-                    pass
-            conditions_num = sorted(conditions_base)
-            conditions_folders_sorted = []
-            
-            for p in conditions_num:
-                conditions_folders_sorted.append(str(p)+suffix)'''
+        #print(conditions_folders_sorted)
 
+        return conditions_folders_sorted
             #print("conditions_num : %s seconds." % (time.time() - start_time))
-            start_time = time.time()
 
-            condition_0 = conditions_folders_sorted[0]
-            freq_search = os.path.join(folder,condition_0,'*'+file_type)
-            freqs = glob.glob(freq_search) 
+    def create_file_dicts(self):
 
-            freqs_base = []
-            
-            suffix_freq = freqs[0].split('_')[-1][-4:]
-            for p in freqs:
-                num = p[-1*(len(file_type)+3):-1*len(file_type)]
-                freqs_base.append(num)
-            freqs_sorted = sorted(freqs_base)
-            #print("freqs_sorted : %s seconds." % (time.time() - start_time))
-            start_time = time.time()
-            for p in conditions_folders_sorted:
-                conditions_search = os.path.join(folder,p,'*'+suffix_freq)
-                res = sorted(glob.glob(conditions_search))[:len(freqs_sorted)]
+        conditions_folders_sorted = self.conditions_folders_sorted
+        self.fps_cond = {}
+        self.file_dict = {}
+        self.fps_Hz = {}
+
+        start_time = time.time()
+     
+        folder = self.fp
+        file_type = self.file_type
+
+        condition_0 = conditions_folders_sorted[0]
+        freq_search = os.path.join(folder,condition_0,'*'+file_type)
+        freqs = glob.glob(freq_search) 
+
+        freqs_base = []
+        
+        suffix_freq = freqs[0].split('_')[-1][-4:]
+        for p in freqs:
+            num = p[-1*(len(file_type)+3):-1*len(file_type)]
+            freqs_base.append(num)
+        freqs_sorted = sorted(freqs_base)
+        #print("freqs_sorted : %s seconds." % (time.time() - start_time))
+        start_time = time.time()
+        for p in conditions_folders_sorted:
+            conditions_search = os.path.join(folder,p,'*'+suffix_freq)
+            res = sorted(glob.glob(conditions_search))[:len(freqs_sorted)]
+        
+            self.fps_cond[p] = res
+            first_num = res[0][-1*(len(file_type)+3):-1*len(file_type)]
+            for i, r in enumerate(res):
                 
-                '''fls = []
-                for r in res:
-                    suffix = r[-7:-4]
-                    fls.append((r,suffix))
-                fls = Sort_Tuple(fls)'''
-                '''freqs_sorted = []
-                for fl in fls:
-                    freqs_sorted.append(fl[0])
-                res = freqs_sorted'''
-                self.fps_cond[p] = res
-                first_num = res[0][-1*(len(file_type)+3):-1*len(file_type)]
-                for i, r in enumerate(res):
-                    time_modified = time_func(r)
-                    f = int(r[-1*(len(file_type)+3):-1*len(file_type)]) - int(first_num)
-                    f_num = f'{f:03d}' 
-                    
-                    
-                    self.file_dict[r]=(p,f_num)
-                    
-                    if f_num in self.fps_Hz:
-                        p_list = self.fps_Hz[f_num]
-                    else:
-                        p_list = []
-                    
-                    p_list.append(r)
-                    self.fps_Hz[f_num] = p_list
-                    
-
-            #print("file_cond_dict : %s seconds." % (time.time() - start_time))
-        
-        '''start_time = time.time()
-
-        nfiles = len(freqs_sorted)*len(conditions_folders_sorted)
-        progress_dialog = QtWidgets.QProgressDialog("Loading multiple waveforms.", "Abort Loading", 0, nfiles, None)
-        progress_dialog.setMinimumWidth(300)
-        progress_dialog.setWindowModality(QtCore.Qt.WindowModal)
-        progress_dialog.setWindowFlags(QtCore.Qt.FramelessWindowHint)
-        progress_dialog.show()
-        QtWidgets.QApplication.processEvents()
-
-        for m, f in enumerate(freqs_sorted):
-            p_list = []
-            for n, p in enumerate(conditions_folders_sorted):
-                d = n + m * len (conditions_folders_sorted)
-                if d % 2 == 0:
-                    #update progress bar only every 2 files to save time
-                    progress_dialog.setValue(d)
-                    QtWidgets.QApplication.processEvents()
-                freq_search = os.path.join(folder,p,'*'+f+suffix_freq)
-                res = glob.glob(freq_search)
-                if len(res):
-                    p_list.append(res[0])
+                f = int(r[-1*(len(file_type)+3):-1*len(file_type)]) - int(first_num)
+                f_num = f'{f:03d}' 
+                
+                
+                self.file_dict[r]=(p,f_num)
+                
+                if f_num in self.fps_Hz:
+                    p_list = self.fps_Hz[f_num]
                 else:
-                    p_list.append(None)
-                if progress_dialog.wasCanceled():
-                    break
-            self.fps_Hz[f] = p_list
-            
-            for p in p_list:
-                self.file_freq_dict[p]=f
-            if progress_dialog.wasCanceled():
-                    break
-        #print("file_freq_dict : %s seconds." % (time.time() - start_time))
-        
-        #print('found conditions: '+str(conditions_folders_sorted))
-        #print('found frequencies: '+str(freqs_sorted))
+                    p_list = []
+                
+                p_list.append(r)
+                self.fps_Hz[f_num] = p_list
+                
+        print('')
+        #print("file_cond_dict : %s seconds." % (time.time() - start_time))
 
-        progress_dialog.close()
-        QtWidgets.QApplication.processEvents()'''
+    def understand_folder_structure(self):
+        
+
+        self.conditions_folders_sorted = self.get_conditions_folders()
+
+
+    
+        if len(self.conditions_folders_sorted):
+            self.create_file_dicts()
+    
+
+   
 
     def add_result_from_file(self, filename):
         data = self.read_result_file(filename)

@@ -248,7 +248,7 @@ class OverViewController(QObject):
 
     def set_frequency(self, index):
         freqs = list(self.model.fps_Hz.keys())
-        if len(freqs) >index:
+        if len(freqs) >index and len(freqs):
             self.freq = freqs[index]
             self.model.load_multiple_files_by_frequency(self.freq)
             
@@ -262,7 +262,7 @@ class OverViewController(QObject):
     def set_condition(self, index):
         
         conds = list(self.model.fps_cond.keys())
-        if len(conds) >index:
+        if len(conds) >index and len(conds):
             self.cond = conds[index]
             self.model.load_multiple_files_by_condition(self.cond)
 

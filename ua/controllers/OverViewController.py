@@ -15,7 +15,7 @@ from numpy.core.einsumfunc import _parse_possible_contraction
 #from pyrsistent import T
 from utilities.utilities import *
 from ua.widgets.UltrasoundAnalysisWidget import UltrasoundAnalysisWidget
-from ua.widgets.OverviewWidget import OverViewWidget
+from ua.widgets.OverviewWidget import OverViewWidget, FolderListWidget
 from ua.models.UltrasoundAnalysisModel import  UltrasoundAnalysisModel
 from utilities.HelperModule import move_window_relative_to_screen_center, get_partial_index, get_partial_value
 import math
@@ -44,6 +44,7 @@ class OverViewController(QObject):
         if app is not None:
             self.setStyle(app)
         self.widget = OverViewWidget()
+        self.folder_widget = FolderListWidget()
 
         self.widget.clip_cbx.setChecked(self.model.settings['clip'])
         self.widget.scale_ebx.setValue(self.model.settings['scale'])
@@ -78,7 +79,11 @@ class OverViewController(QObject):
 
         self.widget.freq_start.valueChanged.connect(self.freq_start_step_callback)
         self.widget.freq_step.valueChanged.connect(self.freq_start_step_callback)
-        
+
+        self.folder_widget.list_changed_signal.connect(self.list_changed_signal_callback)
+
+    def list_changed_signal_callback(self, folders):
+        print (folders)
 
     def freq_start_step_callback(self, *args, **kwargs):
         f_start = self.widget.freq_start.value()
@@ -104,7 +109,7 @@ class OverViewController(QObject):
 
         index = round(y_pos)
         
-        fnames = list(self.model.waterfalls[self.freq].scans[0].keys())
+        fnames = list(self.model.waterfalls[self.freq].waveforms[0].keys())
         if index >=0 and index < len(fnames):
             
             if fnames[index] in self.model.file_dict:
@@ -133,7 +138,7 @@ class OverViewController(QObject):
 
         index = round(y_pos)
         
-        fnames = list(self.model.waterfalls[self.cond].scans[0].keys())
+        fnames = list(self.model.waterfalls[self.cond].waveforms[0].keys())
         if index >=0 and index < len(fnames):
             if fnames[index] in self.model.file_dict:
                 self.selected_fname = fnames[index]
@@ -214,7 +219,7 @@ class OverViewController(QObject):
 
     def set_US_folder(self, *args, **kwargs):
         self.model.clear()
-        default_frequency_index = 3
+        default_frequency_index = 0
         default_condition_index = 0
         if 'folder' in kwargs:
             folder = kwargs['folder']
@@ -222,28 +227,25 @@ class OverViewController(QObject):
             folder = QtWidgets.QFileDialog.getExistingDirectory(self.widget, caption='Select US folder',
                                                      directory='')
 
-        self.folder_selected_signal.emit(folder)
-       
-        # All files ending with .txt
-        self.model.set_folder_path(folder)
-        freqs = list(self.model.fps_Hz.keys())
-        #self.widget.set_freq_buttons(len(freqs))
+        if os.path.isdir(folder):
+            
+            self.model.set_folder_path(folder)
+            folders = self.model.conditions_folders_sorted
+            self.folder_widget.set_folders(folders)
+            self.folder_widget.raise_widget()
 
-        conds = list(self.model.fps_cond.keys())
-        #self.widget.set_cond_buttons(len(conds))
-        
-        '''self.widget.freq_btns_list[default_frequency_index].setChecked(True)
-        self.widget.cond_btns_list[default_condition_index].setChecked(True)'''
-        
-        
-        self.set_frequency(default_frequency_index)
-        self.widget.freq_scroll.setMaximum(len(freqs)-1)
-        
+            self.folder_selected_signal.emit(folder)
 
+            freqs = list(self.model.fps_Hz.keys())
 
-        
-        self.set_condition(default_condition_index)
-        self.widget.cond_scroll.setMaximum(len(conds)-1)
+            conds = list(self.model.fps_cond.keys())
+
+            self.set_frequency(default_frequency_index)
+            self.widget.freq_scroll.setMaximum(len(freqs)-1)
+            
+
+            self.set_condition(default_condition_index)
+            self.widget.cond_scroll.setMaximum(len(conds)-1)
         
 
     def set_frequency(self, index):
@@ -279,7 +281,7 @@ class OverViewController(QObject):
         selected_fname = self.selected_fname
         waterfall_waveform, \
             selected, \
-                selected_name_out = self.prepare_waveforms_for_plot(waterfall, selected_fname)
+                selected_name_out = waterfall.prepare_waveforms_for_plot( selected_fname)
 
         self.widget.single_frequency_waterfall.clear_plot()
         
@@ -298,7 +300,7 @@ class OverViewController(QObject):
 
         waterfall_waveform, \
             selected, \
-                selected_name_out = self.prepare_waveforms_for_plot(waterfall, selected_fname)
+                selected_name_out = waterfall.prepare_waveforms_for_plot( selected_fname)
 
         self.widget.single_condition_waterfall.clear_plot()
         
@@ -306,29 +308,7 @@ class OverViewController(QObject):
         self.widget.single_condition_waterfall.set_name ( self.cond)
         self.widget.single_condition_waterfall.set_selected_name (selected_name_out)
 
-    def prepare_waveforms_for_plot(self, waterfall, selected_fname):
-        limits=[]
-        if len(selected_fname):
-            fnames = list(waterfall.scans[0].keys())
-            if selected_fname in fnames:
-                limits = waterfall.waveform_limits[ selected_fname ]
-        waterfall_waveform = waterfall.waterfall_out['waveform']
-
-        if len(limits):
-            selected = [waterfall_waveform[0] [limits[0]:limits[1]],
-                        waterfall_waveform[1] [limits[0]:limits[1]]]
-            waterfall_waveform = [ np.append(waterfall_waveform[0] [:limits[0]], waterfall_waveform[0] [limits[1]:]),
-                                   np.append(waterfall_waveform[1] [:limits[0]], waterfall_waveform[1] [limits[1]:])]
-
-            path = os.path.normpath(selected_fname)
-            fldr = path.split(os.sep)[-2]
-            file = path.split(os.sep)[-1]
-            selected_name_out = os.path.join( fldr,file)
-        else:
-            selected = [[],[]]
-            selected_name_out = ''
-        return waterfall_waveform, selected, selected_name_out
-       
+    
 
     def update_plot_sigle_frequency(self, waveform,selected=[[],[]]):
         if waveform is not None:

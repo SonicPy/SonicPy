@@ -15,6 +15,108 @@ from functools import partial
 
 from ua.widgets.WaterfallWidget import WaterfallWidget
 
+
+
+        
+
+class FolderListWidget(QWidget):
+    
+    list_changed_signal = pyqtSignal(list)
+   
+    panelClosedSignal = pyqtSignal()
+
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle('Folder list')
+
+        self.resize(200, 800)
+        
+        self.make_widget()
+
+
+    def make_widget(self):
+        self._layout = QtWidgets.QVBoxLayout()
+        self._layout.setContentsMargins(10, 10, 10, 10)
+        
+        self.buttons_widget_top = QtWidgets.QWidget()
+        self._buttons_layout_top = QtWidgets.QHBoxLayout()
+        self._buttons_layout_top.setContentsMargins(0, 0, 0, 0)
+
+        # add top controls here
+        self._up_btn = QtWidgets.QPushButton("Up")
+        self._down_btn = QtWidgets.QPushButton("Down")
+
+        self._up_btn.clicked.connect(self.move_selected_item_up)
+        self._down_btn.clicked.connect(self.move_selected_item_down)
+
+        self._buttons_layout_top.addWidget(self._up_btn)
+        self._buttons_layout_top.addWidget(self._down_btn)
+
+        self.buttons_widget_top.setLayout(self._buttons_layout_top)
+        self._layout.addWidget(self.buttons_widget_top)
+
+        self._folder_list = QtWidgets.QListWidget()
+        self._folder_list.setDragDropMode(QtWidgets. QAbstractItemView.InternalMove)
+        self._folder_list.itemChanged.connect(self.update_folders)
+        self._folder_list.model().rowsMoved.connect(lambda: self.item_dragged_callback())
+
+        self._layout.addWidget(self._folder_list)
+
+        self.setLayout(self._layout)
+
+    def update_folders(self):
+        folders = self.get_folder_list()
+        self.list_changed_signal.emit(folders)
+        
+    def get_folder_list(self):
+
+        items = []
+        for index in range(self._folder_list.count()):
+            item = self._folder_list.item(index)
+            
+            checked = item.checkState()
+            if checked:
+                text = item.text()
+                items.append(self._folder_list.item(index).text())
+        items.reverse()
+        folders = items
+        return folders
+
+    def item_dragged_callback(self,*args,**kwargs):
+        self.update_folders()
+
+    def move_selected_item_up(self):
+        currentRow = self._folder_list.currentRow()
+        currentItem = self._folder_list.takeItem(currentRow)
+        self._folder_list.insertItem(currentRow - 1, currentItem)
+        self._folder_list.setCurrentRow(currentRow - 1)
+        self.update_folders()
+
+    def move_selected_item_down(self):
+        currentRow = self._folder_list.currentRow()
+        currentItem = self._folder_list.takeItem(currentRow)
+        self._folder_list.insertItem(currentRow + 1, currentItem)
+        self._folder_list.setCurrentRow(currentRow + 1)
+        self.update_folders()
+
+    def set_folders(self, fnames):
+        self. _folder_list.clear()
+        fnames.reverse()
+        for f in fnames:
+            list_item = QtWidgets.QListWidgetItem(f)
+            list_item.setFlags(list_item.flags() | QtCore.Qt.ItemIsUserCheckable)
+            list_item.setCheckState(QtCore.Qt.Checked)
+            self._folder_list.addItem(list_item)
+
+    def raise_widget(self):
+        self.show()
+        self.setWindowState(self.windowState() & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
+        self.activateWindow()
+        self.raise_()  
+
+
+
 class OverViewWidget(QWidget):
     
     preferences_signal = pyqtSignal()
@@ -23,7 +125,7 @@ class OverViewWidget(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.initialized = False
+        
         self.t = None
         self.spectrum = None
 
@@ -42,9 +144,7 @@ class OverViewWidget(QWidget):
         
         self._layout = QtWidgets.QVBoxLayout()
         self._layout.setContentsMargins(10, 10, 10, 10)
-        self.detail_widget = QtWidgets.QWidget()
-        self._detail_layout = QtWidgets.QHBoxLayout()
-        self._detail_layout.setContentsMargins(0, 0, 0, 0)
+        
         self.buttons_widget_top = QtWidgets.QWidget()
         self._buttons_layout_top = QtWidgets.QHBoxLayout()
         self._buttons_layout_top.setContentsMargins(0, 0, 0, 0)
@@ -81,22 +181,15 @@ class OverViewWidget(QWidget):
         self.freq_step.setMinimum(1e-9)
         self.freq_step.setSingleStep(0.5)
         self.freq_step.setValue(2)
-        #self.freq_end = QtWidgets.QSpinBox(self.buttons_widget_top)
-        #self.freq_end.setMinimumWidth(70)
 
         self._buttons_layout_top.addWidget(QtWidgets.QLabel('𝑓 start [MHz]'))
         self._buttons_layout_top.addWidget(self.freq_start)
         self._buttons_layout_top.addWidget(QtWidgets.QLabel('𝑓 step [MHz]'))
         self._buttons_layout_top.addWidget(self.freq_step)
-        #self._buttons_layout_top.addWidget(QtWidgets.QLabel('𝑓 N'))
-        #self._buttons_layout_top.addWidget(self.freq_end)
-        
-        #self._buttons_layout_top.addWidget(self.save_btn)
-        
-        
 
         self.buttons_widget_top.setLayout(self._buttons_layout_top)
         self._layout.addWidget(self.buttons_widget_top)
+
 
         self.plots_tab_widget= QtWidgets.QTabWidget(self)
         self.plots_tab_widget.setObjectName("plots_tab_widget")

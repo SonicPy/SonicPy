@@ -1,6 +1,6 @@
 import numpy as np
 from numpy.core.defchararray import asarray
-import time
+import time, os
 
 class WaterfallModel( ):
     ''' synchronous version of the waterfall model '''
@@ -9,7 +9,7 @@ class WaterfallModel( ):
        
         self.common_value = common_value
         
-        self.scans = [{}]
+        self.waveforms = [{}]
         self.settings = {'scale':1.0,
                          'clip':False}
         self.waterfall_out = {}
@@ -41,7 +41,7 @@ class WaterfallModel( ):
             y = y.reshape(-1, 4).mean(axis=1)
         wform = [x,y]
 
-        self.scans[0][fname]=wform
+        self.waveforms[0][fname]=wform
 
 
     def add_waveform(self, param):
@@ -62,7 +62,7 @@ class WaterfallModel( ):
         offset = 1
         clip = self.settings['clip' ]
 
-        fnames = list(self.scans[0].keys())+[" "," "] # pad the list with two empty items to have better scaling of the plot, there should be a better way to do it.
+        fnames = list(self.waveforms[0].keys())+[" "," "] # pad the list with two empty items to have better scaling of the plot, there should be a better way to do it.
         
         if len(self.waterfall_out):
             if scale == self.waterfall_out['scale'] and clip == self.waterfall_out['clip'] and fnames == self. waterfall_out['fnames']:
@@ -80,8 +80,8 @@ class WaterfallModel( ):
             for i, f in enumerate(fnames):
                 
                 key = f
-                if key in self.scans[0]:
-                    waveform = self.scans[0][key]
+                if key in self.waveforms[0]:
+                    waveform = self.waveforms[0][key]
                 else:
                     waveform = [np.asarray([0]),np.asarray([0])]
                     
@@ -112,8 +112,32 @@ class WaterfallModel( ):
         self.waterfall_out = out
 
 
+    def prepare_waveforms_for_plot(self, selected_fname):
+        waterfall = self
+        limits=[]
+        if len(selected_fname):
+            fnames = list(waterfall.waveforms[0].keys())
+            if selected_fname in fnames:
+                limits = waterfall.waveform_limits[ selected_fname ]
+        waterfall_waveform = waterfall.waterfall_out['waveform']
+
+        if len(limits):
+            selected = [waterfall_waveform[0] [limits[0]:limits[1]],
+                        waterfall_waveform[1] [limits[0]:limits[1]]]
+            waterfall_waveform = [ np.append(waterfall_waveform[0] [:limits[0]], waterfall_waveform[0] [limits[1]:]),
+                                   np.append(waterfall_waveform[1] [:limits[0]], waterfall_waveform[1] [limits[1]:])]
+
+            path = os.path.normpath(selected_fname)
+            fldr = path.split(os.sep)[-2]
+            file = path.split(os.sep)[-1]
+            selected_name_out = os.path.join( fldr,file)
+        else:
+            selected = [[],[]]
+            selected_name_out = ''
+        return waterfall_waveform, selected, selected_name_out
+
     def clear(self):
         
-        self.scans[0]={}
-        self.waterfall_out = self.scans[0]
+        self.waveforms[0]={}
+        self.waterfall_out = self.waveforms[0]
          

@@ -5,7 +5,7 @@ import os.path, sys
 from utilities.utilities import *
 from utilities.HelperModule import move_window_relative_to_screen_center, get_partial_index, get_partial_value
 import numpy as np
-from numpy import argmax, nan, greater,less, append, sort, array, argmin
+from numpy import argmax, c_, nan, greater,less, append, sort, array, argmin
 
 from scipy import optimize
 from scipy.signal import argrelextrema, tukey
@@ -36,12 +36,41 @@ def Sort_Tuple(tup):
     tup.sort(key = lambda x: x[1])
     return tup
 
-
+class FileServer():
+    def __init__(self):
+        
+        self.files = {}
+    
+    def get_waveforms(self, files):
+        output = []
+        read_files = []
+        for f in files:
+            if f in self.files:
+                pass
+                #waveforms.append(self.files[f])
+            else:
+                read_files.append(f)
+    
+        if len(read_files):
+            read_files = read_2D_spectra_dict(read_files)
+            for rf in read_files:
+                fname = rf['filename']
+                waveform = rf['waveform']
+                self.files[fname]=waveform
+        
+        for f in files:
+            output.append({'filename':f,'waveform':self.files[f]})
+        return output
 
 class OverViewModel():
     def __init__(self):
         
         self.spectra = {}
+
+        self.file_server = FileServer()
+
+        self.waveforms = None
+        self.files = [[]]
         
         self.fp = ''
         self.fps_cond = {}
@@ -102,7 +131,7 @@ class OverViewModel():
           
             #read_files = read_multiple_spectra_dict(fnames) #old
             
-            read_files = read_2D_spectra_dict(fnames) #new, replaced old
+            read_files = self.file_server.get_waveforms(fnames) #new, replaced old
             
             for condition in conditions:
                 for loaded_fname in read_files:
@@ -133,7 +162,7 @@ class OverViewModel():
             if not cond in self.spectra:
                 loaded_files = {}
                 
-                read_files = read_2D_spectra_dict(fnames)
+                read_files = self.file_server.get_waveforms(fnames)
                 
                 res = read_files[0]['filename']
                 first_num = res[-1*(len('.csv')+3):-1*len('.csv')]
@@ -176,6 +205,7 @@ class OverViewModel():
         file_type = self.file_type
         subfolders = glob.glob(os.path.join(folder,'*/'), recursive = False)
 
+        #return subfolders.sort()
         conditions_folders_sorted = []
 
         if len(subfolders):
@@ -234,16 +264,16 @@ class OverViewModel():
         freq_search = os.path.join(folder,condition_0,'*'+file_type)
         freqs = glob.glob(freq_search) 
 
-        freqs_base = []
-        
+     
         suffix_freq = freqs[0].split('_')[-1][-4:]
-        for p in freqs:
-            num = p[-1*(len(file_type)+3):-1*len(file_type)]
-            freqs_base.append(num)
-        freqs_sorted = sorted(freqs_base)
+        
+        freqs_sorted = self.frequencies_sorted
+
+
         #print("freqs_sorted : %s seconds." % (time.time() - start_time))
         start_time = time.time()
         for p in conditions_folders_sorted:
+            
             conditions_search = os.path.join(folder,p,'*'+suffix_freq)
             res = sorted(glob.glob(conditions_search))[:len(freqs_sorted)]
         
@@ -254,9 +284,8 @@ class OverViewModel():
                 f = int(r[-1*(len(file_type)+3):-1*len(file_type)]) - int(first_num)
                 f_num = f'{f:03d}' 
                 
-                
                 self.file_dict[r]=(p,f_num)
-                
+
                 if f_num in self.fps_Hz:
                     p_list = self.fps_Hz[f_num]
                 else:
@@ -264,22 +293,47 @@ class OverViewModel():
                 
                 p_list.append(r)
                 self.fps_Hz[f_num] = p_list
-                
-        print('')
-        #print("file_cond_dict : %s seconds." % (time.time() - start_time))
+
+        print("file_cond_dict : %s seconds." % (time.time() - start_time))
+
+    def get_frequencies_sorted(self):
+        conditions_folders_sorted = self.conditions_folders_sorted
+        folder = self.fp
+        file_type = self.file_type
+
+        condition_0 = conditions_folders_sorted[0]
+        freq_search = os.path.join(folder,condition_0,'*'+file_type)
+        freqs = glob.glob(freq_search) 
+
+        freqs_base = []
+        for p in freqs:
+            num = p[-1*(len(file_type)+3):-1*len(file_type)]
+            freqs_base.append(num)
+        freqs_sorted = sorted(freqs_base)
+        return freqs_sorted
 
     def understand_folder_structure(self):
         
 
         self.conditions_folders_sorted = self.get_conditions_folders()
 
+        self.frequencies_sorted = self.get_frequencies_sorted()
 
+        rows = len(self.conditions_folders_sorted)
+        cols = len (self.frequencies_sorted)
+        self.files =  [['' for i in range(cols)] for j in range(rows)]
+
+        if len(self.conditions_folders_sorted) and len(self.frequencies_sorted):
+            self.waveforms_3d_array = np.zeros((len(self.conditions_folders_sorted),len(self.frequencies_sorted),2,10000))
     
         if len(self.conditions_folders_sorted):
             self.create_file_dicts()
     
+    def condition_index(self,condition):
+        return self.conditions_folders_sorted.index(condition)
 
-   
+    def frequency_index(self,frequency):
+        return self.frequencies_sorted.index(frequency)
 
     def add_result_from_file(self, filename):
         data = self.read_result_file(filename)

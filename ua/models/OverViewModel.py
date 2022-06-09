@@ -23,18 +23,19 @@ import glob
 import time
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtCore import QObject
+from natsort import natsorted
 
 # Python program to sort a list of
 # tuples by the second Item using sort()
 
 # Function to sort hte list by second item of tuple
-def Sort_Tuple(tup):
+def Sort_Tuple(list):
 
     # reverse = None (Sorts in Ascending order)
     # key is set to sort using second element of
     # sublist lambda has been used
-    tup.sort(key = lambda x: x[1])
-    return tup
+    list.sort(key = lambda x: x[1])
+    return list
 
 class FileServer():
     def __init__(self):
@@ -80,7 +81,7 @@ class OverViewModel():
 
         self.waterfalls = {} 
         self.folder_suffix = 'psi'
-        self.file_type = '.csv'
+        self.file_type = ''
 
         self.settings = {'scale':10,
                          'clip':True}
@@ -161,16 +162,12 @@ class OverViewModel():
             
             if not cond in self.spectra:
                 loaded_files = {}
-                
                 read_files = self.file_server.get_waveforms(fnames)
                 
-                res = read_files[0]['filename']
-                first_num = res[-1*(len('.csv')+3):-1*len('.csv')]
                 for frequency in frequencies:
-                    for loaded_fname in read_files:
-                        path = loaded_fname['filename']
-
-                        f = int(path[-1*(len('.csv')+3):-1*len('.csv')]) - int(first_num)
+                    for i, loaded_fname in enumerate(read_files):
+                     
+                        f = i
                         f_num = f'{f:03d}' 
 
                         if f_num == frequency:
@@ -200,55 +197,25 @@ class OverViewModel():
         
 
     
-    def get_conditions_folders(self):
-
-      
-        folder = self.fp
-        file_type = self.file_type
+    def get_conditions_folders(self, folder):
+        '''
+        returns list of naturally sorted conditions folders in folder
+        '''
+        
         subfolders = glob.glob(os.path.join(folder,'*/'), recursive = False)
-
-        #return subfolders.sort()
         conditions_folders_sorted = []
 
         if len(subfolders):
-            sf = {} # dict {folder:[files]}
-            tm = [] # list [(folder,timestamp)]
-
-            # determine whether to use getmtime or getctime (some Windows file systems will switch modified time and the created time for a file)
-            # sometimes all time stamps get screwed up and files have to be sorted anothe way or manually
-
-            subfolder = subfolders[0]
-            file_search_str = os.path.join(subfolder,'*' + file_type)
-            files_in_subfolder = glob.glob(file_search_str, recursive = False)
-            time_m = os. path. getmtime(files_in_subfolder[0])
-            time_c = os. path. getctime(files_in_subfolder[0])
-
-            if time_m < time_c:
-                time_func = os. path. getmtime
-            else:
-                time_func = os. path. getctime
-
-
+            folder_norm = []
 
             for subfolder in subfolders:
                 path = os.path.normpath(subfolder)
                 fldr = path.split(os.sep)[-1]
-                file_search_str = os.path.join(subfolder,'*' + file_type)
-                files_in_subfolder = glob.glob(file_search_str, recursive = False)
-                
-
-                sf[fldr] = files_in_subfolder
-                time_modified = time_func(files_in_subfolder[0])
-                tm.append ((fldr, time_modified))
-            tm = Sort_Tuple(tm)
+                folder_norm.append(fldr)
+            conditions_folders_sorted = natsorted(folder_norm)
             
-            for t in tm:
-                conditions_folders_sorted.append(t[0])
-
-        #print(conditions_folders_sorted)
-
         return conditions_folders_sorted
-            #print("conditions_num : %s seconds." % (time.time() - start_time))
+
 
     def create_file_dicts(self):
 
@@ -277,14 +244,15 @@ class OverViewModel():
         for p in conditions_folders_sorted:
             
             conditions_search = os.path.join(folder,p,'*'+suffix_freq)
-            res = sorted(glob.glob(conditions_search))[:len(freqs_sorted)]
+            res = natsorted(glob.glob(conditions_search)) [:len(freqs_sorted)]
+
         
             self.fps_cond[p] = res
             first_num = res[0][-1*(len(file_type)+3):-1*len(file_type)]
             for i, r in enumerate(res):
                 
-                f = int(r[-1*(len(file_type)+3):-1*len(file_type)]) - int(first_num)
-                f_num = f'{f:03d}' 
+                
+                f_num = f'{i:03d}' 
                 
                 self.file_dict[r]=(p,f_num)
 
@@ -306,18 +274,65 @@ class OverViewModel():
         condition_0 = conditions_folders_sorted[0]
         freq_search = os.path.join(folder,condition_0,'*'+file_type)
         freqs = glob.glob(freq_search) 
+        files = []
+        for freq in freqs:
+            file = os.path.split(freq)[-1]
+            files.append(file)
+
+        files = natsorted(files)
 
         freqs_base = []
-        for p in freqs:
-            num = p[-1*(len(file_type)+3):-1*len(file_type)]
+        for i, p in enumerate(files):
+            num = f'{i:03d}'
             freqs_base.append(num)
-        freqs_sorted = sorted(freqs_base)
+        freqs_sorted = natsorted(freqs_base)
         return freqs_sorted
+
+    def get_file_types_in_folder(self, folder):
+        '''
+        gets number of file types in folder
+        returns a dict {'type':###}
+        '''
+        conditions_search = os.path.join(folder,'*')
+        res = glob.glob(conditions_search)
+        types = {}
+        for r in res:
+            if '.' in r:
+                ext = '.' + r.split('.')[-1]
+
+            else:
+                ext = ''
+
+            if not ext in types:
+                types[ext]= 1
+            else:
+                i = types[ext]
+                types[ext] = i+1
+         
+        return types
+
+    def get_extension(self ):
+        '''
+        get extension by searching the first folder and determining the most common file type: '.csv', '', etc..
+        '''
+        folder = self.fp
+        condition_0 = self.conditions_folders_sorted[0]
+        first_folder = os.path.join(folder,condition_0)
+        types = self.get_file_types_in_folder(first_folder)
+        extensions = []
+        for t in types:
+            extensions.append((t,types[t]))
+        extensions = Sort_Tuple(extensions)
+        ext = extensions[0][0]
+        return ext
+
 
     def understand_folder_structure(self):
         
+        folder = self.fp
+        self.conditions_folders_sorted = self.get_conditions_folders(folder)
 
-        self.conditions_folders_sorted = self.get_conditions_folders()
+        self.file_type =  self.get_extension()
 
         self.frequencies_sorted = self.get_frequencies_sorted()
 

@@ -180,7 +180,7 @@ class plotWindow(QtWidgets.QWidget):
         self.plots.append(Plot)
          # can display name in upper right corner in same color 
         self.win.legend.addItem(self.plots[-1], '')
-        return Plot
+        return Plot 
             
 
     def closeEvent(self, event):

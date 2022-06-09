@@ -21,9 +21,9 @@ class TimeOfFlightWidget(QMainWindow):
     up_down_signal = pyqtSignal(str)
     panelClosedSignal = pyqtSignal()
 
-    def __init__(self, overview_widget, analysis_widget):
+    def __init__(self, app, overview_widget, analysis_widget):
         super().__init__()
-        
+        self.app = app
         self.overview_widget = overview_widget
         
         self.analysis_widget = analysis_widget
@@ -41,7 +41,9 @@ class TimeOfFlightWidget(QMainWindow):
         self.create_menu()
         self.style_widgets()
 
- 
+    def closeEvent(self, QCloseEvent, *event):
+        self.app.closeAllWindows()
+        self.panelClosedSignal.emit()
 
     def make_widget(self):
         self.my_widget = QtWidgets.QWidget()
@@ -100,8 +102,6 @@ class TimeOfFlightWidget(QMainWindow):
 
     
 
-    def closeEvent(self, QCloseEvent, *event):
-        self.panelClosedSignal.emit()
         
 
     def keyPressEvent(self, e):

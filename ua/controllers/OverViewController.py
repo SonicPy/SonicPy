@@ -107,6 +107,7 @@ class OverViewController(QObject):
 
     def single_frequency_cursor_y_signal_callback(self, y_pos):
 
+        # this is the inxed of the plot when user clicks on the waterfall plot
         index = round(y_pos)
         
         fnames = list(self.model.waterfalls[self.freq].waveforms[0].keys())

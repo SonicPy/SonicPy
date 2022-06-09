@@ -110,7 +110,6 @@ def read_tek_csv_files_2d(paths, subsample=1, *args, **kwargs):
     r['time'] = horizontal scale values
 
     '''
-    
 
     '''if 'progress_dialog' in kwargs:
         progress_dialog = kwargs['progress_dialog']
@@ -175,20 +174,82 @@ def read_tek_csv_files_2d(paths, subsample=1, *args, **kwargs):
     r['time'] = x
     return r
 
-'''folder = '/Users/hrubiak/Desktop/Sturtevant-e251032/Exp3/US/75/1000psi' 
 
-paths = glob.glob(folder + '/*', recursive = False)
-start_time = time.time()
+def read_ascii_scope_files_2d(paths, subsample=1, *args, **kwargs):
+    ''' this is anew reader for tek csv files, supposed to work slightly faster than the old one
+    the speed gain is due to creating a full-size empty 2d array before starting the reading the files
+    optional progress dialog has been commented out for now
 
-r = read_tek_csv_files_2d(paths)
-print("read csv file 2D in %s seconds." % (time.time() - start_time))
+    returns:
+    dict r
+    r['files_loaded'] = files_loaded
+    r['header'] = header of the first file
+    r['voltage'] = 2d voltage array
+    r['time'] = horizontal scale values
 
-start_time = time.time()
+    '''
 
-for path in paths:
-    r = read_tek_csv(path)
-print("read csv file old in %s seconds." % (time.time() - start_time))'''
+    '''if 'progress_dialog' in kwargs:
+        progress_dialog = kwargs['progress_dialog']
+    else:
+        progress_dialog = QtWidgets.QProgressDialog()'''
 
+
+    nfiles = len (paths)   
+
+    
+    file = paths[0]
+    header = {}
+
+    file_text = open(file, "r")
+    row = 0
+    a = True
+    horz = []
+    for i in range (2):
+        file_line = file_text.readline()
+        t = file_line.split('\t')[0]
+        horz.append( float(t))
+       
+        row +=1
+
+    file_text.close()
+    nchans = 10000 #int(header['Record Length'][0])
+    sample_period = round(horz[1]-horz[0],12)
+
+    data = np.zeros([nfiles, nchans])
+    files_loaded = []
+    times = []
+
+    x = np.array(range(nchans))*sample_period*subsample
+    
+    #QtWidgets.QApplication.processEvents()
+    for d, file in enumerate(paths):
+        '''if d % 2 == 0:
+            #update progress bar only every 10 files to save time
+            progress_dialog.setValue(d)
+            QtWidgets.QApplication.processEvents()'''
+        try:
+            file_text = open(file, "r")
+
+            a = True
+            row = 0
+            for row in range(nchans-3):
+                data[d][row]=float(file_text.readline().split('\t')[1])
+            files_loaded.append(file)
+            file_text.close()
+        except:
+            pass
+        
+        
+        '''if progress_dialog.wasCanceled():
+            break'''
+    '''QtWidgets.QApplication.processEvents()'''
+    r = {}
+    r['files_loaded'] = files_loaded
+    r['header'] = header
+    r['voltage'] = data
+    r['time'] = x
+    return r
 
 def write_tek_csv(fname, x,y, params = {}):
     length = len(x)

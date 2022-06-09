@@ -36,14 +36,15 @@ from .. import resources_path, __version__
 class TimeOfFlightController(QObject):
     def __init__(self, app = None, offline = True):
         super().__init__()
-
+        self.app = app
+        
         self.overview_controller = OverViewController()
         overview_widget = self.overview_controller.widget
         self.correlation_controller = UltrasoundAnalysisController()
         analysis_widget = self.correlation_controller.display_window
 
         self.model = OverViewModel()
-        self.widget = TimeOfFlightWidget(overview_widget, analysis_widget)
+        self.widget = TimeOfFlightWidget(app, overview_widget, analysis_widget)
         self.widget.setWindowTitle("Time-of-flight analysis. ver." + __version__ + "  © R. Hrubiak, 2022.")
         
 
@@ -54,6 +55,8 @@ class TimeOfFlightController(QObject):
         self.make_connections()
 
         #self.overview_controller.set_US_folder(folder = '/Users/ross/Globus/s16bmb-20210717-e244302-Aihaiti/sam2/US')
+
+    
         
     def make_connections(self):  
 

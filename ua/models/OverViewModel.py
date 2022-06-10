@@ -95,8 +95,6 @@ class OverViewModel():
 
         freq_cond = self.file_dict[filename_waweform]
 
-
-
         freq = freq_cond[1]
         freq_waterfall = self.waterfalls[freq]
         cond = freq_cond[0]
@@ -122,12 +120,16 @@ class OverViewModel():
             w.settings['clip']=clip
 
     def load_multiple_files_by_frequency(self, freq):
-        
-        fnames = self.fps_Hz[freq]
+        conditions = self.conditions_folders_sorted # list(self.fps_cond.keys())
+        fnames = []
+        for c in conditions:
+            fname_list = self.fps_cond[c]
+            fname = fname_list[freq]
+            fnames.append(fname)
         start_time = time.time()
-        conditions = list(self.fps_cond.keys())
         
-        if not freq in self.spectra:
+        
+        if 1: #not freq in self.spectra:
             loaded_files = {}
           
             #read_files = read_multiple_spectra_dict(fnames) #old
@@ -156,7 +158,10 @@ class OverViewModel():
 
     def load_multiple_files_by_condition(self, cond):
         
-        fnames = self.fps_cond[cond]
+        fname_dict = self.fps_cond[cond]
+        fnames = []
+        for f in fname_dict:
+            fnames.append(fname_dict[f])
         frequencies = list(self.fps_Hz.keys())
         if len(fnames):
             
@@ -246,9 +251,13 @@ class OverViewModel():
             conditions_search = os.path.join(folder,p,'*'+suffix_freq)
             res = natsorted(glob.glob(conditions_search)) [:len(freqs_sorted)]
 
+            r_list = {}
+            for i, r in enumerate(res):
+                f_num = f'{i:03d}' 
+                r_list[f_num]= r
         
-            self.fps_cond[p] = res
-            first_num = res[0][-1*(len(file_type)+3):-1*len(file_type)]
+            self.fps_cond[p] = r_list
+            
             for i, r in enumerate(res):
                 
                 
@@ -336,13 +345,6 @@ class OverViewModel():
 
         self.frequencies_sorted = self.get_frequencies_sorted()
 
-        rows = len(self.conditions_folders_sorted)
-        cols = len (self.frequencies_sorted)
-        self.files =  [['' for i in range(cols)] for j in range(rows)]
-
-        if len(self.conditions_folders_sorted) and len(self.frequencies_sorted):
-            self.waveforms_3d_array = np.zeros((len(self.conditions_folders_sorted),len(self.frequencies_sorted),2,10000))
-    
         if len(self.conditions_folders_sorted):
             self.create_file_dicts()
     

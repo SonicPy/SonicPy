@@ -53,6 +53,8 @@ class OverViewController(QObject):
         self.selected_fname = ''
         self.freq = '000'
         self.cond = '0psi'
+
+        
         
         
         
@@ -83,7 +85,11 @@ class OverViewController(QObject):
         self.folder_widget.list_changed_signal.connect(self.list_changed_signal_callback)
 
     def list_changed_signal_callback(self, folders):
-        print (folders)
+        
+        self.model.conditions_folders_sorted = folders
+        self.model.load_multiple_files_by_frequency(self.freq)
+        self.re_plot_single_frequency()
+
 
     def freq_start_step_callback(self, *args, **kwargs):
         f_start = self.widget.freq_start.value()
@@ -320,9 +326,6 @@ class OverViewController(QObject):
     def update_plot_sigle_condition(self, waveform,selected=[[],[]]):
         if waveform is not None:
             self.widget.single_condition_waterfall.plot(waveform[0],waveform[1],selected[0],selected[1])
-
-
-            
 
     def save_result(self):
         pass

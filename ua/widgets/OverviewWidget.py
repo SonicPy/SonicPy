@@ -72,13 +72,8 @@ class FolderListWidget(QWidget):
     def get_folder_list(self):
 
         items = []
-        for index in range(self._folder_list.count()):
-            item = self._folder_list.item(index)
-            
-            checked = item.checkState()
-            if checked:
-                text = item.text()
-                items.append(self._folder_list.item(index).text())
+        for index in range(self._folder_list.count()):            
+            items.append(self._folder_list.item(index).text())
         items.reverse()
         folders = items
         return folders
@@ -106,8 +101,8 @@ class FolderListWidget(QWidget):
         local_fnames.reverse()
         for f in local_fnames:
             list_item = QtWidgets.QListWidgetItem(f)
-            list_item.setFlags(list_item.flags() | QtCore.Qt.ItemIsUserCheckable)
-            list_item.setCheckState(QtCore.Qt.Checked)
+            #list_item.setFlags(list_item.flags() | QtCore.Qt.ItemIsUserCheckable)
+            #list_item.setCheckState(QtCore.Qt.Checked)
             self._folder_list.addItem(list_item)
 
     def raise_widget(self):

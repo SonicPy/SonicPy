@@ -74,7 +74,8 @@ def TOF():
         if os.path.isdir(win_folder):
             folder = win_folder
         if len(folder):
-            controller.overview_controller.set_US_folder(folder=folder)
+            if os.path.isdir(folder):
+                controller.overview_controller.set_US_folder(folder=folder)
     
     
 

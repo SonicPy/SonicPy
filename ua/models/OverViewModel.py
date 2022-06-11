@@ -23,8 +23,8 @@ import glob
 import time
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtCore import QObject
-from natsort import natsorted
-
+from natsort import natsorted 
+ 
 # Python program to sort a list of
 # tuples by the second Item using sort()
 

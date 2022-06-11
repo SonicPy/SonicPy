@@ -101,9 +101,10 @@ class FolderListWidget(QWidget):
         self.update_folders()
 
     def set_folders(self, fnames):
+        local_fnames = copy.deepcopy(fnames)
         self. _folder_list.clear()
-        fnames.reverse()
-        for f in fnames:
+        local_fnames.reverse()
+        for f in local_fnames:
             list_item = QtWidgets.QListWidgetItem(f)
             list_item.setFlags(list_item.flags() | QtCore.Qt.ItemIsUserCheckable)
             list_item.setCheckState(QtCore.Qt.Checked)

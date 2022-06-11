@@ -46,7 +46,7 @@ def read_2D_spectra_dict(filenames, subsample = 1 ):
 
     spectra = []
     
-    file  = os.path.split(filenames[0])
+    file  = os.path.split(filenames[0])[-1]
     if '.' in file:
         ext = '.' + file.split('.')[-1]
     else:

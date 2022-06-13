@@ -124,7 +124,10 @@ class OverViewModel():
         fnames = []
         for c in conditions:
             fname_list = self.fps_cond[c]
-            fname = fname_list[freq]
+            if freq in fname_list:
+                fname = fname_list[freq]
+            else:
+                fname = ''
             fnames.append(fname)
         start_time = time.time()
         
@@ -139,6 +142,8 @@ class OverViewModel():
             for condition in conditions:
                 for loaded_fname in read_files:
                     path = loaded_fname['filename']
+                    if path == '':
+                        continue
                     fldr = path.split(os.sep)[-2] # this is the pt condition name
                     if fldr == condition:
                         loaded_files[condition]= loaded_fname

@@ -1,6 +1,8 @@
 
 import os.path, sys
+import wave
 import numpy as np
+from sqlalchemy import false, true
 from um.models.ScopeModel import Scope
 from um.models.tek_fileIO import *
 from utilities.utilities import *
@@ -15,6 +17,8 @@ import queue
 from functools import partial
 import json
 from um.models.pv_model import pvModel
+
+from utilities.HelperModule import get_partial_index, get_partial_value
 
 
 class Scope_DPO5104(Scope, pvModel):
@@ -78,7 +82,7 @@ class Scope_DPO5104(Scope, pvModel):
                                 {'desc': 'Erase;Erase', 'val':False, 
                                 'param':{ 'type':'b'}},
                         'vertical_scale':  
-                                {'desc': 'Vertical scale', 'val':1.0,'increment':0.05, 'min':1e-9,'max':10,
+                                {'desc': 'Vertical scale','unit':u'V', 'val':1.0,'increment':0.05, 'min':1e-9,'max':10,
                                 'param':{ 'type':'f'}},
                         'instrument':
                                 {'desc': 'Instrument', 'val':'not connected', 
@@ -87,8 +91,16 @@ class Scope_DPO5104(Scope, pvModel):
                         'waveform':
                                 {'desc': 'Waveform', 'val':{}, 
                                 'methods':{'set':False, 'get':True}, 
-                                'param':{ 'type':'dict'}}
-                        
+                                'param':{ 'type':'dict'}},
+                        'do_autoscale':
+                                {'desc': 'Autoscale;Autoscale', 'val':False, 
+                                'param':{ 'type':'b'}},
+                        'autoscale_t_min':  
+                                {'desc': 'Autscale t<sub>min</sub>','unit':u'us', 'val':3.0,'increment':0.1, 'min':0,'max':20,
+                                'param':{ 'type':'f'}},
+                        'autoscale_t_max':  
+                                {'desc': 'Autscale t<sub>max</sub>','unit':u'us', 'val':9.0,'increment':0.1, 'min':0,'max':20,
+                                'param':{ 'type':'f'}}
                                 
                       }       
 
@@ -278,6 +290,39 @@ class Scope_DPO5104(Scope, pvModel):
             scale = self.pvs['vertical_scale']._val      
         return scale
 
+    def _set_do_autoscale(self, param):
+        if param:
+            print('autoscale')
+            state = self._get_run_state()
+            
+            num_av = self.pvs['num_av']._val
+            self._set_num_av(1)
+            self._set_run_state(True)
+            waveform = self._get_waveform()['waveform']
+            t = waveform[0]
+            V = waveform[1]
+            
+            t_min = self.pvs['autoscale_t_min']._val * 1e-6
+            t_max = self.pvs['autoscale_t_max']._val * 1e-6
+
+            t_min_index = int(round(get_partial_index(t, t_min)))
+            t_max_index = int(round(get_partial_index(t, t_max)))
+
+            V_subset = V[t_min_index:t_max_index]
+            
+            V_min = np.amin(V_subset)
+            V_max = np.amax( V_subset)
+
+            V_max = max(V_max, abs(V_min))
+
+            print(V_max)
+            
+            self._set_num_av(num_av)
+            
+            self._set_run_state(state)
+
+            self.pvs['do_autoscale'].set(False)
+
     def _get_waveform(self): 
         #print('get waveform')
 
@@ -340,6 +385,8 @@ class Scope_DPO5104(Scope, pvModel):
                     #print('num_acq >= num_av: ' + str(True))
                     self.pvs['run_state'].set(False)
         #print('returning waveform_out')
+
+        
         return waveform_out
 
 

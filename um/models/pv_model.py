@@ -8,7 +8,11 @@ import queue
 from functools import partial
 import json
 from um.models.pvServer import pvServer
-from epics import PV as epics_PV
+
+from .. import offline
+
+if not offline:
+    from epics import PV as epics_PV
 
 class PV(QObject):
     
@@ -60,7 +64,9 @@ class PV(QObject):
         if 'unit' in settings:
             self._unit = settings['unit']
         else: self._unit = ''
-        if 'epics_PV_out' in settings:
+
+        
+        if 'epics_PV_out' in settings and not offline:
             try:
                 self._epics_PV_out_name = settings['epics_PV_out']  
                 self._epics_PV_out = epics_PV(self._epics_PV_out_name)
@@ -75,8 +81,10 @@ class PV(QObject):
     def __str__(self):
         return self._pv_name
     
+
     def connect_epics_monitor(self):
-        if 'epics_PV_in' in self.settings:
+        
+        if 'epics_PV_in' in self.settings and not offline:
             try:
                 self._epics_PV_in_name = self.settings['epics_PV_in']  
                 self._epics_PV_in = epics_PV(self._epics_PV_in_name)
@@ -88,16 +96,17 @@ class PV(QObject):
 
 
     def handle_epics_pv_callback(self, Status):
-        if type(Status) == str:
-            if Status == '0' or Status == 'Done':
-                Status = False
-                
-            if Status == '1' or Status == 'Write':
-                Status = True
-                
-            g = self.__getattribute__('set')
-            if Status:
-                g(Status)
+        if not offline:
+            if type(Status) == str:
+                if Status == '0' or Status == 'Done':
+                    Status = False
+                    
+                if Status == '1' or Status == 'Write':
+                    Status = True
+                    
+                g = self.__getattribute__('set')
+                if Status:
+                    g(Status)
 
         
 

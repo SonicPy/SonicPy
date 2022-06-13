@@ -19,10 +19,13 @@ from um.models.pv_model import pvModel
 from um.models.pvServer import pvServer
 
 
+
+
 class setpointSweep(pvModel):
     model_value_changed_signal = pyqtSignal(dict)
     detector_busy_signal = pyqtSignal(bool)
     positioner_busy_signal = pyqtSignal(bool)
+
     def __init__(self, parent):
         super().__init__(parent)
         self.parent= parent
@@ -36,7 +39,7 @@ class setpointSweep(pvModel):
                                 {'desc': 'Current set-point index', 'val':0,'min':0,'max':10000,
                                 'param':{'type':'i'}},
                         'current_setpoint': 
-                                {'desc': 'Current set-point', 'val':0., 'increment':0.1, 'min':-10e11,'max':10e11,
+                                {'desc': 'Current set-point', 'val':0., 'increment':0.01, 'min':-10e11,'max':10e11,
                                 'param':{'type':'f'}},
                         'setpoints':     
                                 {'desc': 'Setpoints', 'val':None, 
@@ -260,7 +263,9 @@ class setpointSweep(pvModel):
             self.pvs['run_state'].set(False)
         
 
-
+class setpointSweepWithAutoscale(setpointSweep):
+    def __init__(self, parent):
+        super().__init__(parent)
         
 class SweepModel(pvModel):
 
@@ -270,7 +275,8 @@ class SweepModel(pvModel):
         super().__init__(parent)
 
         ## device speficic:
-        self.setpointSweepThread = setpointSweep(self)
+        self.setpointSweepThread = setpointSweepWithAutoscale(self)
+        
         self.instrument = 'ScanModel'
         
         

@@ -1,4 +1,5 @@
 
+from enum import auto
 import os.path, sys
 import wave
 import numpy as np
@@ -17,6 +18,7 @@ import queue
 from functools import partial
 import json
 from um.models.pv_model import pvModel
+import copy
 
 from utilities.HelperModule import get_partial_index, get_partial_value
 
@@ -93,14 +95,20 @@ class Scope_DPO5104(Scope, pvModel):
                                 'methods':{'set':False, 'get':True}, 
                                 'param':{ 'type':'dict'}},
                         'do_autoscale':
-                                {'desc': 'Autoscale;Autoscale', 'val':False, 
+                                {'desc': 'Autoscale V;Do once', 'val':False, 
                                 'param':{ 'type':'b'}},
                         'autoscale_t_min':  
                                 {'desc': 'Autscale t<sub>min</sub>','unit':u'us', 'val':3.0,'increment':0.1, 'min':0,'max':20,
                                 'param':{ 'type':'f'}},
                         'autoscale_t_max':  
                                 {'desc': 'Autscale t<sub>max</sub>','unit':u'us', 'val':9.0,'increment':0.1, 'min':0,'max':20,
-                                'param':{ 'type':'f'}}
+                                'param':{ 'type':'f'}},
+                        'autoscale_margin':  
+                                {'desc': 'Autoscale margin','unit':u'%', 'val':30,'min':0,'max':100,
+                                'param':{ 'type':'i'}},
+                        'auto_autoscale':
+                                {'desc': 'Autoscale V; ON', 'val':True, 
+                                'param':{ 'type':'b'}},
                                 
                       }       
 
@@ -148,12 +156,16 @@ class Scope_DPO5104(Scope, pvModel):
     def _set_erase_start(self, params):
         self.pvs['erase_start']._val = params
         if params:
-            
+            autoscale = self.pvs['auto_autoscale']._val
+            if autoscale:
+                self.pvs['do_autoscale'].set (True)
             self.pvs['erase'].set (True)
             self.pvs['run_state'].set (True)
             self.pvs['erase_start'].set(False)
             
-
+    def _set_auto_autoscale(self, params):
+        if params:
+            self.pvs['do_autoscale'].set (True)
 
     def _set_clear_all(self, clear):
 
@@ -280,6 +292,7 @@ class Scope_DPO5104(Scope, pvModel):
         self.pvs['vertical_scale']._val = scale
         if self.connected:
             channel = self._get_channel()
+            print(scale)
             self.DPO5000.set_vertical_scale(channel, scale)
         
     def _get_vertical_scale(self):
@@ -292,18 +305,35 @@ class Scope_DPO5104(Scope, pvModel):
 
     def _set_do_autoscale(self, param):
         if param:
-            print('autoscale')
+            #print('autoscale')
             state = self._get_run_state()
+            #print(state)
             
             num_av = self.pvs['num_av']._val
-            self._set_num_av(1)
+
+            autoscale_margin = self.pvs['autoscale_margin']._val
+
+            #print(num_av)
+            self._set_channel_state(False)
+            #print('self._set_channel_state(False)')
+            self._set_num_av(20)
+            #print("_set_num_av(1)")
             self._set_run_state(True)
-            waveform = self._get_waveform()['waveform']
+            #print('_set_run_state(True)')
+            self._set_channel_state(True)
+            #print('_set_channel_state(True)')
+            autostop = copy.copy(self.pvs['stop_after_num_av_preset']._val )
+            self.pvs['stop_after_num_av_preset']._val = False
+            waveform = self._get_waveform(wait=False)['waveform']
+            self.pvs['stop_after_num_av_preset']._val = autostop
+            #print(waveform)
             t = waveform[0]
             V = waveform[1]
             
             t_min = self.pvs['autoscale_t_min']._val * 1e-6
             t_max = self.pvs['autoscale_t_max']._val * 1e-6
+            #print(t_min)
+            #print(t_max)
 
             t_min_index = int(round(get_partial_index(t, t_min)))
             t_max_index = int(round(get_partial_index(t, t_max)))
@@ -315,18 +345,26 @@ class Scope_DPO5104(Scope, pvModel):
 
             V_max = max(V_max, abs(V_min))
 
-            print(V_max)
+            #print(V_max)
+
+            V_range = V_max * (1 + autoscale_margin /100)
+            V_div = round(V_range / 5,3)
+            #print(V_div)
+
+
             
             self._set_num_av(num_av)
             
             self._set_run_state(state)
-
+            self.pvs['vertical_scale'].set(float(V_div))
             self.pvs['do_autoscale'].set(False)
+            #print('autoscaled')
 
-    def _get_waveform(self): 
+    def _get_waveform(self, wait=True): 
         #print('get waveform')
 
         if self.connected:
+            #print('connected')
             start = time.time()
             wait_till = start+0.1
             num_av = self.pvs['num_av']._val
@@ -334,16 +372,18 @@ class Scope_DPO5104(Scope, pvModel):
             stop_after_preset = self.pvs['stop_after_num_av_preset']._val
 
             if num_acq < num_av or not stop_after_preset:
-            
+                
                 data_stop = self.data_stop
                 ch = self.selected_channel
+                #print('about to read')
                 waveform  = self.DPO5000.read_data_one_channel( data_start=1, 
                                                                 data_stop=data_stop,
                                                                 x_axis_out=True)
                 
                 #end = time.time()
                 # make sure set frame rate isn't exceeded
-                while time.time()< wait_till:
+                if wait:
+                    while time.time()< wait_till:
                         time.sleep(0.005)
                 num_acq = int(self.DPO5000.num_acq)
                 #elapsed = end - start
@@ -359,10 +399,18 @@ class Scope_DPO5104(Scope, pvModel):
             ch = 1
             (dt, micro) = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f').split('.')
             dt = "%s.%03d" % (dt, int(micro) / 1000)
+            scale = self.pvs['vertical_scale']._val
+            v_max = scale * 5 
             waveform = self.virtual_data
+            #print(v_max)
             time.sleep(.05)
             noise_scale = 0.002
             waveform_noised = waveform[1]+(np.random.normal(0,1,len(waveform[1]))-0.5)*noise_scale
+            
+            v = waveform_noised
+            v[v>v_max] = v_max
+            v[v<(v_max*-1)] = -1*v_max
+
             #print('read csv file')
             waveform_out = {'waveform':[waveform[0],waveform_noised],'ch':ch, 'time':dt, 'num_acq':num_acq}  
 

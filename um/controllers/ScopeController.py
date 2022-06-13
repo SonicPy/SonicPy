@@ -39,7 +39,9 @@ class ScopeController(pvController):
                             
                             'autoscale_t_min',
                             'autoscale_t_max',
-                            'do_autoscale']
+                            'autoscale_margin',
+                            'do_autoscale',
+                            'auto_autoscale']
         self.init_panel("Scope", self.panel_items)
         self.make_connections()
 

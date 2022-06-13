@@ -9,8 +9,8 @@
 # Copyright:   (c) Tektronix 2016
 #-------------------------------------------------------------------------------
 
-
-import visa, time, logging, os, struct, sys, copy, os.path
+import pyvisa as visa
+import time, logging, os, struct, sys, copy, os.path
 
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtGui, QtCore

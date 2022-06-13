@@ -61,6 +61,7 @@ class OverViewController(QObject):
     def make_connections(self):  
 
         self.widget.open_btn.clicked.connect(self.open_btn_callback)
+        self.widget.sort_btn.clicked.connect(self.folder_widget.raise_widget)
    
         self.widget.scale_ebx.valueChanged.connect(self.scale_changed_callback )
         self.widget.clip_cbx.clicked.connect(self.clip_changed_callback )
@@ -83,6 +84,8 @@ class OverViewController(QObject):
         self.widget.freq_step.valueChanged.connect(self.freq_start_step_callback)
 
         self.folder_widget.list_changed_signal.connect(self.list_changed_signal_callback)
+
+    
 
     def list_changed_signal_callback(self, folders):
         
@@ -239,7 +242,7 @@ class OverViewController(QObject):
             self.model.set_folder_path(folder)
             folders = self.model.conditions_folders_sorted
             self.folder_widget.set_folders(folders)
-            self.folder_widget.raise_widget()
+            
 
             self.folder_selected_signal.emit(folder)
 

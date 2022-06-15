@@ -2,7 +2,7 @@
 
 from PyQt5 import uic, QtWidgets,QtCore
 from PyQt5.QtCore import QObject, pyqtSignal, Qt
-from um.widgets.CustomWidgets import HorizontalSpacerItem, VerticalSpacerItem, FlatButton
+from um.widgets.CustomWidgets import HorizontalSpacerItem, VerticalSpacerItem, FlatButton, HorizontalSpacerWidget
 
 import time
 from um.models.pv_model import PV
@@ -16,10 +16,11 @@ class Panel(QtWidgets.QGroupBox):
     panelClosedSignal = pyqtSignal()
     def __init__(self, title='',pvs=[], isMain = False):
         super().__init__()
+        self.setMinimumWidth(280)
         self.pv_server = pvServer()
         self.pv_widgets = pvQWidgets()
         self.isMain = isMain
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.MinimumExpanding)
         self.setSizePolicy(sizePolicy)
         self.setTitle(title)
         self.i = 0
@@ -36,24 +37,35 @@ class Panel(QtWidgets.QGroupBox):
     def make_widget_items(self, pvs):
         
 
-        _parameter_layout = QtWidgets.QVBoxLayout()
+        
         self.controls = {}
         self._grid = QtWidgets.QGridLayout()
-        self._grid.setContentsMargins(10, 10, 10, 10)
-        self._grid.setSpacing(5)
+        self._grid.setContentsMargins(0,  10, 0, 10)
+        self._grid.setSpacing(3)
         
         
         for i, pv in enumerate(pvs):
             if pv is not None:
                 
-                
-                ctrl, label = self.pv_widgets.pvWidget(pv)
+                if pv == '_divider':
+                    spacer = HorizontalSpacerWidget()
+                    spacer.setMaximumWidth(100)
                     
-                self.controls[pv] = ctrl
+                    self._grid.addWidget(spacer, i, 0)
+                else:
+                    ctrl, label = self.pv_widgets.pvWidget(pv)
+                    label.setMinimumWidth(170)
+                    label.setMaximumWidth(170)
 
-                if ctrl is not None:
-                    self._grid.addWidget(label, i, 0)
-                    self._grid.addWidget(ctrl, i, 1)
+                    ctrl.setMinimumWidth(120)
+                    ctrl.setMaximumWidth(120)
+                        
+                    self.controls[pv] = ctrl
+
+                    if ctrl is not None:
+                        self._grid.addWidget(label, i, 0)
+                        self._grid.addWidget(ctrl, i, 1)
+
                 self.i = i
         
         

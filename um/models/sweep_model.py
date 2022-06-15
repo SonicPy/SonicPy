@@ -328,7 +328,9 @@ class SweepModel(pvModel):
                                 'param':{ 'type':'b'}},
                         'setpoint': 
                                 {'desc': 'Set-point', 'val':30., 'increment':0.1, 'min':0.1,'max':100,
+                                'methods':{'set':False, 'get':True},
                                 'param':{ 'type':'f'}}
+                                
                                 }
 
         self.create_pvs(self.tasks)
@@ -400,14 +402,17 @@ class SweepModel(pvModel):
             self.setpointSweepThread.clear_queue()
     
     def get_points(self):
-        points, step = get_points(self.pvs['start_point']._val,  self.pvs['end_point']._val, self.pvs['n']._val)
+        points, step = _get_points(self.pvs['start_point']._val,  self.pvs['end_point']._val, self.pvs['n']._val)
+        #print(points)
+        #print(step)
         self.points = self.points={'setpoints':points}
         self.pvs['step'].set(step)
         
-def get_points(start_point, end_point, n):
+def _get_points(start_point, end_point, n):
+    #print('_get_points ' + 'start_point '+str(start_point) +' end_point '+str(end_point) +' n '+str(n))
     rng = end_point - start_point
     step = rng / (n -1)
     points = []
-    for i in range(n):
+    for i in range(int(n)):
         points.append(float(round(start_point+i*step,10)))
     return points, float(step)

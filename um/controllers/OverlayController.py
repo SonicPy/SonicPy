@@ -99,11 +99,11 @@ class OverlayController(object):
     def showWidget(self):
         self.overlay_widget.raise_widget()
         self.active = True
-        #print(self.active)
+      
 
     def widget_closed(self):
         self.active = False
-        #print(self.active)
+      
 
     def connect_click_function(self, emitter, function):
         emitter.clicked.connect(function)

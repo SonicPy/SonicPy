@@ -33,6 +33,7 @@ class pvQWidgets():
         if pv_type is bool:
             ctrl = pvQPushButton(pv)
         label = QtWidgets.QLabel(desc)
+        label.setMinimumWidth(150)
         return ctrl, label
 
 
@@ -58,7 +59,7 @@ class pvQWidget(QWidget):
         enabled = myPV._set_enabled
         super().setEnabled(enabled) 
         self.pv.value_changed_signal.connect(self.setValue)
-        self.setMinimumWidth( 150)
+       
         
 
     def valueChangedCallback(self,value):

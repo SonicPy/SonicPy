@@ -35,8 +35,10 @@ class pvController(QObject):
         self.autosave_data_path = os.path.join(autosave_data_path, self.tag)
         
         if self.autosave_settings is not None:
-            print(self.tag)
-            print(self.autosave_settings)
+            pass
+
+            '''print(self.tag)
+            print(self.autosave_settings)'''
 
     def init_panel(self, title, panel_items):
         self.make_panel(title, panel_items, self.isMain)
@@ -51,6 +53,9 @@ class pvController(QObject):
             if tag in pvs:
                 pv = instr+':'+tag
                 pvs_forPanel.append(pv)
+            else:
+                if tag == '_divider':
+                    pvs_forPanel.append(tag)
         self.panel = Panel(title, pvs_forPanel, isMain)
 
     
@@ -104,7 +109,7 @@ class pvController(QObject):
 
 
         data_out = self.model.get_settings(autosave_settings)
-        print (data_out)
+        # print (data_out)
 
         '''
         try:

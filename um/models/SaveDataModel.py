@@ -90,6 +90,7 @@ class SaveDataModel(pvModel):
                         'path':
                                 {'desc': 'Path', 'val':'', 
                                 
+                                'methods':{'set':False, 'get':True},
                                 'param':{'type':'s'}},
                         'path_exists':     
                                 {'desc': 'Path exists;Yes/No', 'val':False, 
@@ -97,6 +98,7 @@ class SaveDataModel(pvModel):
                         'name':
                                 {'desc': 'Last file', 'val':'', 
                                 
+                                'methods':{'set':False, 'get':True},
                                 'param':{'type':'s'}},
                         'format':
                                 {'desc': '# format', 'val':'%3d', 
@@ -107,6 +109,7 @@ class SaveDataModel(pvModel):
                         'latest_event':
                                 {'desc': 'Status', 'val':'', 'epics_PV_out':'16bmb:scope_file:WriteMessage',
                                 
+                                'methods':{'set':False, 'get':True},
                                 'param':{'type':'s'}},
 
                       }       
@@ -269,7 +272,7 @@ class SaveDataModel(pvModel):
     
     def _set_save(self, state):
         self.pvs['save']._val = state
-        print('received save state: ' + str(state))
+        #print('received save state: ' + str(state))
         if state:
 
             file_system_path = self.pvs['file_system_path']._val
@@ -317,7 +320,7 @@ class SaveDataModel(pvModel):
                     pass
 
                 self.write_file(file_name, params=params)
-            print(self.pvs['save']._pv_name + ' save done')
+            #print(self.pvs['save']._pv_name + ' save done')
             #self.pvs['save']._pv_name
             self.pvs['save'].set(False)
             

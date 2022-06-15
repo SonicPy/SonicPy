@@ -36,7 +36,7 @@ class ScopeController(pvController):
                             'num_acq',
                             'run_state',
                             'stop_after_num_av_preset',
-                            
+                            '_divider',
                             'autoscale_t_min',
                             'autoscale_t_max',
                             'autoscale_margin',

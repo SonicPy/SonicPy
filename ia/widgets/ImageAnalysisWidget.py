@@ -51,8 +51,8 @@ class ImageAnalysisWidget(QMainWindow):
 
 
     def update_view(self, image):
-        
-        print(image)
+        pass
+    
 
 
     def make_widget(self):

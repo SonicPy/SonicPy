@@ -124,7 +124,7 @@ class PhaseController(object):
         self.phase_widget.set_vs_sb(phase.params['vs'])
         self.phase_widget.set_vp_sb(phase.params['vp'])
         self.phase_widget.set_d_sb(phase.params['d'])
-        #print(selection)
+     
         
     def file_dragged_in(self,files):
         self.add_btn_click_callback(filenames=files)
@@ -231,7 +231,8 @@ class PhaseController(object):
                                               positions,
                                               intensities,
                                               baseline)
-        #print(color)
+      
+      
         return color
         
 

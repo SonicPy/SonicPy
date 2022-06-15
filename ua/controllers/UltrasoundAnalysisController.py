@@ -119,20 +119,21 @@ class UltrasoundAnalysisController(QObject):
 
             #t_f, spectrum_f = zero_phase_lowpass_filter([t,spectrum],60e6,1)
             if len(t)<2:
-                print('stop')
+                pass
+                
             min_roi = abs(t[1]-t[0])*10
             [l1, r1] = self.display_window.get_echo_bounds(0)
             [l2, r2] = self.display_window.get_echo_bounds(1)
             if l1 >  0 and l2 >0 and abs(l1-r1) > min_roi and abs(l2-r2) > min_roi:
 
-                #pg.plot(np.asarray(spectrum_f), title="spectrum_f")
+                
                 
                 start_time = time.time()
                 self.model.filter_echoes(l1, r1, l2, r2, freq)
 
                 self.model.cross_correlate()
                 self.model.exract_optima()
-                #print("cross correlated in %s seconds." % (time.time() - start_time))
+               
 
                 self.display_window.detail_plot1.setData(*self.model.filtered1)
                 self.display_window.detail_plot1_bg.setData(*self.model.filtered2)

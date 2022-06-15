@@ -54,7 +54,7 @@ class epicsModel():
             self.read_environment_file(self.environment_file)
             for env in self.environment:
                 self.env_pvs.append(PV(env.name))
-        print (self.env_pvs)
+        #print (self.env_pvs)
 
 
     def get_environment(self):

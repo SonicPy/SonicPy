@@ -94,8 +94,6 @@ class UltrasoundAnalysisModel():
         echo1_sub = echo1[lb1:rb1]
         echo2_sub = echo2[lb2:rb2]
         distance = max(max1_ind, max2_ind) - min(max1_ind, max2_ind)
-        #print(distance)
-
 
         shift_range = int((rb1-lb1)/2)*2
         cross_corr = []
@@ -132,7 +130,8 @@ class UltrasoundAnalysisModel():
             try:
                 os.mkdir(subfolder)
             except:
-                print('could not make subfolder: '+ subfolder)
+                pass
+            
                 
         basename = os.path.basename(fname)+'.'+str(round(self.freq*1e-6,1))+'_MHz.json'
 
@@ -268,7 +267,5 @@ def get_fractional_max_x( xData, yData, opt_ind, fit_range):
                 optima_type='maximum'
             optima_x = array([optima_x])
             optima_y = array([optima_y[optima_pind]])
-        
-        #print (optima_x)
-        #print (optima_type)
+
         return (optima_x, optima_y), optima_type'''

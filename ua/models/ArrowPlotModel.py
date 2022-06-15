@@ -165,7 +165,7 @@ class ArrowPlotModel():
             x, y, fit= self.get_line(opt,line_ind)
             line_slopes.append(fit[0])
         min_slope_ind = lines_ind[np.argmin(abs(np.asarray(line_slopes)))]
-        #print(min_slope_ind)
+       
         if min_slope_ind != 0:
             for freq in freqs:
                 best_opt = self.optima[freq].get_optimum(opt, min_slope_ind)
@@ -310,6 +310,5 @@ def get_local_optimum(x, xData, yData, optima_type=None):
             optima_x = array([optima_x])
             optima_y = array([optima_y[optima_pind]])
         
-        #print (optima_x)
-        #print (optima_type)
+       
         return (optima_x, optima_y), optima_type

@@ -157,10 +157,7 @@ class OverViewModel():
             self.waterfalls[freq].settings =  self.settings
 
             self.waterfalls[freq].add_multiple_waveforms(self.spectra[freq])
-            #self.waterfalls[freq].get_rescaled_waveforms()
-
-            #print("Loaded " + str(len(fnames)) + " files in %s seconds." % (time.time() - start_time))
-
+          
     def load_multiple_files_by_condition(self, cond):
         
         fname_dict = self.fps_cond[cond]
@@ -191,10 +188,6 @@ class OverViewModel():
                 self.waterfalls[cond].settings =  self.settings
                 self.waterfalls[cond].add_multiple_waveforms(self.spectra[cond])
                 
-
-                
-
-            #print("Loaded " + str(len(fnames)) + " files in %s seconds." % (time.time() - start_time))
 
 
     def set_folder_path(self, folder):
@@ -249,7 +242,6 @@ class OverViewModel():
         freqs_sorted = self.frequencies_sorted
 
 
-        #print("freqs_sorted : %s seconds." % (time.time() - start_time))
         start_time = time.time()
         for p in conditions_folders_sorted:
             
@@ -278,7 +270,6 @@ class OverViewModel():
                 p_list.append(r)
                 self.fps_Hz[f_num] = p_list
 
-        print("file_cond_dict : %s seconds." % (time.time() - start_time))
 
     def get_frequencies_sorted(self):
         conditions_folders_sorted = self.conditions_folders_sorted

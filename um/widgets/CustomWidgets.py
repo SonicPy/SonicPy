@@ -217,6 +217,12 @@ def HorizontalSpacerItem(minimum_width=0):
     return QtWidgets.QSpacerItem(minimum_width, 0, QtWidgets.QSizePolicy.MinimumExpanding,
                                  QtWidgets.QSizePolicy.Minimum)
 
+class HorizontalSpacerWidget(QtWidgets.QWidget):
+    def __init__(self):
+        super().__init__()
+        self._layout = QtWidgets.QHBoxLayout()
+        self._layout.addSpacerItem(HorizontalSpacerItem())
+        self.setLayout(self._layout)
 
 def VerticalSpacerItem():
     return QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)

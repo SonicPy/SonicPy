@@ -108,7 +108,7 @@ class WaterfallModel( ):
                     'scale':scale,
                     'clip':clip,
                     'fnames':fnames}
-            #print("waterfall composed from  " + str(len(fnames)) + " files in %s seconds." % (time.time() - start_time))
+                    
         self.waterfall_out = out
 
 

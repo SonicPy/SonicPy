@@ -102,7 +102,8 @@ class ArrowPlotController(QObject):
             self.arrow_plot_window.update_max_line([],[])
 
     def error_not_enough_datapoints(self):
-        print('Not enough datapoints')
+        pass
+    
 
     def calculate_data(self):
         

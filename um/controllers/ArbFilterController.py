@@ -132,8 +132,9 @@ class ArbFilterController(pvController):
         self.arb_filter_edit_controller.select_controller(key)
 
     def arb_filter_edited_apply_clicked_signal_callback(self, selected):
-        print(selected)
-
+        pass
+        
+        
 
     def edit_state_signal_callback(self, pv_name, data):
         data = data[0]

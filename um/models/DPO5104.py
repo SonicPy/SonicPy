@@ -95,7 +95,7 @@ class Scope_DPO5104(Scope, pvModel):
                                 'methods':{'set':False, 'get':True}, 
                                 'param':{ 'type':'dict'}},
                         'do_autoscale':
-                                {'desc': 'Autoscale V;Do once', 'val':False, 
+                                {'desc': 'Autoscale (V);Do once', 'unit':u'V', 'val':False, 
                                 'param':{ 'type':'b'}},
                         'autoscale_t_min':  
                                 {'desc': 'Autscale t<sub>min</sub>','unit':u'us', 'val':3.0,'increment':0.1, 'min':0,'max':20,
@@ -104,10 +104,10 @@ class Scope_DPO5104(Scope, pvModel):
                                 {'desc': 'Autscale t<sub>max</sub>','unit':u'us', 'val':9.0,'increment':0.1, 'min':0,'max':20,
                                 'param':{ 'type':'f'}},
                         'autoscale_margin':  
-                                {'desc': 'Autoscale margin','unit':u'%', 'val':30,'min':0,'max':100,
+                                {'desc': 'Autoscale +/-','unit':u'%', 'val':30,'min':0,'max':100,
                                 'param':{ 'type':'i'}},
                         'auto_autoscale':
-                                {'desc': 'Autoscale V; ON', 'val':True, 
+                                {'desc': 'Autoscale (V); ON/OFF', 'val':True, 
                                 'param':{ 'type':'b'}},
                                 
                       }       
@@ -292,7 +292,7 @@ class Scope_DPO5104(Scope, pvModel):
         self.pvs['vertical_scale']._val = scale
         if self.connected:
             channel = self._get_channel()
-            print(scale)
+            #print(scale)
             self.DPO5000.set_vertical_scale(channel, scale)
         
     def _get_vertical_scale(self):

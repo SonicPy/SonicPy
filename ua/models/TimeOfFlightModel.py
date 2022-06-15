@@ -25,7 +25,8 @@ class TimeOfFlightModel():
         
         self.spectra = {}
         
-    
+        self.experiment = {}
+        
 
 
  

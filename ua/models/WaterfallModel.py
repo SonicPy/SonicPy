@@ -14,8 +14,20 @@ class WaterfallModel( ):
                          'clip':False}
         self.waterfall_out = {}
 
-        self.echoes = {'P':{},'S':{}}
+        self.echoes = {}
      
+
+    def set_echoes(self, fname, echoes):
+        # echoes = dict
+        # {'P':[low,high], ...}
+        if fname in self.echoes:
+            echo_dict = self.echoes[fname]
+        else:
+            echo_dict = {}
+        for echo in echoes:
+            echo_dict[echo]= echoes[echo]
+        
+
 
     def add_multiple_waveforms(self, params ):
         
@@ -122,8 +134,10 @@ class WaterfallModel( ):
         waterfall_waveform = waterfall.waterfall_out['waveform']
 
         if len(limits):
+            # blue part
             selected = [waterfall_waveform[0] [limits[0]:limits[1]],
                         waterfall_waveform[1] [limits[0]:limits[1]]]
+            # yellow part
             waterfall_waveform = [ np.append(waterfall_waveform[0] [:limits[0]], waterfall_waveform[0] [limits[1]:]),
                                    np.append(waterfall_waveform[1] [:limits[0]], waterfall_waveform[1] [limits[1]:])]
 
@@ -132,7 +146,7 @@ class WaterfallModel( ):
             file = path.split(os.sep)[-1]
             selected_name_out = os.path.join( fldr,file)
         else:
-            selected = [[],[]]
+            selected = [[],[]] 
             selected_name_out = ''
         return waterfall_waveform, selected, selected_name_out
 

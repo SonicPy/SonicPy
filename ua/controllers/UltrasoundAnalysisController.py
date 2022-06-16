@@ -15,6 +15,7 @@ from utilities.utilities import *
 from ua.widgets.UltrasoundAnalysisWidget import UltrasoundAnalysisWidget
 from ua.widgets.ArrowPlotWidget import ArrowPlotWidget
 from ua.models.UltrasoundAnalysisModel import UltrasoundAnalysisModel
+from um.models.tek_fileIO import read_tek_ascii, read_tek_csv
 from utilities.HelperModule import move_window_relative_to_screen_center, get_partial_index, get_partial_value
 import math, time
 
@@ -184,15 +185,23 @@ class UltrasoundAnalysisController(QObject):
 
  
     def load_file(self, filename):
+        if '.' in filename:
+            ext = '.' + filename.split('.')[-1]
+
+        else:
+            ext = ''
+        if ext == '.csv':
+            t, spectrum = read_tek_csv(filename, subsample=1)
+            t, spectrum = zero_phase_highpass_filter([t,spectrum],1e4,1)
+        elif ext == '':
+            t, spectrum = read_tek_ascii(filename, subsample=1)
         
-        t, spectrum = read_tek_csv(filename, subsample=1)
-        t, spectrum = zero_phase_highpass_filter([t,spectrum],1e4,1)
         return t,spectrum, filename
 
     def update_data(self, *args, **kwargs):
         filename = kwargs.get('filename', None)
         if filename is None:
-            filename = open_file_dialog(None, "Load File(s).",filter='*.csv')
+            filename = open_file_dialog(None, "Load File(s).")
         if len(filename):
             t, spectrum, fname = self.load_file(filename)
 

@@ -96,6 +96,24 @@ def read_tek_csv(fname, return_x=True, subsample=1):
     else: 
         return [y]
 
+        
+
+def read_tek_ascii(fname, return_x=True, subsample=1):
+
+    r = read_ascii_scope_files_2d([fname],subsample=1)
+    data = r['voltage'] 
+    
+    
+
+    y = data[0]
+
+    if return_x:
+
+        x = r['time']
+        return [x, y]
+    else:
+        return [y]
+
 
 def read_tek_csv_files_2d(paths, subsample=1, *args, **kwargs):
     ''' this is anew reader for tek csv files, supposed to work slightly faster than the old one

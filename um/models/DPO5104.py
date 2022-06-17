@@ -107,7 +107,7 @@ class Scope_DPO5104(Scope, pvModel):
                                 {'desc': 'Autoscale +/-','unit':u'%', 'val':30,'min':0,'max':100,
                                 'param':{ 'type':'i'}},
                         'auto_autoscale':
-                                {'desc': 'Autoscale (V); ON/OFF', 'val':True, 
+                                {'desc': 'Autoscale (V); ON/OFF', 'val':False, 
                                 'param':{ 'type':'b'}},
                                 
                       }       

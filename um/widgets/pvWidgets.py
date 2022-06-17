@@ -33,7 +33,7 @@ class pvQWidgets():
         if pv_type is bool:
             ctrl = pvQPushButton(pv)
         label = QtWidgets.QLabel(desc)
-        label.setMinimumWidth(150)
+        #label.setMinimumWidth(150)
         return ctrl, label
 
 

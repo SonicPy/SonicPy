@@ -40,7 +40,7 @@ class Panel(QtWidgets.QGroupBox):
         
         self.controls = {}
         self._grid = QtWidgets.QGridLayout()
-        self._grid.setContentsMargins(0,  10, 0, 10)
+        self._grid.setContentsMargins(10,  10, 10, 10)
         self._grid.setSpacing(3)
         
         
@@ -54,11 +54,11 @@ class Panel(QtWidgets.QGroupBox):
                     self._grid.addWidget(spacer, i, 0)
                 else:
                     ctrl, label = self.pv_widgets.pvWidget(pv)
-                    label.setMinimumWidth(170)
-                    label.setMaximumWidth(170)
+                    #label.setMinimumWidth(170)
+                    #label.setMaximumWidth(170)
 
-                    ctrl.setMinimumWidth(120)
-                    ctrl.setMaximumWidth(120)
+                    #ctrl.setMinimumWidth(120)
+                    #ctrl.setMaximumWidth(120)
                         
                     self.controls[pv] = ctrl
 

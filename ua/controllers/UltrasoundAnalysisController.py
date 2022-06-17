@@ -15,7 +15,7 @@ from utilities.utilities import *
 from ua.widgets.UltrasoundAnalysisWidget import UltrasoundAnalysisWidget
 from ua.widgets.ArrowPlotWidget import ArrowPlotWidget
 from ua.models.UltrasoundAnalysisModel import UltrasoundAnalysisModel
-from um.models.tek_fileIO import read_tek_ascii, read_tek_csv
+from um.models.tek_fileIO import read_tek_ascii, read_tek_csv, get_file_format, read_stonybrook_wavestar, read_gsecars_oscilloscope
 from utilities.HelperModule import move_window_relative_to_screen_center, get_partial_index, get_partial_value
 import math, time
 
@@ -185,17 +185,23 @@ class UltrasoundAnalysisController(QObject):
 
  
     def load_file(self, filename):
-        if '.' in filename:
-            ext = '.' + filename.split('.')[-1]
-
-        else:
-            ext = ''
-        if ext == '.csv':
-            t, spectrum = read_tek_csv(filename, subsample=1)
-            t, spectrum = zero_phase_highpass_filter([t,spectrum],1e4,1)
-        elif ext == '':
-            t, spectrum = read_tek_ascii(filename, subsample=1)
+        t = np.zeros(1)
+        spectrum = np.zeros(1)
         
+
+        fformat, fformat_name = get_file_format(filename)
+        if fformat == 1:
+            t, spectrum = read_tek_csv(filename, subsample=1)
+            #t, spectrum = zero_phase_highpass_filter([t,spectrum],1e4,1)
+        elif fformat == 2:
+            t, spectrum = read_tek_ascii(filename, subsample=1)
+      
+        elif fformat == 4:
+            t, spectrum = read_stonybrook_wavestar(filename, subsample=1)
+           
+        elif fformat == 5:
+            t, spectrum = read_gsecars_oscilloscope(filename, subsample=1)
+    
         return t,spectrum, filename
 
     def update_data(self, *args, **kwargs):

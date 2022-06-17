@@ -8,6 +8,91 @@ from numpy import format_float_scientific
 import time
 from PyQt5 import QtWidgets
 
+def get_file_format( fname):
+    '''
+    used for determining the file format for the oscilloscope waveform data
+    Supported types:
+    1. HPCAT tek scope (column 0-3: header, column 4-5: 2-column data)
+    2. LANL 2-column, no header
+    3. Stonybrook scope (same as 1), returns as 1
+    4. Stonybrook wavestar (2-column, one line header)
+    5. GSECARS (2-column with full header)
+
+    returns: tuple with file format number 1-n, or -1 if not recognised, and the file format name
+    '''
+
+    
+    file_text = open(fname, "r")
+    
+    file_line = file_text.readline()
+    separator = None
+    formats = [ (-1, ''),
+                (1, 'hpcat'),
+                (2, 'lanl'),
+                (4, 'stonybrook'),
+                (5, 'gsecars')
+                ]
+    fformat = 0
+
+    if '\t' in file_line:
+        # tab separated
+        # LANL format
+        #separator = '\t'
+        #tokens = file_line.split(separator)
+        fformat = 2
+
+    elif ',' in file_line:
+        header = {}
+        # coma separated
+        separator = ','    
+        tokens = file_line.split(separator)
+        
+        if len(tokens) == 5:
+            # hpcat format
+            fformat =  1
+
+        elif len(tokens) == 2:
+
+            if tokens[0].strip() == 's' and tokens[1].strip() == 'Volts':
+                # stonybrook wavestar format
+                fformat =  3
+            
+            # Check if there is a multiline 2-column header (GSECARS)
+            header = {}
+            a = True
+            if len(tokens[0]):
+                    header[tokens[0].strip('"').strip()]=(tokens[1].strip())
+            else:
+                a = False
+            row = 1
+
+            while a:
+                file_line = file_text.readline()
+                tokens = file_line.split(separator)
+                if len(tokens[0])>1:
+                    header[tokens[0].strip('"').strip()]=(tokens[1].strip())
+                else:
+                    a = False
+                row +=1
+            
+            if "Model" in header:
+                # gsecars format
+                fformat =  4
+
+    file_text.close()
+
+    return formats[fformat]
+
+'''fnames = ['/Users/hrubiak/Downloads/Ultrasonic/3 StonyBrook_Oscilloscope/3 StonyBrook_Oscilloscope_u-300.csv',
+           '/Users/hrubiak/Downloads/Ultrasound_XRD_datasets_for_dissemination/Ultrasound_data_for_dissemination_June_2018_Exp4/US/Exp4_25_C_8750_psi/Exp4_25_C_8750_psi_71000_khz',
+           '/Users/hrubiak/Downloads/Ultrasonic/3 StonyBrook_Oscilloscope/3 StonyBrook_Oscilloscope_u-300.csv',
+           '/Users/hrubiak/Downloads/Ultrasonic/4 StonyBrook_WaveStar/4 StonyBrook_WaveStar_u-060.csv',
+           '/Users/hrubiak/Downloads/Ultrasonic/2 GSECARS_transferfunction/2 GSECARS_transferfunction_u600-d673K.csv'
+           ]
+for fname in fnames:
+    fformat = get_file_format(fname)
+    print (fname)
+    print (fformat)'''
 
 def read_file_TEKAFG3000( filename=''):
     #Filename for TFW to be read in from the PC
@@ -114,8 +199,35 @@ def read_tek_ascii(fname, return_x=True, subsample=1):
     else:
         return [y]
 
+def read_gsecars_oscilloscope(fname, return_x=True, subsample=1):
+    r = read_tek_csv_files_2d([fname],subsample=1, header_columns=2,skip_rows=1,column_shift=0)
+    data = r['voltage'] 
+    
+    
 
-def read_tek_csv_files_2d(paths, subsample=1, *args, **kwargs):
+    y = data[0]
+
+    if return_x:
+
+        x = r['time']
+        return [x, y]
+    else:
+        return [y]
+
+
+def read_stonybrook_wavestar(fname, return_x=True, subsample=1):
+    r = read_ascii_scope_files_2d([fname],subsample=1, separator=',', skip_rows=1, nchans = 200000)
+    data = r['voltage'] 
+    y = data[0]
+
+    if return_x:
+
+        x = r['time']
+        return [x, y]
+    else:
+        return [y]
+
+def read_tek_csv_files_2d(paths, subsample=1, header_columns = 3, skip_rows = 0, column_shift = 3, *args, **kwargs):
     ''' this is anew reader for tek csv files, supposed to work slightly faster than the old one
     the speed gain is due to creating a full-size empty 2d array before starting the reading the files
     optional progress dialog has been commented out for now
@@ -146,8 +258,13 @@ def read_tek_csv_files_2d(paths, subsample=1, *args, **kwargs):
     while a:
         file_line = file_text.readline()
         tokens = file_line.split(',')
-        if len(tokens[0]):
-            header[tokens[0].strip('"')]=(tokens[1],tokens[2])
+        if len(tokens[0])>1:
+            val = []
+
+            for v in range(header_columns-1):
+                val.append(tokens[v+1].strip())
+            header[tokens[0].strip('"')]=tuple(val)
+       
         else:
             a = False
         
@@ -161,6 +278,9 @@ def read_tek_csv_files_2d(paths, subsample=1, *args, **kwargs):
     files_loaded = []
     times = []
 
+    if column_shift == 0:
+        skip_rows = skip_rows + row
+
     x = np.array(range(nchans))*sample_period*subsample
     
     #QtWidgets.QApplication.processEvents()
@@ -169,17 +289,24 @@ def read_tek_csv_files_2d(paths, subsample=1, *args, **kwargs):
             #update progress bar only every 10 files to save time
             progress_dialog.setValue(d)
             QtWidgets.QApplication.processEvents()'''
-        try:
-            file_text = open(file, "r")
-
-            a = True
-            row = 0
-            for row in range(nchans-3):
-                data[d][row]=float(file_text.readline().split(',')[4])
-            files_loaded.append(file)
-            file_text.close()
-        except:
-            pass
+        
+        data_position = column_shift+1
+        file_text = open(file, "r")
+        for skip_row in range(skip_rows):
+            file_line = file_text.readline()
+            
+        a = True
+        row = 0
+        for row in range(nchans-3):
+            line_str  = file_text.readline()
+            if not '#' in line_str:
+                
+            
+                data[d][row]=float(line_str.split(',')[data_position])
+            
+        files_loaded.append(file)
+        file_text.close()
+        
         
         
         '''if progress_dialog.wasCanceled():
@@ -193,7 +320,7 @@ def read_tek_csv_files_2d(paths, subsample=1, *args, **kwargs):
     return r
 
 
-def read_ascii_scope_files_2d(paths, subsample=1, *args, **kwargs):
+def read_ascii_scope_files_2d(paths, subsample=1, separator = '\t',skip_rows = 0, nchans = 10000, *args, **kwargs):
     ''' this is anew reader for tek csv files, supposed to work slightly faster than the old one
     the speed gain is due to creating a full-size empty 2d array before starting the reading the files
     optional progress dialog has been commented out for now
@@ -223,15 +350,17 @@ def read_ascii_scope_files_2d(paths, subsample=1, *args, **kwargs):
     row = 0
     a = True
     horz = []
+    for skip_row in range(skip_rows):
+        file_line = file_text.readline()
     for i in range (2):
         file_line = file_text.readline()
-        t = file_line.split('\t')[0]
+        t = file_line.split(separator)[0]
         horz.append( float(t))
        
         row +=1
 
     file_text.close()
-    nchans = 10000 #int(header['Record Length'][0])
+    
     sample_period = round(horz[1]-horz[0],12)
 
     data = np.zeros([nfiles, nchans])
@@ -248,11 +377,12 @@ def read_ascii_scope_files_2d(paths, subsample=1, *args, **kwargs):
             QtWidgets.QApplication.processEvents()'''
         try:
             file_text = open(file, "r")
-
+            for skip_row in range(skip_rows):
+                file_line = file_text.readline()
             a = True
             row = 0
             for row in range(nchans-3):
-                data[d][row]=float(file_text.readline().split('\t')[1])
+                data[d][row]=float(file_text.readline().split(separator)[1])
             files_loaded.append(file)
             file_text.close()
         except:

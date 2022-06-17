@@ -229,7 +229,7 @@ class setpointSweep(pvModel):
 
     def wait_for_save_data_done(self, pv, param):
         param = param[0]
-        print(param)
+        #print(param)
         if not param:
             save_data_pvname = self.parent.pvs['save_data_read_channel']._val
             save_data_pv = self.pv_server.get_pv(save_data_pvname)

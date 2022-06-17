@@ -276,7 +276,7 @@ class PhaseController(object):
                 self.phase_model.set_d(row, float(d))
                 vs = float(vs)
 
-                if vs is not '':
+                if vs != '':
                     self.phase_widget.set_phase_vs(row, vs)
                     self.phase_model.set_vs(row, vs)
 

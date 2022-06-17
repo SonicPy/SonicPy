@@ -61,7 +61,7 @@ class SaveDataController(pvController):
                                 filter=self.model.pvs['file_filter']._val)
             else:
                 filename = kwargs['filename']
-            if filename is not '':
+            if filename != '':
                 if 'params' in kwargs:
                     params = kwargs['params']
                     self.model.pvs['params'].set(params)

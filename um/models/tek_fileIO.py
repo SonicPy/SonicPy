@@ -8,6 +8,29 @@ from numpy import format_float_scientific
 import time
 from PyQt5 import QtWidgets
 
+
+def load_any_waveform_file(filename):
+
+        
+        t = np.zeros(1)
+        spectrum = np.zeros(1)
+        
+
+        fformat, fformat_name = get_file_format(filename)
+        if fformat == 1:
+            t, spectrum = read_tek_csv(filename, subsample=1)
+            #t, spectrum = zero_phase_highpass_filter([t,spectrum],1e4,1)
+        elif fformat == 2:
+            t, spectrum = read_tek_ascii(filename, subsample=1)
+      
+        elif fformat == 4:
+            t, spectrum = read_stonybrook_wavestar(filename, subsample=1)
+           
+        elif fformat == 5:
+            t, spectrum = read_gsecars_oscilloscope(filename, subsample=1)
+    
+        return t,spectrum
+
 def get_file_format( fname):
     '''
     used for determining the file format for the oscilloscope waveform data

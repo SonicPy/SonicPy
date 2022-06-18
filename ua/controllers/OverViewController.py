@@ -128,6 +128,7 @@ class OverViewController(QObject):
                 self.re_plot_single_frequency()
                 
                 cond = self.model.file_dict[self.selected_fname][0]
+                freq = self.model.file_dict[self.selected_fname][1]
                 conds = list(self.model.fps_cond.keys())
                 ind  = conds.index(cond)
                 self.set_condition(ind)
@@ -136,6 +137,7 @@ class OverViewController(QObject):
                 
                 data['fname'] = self.selected_fname
                 data['cond'] = cond
+                data['freq'] = freq
 
                 selected = self.model.spectra[cond][self.freq]['waveform']
                
@@ -155,6 +157,8 @@ class OverViewController(QObject):
                 
                 self.re_plot_single_condition()
 
+                cond = self.model.file_dict[self.selected_fname][0]
+                self.cond = cond
                 freq = self.model.file_dict[self.selected_fname][1]
                 freqs = list(self.model.fps_Hz.keys())
                 ind  = freqs.index(freq)
@@ -163,7 +167,7 @@ class OverViewController(QObject):
                 data = {}
                 
                 data['fname'] = self.selected_fname
-                data['cond'] = self.cond
+                data['cond'] = cond
                 data['freq'] = freq
 
                 selected = self.model.spectra[self.cond][freq]['waveform']

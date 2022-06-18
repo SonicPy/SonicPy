@@ -83,11 +83,10 @@ class TimeOfFlightController(QObject):
     def file_selected_signal_callback(self, data):
 
         fname = data['fname']
-
+        fbase = data['freq']
         f_start = self.overview_controller.widget.freq_start.value()
         f_step = self.overview_controller.widget.freq_step.value()
-        name = os.path.split(fname)[-1]
-        fbase = name[-7:-4]
+        
         
         f_freq_ind = int(fbase)
         freq = f_start + f_freq_ind * f_step

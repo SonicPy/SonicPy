@@ -13,8 +13,8 @@ from functools import partial
 from um.models.tek_fileIO import *
 from scipy import signal
 import pyqtgraph as pg
-from utilities.utilities import zero_phase_bandpass_filter, read_tek_csv, \
-                                read_multiple_spectra, zero_phase_highpass_filter, \
+from utilities.utilities import zero_phase_bandpass_filter,  \
+                                 zero_phase_highpass_filter, \
                                 zero_phase_bandstop_filter, zero_phase_lowpass_filter
 
 from ua.models.WaterfallModel import WaterfallModel
@@ -88,6 +88,9 @@ class OverViewModel():
 
         self.conditions_folders_sorted = []
 
+        self.echoes_p = {}
+        self.echoes_s = {}
+
     def add_echoes(self, correlation):
         filename_waweform = correlation['filename_waweform']
         bounds = correlation['echo_bounds']
@@ -100,9 +103,20 @@ class OverViewModel():
         cond = freq_cond[0]
         cond_waterfall = self.waterfalls[cond]
 
-        freq_waterfall.echoes[wave_type][filename_waweform]=bounds
-        cond_waterfall.echoes[wave_type][filename_waweform]=bounds
-     
+        # i was here
+        freq_waterfall.set_echoes(filename_waweform ,wave_type, bounds)
+        
+        cond_waterfall.set_echoes(filename_waweform ,wave_type, bounds)
+        
+    def set_echoes(self, fname, wave_type, echoes_bounds):
+        # echoes_bounds = list, [[0,0],[0,0]]
+        # echoes_bounds[0]: P bounds
+        # echoes_bounds[0]: S bounds
+        if wave_type == 'P':
+            self.echoes_p[fname] = echoes_bounds
+
+        elif wave_type == 'S':
+            self.echoes_s[fname] = echoes_bounds
 
     def clear(self):
         self.__init__()

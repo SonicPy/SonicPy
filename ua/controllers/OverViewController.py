@@ -111,6 +111,7 @@ class OverViewController(QObject):
 
     def correlation_echoes_added(self,correlation):
         self.model.add_echoes(correlation)
+
         self.re_plot_single_frequency()
         self.re_plot_single_condition()
 
@@ -119,7 +120,7 @@ class OverViewController(QObject):
         # this is the inxed of the plot when user clicks on the waterfall plot
         index = round(y_pos)
         
-        fnames = list(self.model.waterfalls[self.freq].waveforms[0].keys())
+        fnames = list(self.model.waterfalls[self.freq].waveforms.keys())
         if index >=0 and index < len(fnames):
             
             if fnames[index] in self.model.file_dict:
@@ -150,7 +151,7 @@ class OverViewController(QObject):
 
         index = round(y_pos)
         
-        fnames = list(self.model.waterfalls[self.cond].waveforms[0].keys())
+        fnames = list(self.model.waterfalls[self.cond].waveforms.keys())
         if index >=0 and index < len(fnames):
             if fnames[index] in self.model.file_dict:
                 self.selected_fname = fnames[index]
@@ -290,16 +291,17 @@ class OverViewController(QObject):
 
     def re_plot_single_frequency(self ):
         waterfall = self.model.waterfalls[self.freq]
-        waterfall.get_rescaled_waveforms()
+        waterfall.get_rescaled_waveforms(caller='re_plot_single_frequency')
     
         selected_fname = self.selected_fname
         waterfall_waveform, \
             selected, \
-                selected_name_out = waterfall.prepare_waveforms_for_plot( selected_fname)
+                selected_name_out, \
+                    echoes_p = waterfall.prepare_waveforms_for_plot( selected_fname)
 
         self.widget.single_frequency_waterfall.clear_plot()
         
-        self.update_plot_sigle_frequency(waterfall_waveform,selected)
+        self.update_plot_sigle_frequency(waterfall_waveform,selected, echoes_p)
         f_start = self.widget.freq_start.value()
         f_step = self.widget.freq_step.value()
         display_freq = f_start + int(self.freq) * f_step
@@ -308,31 +310,33 @@ class OverViewController(QObject):
 
     def re_plot_single_condition(self ):
         waterfall = self.model.waterfalls[self.cond]
-        waterfall.get_rescaled_waveforms()
+        waterfall.get_rescaled_waveforms(caller='re_plot_single_condition')
     
         selected_fname = self.selected_fname
 
         waterfall_waveform, \
             selected, \
-                selected_name_out = waterfall.prepare_waveforms_for_plot( selected_fname)
+                selected_name_out, \
+                    echoes_p = waterfall.prepare_waveforms_for_plot( selected_fname)
 
         self.widget.single_condition_waterfall.clear_plot()
         
-        self.update_plot_sigle_condition(waterfall_waveform,selected)
+        self.update_plot_sigle_condition(waterfall_waveform,selected,echoes_p)
         self.widget.single_condition_waterfall.set_name ( self.cond)
         self.widget.single_condition_waterfall.set_selected_name (selected_name_out)
 
     
 
-    def update_plot_sigle_frequency(self, waveform,selected=[[],[]]):
+    def update_plot_sigle_frequency(self, waveform,selected=[[],[]], echoes_p=[[],[]]):
         if waveform is not None:
-            self.widget.single_frequency_waterfall.plot(waveform[0],waveform[1],selected[0],selected[1])
+            print(echoes_p)
+            self.widget.single_frequency_waterfall.plot(waveform[0],waveform[1],selected[0],selected[1], echoes_p[0], echoes_p[1])
 
- 
+        
 
-    def update_plot_sigle_condition(self, waveform,selected=[[],[]]):
+    def update_plot_sigle_condition(self, waveform,selected=[[],[]], echoes_p=[[],[]]):
         if waveform is not None:
-            self.widget.single_condition_waterfall.plot(waveform[0],waveform[1],selected[0],selected[1])
+            self.widget.single_condition_waterfall.plot(waveform[0],waveform[1],selected[0],selected[1], echoes_p[0], echoes_p[1])
 
     def save_result(self):
         pass

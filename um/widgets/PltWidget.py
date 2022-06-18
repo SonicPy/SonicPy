@@ -425,13 +425,18 @@ class PltWidget(pg.PlotWidget):
         #self.roi_cursor_legend.anchor(itemPos=(0, 0), parentPos=(0, 0), offset=(0, 30))
         # initialize roi plot 
         rois_color = self.colors['rois_color']
+        echo_color = '#ff0055'
         self.plotRoi = pg.PlotDataItem(roiHorz, roiData, 
             antialias=True, pen=rois_color, connect="finite", width=1)
         self.addItem(self.plotRoi)  
+        self.plotEcho = pg.PlotDataItem([], [], 
+            antialias=True, pen=echo_color, connect="finite", width=1)
+        self.addItem(self.plotEcho)  
         self.legend.addItem(self.plotRoi, '')
+        self.legend.addItem(self.plotEcho, '')
         self.setLabel('bottom', xLabel) 
 
-    def plotData(self, xAxis,data,roiHorz=[],roiData=[], xLabel='', dataLabel=''):
+    def plotData(self, xAxis,data,roiHorz=[],roiData=[],echoHorz=[],echoData=[], xLabel='', dataLabel=''):
         if len(xAxis)==len(data):
             self.xAxis = xAxis
             self.yData = data
@@ -440,6 +445,7 @@ class PltWidget(pg.PlotWidget):
             else:
                 self.plotForeground.setData(xAxis, data) 
                 self.plotRoi.setData(roiHorz, roiData) 
+                self.plotEcho.setData(echoHorz,echoData)
             # if nonzero ROI data, show ROI legend on plot
             if len(roiHorz) > 0: roiLabel = 'ROIs'
             else:   roiLabel = ''

@@ -63,9 +63,9 @@ class WaterfallWidget(QtWidgets.QWidget):
             else:
                 self._button_layout.addWidget(ctrl)
 
-    def plot(self, x,y,sel_x=[],sel_y=[], xLabel='Time', dataLabel=''):
+    def plot(self, x,y,sel_x=[],sel_y=[],echoes_p_x=[],echoes_p_y=[], xLabel='Time', dataLabel=''):
         fig = self.plot_widget.fig.win 
-        fig.plotData(x,y,sel_x,sel_y, xLabel, dataLabel)
+        fig.plotData(x,y,sel_x,sel_y, echoes_p_x,echoes_p_y, xLabel, dataLabel)
 
     def clear_plot(self,):
         self.plot([],[])

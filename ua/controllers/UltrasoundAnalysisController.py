@@ -87,7 +87,7 @@ class UltrasoundAnalysisController(QObject):
         if self.fname is not None:
             filename = self.fname + '.json'
             out = self.model.save_result(self.fname)
-            if out['saved']:
+            if out['saved']: 
                 self.correlation_saved_signal.emit(out['data'])
 
 

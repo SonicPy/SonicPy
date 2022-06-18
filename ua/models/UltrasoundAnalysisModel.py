@@ -36,6 +36,9 @@ class UltrasoundAnalysisModel():
         self.wave_type = 'P' # or 'S'
         self.settings = {'tukey_alpha':0.2}
 
+        self.minima = []
+        self.maxima = []
+
     def fit_func(self, x, a, b,c,d):
         '''
         calculated a cosine function, can be used for regression
@@ -123,69 +126,46 @@ class UltrasoundAnalysisModel():
         '''
         saves result of correlation between two echoes to file
         '''
-        oritinal_folder =  os.path.split(fname)[:-1]
-        subfolder = os.path.join(*oritinal_folder,self.wave_type)
-        exists = os.path.exists(subfolder)
-        if not exists:
-            try:
-                os.mkdir(subfolder)
-            except:
-                pass
-            
+        if len(self.minima):
+            oritinal_folder =  os.path.split(fname)[:-1]
+            subfolder = os.path.join(*oritinal_folder,self.wave_type)
+            exists = os.path.exists(subfolder)
+            if not exists:
+                try:
+                    os.mkdir(subfolder)
+                except:
+                    pass
                 
-        basename = os.path.basename(fname)+'.'+str(round(self.freq*1e-6,1))+'_MHz.json'
+                    
+            basename = os.path.basename(fname)+'.'+str(round(self.freq*1e-6,1))+'_MHz.json'
 
-        filename = os.path.join(subfolder,basename)
-        data = {'frequency':self.freq,
-                    'correlation':{
-                    'minima_t':list(np.around(self.minima[0],12)),
-                    'minima':list(np.around(self.minima[1],12)), 
-                    'maxima_t':list(np.around(self.maxima[0],12)),
-                    'maxima':list(np.around(self.maxima[1],12))},
-                    'filename_waweform':fname,
-                    'echo_bounds':self.bounds,
-                    'filter': {'tukey_alpha':self.settings['tukey_alpha']} ,
-                    'wave_type':self.wave_type}
-        
-        saved = False
-        try:
-            if filename.endswith('.json'):
-                with open(filename, 'w') as json_file:
-                    json.dump(data, json_file,indent = 2) 
-                    saved = True   
-        except:
-            print('could not save file: '+ filename)
-        
-        return {'saved':saved, 'data':data}
+            filename = os.path.join(subfolder,basename)
+            data = {'frequency':self.freq,
+                        'correlation':{
+                        'minima_t':list(np.around(self.minima[0],12)),
+                        'minima':list(np.around(self.minima[1],12)), 
+                        'maxima_t':list(np.around(self.maxima[0],12)),
+                        'maxima':list(np.around(self.maxima[1],12))},
+                        'filename_waweform':fname,
+                        'echo_bounds':self.bounds,
+                        'filter': {'tukey_alpha':self.settings['tukey_alpha']} ,
+                        'wave_type':self.wave_type}
+            
+            saved = True
+            '''saved = False
+            try:
+                if filename.endswith('.json'):
+                    with open(filename, 'w') as json_file:
+                        json.dump(data, json_file,indent = 2) 
+                        saved = True   
+            except:
+                print('could not save file: '+ filename)'''
+            
+            return {'saved':saved, 'data':data}
 
-
-
-'''def index_of_nearest(values, value):
-    items = []
-    for ind, v in enumerate(values):
-        diff = abs(v-value)
-        item = (diff, v, ind)
-        items.append(item)
-    def getKey(item):
-        return item[0]
-    s = sorted(items, key=getKey)
-    closest = s[0][1]
-    closest_ind = s[0][2]
-    return closest_ind'''
+        return {'saved':False, 'data':{}}
 
 
-'''def get_optima(xData,yData, optima_type=None):
-    f = None
-    if optima_type == 'min':
-        f = less
-    elif optima_type == 'max':
-        f = greater
-    if f is not None:
-        optima_ind = argrelextrema(yData, f)
-        optima_x = xData[optima_ind]
-        optima_y = yData[optima_ind]
-        return optima_x, optima_y
-    return ([],[])'''
 
 def get_optima_peaks(xData, yData, optima_type = None):
     optima_x, optima_y = [],[]
@@ -222,6 +202,33 @@ def get_fractional_max_x( xData, yData, opt_ind, fit_range):
         fract_x = near_x
     return fract_x
 
+
+'''def index_of_nearest(values, value):
+    items = []
+    for ind, v in enumerate(values):
+        diff = abs(v-value)
+        item = (diff, v, ind)
+        items.append(item)
+    def getKey(item):
+        return item[0]
+    s = sorted(items, key=getKey)
+    closest = s[0][1]
+    closest_ind = s[0][2]
+    return closest_ind'''
+
+
+'''def get_optima(xData,yData, optima_type=None):
+    f = None
+    if optima_type == 'min':
+        f = less
+    elif optima_type == 'max':
+        f = greater
+    if f is not None:
+        optima_ind = argrelextrema(yData, f)
+        optima_x = xData[optima_ind]
+        optima_y = yData[optima_ind]
+        return optima_x, optima_y
+    return ([],[])'''
 
 '''def get_local_optimum(x, xData, yData, optima_type=None):
 

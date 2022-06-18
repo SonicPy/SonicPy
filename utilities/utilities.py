@@ -11,72 +11,7 @@ import math
 from PyQt5 import QtCore, QtWidgets
 import time, os
 
-def read_multiple_spectra(filenames, subsample = 1):
-    spectra = []
-    f = filenames[0]
-    X,Y = read_tek_csv(f, return_x=True, subsample=subsample)
-    
-    for f in filenames:
-        Y = read_tek_csv(f, return_x=False, subsample=subsample)
-        y = Y
-        
-        spectra.append(y)
-    return spectra, X
 
-def read_multiple_spectra_dict(filenames, subsample = 1 ):
-
-    spectra = []
-    f = filenames[0]
-    X,Y = read_tek_csv(f, return_x=True, subsample=subsample)
-    x = np.asarray(X)
-    missing_couner = 1
-    missing_waveform = [np.asarray([]),np.asarray([])]
-    for d, f in enumerate(filenames):
-        
-        if f is not None and len(f):
-            Y = read_tek_csv(f, return_x=False, subsample=subsample)
-            y = np.asarray(Y)
-            spectra.append({ 'filename':f,'waveform':[x, y]})
-        else:
-            spectra.append({ 'filename':'missing_file_'+str(missing_couner),'waveform':missing_waveform})
-        
-        
-    return spectra
-
-def read_2D_spectra_dict(filenames, subsample = 1 ):
-
-    r = None
-
-    fformat, fformat_name = get_file_format(filenames[0])
-    if fformat == 1:
-        r = read_tek_csv_files_2d(filenames, subsample=subsample)
-       
-    elif fformat == 2:
-        r = read_ascii_scope_files_2d(filenames, subsample = subsample)
-    
-    elif fformat == 4:
-        r = read_ascii_scope_files_2d(filenames,subsample=1, separator=',', skip_rows=1, nchans = 200000)
-        
-    elif fformat == 5:
-        r = read_tek_csv_files_2d(filenames,subsample=1, header_columns=2,skip_rows=1,column_shift=0)
-    
-    file  = os.path.split(filenames[0])[-1]
-    if '.' in file:
-        ext = '.' + file.split('.')[-1]
-    else:
-        ext = ''
-
-    if ext == '.csv':
-        r = read_tek_csv_files_2d(filenames, subsample=subsample)
-    elif ext == '':
-        r = read_ascii_scope_files_2d(filenames, subsample = subsample)
-    
-    spectra = []
-    if r != None:
-        for d, f in enumerate(filenames):
-            spectra.append({ 'filename':f,'waveform':[r['time'], r['voltage'][d]]})
-        
-    return spectra
 
 
 def butter_bandstop_filter(data, lowcut, highcut, order):

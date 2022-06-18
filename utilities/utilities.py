@@ -1,3 +1,4 @@
+from binhex import getfileinfo
 import numpy as np
 from scipy import signal
 from scipy import blackman, nanmean
@@ -5,7 +6,7 @@ from scipy.signal import hilbert
 from scipy.fftpack import rfft, irfft, fftfreq, fft
 import scipy.fftpack
 import csv
-from um.models.tek_fileIO import read_tek_csv, read_tek_csv_files_2d, read_ascii_scope_files_2d
+from um.models.tek_fileIO import get_file_format, read_tek_csv, read_tek_csv_files_2d, read_ascii_scope_files_2d
 import math
 from PyQt5 import QtCore, QtWidgets
 import time, os
@@ -44,7 +45,20 @@ def read_multiple_spectra_dict(filenames, subsample = 1 ):
 
 def read_2D_spectra_dict(filenames, subsample = 1 ):
 
-    spectra = []
+    r = None
+
+    fformat, fformat_name = get_file_format(filenames[0])
+    if fformat == 1:
+        r = read_tek_csv_files_2d(filenames, subsample=subsample)
+       
+    elif fformat == 2:
+        r = read_ascii_scope_files_2d(filenames, subsample = subsample)
+    
+    elif fformat == 4:
+        r = read_ascii_scope_files_2d(filenames,subsample=1, separator=',', skip_rows=1, nchans = 200000)
+        
+    elif fformat == 5:
+        r = read_tek_csv_files_2d(filenames,subsample=1, header_columns=2,skip_rows=1,column_shift=0)
     
     file  = os.path.split(filenames[0])[-1]
     if '.' in file:
@@ -57,11 +71,10 @@ def read_2D_spectra_dict(filenames, subsample = 1 ):
     elif ext == '':
         r = read_ascii_scope_files_2d(filenames, subsample = subsample)
     
-    for d, f in enumerate(filenames):
-        
-       
-        spectra.append({ 'filename':f,'waveform':[r['time'], r['voltage'][d]]})
-        
+    spectra = []
+    if r != None:
+        for d, f in enumerate(filenames):
+            spectra.append({ 'filename':f,'waveform':[r['time'], r['voltage'][d]]})
         
     return spectra
 

@@ -84,21 +84,35 @@ class UltrasoundAnalysisWidget(QWidget):
         
         
 
-        self.lr1 = pg.LinearRegionItem()
-        self.lr1.setZValue(-10)
-        self.lr2 = pg.LinearRegionItem()
-        self.lr2.setZValue(-10)
+        self.lr1_p = pg.LinearRegionItem()
+        self.lr1_p.setZValue(-10)
+        self.lr2_p = pg.LinearRegionItem()
+        self.lr2_p.setZValue(-10)
+
+        self.lr1_s = pg.LinearRegionItem()
+        self.lr1_s.setZValue(-10)
+        self.lr2_s = pg.LinearRegionItem()
+        self.lr2_s.setZValue(-10)
 
         
 
-        self.echo_bounds = [self.lr1, self.lr2]
-        self.plot_win.addItem(self.lr1)
-        self.plot_win.addItem(self.lr2) 
-        self.lr1.setRegion([0, 0])
-        self.lr2.setRegion([0, 0])
+        self.echo_bounds_p = [self.lr1_p, self.lr2_p]
+        self.plot_win.addItem(self.lr1_p)
+        self.plot_win.addItem(self.lr2_p) 
+        self.lr1_p.setRegion([0, 0])
+        self.lr2_p.setRegion([0, 0])
 
-    def get_echo_bounds(self, i):
-        return self.echo_bounds[i].getRegion()
+        self.echo_bounds_s = [self.lr1_s, self.lr2_s]
+        self.plot_win.addItem(self.lr1_s)
+        self.plot_win.addItem(self.lr2_s) 
+        self.lr1_s.setRegion([0, 0])
+        self.lr2_s.setRegion([0, 0])
+
+    def get_echo_bounds_p(self, i):
+        return self.echo_bounds_p[i].getRegion()
+
+    def get_echo_bounds_s(self, i):
+        return self.echo_bounds_s[i].getRegion()
 
     def update_view(self, t, spectrum, fname):
         
@@ -117,48 +131,18 @@ class UltrasoundAnalysisWidget(QWidget):
         self. plot_widget.setText(text , 0)
 
     def updatePlot1(self):
-        self.lr1r = self.lr1.getRegion()
-        self.plot_win_detail1.setXRange(*self.lr1r, padding=0)
+        self.lr1_pr = self.lr1_p.getRegion()
+        self.plot_win_detail1.setXRange(*self.lr1_pr, padding=0)
 
     def updateRegion1(self):
-        self.lr1.setRegion(self.detail_plot1.getViewBox().viewRange()[0])
+        self.lr1_p.setRegion(self.detail_plot1.getViewBox().viewRange()[0])
         
     def updatePlot2(self):
-        self.lr2r = self.lr2.getRegion()
-        self.plot_win_detail2.setXRange(*self.lr2r, padding=0)
+        self.lr2_pr = self.lr2_p.getRegion()
+        self.plot_win_detail2.setXRange(*self.lr2_pr, padding=0)
 
     def updateRegion2(self):
-        self.lr2.setRegion(self.detail_plot2.getViewBox().viewRange()[0])
-
-    '''def init_region_items(self, t):
-        
-        self.plot_win.addItem(self.lr1)
-        self.plot_win.addItem(self.lr2) 
-        p1l, p1r, p2l, p2r = self.get_initial_lr_positions(t)
-
-        self.lr1.setRegion([p1l, p1r])
-        self.lr2.setRegion([p2l, p2r])
-
-        self.initialized = True'''
-        
-       
-
-    '''def get_initial_lr_positions(self, t):
-        mn = min(t)
-        mx = max(t)
-        r = mx-mn
-        p1l = 0.25 * r
-        p1r = 0.3 * r
-        p2l = 0.7 * r
-        p2r = 0.75 * r 
-        return p1l, p1r, p2l, p2r
-
-    def get_initial_lr_zoom_positions(self, region):
-        lr = region.getRegion()
-        rng = lr[1] - lr[0]
-        l = lr[0]+ rng*0.4
-        r = lr[1] + rng*0.6
-        return l, r'''
+        self.lr2_p.setRegion(self.detail_plot2.getViewBox().viewRange()[0])
 
 
     def make_widget(self):

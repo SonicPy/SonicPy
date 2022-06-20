@@ -56,8 +56,12 @@ class UltrasoundAnalysisController(QObject):
     def make_connections(self): 
         self.display_window.open_btn.clicked.connect(self.update_data)
         self.display_window.freq_ebx.valueChanged.connect(self.calculate_data)
-        self.display_window.lr1.sigRegionChangeFinished.connect(self.calculate_data)
-        self.display_window.lr2.sigRegionChangeFinished.connect(self.calculate_data)
+        self.display_window.lr1_p.sigRegionChangeFinished.connect(self.calculate_data)
+        self.display_window.lr2_p.sigRegionChangeFinished.connect(self.calculate_data)
+
+        self.display_window.lr1_s.sigRegionChangeFinished.connect(self.calculate_data)
+        self.display_window.lr2_s.sigRegionChangeFinished.connect(self.calculate_data)
+
         self.display_window.N_cbx.stateChanged.connect(self.calculate_data)
 
         self.display_window.plot_widget.cursor_changed_singal.connect(self.sync_cursors)
@@ -78,6 +82,19 @@ class UltrasoundAnalysisController(QObject):
 
 
     def p_s_wave_btn_callback(self, wave_type):
+        self.display_window.plot_win.removeItem(self.display_window.lr1_s)
+        self.display_window.plot_win.removeItem(self.display_window.lr2_s)
+        self.display_window.plot_win.removeItem(self.display_window.lr1_p)
+        self.display_window.plot_win.removeItem(self.display_window.lr2_p)
+
+        if wave_type == 'P':
+            
+            self.display_window.plot_win.addItem(self.display_window.lr1_p)
+            self.display_window.plot_win.addItem(self.display_window.lr2_p)
+        if wave_type == 'S':
+            self.display_window.plot_win.addItem(self.display_window.lr1_s)
+            self.display_window.plot_win.addItem(self.display_window.lr2_s)
+
         self.model.wave_type = wave_type
 
     def ArrowPlotShow(self):
@@ -106,8 +123,13 @@ class UltrasoundAnalysisController(QObject):
     def set_echo_region_position(self, index):
         center = self.display_window.plot_widget.cursor_pos
         pad = 0.06e-6
-        echo = self.display_window.echo_bounds[index]
-        echo.setRegion([center-pad, center+pad])
+        wave_type = self.model.wave_type
+        if wave_type == 'P':
+            echo = self.display_window.echo_bounds_p[index]
+            echo.setRegion([center-pad, center+pad])
+        elif wave_type == 'S':
+            echo = self.display_window.echo_bounds_s[index]
+            echo.setRegion([center-pad, center+pad])
         
 
     def calculate_data(self):
@@ -123,8 +145,15 @@ class UltrasoundAnalysisController(QObject):
                 pass
                 
             min_roi = abs(t[1]-t[0])*10
-            [l1, r1] = self.display_window.get_echo_bounds(0)
-            [l2, r2] = self.display_window.get_echo_bounds(1)
+
+            wave_type = self.model.wave_type
+            if wave_type == 'P':
+                [l1, r1] = self.display_window.get_echo_bounds_p(0)
+                [l2, r2] = self.display_window.get_echo_bounds_p(1)
+            elif wave_type == 'S':
+                [l1, r1] = self.display_window.get_echo_bounds_s(0)
+                [l2, r2] = self.display_window.get_echo_bounds_s(1)
+            
             if l1 >  0 and l2 >0 and abs(l1-r1) > min_roi and abs(l2-r2) > min_roi:
 
                 

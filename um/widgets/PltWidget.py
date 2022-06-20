@@ -426,7 +426,7 @@ class PltWidget(pg.PlotWidget):
         # initialize roi plot 
         rois_color = self.colors['rois_color']
         echo_p_color = '#ff0099'
-        echo_s_color = '#00ff99'
+        echo_s_color = '#ff0099'
         self.plotRoi = pg.PlotDataItem(roiHorz, roiData, 
             antialias=True, pen=rois_color, connect="finite", width=1)
         self.addItem(self.plotRoi)  

@@ -297,11 +297,11 @@ class OverViewController(QObject):
         waterfall_waveform, \
             selected, \
                 selected_name_out, \
-                    echoes_p = waterfall.prepare_waveforms_for_plot( selected_fname)
+                    echoes_p, echoes_s = waterfall.prepare_waveforms_for_plot( selected_fname)
 
         self.widget.single_frequency_waterfall.clear_plot()
         
-        self.update_plot_sigle_frequency(waterfall_waveform,selected, echoes_p)
+        self.update_plot_sigle_frequency(waterfall_waveform,selected, echoes_p, echoes_s)
         f_start = self.widget.freq_start.value()
         f_step = self.widget.freq_step.value()
         display_freq = f_start + int(self.freq) * f_step
@@ -317,26 +317,32 @@ class OverViewController(QObject):
         waterfall_waveform, \
             selected, \
                 selected_name_out, \
-                    echoes_p = waterfall.prepare_waveforms_for_plot( selected_fname)
+                    echoes_p, echoes_s = waterfall.prepare_waveforms_for_plot( selected_fname)
 
         self.widget.single_condition_waterfall.clear_plot()
         
-        self.update_plot_sigle_condition(waterfall_waveform,selected,echoes_p)
+        self.update_plot_sigle_condition(waterfall_waveform,selected,echoes_p, echoes_s)
         self.widget.single_condition_waterfall.set_name ( self.cond)
         self.widget.single_condition_waterfall.set_selected_name (selected_name_out)
 
     
 
-    def update_plot_sigle_frequency(self, waveform,selected=[[],[]], echoes_p=[[],[]]):
+    def update_plot_sigle_frequency(self, waveform,selected=[[],[]], echoes_p=[[],[]], echoes_s=[[],[]]):
         if waveform is not None:
-            print(echoes_p)
-            self.widget.single_frequency_waterfall.plot(waveform[0],waveform[1],selected[0],selected[1], echoes_p[0], echoes_p[1])
+            #print(echoes_p)
+            self.widget.single_frequency_waterfall.plot(waveform[0],waveform[1],
+                                                        selected[0],selected[1], 
+                                                        echoes_p[0], echoes_p[1],
+                                                        echoes_s[0], echoes_s[1])
 
         
 
-    def update_plot_sigle_condition(self, waveform,selected=[[],[]], echoes_p=[[],[]]):
+    def update_plot_sigle_condition(self, waveform,selected=[[],[]], echoes_p=[[],[]], echoes_s=[[],[]]):
         if waveform is not None:
-            self.widget.single_condition_waterfall.plot(waveform[0],waveform[1],selected[0],selected[1], echoes_p[0], echoes_p[1])
+            self.widget.single_condition_waterfall.plot(waveform[0],waveform[1],
+                                                        selected[0],selected[1], 
+                                                        echoes_p[0], echoes_p[1],
+                                                        echoes_s[0], echoes_s[1])
 
     def save_result(self):
         pass

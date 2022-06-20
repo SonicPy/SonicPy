@@ -1,3 +1,4 @@
+from fileinput import filename
 import imp, os, glob
 import struct
 import csv
@@ -46,6 +47,7 @@ def read_2D_spectra_dict(filenames, subsample = 1 ):
     r = None
 
     fformat, fformat_name = get_file_format(filenames[0])
+    #print(filenames[0])
     if fformat == 1:
         r = read_tek_csv_files_2d(filenames, subsample=subsample)
        
@@ -58,7 +60,7 @@ def read_2D_spectra_dict(filenames, subsample = 1 ):
     elif fformat == 5:
         r = read_tek_csv_files_2d(filenames,subsample=1, header_columns=2,skip_rows=1,column_shift=0)
     
-    file  = os.path.split(filenames[0])[-1]
+    '''file  = os.path.split(filenames[0])[-1]
     if '.' in file:
         ext = '.' + file.split('.')[-1]
     else:
@@ -67,13 +69,14 @@ def read_2D_spectra_dict(filenames, subsample = 1 ):
     if ext == '.csv':
         r = read_tek_csv_files_2d(filenames, subsample=subsample)
     elif ext == '':
-        r = read_ascii_scope_files_2d(filenames, subsample = subsample)
+        r = read_ascii_scope_files_2d(filenames, subsample = subsample)'''
     
     spectra = []
     if r != None:
         for d, f in enumerate(filenames):
             spectra.append({ 'filename':f,'waveform':[r['time'], r['voltage'][d]]})
         
+    #print(fformat)
     return spectra
 
 def load_any_waveform_file(filename):
@@ -95,7 +98,8 @@ def load_any_waveform_file(filename):
            
         elif fformat == 5:
             t, spectrum = read_gsecars_oscilloscope(filename, subsample=1)
-    
+
+        print(fformat)
         return t,spectrum
 
 def get_file_format( fname):
@@ -373,29 +377,42 @@ def read_tek_csv_files_2d(paths, subsample=1, header_columns = 3, skip_rows = 0,
 
     x = np.array(range(nchans))*sample_period*subsample
     
-    #QtWidgets.QApplication.processEvents()
+    if skip_rows:
+        # this option is used for gsecars format, somtimes you get "1.#INF00e+00" values
+        # (for hpcat format skiprows would be 0) 
+        checkINF = True
+    else:
+        # this option may save a few milliseconds?
+        #print('hpcat')
+        checkINF = False
+
+    data_position = column_shift+1
     for d, file in enumerate(paths):
         '''if d % 2 == 0:
             #update progress bar only every 10 files to save time
             progress_dialog.setValue(d)
             QtWidgets.QApplication.processEvents()'''
         
-        data_position = column_shift+1
-        file_text = open(file, "r")
-        for skip_row in range(skip_rows):
-            file_line = file_text.readline()
-            
-        a = True
-        row = 0
-        for row in range(nchans-3):
-            line_str  = file_text.readline()
-            if not '#' in line_str:
+        
+        if len(file):
+            file_text = open(file, "r")
+            for skip_row in range(skip_rows):
+                file_line = file_text.readline()
                 
+            a = True
+            row = 0
             
-                data[d][row]=float(line_str.split(',')[data_position])
-            
-        files_loaded.append(file)
-        file_text.close()
+            if checkINF:
+                for row in range(nchans-3):
+                    line_str  = file_text.readline()
+                    if not '#' in line_str:
+                        data[d][row]=float(line_str.split(',')[data_position])
+            else:
+                for row in range(nchans-3):
+                    data[d][row]=float(file_text.readline().split(',')[data_position])
+                
+            files_loaded.append(file)
+            file_text.close()
         
         
         
@@ -465,16 +482,18 @@ def read_ascii_scope_files_2d(paths, subsample=1, separator = '\t',skip_rows = 0
             #update progress bar only every 10 files to save time
             progress_dialog.setValue(d)
             QtWidgets.QApplication.processEvents()'''
+        
         try:
-            file_text = open(file, "r")
-            for skip_row in range(skip_rows):
-                file_line = file_text.readline()
-            a = True
-            row = 0
-            for row in range(nchans-3):
-                data[d][row]=float(file_text.readline().split(separator)[1])
-            files_loaded.append(file)
-            file_text.close()
+            if len(file):
+                file_text = open(file, "r")
+                for skip_row in range(skip_rows):
+                    file_line = file_text.readline()
+                a = True
+                row = 0
+                for row in range(nchans-3):
+                    data[d][row]=float(file_text.readline().split(separator)[1])
+                files_loaded.append(file)
+                file_text.close()
         except:
             pass
         
@@ -539,12 +558,5 @@ def read_npy(filename):
     x, y = loaded[keys[0]]
     return x, y
 
-if __name__ == '__main__':
-    
 
-    x = np.asarray(range(100000))*1e-10
-    y = np.random.rand(100000)
-
-    write_tek_csv('rand.csv',x,y)
-    
 

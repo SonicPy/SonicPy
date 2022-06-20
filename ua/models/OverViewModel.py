@@ -107,9 +107,11 @@ class OverViewModel():
         freq_waterfall.set_echoes(filename_waweform ,wave_type, bounds)
         
         cond_waterfall.set_echoes(filename_waweform ,wave_type, bounds)
+
+        self.set_echoes(filename_waweform ,wave_type, bounds)
         
     def set_echoes(self, fname, wave_type, echoes_bounds):
-        # echoes_bounds = list, [[0,0],[0,0]]
+        # echoes_bounds = list, [[0.0,0.0],[0.0,0.0]] (values are in seconds)
         # echoes_bounds[0]: P bounds
         # echoes_bounds[0]: S bounds
         if wave_type == 'P':
@@ -146,7 +148,7 @@ class OverViewModel():
         start_time = time.time()
         
         
-        if 1: #not freq in self.spectra:
+        if not freq in self.spectra:
             loaded_files = {}
           
             #read_files = read_multiple_spectra_dict(fnames) #old
@@ -369,8 +371,7 @@ class OverViewModel():
         self.add_freq(data)
 
 
-    def clear(self):
-        self.__init__()
+
 
 
     def read_result_file(self, filename):

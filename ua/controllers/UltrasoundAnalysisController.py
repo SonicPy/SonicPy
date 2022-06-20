@@ -139,10 +139,6 @@ class UltrasoundAnalysisController(QObject):
         t = self.model.t
         spectrum = self.model.spectrum
         if t is not None and spectrum is not None:
-
-            #t_f, spectrum_f = zero_phase_lowpass_filter([t,spectrum],60e6,1)
-            if len(t)<2:
-                pass
                 
             min_roi = abs(t[1]-t[0])*10
 

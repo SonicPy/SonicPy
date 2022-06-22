@@ -72,6 +72,7 @@ class TimeOfFlightController(QObject):
 
     def correlation_saved_signal_callback(self, correlation):
         self.echoes_results_model.add_echoes(correlation)
+        self.echoes_results_model.save_result()
         self.overview_controller.correlation_echoes_added(correlation)
     
     def folder_selected_signal_callback(self, folder):

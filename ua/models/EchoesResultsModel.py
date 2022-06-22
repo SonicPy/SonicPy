@@ -27,15 +27,17 @@ from natsort import natsorted
  
 
 
+
 class EchoesResultsModel():
     def __init__(self):
         
-        self.echoes = []
+        self.echoes = {}
 
     def add_echoes(self, correlation):
-        filename_waweform = correlation['filename_waweform']
-        bounds = correlation['echo_bounds']
-        wave_type = correlation['wave_type']
+        
+
+
+        self.echoes[correlation['filename_waweform']] = correlation
 
     def clear(self):
         self.__init__()
@@ -44,10 +46,9 @@ class EchoesResultsModel():
 
  
  
-    def save_result(self, filename):
+    def save_result(self, filename='test_output.json'):
         
-        data = {'frequency':self.freq,'minima_t':list(self.minima[0]),'minima':list(self.minima[1]), 
-                            'maxima_t':list(self.maxima[0]),'maxima':list(self.maxima[1])}
+        data = self.echoes
         
         if filename.endswith('.json'):
             with open(filename, 'w') as json_file:

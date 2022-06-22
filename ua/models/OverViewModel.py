@@ -96,21 +96,16 @@ class OverViewModel():
         bounds = correlation['echo_bounds']
         wave_type = correlation['wave_type']
 
-        freq_cond = self.file_dict[filename_waweform]
-
-        freq = freq_cond[1]
-        freq_waterfall = self.waterfalls[freq]
-        cond = freq_cond[0]
-        cond_waterfall = self.waterfalls[cond]
+   
 
         # i was here
-        freq_waterfall.set_echoes(filename_waweform ,wave_type, bounds)
+        '''freq_waterfall.set_echoe(filename_waweform ,wave_type, bounds)
         
-        cond_waterfall.set_echoes(filename_waweform ,wave_type, bounds)
+        cond_waterfall.set_echoe(filename_waweform ,wave_type, bounds)'''
 
-        #self.set_echoes(filename_waweform ,wave_type, bounds)
+        self.set_echoes(filename_waweform ,wave_type, bounds)
         
-    '''def set_echoes(self, fname, wave_type, echoes_bounds):
+    def set_echoes(self, fname, wave_type, echoes_bounds):
         # echoes_bounds = list, [[0.0,0.0],[0.0,0.0]] (values are in seconds)
         # echoes_bounds[0]: P bounds
         # echoes_bounds[0]: S bounds
@@ -118,7 +113,7 @@ class OverViewModel():
             self.echoes_p[fname] = echoes_bounds
 
         elif wave_type == 'S':
-            self.echoes_s[fname] = echoes_bounds'''
+            self.echoes_s[fname] = echoes_bounds
 
     def clear(self):
         self.__init__()

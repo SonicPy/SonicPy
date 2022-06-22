@@ -113,9 +113,10 @@ class OverViewController(QObject):
         self.widget.single_frequency_waterfall.plot_widget.fig.set_cursor(pos)
         self.widget.single_condition_waterfall.plot_widget.fig.set_cursor(pos)
 
-    def correlation_echoes_added(self,correlation):
+    def correlation_echoes_added(self , correlations):
         
-        self.model.add_echoes(correlation)
+        for correlation in correlations:
+            self.model.add_echoes(correlations[correlation])
 
         self.re_plot_single_frequency()
         self.re_plot_single_condition()
@@ -260,7 +261,7 @@ class OverViewController(QObject):
             self.folder_widget.set_folders(folders)
             
 
-            self.folder_selected_signal.emit(folder)
+            
 
             freqs = list(self.model.fps_Hz.keys())
 
@@ -272,6 +273,8 @@ class OverViewController(QObject):
 
             self.set_condition(default_condition_index)
             self.widget.cond_scroll.setMaximum(len(conds)-1)
+
+            self.folder_selected_signal.emit(folder)
         
 
     def set_frequency(self, index):
@@ -302,6 +305,21 @@ class OverViewController(QObject):
 
     def re_plot_single_frequency(self ):
         waterfall = self.model.waterfalls[self.freq]
+        echoes_p = self.model.echoes_p
+        echoes_s = self.model.echoes_s
+
+        for echo_p_name in echoes_p:
+            bounds = echoes_p[echo_p_name]
+            filename_waveform = echo_p_name
+            wave_type = "P"
+            waterfall.set_echoe(filename_waveform ,wave_type, bounds)
+
+        for echo_s_name in echoes_s:
+            bounds = echoes_s[echo_s_name]
+            filename_waveform = echo_s_name
+            wave_type = "S"
+            waterfall.set_echoe(filename_waveform ,wave_type, bounds)
+
         waterfall.get_rescaled_waveforms(caller='re_plot_single_frequency')
     
         selected_fname = self.selected_fname
@@ -321,6 +339,22 @@ class OverViewController(QObject):
 
     def re_plot_single_condition(self ):
         waterfall = self.model.waterfalls[self.cond]
+
+        echoes_p = self.model.echoes_p
+        echoes_s = self.model.echoes_s
+
+        for echo_p_name in echoes_p:
+            bounds = echoes_p[echo_p_name]
+            filename_waveform = echo_p_name
+            wave_type = "P"
+            waterfall.set_echoe(filename_waveform ,wave_type, bounds)
+
+        for echo_s_name in echoes_s:
+            bounds = echoes_s[echo_s_name]
+            filename_waveform = echo_s_name
+            wave_type = "S"
+            waterfall.set_echoe(filename_waveform ,wave_type, bounds)
+
         waterfall.get_rescaled_waveforms(caller='re_plot_single_condition')
     
         selected_fname = self.selected_fname

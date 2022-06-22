@@ -71,12 +71,22 @@ class TimeOfFlightController(QObject):
         self.correlation_controller.correlation_saved_signal.connect(self.correlation_saved_signal_callback)
 
     def correlation_saved_signal_callback(self, correlation):
-        self.echoes_results_model.add_echoes(correlation)
+        
+        correlations = {correlation['filename_waweform']:correlation}
+        self.overview_controller.correlation_echoes_added(correlations)
+
+        self.echoes_results_model.add_echoe(correlation)
         self.echoes_results_model.save_result()
-        self.overview_controller.correlation_echoes_added(correlation)
+
+        
     
     def folder_selected_signal_callback(self, folder):
         self.widget.setWindowTitle("Time-of-flight analysis. V." + __version__ + "  © R. Hrubiak, 2022. Folder: "+ os.path.abspath( folder))
+
+        self.echoes_results_model.load_result_from_file()
+        saved_echoes_p, saved_echoes_s = self.echoes_results_model.get_echoes()
+        self.overview_controller.correlation_echoes_added(saved_echoes_p)
+        self.overview_controller.correlation_echoes_added(saved_echoes_s)
 
     def freq_settings_changed_signal_callback(self, freq):
         
@@ -87,6 +97,29 @@ class TimeOfFlightController(QObject):
 
         fname = data['fname']
         fbase = data['freq']
+
+        echo_type = ''
+        if  self.correlation_controller.display_window.p_wave_btn.isChecked():
+            echo_type = "P"
+        elif self.correlation_controller.display_window.s_wave_btn.isChecked():
+            echo_type = "S"
+
+
+        echoes_p, echoes_s = self.echoes_results_model.get_echoes()
+
+        
+        if fname in echoes_p:
+            echo_p = echoes_p[fname]
+            bounds_p = echo_p['echo_bounds']
+            self.correlation_controller.display_window.lr1_p.setRegion(bounds_p[0])
+            self.correlation_controller.display_window.lr2_p.setRegion(bounds_p[1])
+        
+        if fname in echoes_s:
+            echo_s = echoes_s[fname]
+            bounds_s = echo_s['echo_bounds']
+            self.correlation_controller.display_window.lr1_s.setRegion(bounds_s[0])
+            self.correlation_controller.display_window.lr2_s.setRegion(bounds_s[1])
+
         f_start = self.overview_controller.widget.freq_start.value()
         f_step = self.overview_controller.widget.freq_step.value()
         

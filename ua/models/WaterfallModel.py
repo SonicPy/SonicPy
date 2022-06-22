@@ -28,13 +28,13 @@ class WaterfallModel( ):
                 new_waveforms[fname] = self.waveforms[fname]
         self.waveforms = new_waveforms
 
-    def set_echoes(self, fname, wave_type, echoes_bounds):
+    def set_echoe(self, fname, wave_type, echoes_bounds):
         # echoes_bounds = list, [[0,0],[0,0]]
         # echoes_bounds[0]: P bounds
         # echoes_bounds[0]: S bounds
 
         fnames = list(self.waveforms.keys())
-        if len(fnames):
+        if fname in fnames :
 
             # convert echo bounds seconds to index by looking up the horizontal axis
             waveform = self.waveforms[fnames[0]]

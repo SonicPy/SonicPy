@@ -31,26 +31,49 @@ from natsort import natsorted
 class EchoesResultsModel():
     def __init__(self):
         
-        self.echoes = {}
+        self.echoes_p = {}
+        self.echoes_s = {}
 
-    def add_echoes(self, correlation):
+    def add_echoe(self, correlation):
         
+        wave_type = correlation['wave_type']
+        if wave_type == "P":
 
+            self.echoes_p[correlation['filename_waweform']] = correlation
+        elif wave_type == "S":
 
-        self.echoes[correlation['filename_waweform']] = correlation
+            self.echoes_s[correlation['filename_waweform']] = correlation
 
     def clear(self):
         self.__init__()
 
     
-
+    def get_echoes(self):
+        return self.echoes_p, self.echoes_s
  
  
     def save_result(self, filename='test_output.json'):
         
-        data = self.echoes
+        data = {'P':self.echoes_p, 'S':self.echoes_s}
         
         if filename.endswith('.json'):
             with open(filename, 'w') as json_file:
                 json.dump(data, json_file,indent = 2)    
 
+    def load_result_from_file(self, filename= 'test_output.json'):
+        if filename.endswith('.json'):
+            with open(filename, 'r') as json_file:
+                correlations = json.load(json_file)   
+                self.clear()
+                echoes_p = correlations['P']
+                echoes_s = correlations['S']
+                
+                for fname in echoes_p:
+                    
+                    echo = echoes_p[fname]
+                    self.add_echoe(echo)
+                for fname in echoes_s:
+                    
+                    echo = echoes_s[fname]
+                    self.add_echoe(echo)
+        

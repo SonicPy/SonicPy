@@ -103,8 +103,8 @@ class UltrasoundAnalysisWidget(QWidget):
         self.lr2_p.setRegion([0, 0])
 
         self.echo_bounds_s = [self.lr1_s, self.lr2_s]
-        self.plot_win.addItem(self.lr1_s)
-        self.plot_win.addItem(self.lr2_s) 
+        #self.plot_win.addItem(self.lr1_s)
+        #self.plot_win.addItem(self.lr2_s) 
         self.lr1_s.setRegion([0, 0])
         self.lr2_s.setRegion([0, 0])
 

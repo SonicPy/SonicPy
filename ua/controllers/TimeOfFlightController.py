@@ -28,6 +28,8 @@ from utilities.HelperModule import increment_filename, increment_filename_extra
 from um.widgets.UtilityWidgets import open_file_dialog, open_files_dialog 
 import glob 
 
+from ua. models.EchoesResultsModel import EchoesResultsModel
+
 from .. import resources_path, __version__
 
 
@@ -44,6 +46,9 @@ class TimeOfFlightController(QObject):
         analysis_widget = self.correlation_controller.display_window
 
         self.model = OverViewModel()
+
+        self.echoes_results_model = EchoesResultsModel()
+
         self.widget = TimeOfFlightWidget(app, overview_widget, analysis_widget)
         self.widget.setWindowTitle("Time-of-flight analysis. ver." + __version__ + "  © R. Hrubiak, 2022.")
         
@@ -70,6 +75,7 @@ class TimeOfFlightController(QObject):
         self.correlation_controller.correlation_saved_signal.connect(self.correlation_saved_signal_callback)
 
     def correlation_saved_signal_callback(self, correlation):
+        self.echoes_results_model.add_echoes(correlation)
         self.overview_controller.correlation_echoes_added(correlation)
     
     def folder_selected_signal_callback(self, folder):

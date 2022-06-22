@@ -19,7 +19,14 @@ class WaterfallModel( ):
         self.echoes_s_ind = {}
 
         self.bin_size = 4
-     
+
+    def re_order_files(self, new_list):
+        fnames = list(self.waveforms.keys())
+        new_waveforms = {}
+        for fname in new_list:
+            if fname in fnames:
+                new_waveforms[fname] = self.waveforms[fname]
+        self.waveforms = new_waveforms
 
     def set_echoes(self, fname, wave_type, echoes_bounds):
         # echoes_bounds = list, [[0,0],[0,0]]

@@ -2,6 +2,7 @@
 
 
 
+import imp
 import os.path, sys
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QObject, pyqtSignal
@@ -22,6 +23,7 @@ import math
 
 from ua.models.OverViewModel import OverViewModel
 
+
 import utilities.hpMCAutilities as mcaUtil
 from utilities.HelperModule import increment_filename, increment_filename_extra
 from um.widgets.UtilityWidgets import open_file_dialog, open_files_dialog 
@@ -40,6 +42,8 @@ class OverViewController(QObject):
     def __init__(self, app = None):
         super().__init__()
         self.model = OverViewModel()
+
+        
 
         if app is not None:
             self.setStyle(app)
@@ -110,10 +114,17 @@ class OverViewController(QObject):
         self.widget.single_condition_waterfall.plot_widget.fig.set_cursor(pos)
 
     def correlation_echoes_added(self,correlation):
+        
         self.model.add_echoes(correlation)
 
         self.re_plot_single_frequency()
         self.re_plot_single_condition()
+
+    def save_result(self):
+        pass
+        #filename = self.fname + '.json'
+        #self.model.save_result(filename)
+
 
     def single_frequency_cursor_y_signal_callback(self, y_pos):
 
@@ -344,11 +355,7 @@ class OverViewController(QObject):
                                                         echoes_p[0], echoes_p[1],
                                                         echoes_s[0], echoes_s[1])
 
-    def save_result(self):
-        pass
-        #filename = self.fname + '.json'
-        #self.model.save_result(filename)
-
+    
 
 
     def show_window(self):

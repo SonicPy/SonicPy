@@ -108,9 +108,9 @@ class OverViewModel():
         
         cond_waterfall.set_echoes(filename_waweform ,wave_type, bounds)
 
-        self.set_echoes(filename_waweform ,wave_type, bounds)
+        #self.set_echoes(filename_waweform ,wave_type, bounds)
         
-    def set_echoes(self, fname, wave_type, echoes_bounds):
+    '''def set_echoes(self, fname, wave_type, echoes_bounds):
         # echoes_bounds = list, [[0.0,0.0],[0.0,0.0]] (values are in seconds)
         # echoes_bounds[0]: P bounds
         # echoes_bounds[0]: S bounds
@@ -118,7 +118,7 @@ class OverViewModel():
             self.echoes_p[fname] = echoes_bounds
 
         elif wave_type == 'S':
-            self.echoes_s[fname] = echoes_bounds
+            self.echoes_s[fname] = echoes_bounds'''
 
     def clear(self):
         self.__init__()
@@ -148,7 +148,7 @@ class OverViewModel():
         start_time = time.time()
         
         
-        if not freq in self.spectra:
+        if 1: #not freq in self.spectra:
             loaded_files = {}
           
             #read_files = read_multiple_spectra_dict(fnames) #old
@@ -168,11 +168,20 @@ class OverViewModel():
                     loaded_files[condition] = {'filename':'','waveform':[np.asarray([0]),np.asarray([0])]}
 
             self.spectra[freq] = loaded_files
+        if not freq in self.waterfalls:
 
             self.waterfalls[freq] = WaterfallModel(freq)
             self.waterfalls[freq].settings =  self.settings
 
             self.waterfalls[freq].add_multiple_waveforms(self.spectra[freq])
+        else:
+            fnames = []
+            for cond in self.spectra[freq]:
+                fnames.append(self.spectra[freq][cond]['filename'])
+            waterfall = self.waterfalls[freq]
+            waterfall.re_order_files(fnames)
+        
+
           
     def load_multiple_files_by_condition(self, cond):
         

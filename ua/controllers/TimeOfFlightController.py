@@ -58,10 +58,6 @@ class TimeOfFlightController(QObject):
         
         
         self.make_connections()
-
-        #self.overview_controller.set_US_folder(folder = '/Users/ross/Globus/s16bmb-20210717-e244302-Aihaiti/sam2/US')
-
-    
         
     def make_connections(self):  
 

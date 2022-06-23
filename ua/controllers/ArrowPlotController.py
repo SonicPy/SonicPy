@@ -133,10 +133,10 @@ class ArrowPlotController(QObject):
         else:
             self.error_not_enough_datapoints()
 
-    def load_file(self, filename):
+    '''def load_file(self, filename):
         t, spectrum = read_tek_csv(filename, subsample=4)
         t, spectrum = zero_phase_highpass_filter([t,spectrum],1e4,1)
-        return t,spectrum, filename
+        return t,spectrum, filename'''
         
     def update_data(self, *args, **kwargs):
         filenames = kwargs.get('filenames', None)
@@ -147,6 +147,10 @@ class ArrowPlotController(QObject):
                 self.model.add_result_from_file(fname)
             #self.auto_data()
             self.update_plot()
+
+    def set_data_by_dict(self, correlations):
+        self.model.set_all_freqs(correlations)
+        self.update_plot()
 
     def show_window(self):
         self.arrow_plot_window.raise_widget()

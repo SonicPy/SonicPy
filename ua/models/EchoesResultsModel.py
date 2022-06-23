@@ -53,6 +53,23 @@ class EchoesResultsModel():
     
     def get_echoes(self):
         return self.echoes_p, self.echoes_s
+
+    def get_echoes_by_condition(self, condition, wave_type='P'):
+        echoes = {}
+        echoes_out = []
+        if wave_type == 'P':
+            echoes = self.echoes_p
+        elif wave_type == 'S':
+            echoes = self.echoes_s
+        if len(echoes):
+            for fname in echoes:
+                echo = echoes[fname]
+                
+                freq = echo['frequency']
+                folder = os.path.split(os.path.split(fname)[0])[-1]
+                if folder == condition:
+                    echoes_out.append(echo)
+        return echoes_out
  
  
     def save_result(self, correlation ):

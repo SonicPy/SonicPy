@@ -106,6 +106,7 @@ class TimeOfFlightController(QObject):
 
         fname = data['fname']
         fbase = data['freq']
+        cond = data['cond']
 
         echo_type = ''
         if  self.correlation_controller.display_window.p_wave_btn.isChecked():
@@ -115,6 +116,9 @@ class TimeOfFlightController(QObject):
 
 
         echoes_p, echoes_s = self.echoes_results_model.get_echoes()
+
+        echoes_by_condition = self.echoes_results_model.get_echoes_by_condition(cond, echo_type)
+        self.arrow_plot_controller.set_data_by_dict(echoes_by_condition)
 
         
         if fname in echoes_p:
@@ -146,6 +150,8 @@ class TimeOfFlightController(QObject):
             self.correlation_controller.display_window.freq_ebx.setValue(freq)
         else:
             self.correlation_controller.calculate_data()
+
+        
     
 
     def preferences_module(self, *args, **kwargs):

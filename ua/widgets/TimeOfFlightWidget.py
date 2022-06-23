@@ -35,7 +35,7 @@ class TimeOfFlightWidget(QMainWindow):
 
         self.setWindowTitle('Time-of-flight analysis. (C) R. Hrubiak 2021')
 
-        self.resize(1600, 900)
+        self.resize(1800, 900)
         
         self.make_widget()
 
@@ -85,7 +85,7 @@ class TimeOfFlightWidget(QMainWindow):
 
         self.splitter_horizontal.addWidget(self.arrow_plot_widget)
         
-        self.splitter_horizontal.setSizes([800,800, 0])
+        self.splitter_horizontal.setSizes([600,600, 600])
 
         self._center_widget_layout.addWidget(self.splitter_horizontal)
 

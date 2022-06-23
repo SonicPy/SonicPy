@@ -1,5 +1,6 @@
 
 import os.path, sys
+from ua.models.OverViewModel import Sort_Tuple
 from utilities.utilities import *
 from utilities.HelperModule import move_window_relative_to_screen_center, get_partial_index, get_partial_value
 import numpy as np
@@ -215,6 +216,22 @@ class ArrowPlotModel():
         fit = np.polyfit(X,Y,1)
         return fit
 
+    def set_all_freqs(self, correlations):
+        self.clear()
+        freqs = []
+
+        for correlation in correlations:
+            freq = correlation['frequency']
+            fname = correlation['filename_waveform']
+            freqs.append((freq, correlation))
+        
+        freqs = Sort_Tuple(freqs, 0)
+        for freq in freqs:
+            correlation = freq[1]
+        
+            self.add_freq(correlation)
+
+    
             
     def add_freq(self, data):
         freq = data['frequency']
@@ -226,14 +243,14 @@ class ArrowPlotModel():
         self.optima[freq]=data_pt
         
 
-    def save_result(self, filename):
+    '''def save_result(self, filename):
         
         data = {'frequency':self.freq,'minima_t':list(self.minima[0]),'minima':list(self.minima[1]), 
                             'maxima_t':list(self.maxima[0]),'maxima':list(self.maxima[1])}
         
         if filename.endswith('.json'):
             with open(filename, 'w') as json_file:
-                json.dump(data, json_file,indent = 2)    
+                json.dump(data, json_file,indent = 2)    '''
 
     
    

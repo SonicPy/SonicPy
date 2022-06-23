@@ -205,7 +205,7 @@ class UltrasoundAnalysisWidget(QWidget):
   
         self._buttons_layout_top.addWidget(self.save_btn)
         self._buttons_layout_top.addSpacerItem(HorizontalSpacerItem())
-        self._buttons_layout_top.addWidget(self.arrow_plt_btn)
+        #self._buttons_layout_top.addWidget(self.arrow_plt_btn)
 
         self.buttons_widget_top.setLayout(self._buttons_layout_top)
         self._layout.addWidget(self.buttons_widget_top)

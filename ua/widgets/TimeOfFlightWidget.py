@@ -21,12 +21,15 @@ class TimeOfFlightWidget(QMainWindow):
     up_down_signal = pyqtSignal(str)
     panelClosedSignal = pyqtSignal()
 
-    def __init__(self, app, overview_widget, analysis_widget):
+    def __init__(self, app, overview_widget, analysis_widget, arrow_plot_widget):
         super().__init__()
         self.app = app
         self.overview_widget = overview_widget
         
         self.analysis_widget = analysis_widget
+
+        self.arrow_plot_widget = arrow_plot_widget
+
         #self.analysis_widget.resize(800,800)
 
 
@@ -79,8 +82,10 @@ class TimeOfFlightWidget(QMainWindow):
         self.splitter_horizontal.addWidget(self.overview_widget)
 
         self.splitter_horizontal.addWidget(self.analysis_widget)
+
+        self.splitter_horizontal.addWidget(self.arrow_plot_widget)
         
-        self.splitter_horizontal.setSizes([800,800])
+        self.splitter_horizontal.setSizes([800,800, 0])
 
         self._center_widget_layout.addWidget(self.splitter_horizontal)
 

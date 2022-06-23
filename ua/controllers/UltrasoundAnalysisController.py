@@ -46,7 +46,7 @@ class UltrasoundAnalysisController(QObject):
         if app is not None:
             self.setStyle(app)
         self.display_window = UltrasoundAnalysisWidget()
-        self.arrow_plot_controller = ArrowPlotController()
+        
         self.make_connections()
        
         
@@ -72,7 +72,7 @@ class UltrasoundAnalysisController(QObject):
         self.display_window.save_btn.clicked.connect(self.save_result)
 
        
-        self.display_window.arrow_plt_btn.clicked.connect(self.ArrowPlotShow)
+        
 
         self.display_window.echo1_cursor_btn.clicked.connect(partial(self.set_echo_region_position,0))
         self.display_window.echo2_cursor_btn.clicked.connect(partial(self.set_echo_region_position,1))
@@ -98,8 +98,7 @@ class UltrasoundAnalysisController(QObject):
         self.model.wave_type = wave_type
         self.calculate_data()
 
-    def ArrowPlotShow(self):
-        self.arrow_plot_controller.arrow_plot_window.raise_widget()
+    
 
     def save_result(self):
         if self.fname is not None:

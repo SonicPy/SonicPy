@@ -22,6 +22,7 @@ import math
 from ua.models.OverViewModel import OverViewModel
 from ua.controllers.OverViewController import OverViewController
 from ua.controllers.UltrasoundAnalysisController import UltrasoundAnalysisController
+from ua.controllers.ArrowPlotController import ArrowPlotController
 
 import utilities.hpMCAutilities as mcaUtil
 from utilities.HelperModule import increment_filename, increment_filename_extra
@@ -45,11 +46,14 @@ class TimeOfFlightController(QObject):
         self.correlation_controller = UltrasoundAnalysisController()
         analysis_widget = self.correlation_controller.display_window
 
+        self.arrow_plot_controller = ArrowPlotController()
+        arrow_plot_widget = self.arrow_plot_controller.arrow_plot_window
+
         self.model = OverViewModel()
 
         self.echoes_results_model = EchoesResultsModel()
 
-        self.widget = TimeOfFlightWidget(app, overview_widget, analysis_widget)
+        self.widget = TimeOfFlightWidget(app, overview_widget, analysis_widget, arrow_plot_widget)
         self.widget.setWindowTitle("Time-of-flight analysis. ver." + __version__ + "  © R. Hrubiak, 2022.")
         
 
@@ -69,6 +73,9 @@ class TimeOfFlightController(QObject):
         self.correlation_controller.cursor_position_signal.connect(self.overview_controller.sync_cursors)
 
         self.correlation_controller.correlation_saved_signal.connect(self.correlation_saved_signal_callback)
+
+    def ArrowPlotShow(self):
+        self.arrow_plot_controller.arrow_plot_window.raise_widget()
 
     def correlation_saved_signal_callback(self, correlation):
         

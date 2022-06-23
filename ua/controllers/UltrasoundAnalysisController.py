@@ -96,6 +96,7 @@ class UltrasoundAnalysisController(QObject):
             self.display_window.plot_win.addItem(self.display_window.lr2_s)
 
         self.model.wave_type = wave_type
+        self.calculate_data()
 
     def ArrowPlotShow(self):
         self.arrow_plot_controller.arrow_plot_window.raise_widget()
@@ -104,7 +105,7 @@ class UltrasoundAnalysisController(QObject):
         if self.fname is not None:
             filename = self.fname + '.json'
             out = self.model.save_result(self.fname)
-            if out['saved']: 
+            if out['ok']: 
                 self.correlation_saved_signal.emit(out['data'])
 
 

@@ -72,17 +72,19 @@ class TimeOfFlightController(QObject):
 
     def correlation_saved_signal_callback(self, correlation):
         
-        correlations = {correlation['filename_waweform']:correlation}
+        correlations = {correlation['filename_waveform']:correlation}
         self.overview_controller.correlation_echoes_added(correlations)
 
         self.echoes_results_model.add_echoe(correlation)
-        self.echoes_results_model.save_result()
+        self.echoes_results_model.save_result(correlation)
 
         
     
     def folder_selected_signal_callback(self, folder):
         self.widget.setWindowTitle("Time-of-flight analysis. V." + __version__ + "  © R. Hrubiak, 2022. Folder: "+ os.path.abspath( folder))
-
+        subfolders = copy.copy(self.overview_controller.model.conditions_folders_sorted)
+        self.echoes_results_model.folder = folder
+        self.echoes_results_model.subfolders = subfolders
         self.echoes_results_model.load_result_from_file()
         saved_echoes_p, saved_echoes_s = self.echoes_results_model.get_echoes()
         self.overview_controller.correlation_echoes_added(saved_echoes_p)

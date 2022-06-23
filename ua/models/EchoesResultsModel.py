@@ -2,6 +2,7 @@
 from argparse import FileType
 import enum
 import os.path, sys
+from turtle import update
 from utilities.utilities import *
 from utilities.HelperModule import move_window_relative_to_screen_center, get_partial_index, get_partial_value
 import numpy as np
@@ -31,6 +32,8 @@ from natsort import natsorted
 class EchoesResultsModel():
     def __init__(self):
         
+        self.subfolders = []
+        self.folder = ''
         self.echoes_p = {}
         self.echoes_s = {}
 
@@ -39,10 +42,10 @@ class EchoesResultsModel():
         wave_type = correlation['wave_type']
         if wave_type == "P":
 
-            self.echoes_p[correlation['filename_waweform']] = correlation
+            self.echoes_p[correlation['filename_waveform']] = correlation
         elif wave_type == "S":
 
-            self.echoes_s[correlation['filename_waweform']] = correlation
+            self.echoes_s[correlation['filename_waveform']] = correlation
 
     def clear(self):
         self.__init__()
@@ -52,16 +55,98 @@ class EchoesResultsModel():
         return self.echoes_p, self.echoes_s
  
  
-    def save_result(self, filename='test_output.json'):
+    def save_result(self, correlation ):
+        wave_type = correlation['wave_type']
         
-        data = {'P':self.echoes_p, 'S':self.echoes_s}
-        
-        if filename.endswith('.json'):
-            with open(filename, 'w') as json_file:
-                json.dump(data, json_file,indent = 2)    
+        if wave_type == 'P' or wave_type == 'S':
+            echo = correlation
+            fname = echo['filename_waveform']
+            freq = echo['frequency']
+            folder = os.path.split(fname)[:-1]
 
-    def load_result_from_file(self, filename= 'test_output.json'):
-        if filename.endswith('.json'):
+
+            p_folder = os.path.join(*folder, wave_type)
+            exists = os.path.exists(p_folder)
+            if not exists:
+                try:
+                    os.mkdir(p_folder)
+                except:
+                    return
+
+            data = echo
+            basename = os.path.basename(fname)+'.'+str(round(freq*1e-6,1))+'_MHz.json'
+            filename = os.path.join(p_folder,basename)
+            try:
+                with open(filename, 'w') as json_file:
+                    json.dump(data, json_file, indent = 2) 
+
+                    json_file.close()
+            except:
+                print('could not save file: '+ filename)
+
+    def load_result_from_file(self, ):
+
+        for subfolder in self.subfolders:
+            p_folder = os.path.join(self.folder, subfolder, 'P')
+            p_exists = os.path.exists(p_folder)
+            if p_exists:
+                json_search = os.path.join(p_folder,'*.json')
+                p_res_files = glob.glob(json_search)
+                for p_file in p_res_files:
+
+                    with open(p_file) as json_file:
+                        data = json.load(json_file)
+                        correlation = data
+                        if 'wave_type' in correlation:
+                            wave_type = correlation['wave_type']
+                            if wave_type == 'P':
+                                if 'filename_waweform' in correlation:
+                                    saved_path = correlation['filename_waweform']
+                                elif 'filename_waveform' in correlation:
+                                    saved_path = correlation['filename_waveform']
+                                else:
+                                    continue
+                                saved_path = os.path.normpath(saved_path)
+                                file_split = os.path.split(saved_path)[-1]
+
+                                
+                                base_folder = os.path.split(os.path.split(saved_path)[0])[-1]
+                                updated_path = os.path.join(self.folder, base_folder, file_split)
+                                correlation['filename_waveform'] = updated_path
+                                self.add_echoe(correlation)
+                        json_file.close()
+
+            s_folder = os.path.join(self.folder, subfolder, 'S')
+            s_exists = os.path.exists(s_folder)
+            if s_exists:
+                json_search = os.path.join(s_folder,'*.json')
+                s_res_files = glob.glob(json_search)
+                for s_file in s_res_files:
+
+                    with open(s_file) as json_file:
+                        data = json.load(json_file)
+                        correlation = data
+                        if 'wave_type' in correlation:
+                            wave_type = correlation['wave_type']
+                            if wave_type == 'S':
+                                if 'filename_waweform' in correlation:
+                                    saved_path = correlation['filename_waweform']
+                                elif 'filename_waveform' in correlation:
+                                    saved_path = correlation['filename_waveform']
+                                else:
+                                    continue
+                                saved_path = os.path.normpath(saved_path)
+                                file_split = os.path.split(saved_path)[-1]
+
+                                
+                                base_folder = os.path.split(os.path.split(saved_path)[0])[-1]
+                                updated_path = os.path.join(self.folder, base_folder, file_split)
+                                correlation['filename_waveform'] = updated_path
+                                self.add_echoe(correlation)
+                        json_file.close()
+                        
+
+        '''if filename.endswith('.json'):
             with open(filename, 'r') as json_file:
                 correlations = json.load(json_file)   
                 self.clear()
@@ -76,4 +161,5 @@ class EchoesResultsModel():
                     
                     echo = echoes_s[fname]
                     self.add_echoe(echo)
+                json_file.close()'''
         

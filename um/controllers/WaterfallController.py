@@ -25,7 +25,7 @@ class WaterfallController(pvController):
         self.model.pvs['waveform_in'].value_changed_signal.connect(self.waveform_added_callback)
 
     def waveform_added_callback(self, tag, data):
-        waweform_dict = data[0]
+        waveform_dict = data[0]
         files = list(self.model.scans[0].keys())
         print(files)'''
 

@@ -127,43 +127,26 @@ class UltrasoundAnalysisModel():
         saves result of correlation between two echoes to file
         '''
         if len(self.minima):
-            oritinal_folder =  os.path.split(fname)[:-1]
-            subfolder = os.path.join(*oritinal_folder,self.wave_type)
-            exists = os.path.exists(subfolder)
-            if not exists:
-                try:
-                    os.mkdir(subfolder)
-                except:
-                    pass
-                
-                    
-            basename = os.path.basename(fname)+'.'+str(round(self.freq*1e-6,1))+'_MHz.json'
+            
 
-            filename = os.path.join(subfolder,basename)
+            
             data = {'frequency':self.freq,
                         'correlation':{
                         'minima_t':list(np.around(self.minima[0],12)),
                         'minima':list(np.around(self.minima[1],12)), 
                         'maxima_t':list(np.around(self.maxima[0],12)),
                         'maxima':list(np.around(self.maxima[1],12))},
-                        'filename_waweform':fname,
+                        'filename_waveform':fname,
                         'echo_bounds':self.bounds,
                         'filter': {'tukey_alpha':self.settings['tukey_alpha']} ,
                         'wave_type':self.wave_type}
             
             saved = True
-            '''saved = False
-            try:
-                if filename.endswith('.json'):
-                    with open(filename, 'w') as json_file:
-                        json.dump(data, json_file,indent = 2) 
-                        saved = True   
-            except:
-                print('could not save file: '+ filename)'''
+           
             
-            return {'saved':saved, 'data':data}
+            return {'ok':True,'data':data}
 
-        return {'saved':False, 'data':{}}
+        return {'ok': False,'data':{}}
 
 
 

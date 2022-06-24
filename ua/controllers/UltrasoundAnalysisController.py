@@ -31,16 +31,16 @@ from functools import partial
 from utilities.HelperModule import increment_filename, increment_filename_extra
 from um.widgets.UtilityWidgets import open_file_dialog
 
-
+from ua.models.EchoesResultsModel import EchoesResultsModel
 
 ############################################################
 
 class UltrasoundAnalysisController(QObject):
     cursor_position_signal = pyqtSignal(float)
     correlation_saved_signal = pyqtSignal(dict)
-    def __init__(self, app=None, offline = False):
+    def __init__(self, app=None, results_model= EchoesResultsModel()):
         super().__init__()
-        self.model = UltrasoundAnalysisModel()
+        self.model = UltrasoundAnalysisModel(results_model)
         self.fname = None
     
         if app is not None:

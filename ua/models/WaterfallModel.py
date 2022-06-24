@@ -3,10 +3,13 @@ from numpy.core.defchararray import asarray
 import time, os, copy
 from utilities.HelperModule import get_partial_index, get_partial_value
 
+
 class WaterfallModel( ):
     ''' synchronous version of the waterfall model '''
 
     def __init__(self , common_value):
+
+        
        
         self.common_value = common_value
         
@@ -19,6 +22,8 @@ class WaterfallModel( ):
         self.echoes_s_ind = {}
 
         self.bin_size = 4
+
+        
 
     def re_order_files(self, new_list):
         fnames = list(self.waveforms.keys())

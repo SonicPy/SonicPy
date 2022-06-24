@@ -23,17 +23,18 @@ from ua.models.ArrowPlotModel import ArrowPlotModel
 import utilities.hpMCAutilities as mcaUtil
 from utilities.HelperModule import increment_filename, increment_filename_extra
 from um.widgets.UtilityWidgets import open_file_dialog, open_files_dialog
-
+from ua.models.EchoesResultsModel import EchoesResultsModel
 
 ############################################################
 
 class ArrowPlotController(QObject):
 
     arrow_plot_freq_cursor_changed_signal = pyqtSignal(dict)
+    arrow_plot_del_clicked_signal = pyqtSignal(dict)
 
-    def __init__(self, app = None):
+    def __init__(self, app = None, results_model= EchoesResultsModel()):
         super().__init__()
-        self.model = ArrowPlotModel()
+        self.model = ArrowPlotModel(results_model)
         if app is not None:
             self.setStyle(app)
         self.arrow_plot_window = ArrowPlotWidget()
@@ -49,6 +50,21 @@ class ArrowPlotController(QObject):
         self.arrow_plot_window.point_clicked_signal.connect(self.point_clicked_callback)
         #self.arrow_plot_window.save_btn.clicked.connect(self.save_result)
         self.arrow_plot_window.win.cursor_changed_singal.connect(self.cursor_changed_singal_callback)
+        self.arrow_plot_window.del_btn.clicked.connect(self. del_btn_callback)
+
+    def del_btn_callback(self):
+        freq = 1/self. arrow_plot_window.get_cursor_pos()
+        if freq in self.model.optima:
+            fname = self.model.optima[freq].filename_waveform
+            wave_type = self.model.optima[freq].wave_type
+            self.arrow_plot_del_clicked_signal.emit({'frequency':freq, 'filename_waveform':fname, 'wave_type': wave_type})
+
+    def echo_deleted(self, del_info):
+        fname = del_info['filename_waveform']
+        freq = del_info['frequency']
+        wave_type = del_info['wave_type']
+        self. model.delete_optima(freq)
+        self.update_plot()
 
     def cursor_changed_singal_callback(self, *args):
         

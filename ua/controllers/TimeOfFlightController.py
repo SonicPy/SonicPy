@@ -40,18 +40,20 @@ class TimeOfFlightController(QObject):
     def __init__(self, app = None, offline = True):
         super().__init__()
         self.app = app
-        
-        self.overview_controller = OverViewController()
-        overview_widget = self.overview_controller.widget
-        self.correlation_controller = UltrasoundAnalysisController()
-        analysis_widget = self.correlation_controller.display_window
-
-        self.arrow_plot_controller = ArrowPlotController()
-        arrow_plot_widget = self.arrow_plot_controller.arrow_plot_window
-
-        self.model = OverViewModel()
 
         self.echoes_results_model = EchoesResultsModel()
+        
+        self.overview_controller = OverViewController(self.app, self.echoes_results_model)
+        overview_widget = self.overview_controller.widget
+        self.correlation_controller = UltrasoundAnalysisController(self.app, self.echoes_results_model)
+        analysis_widget = self.correlation_controller.display_window
+
+        self.arrow_plot_controller = ArrowPlotController(self.app, self.echoes_results_model)
+        arrow_plot_widget = self.arrow_plot_controller.arrow_plot_window
+
+        #self.model = OverViewModel()
+
+        
 
         self.widget = TimeOfFlightWidget(app, overview_widget, analysis_widget, arrow_plot_widget)
         self.widget.setWindowTitle("Time-of-flight analysis. ver." + __version__ + "  © R. Hrubiak, 2022.")
@@ -76,11 +78,22 @@ class TimeOfFlightController(QObject):
 
         self.arrow_plot_controller.arrow_plot_freq_cursor_changed_signal.connect(self.arrow_plot_freq_cursor_changed_signal_callback)
 
+        self.arrow_plot_controller.arrow_plot_del_clicked_signal.connect(self.arrow_plot_del_clicked_signal_callback)
+
+    def arrow_plot_del_clicked_signal_callback(self, del_info):
+        fname = del_info['filename_waveform']
+        freq = del_info['frequency']
+        wave_type = del_info['wave_type']
+        deleted = self.echoes_results_model.delete_echo(fname, freq, wave_type)
+        if deleted:
+            self.arrow_plot_controller.echo_deleted(del_info)
+
+
     def arrow_plot_freq_cursor_changed_signal_callback(self, cursor_info):
         fname = cursor_info['filename_waveform']
         freq = cursor_info['frequency']
         
-        self.overview_controller. set_frequency_by_value(freq)
+        #self.overview_controller. set_frequency_by_value(freq)
         self.overview_controller. select_fname(fname)
 
     def ArrowPlotShow(self):

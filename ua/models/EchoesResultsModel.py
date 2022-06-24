@@ -18,7 +18,7 @@ from utilities.utilities import zero_phase_bandpass_filter,  \
                                  zero_phase_highpass_filter, \
                                 zero_phase_bandstop_filter, zero_phase_lowpass_filter
 
-from ua.models.WaterfallModel import WaterfallModel
+#from ua.models.WaterfallModel import WaterfallModel
 import json
 import glob
 import time
@@ -46,6 +46,19 @@ class EchoesResultsModel():
         elif wave_type == "S":
 
             self.echoes_s[correlation['filename_waveform']] = correlation
+
+    def delete_echo(self, filename_waveform, frequency, wave_type):
+        deleted = False
+        if wave_type == "P":
+            if filename_waveform in self.echoes_p:
+                del self.echoes_p[filename_waveform]
+                deleted = True
+        elif wave_type == "S":
+            if filename_waveform in self.echoes_s:
+                del self.echoes_s[filename_waveform]
+                deleted = True
+
+        return deleted
 
     def clear(self):
         self.__init__()

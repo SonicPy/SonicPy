@@ -20,10 +20,12 @@ import json
 from utilities.CARSMath import fit_gaussian, polyfitw
 
 from .. models.SelectedEchoesModel import SelectedEchoesModel
-
+from ua.models.EchoesResultsModel import EchoesResultsModel
 
 class UltrasoundAnalysisModel():
-    def __init__(self):
+    def __init__(self, results_model: EchoesResultsModel):
+
+        self.results_model = results_model
         self.waveform = None
         self.envelope = None
         self.t = None
@@ -35,6 +37,8 @@ class UltrasoundAnalysisModel():
         self.freq = 0
         self.wave_type = 'P' # or 'S'
         self.settings = {'tukey_alpha':0.2}
+
+        
 
         self.minima = []
         self.maxima = []

@@ -19,15 +19,16 @@ from ua.models.WaterfallModel import WaterfallModel
 import json
 import glob
 import time
+from ua.models.EchoesResultsModel import EchoesResultsModel
 
 class TimeOfFlightModel():
-    def __init__(self):
+    def __init__(self, results_model: EchoesResultsModel):
         
         self.spectra = {}
         
         self.experiment = {}
         
-
+        self.results_model = results_model
 
  
  

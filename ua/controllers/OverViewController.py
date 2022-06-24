@@ -28,7 +28,7 @@ import utilities.hpMCAutilities as mcaUtil
 from utilities.HelperModule import increment_filename, increment_filename_extra
 from um.widgets.UtilityWidgets import open_file_dialog, open_files_dialog 
 import glob
-
+from ua.models.EchoesResultsModel import EchoesResultsModel
 
 ############################################################
 
@@ -39,9 +39,9 @@ class OverViewController(QObject):
     cursor_position_signal = pyqtSignal(float)
     freq_settings_changed_signal = pyqtSignal(float)
 
-    def __init__(self, app = None):
+    def __init__(self, app = None, results_model=EchoesResultsModel()):
         super().__init__()
-        self.model = OverViewModel()
+        self.model = OverViewModel(results_model)
 
         
 
@@ -142,7 +142,7 @@ class OverViewController(QObject):
     def select_fname(self, fname):
         if fname in self.model.file_dict:
             self.selected_fname = fname
-            self.re_plot_single_frequency()
+            
                     
             cond = self.model.file_dict[self.selected_fname][0]
             freq = self.model.file_dict[self.selected_fname][1]
@@ -163,6 +163,17 @@ class OverViewController(QObject):
             
             self.file_selected_signal.emit(data)
 
+            current_frequency = copy.copy(self.freq)
+            current_condition = copy.copy(self.cond)
+
+            if cond != current_condition:
+
+                self.set_condition(cond)
+            if freq != current_frequency:
+                ind = list(self.model.fps_Hz.keys()).index(freq)
+                self.set_frequency(ind)
+                
+
     def single_condition_cursor_y_signal_callback(self, y_pos):
 
         index = round(y_pos)
@@ -172,7 +183,7 @@ class OverViewController(QObject):
             if fnames[index] in self.model.file_dict:
                 self.selected_fname = fnames[index]
                 
-                self.re_plot_single_condition()
+                
 
                 cond = self.model.file_dict[self.selected_fname][0]
                 self.cond = cond
@@ -193,6 +204,7 @@ class OverViewController(QObject):
                 data['spectrum'] = selected[1]
                 
                 self.file_selected_signal.emit(data)
+                self.re_plot_single_condition()
 
     def preferences_module(self, *args, **kwargs):
         pass

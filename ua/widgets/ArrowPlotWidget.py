@@ -62,6 +62,9 @@ class ArrowPlotWidget(QWidget):
         
         if xData is not None and yData is not None:
             self.maximums.setData(xData, yData)
+
+    def get_cursor_pos(self):
+        return self.win.fig.win.get_cursor_pos()
          
     def make_widget(self):
         my_widget = self
@@ -79,6 +82,7 @@ class ArrowPlotWidget(QWidget):
         self.open_btn = QtWidgets.QPushButton("Open")
         self.auto_btn = QtWidgets.QPushButton("Auto")
         self.calc_btn = QtWidgets.QPushButton("Calculate")
+        self.del_btn = QtWidgets.QPushButton('Delete')
         self.clear_btn = QtWidgets.QPushButton('Clear')
         self.fname_lbl = QtWidgets.QLineEdit('')
         freq_lbl = QtWidgets.QLabel('   Inverse Frequency (1/MHz):')
@@ -95,6 +99,7 @@ class ArrowPlotWidget(QWidget):
         _buttons_layout_top.addWidget(self.N_cbx)
         _buttons_layout_top.addWidget(self.calc_btn)
         _buttons_layout_top.addWidget(self.auto_btn)
+        _buttons_layout_top.addWidget(self.del_btn)
         _buttons_layout_top.addWidget(self.clear_btn)
         
         _buttons_layout_top.addSpacerItem(HorizontalSpacerItem())

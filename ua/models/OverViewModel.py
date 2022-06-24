@@ -24,6 +24,8 @@ import time
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtCore import QObject
 from natsort import natsorted 
+
+from ua.models.EchoesResultsModel import EchoesResultsModel
  
 # Python program to sort a list of
 # tuples by the second Item using sort()
@@ -64,8 +66,10 @@ class FileServer():
         return output
 
 class OverViewModel():
-    def __init__(self):
+    def __init__(self, results_model: EchoesResultsModel):
         
+        self.results_model = results_model
+
         self.spectra = {}
 
         self.file_server = FileServer()
@@ -116,7 +120,7 @@ class OverViewModel():
             self.echoes_s[fname] = echoes_bounds
 
     def clear(self):
-        self.__init__()
+        self.__init__(self.results_model)
 
     def set_scale(self, scale):
 

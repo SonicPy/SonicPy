@@ -14,11 +14,12 @@ from scipy import signal
 import pyqtgraph as pg
 from utilities.utilities import zero_phase_bandpass_filter
 import json
-
+from ua.models.EchoesResultsModel import EchoesResultsModel
 
 class optima():
-    def __init__(self, data, frequency, filename_waveform):
+    def __init__(self, data, frequency, filename_waveform, wave_type):
         self.filename_waveform = filename_waveform
+        self.wave_type = wave_type
         self.freq = frequency
         self.minima = data['minima']
         self.maxima = data['maxima']
@@ -101,9 +102,15 @@ class optima():
 
 
 class ArrowPlotModel():
-    def __init__(self):
+    def __init__(self, results_model: EchoesResultsModel):
         
         self.optima = {}
+        self.results_model = results_model
+
+    def delete_optima(self, freq):
+
+        del self.optima[freq]
+    
 
 
     def add_result_from_file(self, filename):
@@ -175,7 +182,7 @@ class ArrowPlotModel():
 
 
     def clear(self):
-        self.__init__()
+        self.__init__(self.results_model)
 
 
     def read_result_file(self, filename):
@@ -238,11 +245,12 @@ class ArrowPlotModel():
         freq = data['frequency']
 
         filename_waveform = data['filename_waveform']
+        wave_type = data['wave_type']
         if 'correlation' in data:
             correlation_optima = data['correlation']
         else:
             correlation_optima = data
-        data_pt = optima(correlation_optima, freq, filename_waveform)
+        data_pt = optima(correlation_optima, freq, filename_waveform, wave_type)
         self.optima[freq]=data_pt
         
 

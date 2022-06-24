@@ -74,6 +74,15 @@ class TimeOfFlightController(QObject):
 
         self.correlation_controller.correlation_saved_signal.connect(self.correlation_saved_signal_callback)
 
+        self.arrow_plot_controller.arrow_plot_freq_cursor_changed_signal.connect(self.arrow_plot_freq_cursor_changed_signal_callback)
+
+    def arrow_plot_freq_cursor_changed_signal_callback(self, cursor_info):
+        fname = cursor_info['filename_waveform']
+        freq = cursor_info['frequency']
+        
+        self.overview_controller. set_frequency_by_value(freq)
+        self.overview_controller. select_fname(fname)
+
     def ArrowPlotShow(self):
         self.arrow_plot_controller.arrow_plot_window.raise_widget()
 
@@ -117,8 +126,7 @@ class TimeOfFlightController(QObject):
 
         echoes_p, echoes_s = self.echoes_results_model.get_echoes()
 
-        echoes_by_condition = self.echoes_results_model.get_echoes_by_condition(cond, echo_type)
-        self.arrow_plot_controller.set_data_by_dict(echoes_by_condition)
+        
 
         
         if fname in echoes_p:
@@ -152,7 +160,10 @@ class TimeOfFlightController(QObject):
             self.correlation_controller.calculate_data()
 
         
-    
+        echoes_by_condition = self.echoes_results_model.get_echoes_by_condition(cond, echo_type)
+        self.arrow_plot_controller.set_data_by_dict(echoes_by_condition)
+        self.arrow_plot_controller.set_frequency_cursor(freq)
+
 
     def preferences_module(self, *args, **kwargs):
         pass

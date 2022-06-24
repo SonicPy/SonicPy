@@ -28,6 +28,9 @@ from um.widgets.UtilityWidgets import open_file_dialog, open_files_dialog
 ############################################################
 
 class ArrowPlotController(QObject):
+
+    arrow_plot_freq_cursor_changed_signal = pyqtSignal(dict)
+
     def __init__(self, app = None):
         super().__init__()
         self.model = ArrowPlotModel()
@@ -45,6 +48,23 @@ class ArrowPlotController(QObject):
         self.arrow_plot_window.N_cbx.stateChanged.connect(self.update_plot)
         self.arrow_plot_window.point_clicked_signal.connect(self.point_clicked_callback)
         #self.arrow_plot_window.save_btn.clicked.connect(self.save_result)
+        self.arrow_plot_window.win.cursor_changed_singal.connect(self.cursor_changed_singal_callback)
+
+    def cursor_changed_singal_callback(self, *args):
+        
+        freqs = np.asarray(list(self.model.optima.keys()))
+        freq = 1/args[0]
+        if freq <= np.amin(freqs):
+            part_ind = 0
+        elif freq >= np.amax(freqs):
+            part_ind = len(freqs)-1
+        else:
+            part_ind = get_partial_index(freqs, freq)
+        ind = int(round(part_ind))
+        freq_out = freqs[ind]
+        optima = self.model.optima[freq_out]
+        fname = optima.filename_waveform
+        self.arrow_plot_freq_cursor_changed_signal.emit({'frequency':freq_out, 'filename_waveform':fname})
 
     def calc_callback(self):
         self.calculate_data()
@@ -78,9 +98,14 @@ class ArrowPlotController(QObject):
         #filename = self.fname + '.json'
         #self.model.save_result(filename)
 
+    def set_frequency_cursor(self, freq):
+        inv_freq = 1/(freq*1e6)
+        self.sync_cursors(inv_freq)
+
     def sync_cursors(self, pos):
-        self.display_window.win.fig.set_cursor(pos)
-        self.display_window.detail_win1.fig.set_cursor(pos)
+        self.arrow_plot_window.win.blockSignals(True)
+        self.arrow_plot_window.win.update_cursor(pos)
+        self.arrow_plot_window.win.blockSignals(False)
 
     def get_opt(self):
         N = self.arrow_plot_window.N_cbx.checkState()

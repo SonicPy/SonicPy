@@ -171,7 +171,7 @@ class OverViewWidget(QWidget):
         self.freq_start.setMinimumWidth(70)
         self.freq_start.setMinimum(1e-9)
         self.freq_start.setSingleStep(1)
-        self.freq_start.setValue(24)
+        self.freq_start.setValue(15)
         
         self.freq_step = DoubleSpinBoxAlignRight(self.buttons_widget_top)
         self.freq_step.setMinimumWidth(70)

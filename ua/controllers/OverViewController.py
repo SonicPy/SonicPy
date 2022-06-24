@@ -135,29 +135,33 @@ class OverViewController(QObject):
         fnames = list(self.model.waterfalls[self.freq].waveforms.keys())
         if index >=0 and index < len(fnames):
             
-            if fnames[index] in self.model.file_dict:
-                self.selected_fname = fname = fnames[index]
-                
-                self.re_plot_single_frequency()
-                
-                cond = self.model.file_dict[self.selected_fname][0]
-                freq = self.model.file_dict[self.selected_fname][1]
-                conds = list(self.model.fps_cond.keys())
-                ind  = conds.index(cond)
-                self.set_condition(ind)
-                
-                data = {}
-                
-                data['fname'] = self.selected_fname
-                data['cond'] = cond
-                data['freq'] = freq
+            fname = fnames[index]
+            
+            self.select_fname(fname)
 
-                selected = self.model.spectra[cond][self.freq]['waveform']
-               
-                data['t'] = selected[0]
-                data['spectrum'] = selected[1]
-                
-                self.file_selected_signal.emit(data)
+    def select_fname(self, fname):
+        if fname in self.model.file_dict:
+            self.selected_fname = fname
+            self.re_plot_single_frequency()
+                    
+            cond = self.model.file_dict[self.selected_fname][0]
+            freq = self.model.file_dict[self.selected_fname][1]
+            conds = list(self.model.fps_cond.keys())
+            ind  = conds.index(cond)
+            self.set_condition(ind)
+            
+            data = {}
+            
+            data['fname'] = self.selected_fname
+            data['cond'] = cond
+            data['freq'] = freq
+
+            selected = self.model.spectra[cond][self.freq]['waveform']
+            
+            data['t'] = selected[0]
+            data['spectrum'] = selected[1]
+            
+            self.file_selected_signal.emit(data)
 
     def single_condition_cursor_y_signal_callback(self, y_pos):
 
@@ -276,6 +280,17 @@ class OverViewController(QObject):
 
             self.folder_selected_signal.emit(folder)
         
+    def set_frequency_by_value(self, freq):
+        freqs = list(self.model.fps_Hz.keys())
+        f_start = self.widget.freq_start.value()
+        f_step = self.widget.freq_step.value()
+        freqs_vals = []
+        for freq_ind in range(len(freqs)):
+            freq_val = (f_start + freq_ind * f_step) * 1e6
+            freqs_vals.append(freq_val)
+        if freq in freqs_vals:
+            ind = freqs_vals.index(freq)
+            self.set_frequency(ind)
 
     def set_frequency(self, index):
         freqs = list(self.model.fps_Hz.keys())

@@ -104,6 +104,7 @@ class ArrowPlotWidget(QWidget):
         _layout.addWidget(buttons_widget_top)
         params = "Arrow Plot", 'Time delay (s)', 'Inverse frequency (1/Hz)'
         self.win = SimpleDisplayWidget(params)
+        
         _layout.addWidget(self.win)
 
 

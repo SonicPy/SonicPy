@@ -17,7 +17,8 @@ import json
 
 
 class optima():
-    def __init__(self, data, frequency):
+    def __init__(self, data, frequency, filename_waveform):
+        self.filename_waveform = filename_waveform
         self.freq = frequency
         self.minima = data['minima']
         self.maxima = data['maxima']
@@ -235,11 +236,13 @@ class ArrowPlotModel():
             
     def add_freq(self, data):
         freq = data['frequency']
+
+        filename_waveform = data['filename_waveform']
         if 'correlation' in data:
             correlation_optima = data['correlation']
         else:
             correlation_optima = data
-        data_pt = optima(correlation_optima, freq)
+        data_pt = optima(correlation_optima, freq, filename_waveform)
         self.optima[freq]=data_pt
         
 

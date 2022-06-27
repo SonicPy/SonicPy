@@ -152,7 +152,7 @@ class OverViewWidget(QWidget):
         self.fname_lbl.setMinimumWidth(300)'''
         self.scale_lbl = QtWidgets.QLabel('   Scale:')
         self.scale_ebx = DoubleSpinBoxAlignRight()
-        self.scale_ebx.setMaximum(100)
+        self.scale_ebx.setMaximum(1000)
         self.scale_ebx.setMinimum(1)
         self.scale_ebx.setValue(21)
         self.clip_cbx = QtWidgets.QCheckBox('Clip')

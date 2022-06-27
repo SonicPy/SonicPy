@@ -118,8 +118,7 @@ class OverViewController(QObject):
         for correlation in correlations:
             self.model.add_echoes(correlations[correlation])
 
-        self.re_plot_single_frequency()
-        self.re_plot_single_condition()
+        
 
     def save_result(self):
         pass
@@ -141,6 +140,7 @@ class OverViewController(QObject):
 
     def select_fname(self, fname):
         if fname in self.model.file_dict:
+            temp_fname = copy.copy(self.selected_fname)
             self.selected_fname = fname
             
                     
@@ -166,12 +166,18 @@ class OverViewController(QObject):
             current_frequency = copy.copy(self.freq)
             current_condition = copy.copy(self.cond)
 
-            if cond != current_condition:
-
-                self.set_condition(cond)
+           
             if freq != current_frequency:
-                ind = list(self.model.fps_Hz.keys()).index(freq)
-                self.set_frequency(ind)
+                if temp_fname != self.selected_fname:
+                    ind = list(self.model.fps_Hz.keys()).index(freq)
+                    self.set_frequency(ind)
+            else:
+                if cond != current_condition:
+
+                    self.set_condition(cond)
+                else:
+                    if temp_fname != self.selected_fname:
+                        self.re_plot_single_frequency()
                 
 
     def single_condition_cursor_y_signal_callback(self, y_pos):
@@ -181,11 +187,11 @@ class OverViewController(QObject):
         fnames = list(self.model.waterfalls[self.cond].waveforms.keys())
         if index >=0 and index < len(fnames):
             if fnames[index] in self.model.file_dict:
-                self.selected_fname = fnames[index]
-                
-                
+                #self.selected_fname = fnames[index]
+                fname = fnames[index]
+                self.select_fname(fname)
 
-                cond = self.model.file_dict[self.selected_fname][0]
+                '''cond = self.model.file_dict[self.selected_fname][0]
                 self.cond = cond
                 freq = self.model.file_dict[self.selected_fname][1]
                 freqs = list(self.model.fps_Hz.keys())
@@ -204,7 +210,7 @@ class OverViewController(QObject):
                 data['spectrum'] = selected[1]
                 
                 self.file_selected_signal.emit(data)
-                self.re_plot_single_condition()
+                self.re_plot_single_condition()'''
 
     def preferences_module(self, *args, **kwargs):
         pass

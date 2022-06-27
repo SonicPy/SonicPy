@@ -103,6 +103,8 @@ class TimeOfFlightController(QObject):
         
         correlations = {correlation['filename_waveform']:correlation}
         self.overview_controller.correlation_echoes_added(correlations)
+        self.overview_controller.re_plot_single_frequency()
+        self.overview_controller.re_plot_single_condition()
 
         self.echoes_results_model.add_echoe(correlation)
         self.echoes_results_model.save_result(correlation)
@@ -118,6 +120,8 @@ class TimeOfFlightController(QObject):
         saved_echoes_p, saved_echoes_s = self.echoes_results_model.get_echoes()
         self.overview_controller.correlation_echoes_added(saved_echoes_p)
         self.overview_controller.correlation_echoes_added(saved_echoes_s)
+        self.overview_controller.re_plot_single_frequency()
+        self.overview_controller.re_plot_single_condition()
 
     def freq_settings_changed_signal_callback(self, freq):
         

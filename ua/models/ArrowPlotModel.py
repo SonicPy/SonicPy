@@ -101,21 +101,82 @@ class optima():
                 self.other_opt[opt].pop(other_opt_ind)
 
 
-class ArrowPlotModel():
+class ArrowPlotsModel():
     def __init__(self, results_model: EchoesResultsModel):
-        
-        self.optima = {}
+
+        self.arrow_plot_models = {}
         self.results_model = results_model
 
-    def delete_optima(self, freq):
+    def clear(self):
+        self.__init__(self.results_model)
+
+    
+    
+    def add_result_from_file(self, cond, filename):
+        if not cond in self.arrow_plot_models:
+            self.arrow_plot_models[cond] = ArrowPlot()
+        
+
+        data = read_result_file(filename)
+        self.arrow_plot_models[cond].add_freq(data)
+
+    def set_all_freqs(self, cond, correlations):
+
+        if not cond in self.arrow_plot_models:
+            self.arrow_plot_models[cond] = ArrowPlot()
+
+        #self.arrow_plot_models[cond].clear()
+        freqs = []
+
+        for correlation in correlations:
+            freq = correlation['frequency']
+            fname = correlation['filename_waveform']
+            freqs.append((freq, correlation))
+        
+        freqs = Sort_Tuple(freqs, 0)
+        for freq in freqs:
+            correlation = freq[1]
+        
+            self.arrow_plot_models[cond].add_freq(correlation)
+
+    def delete_optima(self, cond, freq):
+        if cond in self.arrow_plot_models:
+            if freq in self.arrow_plot_models[cond].optima:
+                del self.arrow_plot_models[cond].optima[freq]
+
+    def save_result(self, filename):
+        # not implemented yet
+        data = {}
+        
+        if filename.endswith('.json'):
+            with open(filename, 'w') as json_file:
+                json.dump(data, json_file,indent = 2)    
+            
+
+class ArrowPlot():
+    def __init__(self):
+
+        self.optima = {}
+
+    def clear(self):
+        self.__init__()
+
+            
+    def add_freq(self, data):
+        freq = data['frequency']
+        if not freq in self.optima:
+            filename_waveform = data['filename_waveform']
+            wave_type = data['wave_type']
+            
+            correlation_optima = data['correlation']
+            data_pt = optima(correlation_optima, freq, filename_waveform, wave_type)
+            self.optima[freq]=data_pt
+
+    def delete_optima(self, cond, freq):
 
         del self.optima[freq]
-    
 
 
-    def add_result_from_file(self, filename):
-        data = self.read_result_file(filename)
-        self.add_freq(data)
 
     def get_other_data_points(self, opt):
         optima = self.optima
@@ -140,6 +201,15 @@ class ArrowPlotModel():
                 xData.append(1/freq)
                 yData.append(pt)
         return xData, yData
+
+
+    def set_optimum(self, opt, t, f_inv):
+        
+        keys = list(self.optima.keys())
+        freqs = abs(np.asarray(keys) - 1/f_inv)
+        ind = np.argmin(freqs)
+        freq = keys[ind]
+        self.optima[freq].set_optimum(opt, t)
 
     def auto_sort_optima(self, opt):
         '''
@@ -181,18 +251,6 @@ class ArrowPlotModel():
                 self.optima[freq].set_optimum(opt, best_opt)
 
 
-    def clear(self):
-        self.__init__(self.results_model)
-
-
-    def read_result_file(self, filename):
-        with open(filename) as json_file:
-            data = json.load(json_file)
-
-        return data
-
-    
-
     def get_line(self, opt, ind=0):
         '''
         opt: 'min' or 'max
@@ -212,58 +270,17 @@ class ArrowPlotModel():
         return X, Y, fit
 
 
-    def set_optimum(self, opt, t, f_inv):
-        
-        keys = list(self.optima.keys())
-        freqs = abs(np.asarray(keys) - 1/f_inv)
-        ind = np.argmin(freqs)
-        freq = keys[ind]
-        self.optima[freq].set_optimum(opt, t)
-
     def fit_line(self, X, Y):
         fit = np.polyfit(X,Y,1)
         return fit
 
-    def set_all_freqs(self, correlations):
-        self.clear()
-        freqs = []
-
-        for correlation in correlations:
-            freq = correlation['frequency']
-            fname = correlation['filename_waveform']
-            freqs.append((freq, correlation))
-        
-        freqs = Sort_Tuple(freqs, 0)
-        for freq in freqs:
-            correlation = freq[1]
-        
-            self.add_freq(correlation)
-
     
-            
-    def add_freq(self, data):
-        freq = data['frequency']
 
-        filename_waveform = data['filename_waveform']
-        wave_type = data['wave_type']
-        if 'correlation' in data:
-            correlation_optima = data['correlation']
-        else:
-            correlation_optima = data
-        data_pt = optima(correlation_optima, freq, filename_waveform, wave_type)
-        self.optima[freq]=data_pt
-        
+def read_result_file( filename):
+        with open(filename) as json_file:
+            data = json.load(json_file)
 
-    '''def save_result(self, filename):
-        
-        data = {'frequency':self.freq,'minima_t':list(self.minima[0]),'minima':list(self.minima[1]), 
-                            'maxima_t':list(self.maxima[0]),'maxima':list(self.maxima[1])}
-        
-        if filename.endswith('.json'):
-            with open(filename, 'w') as json_file:
-                json.dump(data, json_file,indent = 2)    '''
-
-    
+        return data
    
 
 def index_of_nearest(values, value):

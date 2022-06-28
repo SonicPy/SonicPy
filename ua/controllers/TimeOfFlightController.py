@@ -178,6 +178,7 @@ class TimeOfFlightController(QObject):
 
         
         echoes_by_condition = self.echoes_results_model.get_echoes_by_condition(cond, echo_type)
+        self.arrow_plot_controller.set_condition( cond) 
         self.arrow_plot_controller.set_data_by_dict(echoes_by_condition)
         self.arrow_plot_controller.set_frequency_cursor(freq)
 

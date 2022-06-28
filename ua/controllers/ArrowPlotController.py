@@ -18,7 +18,7 @@ from ua.models.UltrasoundAnalysisModel import UltrasoundAnalysisModel
 from utilities.HelperModule import move_window_relative_to_screen_center, get_partial_index, get_partial_value
 import math
 
-from ua.models.ArrowPlotModel import ArrowPlotModel
+from ua.models.ArrowPlotModel import ArrowPlotsModel
 
 import utilities.hpMCAutilities as mcaUtil
 from utilities.HelperModule import increment_filename, increment_filename_extra
@@ -34,7 +34,10 @@ class ArrowPlotController(QObject):
 
     def __init__(self, app = None, results_model= EchoesResultsModel()):
         super().__init__()
-        self.model = ArrowPlotModel(results_model)
+        
+        self.model = ArrowPlotsModel(results_model)
+        self.cond = None
+        self.echo_type = None
         if app is not None:
             self.setStyle(app)
         self.arrow_plot_window = ArrowPlotWidget()
@@ -53,11 +56,14 @@ class ArrowPlotController(QObject):
         self.arrow_plot_window.del_btn.clicked.connect(self. del_btn_callback)
 
     def del_btn_callback(self):
-        freq = 1/self. arrow_plot_window.get_cursor_pos()
-        if freq in self.model.optima:
-            fname = self.model.optima[freq].filename_waveform
-            wave_type = self.model.optima[freq].wave_type
-            self.arrow_plot_del_clicked_signal.emit({'frequency':freq, 'filename_waveform':fname, 'wave_type': wave_type})
+        if self.cond != None:
+            if self.cond in self.model.arrow_plot_models:
+                arrow_plot = self.model.arrow_plot_models[self.cond]
+                freq = 1/self. arrow_plot_window.get_cursor_pos()
+                if freq in arrow_plot.optima:
+                    fname = arrow_plot.optima[freq].filename_waveform
+                    wave_type = arrow_plot.optima[freq].wave_type
+                    self.arrow_plot_del_clicked_signal.emit({'frequency':freq, 'filename_waveform':fname, 'wave_type': wave_type})
 
     def echo_deleted(self, del_info):
         fname = del_info['filename_waveform']
@@ -67,43 +73,55 @@ class ArrowPlotController(QObject):
         self.update_plot()
 
     def cursor_changed_singal_callback(self, *args):
-        
-        freqs = np.asarray(list(self.model.optima.keys()))
-        freq = 1/args[0]
-        if freq <= np.amin(freqs):
-            part_ind = 0
-        elif freq >= np.amax(freqs):
-            part_ind = len(freqs)-1
-        else:
-            part_ind = get_partial_index(freqs, freq)
-        ind = int(round(part_ind))
-        freq_out = freqs[ind]
-        optima = self.model.optima[freq_out]
-        fname = optima.filename_waveform
-        self.arrow_plot_freq_cursor_changed_signal.emit({'frequency':freq_out, 'filename_waveform':fname})
+        if self.cond != None:
+            if self.cond in self.model.arrow_plot_models:
+                arrow_plot = self.model.arrow_plot_models[self.cond]
+                freqs = np.asarray(list(arrow_plot.optima.keys()))
+                freq = 1/args[0]
+                if freq <= np.amin(freqs):
+                    part_ind = 0
+                elif freq >= np.amax(freqs):
+                    part_ind = len(freqs)-1
+                else:
+                    part_ind = get_partial_index(freqs, freq)
+                ind = int(round(part_ind))
+                freq_out = freqs[ind]
+                optima = arrow_plot.optima[freq_out]
+                fname = optima.filename_waveform
+                self.arrow_plot_freq_cursor_changed_signal.emit({'frequency':freq_out, 'filename_waveform':fname})
 
     def calc_callback(self):
         self.calculate_data()
         self.update_plot()
 
     def auto_data(self):
-        num_pts = len(self.model.optima)
-        if num_pts > 2:
-            opt = self.get_opt()
-            self.model.auto_sort_optima(opt)
-            self.calculate_data()
-            self.update_plot()
-        else: self.error_not_enough_datapoints()
+        # starts the automatic point sorting and finding the most horizontal line, the 
+        # most horizontal points are the opt_data_points, other points are the other_data_points
+
+        if self.cond != None:
+            if self.cond in self.model.arrow_plot_models:
+                arrow_plot = self.model.arrow_plot_models[self.cond]
+                num_pts = len(arrow_plot.optima)
+                if num_pts > 2:
+                    opt = self.get_opt()
+                    arrow_plot.auto_sort_optima(opt)
+                    self.calculate_data()
+                    self.update_plot()
+                else: self.error_not_enough_datapoints()
  
     def point_clicked_callback(self, pt):
-        f = pt[0]
-        t = pt[1]
-        opt = self.get_opt()
-        self.model.set_optimum(opt, t,f)
-        self.update_plot()
-        #self.calculate_data()
+        if self.cond != None:
+            if self.cond in self.model.arrow_plot_models:
+                arrow_plot = self.model.arrow_plot_models[self.cond]
+                f = pt[0]
+                t = pt[1]
+                opt = self.get_opt()
+                arrow_plot.set_optimum(opt, t,f)
+                self.update_plot()
+                #self.calculate_data()
 
     def clear_data(self):
+        
         self.line_plots = {}
         self.model.clear()
         self.update_plot()
@@ -132,47 +150,52 @@ class ArrowPlotController(QObject):
         return opt
 
     def update_plot(self):
-        opt = self.get_opt()
-        xMax, yMax = self.model.get_opt_data_points(opt)
-        xData, yData = self.model.get_other_data_points(opt)
-        self.arrow_plot_window.update_view(xData,yData)
-        self.arrow_plot_window.update_maximums(np.asarray(xMax),np.asarray(yMax))
-        if opt in self.line_plots:
-            self.arrow_plot_window.update_max_line(*self.line_plots[opt])
-        else:
-            self.arrow_plot_window.update_max_line([],[])
+        if self.cond != None:
+            if self.cond in self.model.arrow_plot_models:
+                arrow_plot = self.model.arrow_plot_models[self.cond]
+                opt = self.get_opt()
+                xMax, yMax = arrow_plot.get_opt_data_points(opt)
+                xData, yData = arrow_plot.get_other_data_points(opt)
+                self.arrow_plot_window.update_view(xData,yData)
+                self.arrow_plot_window.update_maximums(np.asarray(xMax),np.asarray(yMax))
+                if opt in self.line_plots:
+                    self.arrow_plot_window.update_max_line(*self.line_plots[opt])
+                else:
+                    self.arrow_plot_window.update_max_line([],[])
 
     def error_not_enough_datapoints(self):
         pass
     
 
     def calculate_data(self):
-        
-        num_pts = len(self.model.optima)
-        if num_pts > 2:
-            opt = self.get_opt()
+        if self.cond != None:
+            if self.cond in self.model.arrow_plot_models:
+                arrow_plot = self.model.arrow_plot_models[self.cond]
+                num_pts = len(arrow_plot.optima)
+                if num_pts > 2:
+                    opt = self.get_opt()
 
-            indexes = [-3,-2,-1,0,1,2,3]
-            X = []
-            Y = []
-            fits = []
-            for i in indexes:
-                x, y, fit = self.model.get_line(opt,i)
-                fits.append(fit[1])
-                X = X +x
-                Y = Y+y
-                X = X +[np.nan]
-                Y = Y+[np.nan]
-            self.line_plots[opt] = (np.asarray(X),np.asarray(Y))
-            
-            s = np.std(np.asarray(fits))
-            out = 'Time delay = ' + \
-                str(round(sum(np.asarray(fits))/len(fits)*1e6,5)) + \
-                    ' microseconds, st.dev. = ' + \
-                        str(round(s*1e6,5)) +' microseconds'
-            self.arrow_plot_window.output_ebx.setText(out)
-        else:
-            self.error_not_enough_datapoints()
+                    indexes = [-2,-1,0,1,2]
+                    X = []
+                    Y = []
+                    fits = []
+                    for i in indexes:
+                        x, y, fit = arrow_plot.get_line(opt,i)
+                        fits.append(fit[1])
+                        X = X +x
+                        Y = Y+y
+                        X = X +[np.nan]
+                        Y = Y+[np.nan]
+                    self.line_plots[opt] = (np.asarray(X),np.asarray(Y))
+                    
+                    s = np.std(np.asarray(fits))
+                    out = 'Time delay = ' + \
+                        str(round(sum(np.asarray(fits))/len(fits)*1e6,5)) + \
+                            ' microseconds, st.dev. = ' + \
+                                str(round(s*1e6,5)) +' microseconds'
+                    self.arrow_plot_window.output_ebx.setText(out)
+                else:
+                    self.error_not_enough_datapoints()
 
     '''def load_file(self, filename):
         t, spectrum = read_tek_csv(filename, subsample=4)
@@ -180,18 +203,24 @@ class ArrowPlotController(QObject):
         return t,spectrum, filename'''
         
     def update_data(self, *args, **kwargs):
-        filenames = kwargs.get('filenames', None)
-        if filenames is None:
-            filenames = open_files_dialog(self.arrow_plot_window, 'Open files',filter='*.json')
-        if len(filenames):
-            for fname in filenames:
-                self.model.add_result_from_file(fname)
-            #self.auto_data()
-            self.update_plot()
+        if self.cond != None:
+            
+            filenames = kwargs.get('filenames', None)
+            if filenames is None:
+                filenames = open_files_dialog(self.arrow_plot_window, 'Open files',filter='*.json')
+            if len(filenames):
+                for fname in filenames:
+                    self.model.add_result_from_file(self.cond,fname)
+                #self.auto_data()
+                self.update_plot()
 
     def set_data_by_dict(self, correlations):
-        self.model.set_all_freqs(correlations)
-        self.update_plot()
+        if self.cond != None:
+            self.model.set_all_freqs(self.cond, correlations)
+            self.update_plot()
+
+    def set_condition(self, cond):
+        self.cond = cond
 
     def show_window(self):
         self.arrow_plot_window.raise_widget()

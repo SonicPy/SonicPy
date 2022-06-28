@@ -18,6 +18,7 @@ from ua.models.EchoesResultsModel import EchoesResultsModel
 
 class optima():
     def __init__(self, data, frequency, filename_waveform, wave_type):
+        self.data = data
         self.filename_waveform = filename_waveform
         self.wave_type = wave_type
         self.freq = frequency
@@ -108,36 +109,39 @@ class ArrowPlotsModel():
         self.arrow_plot_models_s = {}
         self.results_model = results_model
 
-    def clear(self):
-        self.__init__(self.results_model)
 
-    
-    
-    def add_result_from_file(self, cond, wave_type, filename):
+    def get_arrow_plot(self, cond, wave_type):
+
         if wave_type == 'P':
             arrow_plot_models = self.arrow_plot_models_p
         elif wave_type == 'S':
             arrow_plot_models = self.arrow_plot_models_s
-            
-        if not cond in arrow_plot_models:
-            arrow_plot_models[cond] = ArrowPlot()
+        if cond in arrow_plot_models:
+            arrow_plot = arrow_plot_models[cond]
+        else:
+            arrow_plot = arrow_plot_models[cond] = ArrowPlot()
+
+        return arrow_plot
+
+    def clear_condition(self, condition, wave_type):
+        arrow_plot = self.get_arrow_plot(condition, wave_type)
+
+        del arrow_plot
+    
+    
+    '''def add_result_from_file(self, condition, wave_type, filename):
+        arrow_plot = self.get_arrow_plot(condition, wave_type)
         
 
         data = read_result_file(filename)
-        arrow_plot_models[cond].add_freq(data)
+        arrow_plot.add_freq(data)'''
 
-    def set_all_freqs(self, cond,wave_type, correlations):
-        if wave_type == 'P':
-            arrow_plot_models = self.arrow_plot_models_p
-        elif wave_type == 'S':
-            arrow_plot_models = self.arrow_plot_models_s
-        if not cond in arrow_plot_models:
-            arrow_plot_models[cond] = ArrowPlot()
+    def refresh_all_freqs(self, condition,wave_type):
+        arrow_plot = self.get_arrow_plot(condition, wave_type)
 
-        #self.arrow_plot_models[cond].clear()
+        echoes_by_condition = self.results_model.get_echoes_by_condition(condition, wave_type)
         freqs = []
-
-        for correlation in correlations:
+        for correlation in echoes_by_condition:
             freq = correlation['frequency']
             fname = correlation['filename_waveform']
             freqs.append((freq, correlation))
@@ -146,24 +150,23 @@ class ArrowPlotsModel():
         for freq in freqs:
             correlation = freq[1]
         
-            arrow_plot_models[cond].add_freq(correlation)
+            arrow_plot.add_freq(correlation)
 
-    def delete_optima(self, cond, wave_type, freq):
-        if wave_type == 'P':
-            arrow_plot_models = self.arrow_plot_models_p
-        elif wave_type == 'S':
-            arrow_plot_models = self.arrow_plot_models_s
-        if cond in arrow_plot_models:
-            if freq in arrow_plot_models[cond].optima:
-                del arrow_plot_models[cond].optima[freq]
+    
 
-    def save_result(self, filename):
+    def delete_optima(self, condition, wave_type, freq):
+        arrow_plot = self.get_arrow_plot(condition, wave_type)
+
+        if freq in arrow_plot.optima:
+            del arrow_plot.optima[freq]
+
+    '''def save_result(self, filename):
         # not implemented yet
         data = {}
         
         if filename.endswith('.json'):
             with open(filename, 'w') as json_file:
-                json.dump(data, json_file,indent = 2)    
+                json.dump(data, json_file,indent = 2)    '''
             
 
 class ArrowPlot():
@@ -177,13 +180,24 @@ class ArrowPlot():
             
     def add_freq(self, data):
         freq = data['frequency']
+
+        filename_waveform = data['filename_waveform']
+        wave_type = data['wave_type']
+        correlation_optima = data['correlation']
+
         if not freq in self.optima:
-            filename_waveform = data['filename_waveform']
-            wave_type = data['wave_type']
-            
-            correlation_optima = data['correlation']
             data_pt = optima(correlation_optima, freq, filename_waveform, wave_type)
             self.optima[freq]=data_pt
+        else:
+            data_pt = self.optima[freq]
+            stored_filename_waveform = data_pt.filename_waveform
+            stored_wave_type = data_pt.wave_type
+            stored_correlation_optima = data_pt.data
+            same = stored_filename_waveform== filename_waveform and stored_wave_type ==wave_type and stored_correlation_optima==correlation_optima
+            if not same:
+                data_pt = optima(correlation_optima, freq, filename_waveform, wave_type)
+                self.optima[freq]=data_pt
+
 
     def delete_optima(self, cond, freq):
 

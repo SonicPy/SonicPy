@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 
-
 import os.path, sys
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QObject, pyqtSignal
@@ -70,15 +69,12 @@ class TimeOfFlightController(QObject):
         self.overview_controller.file_selected_signal.connect(self.file_selected_signal_callback)
         self.overview_controller.folder_selected_signal.connect(self.folder_selected_signal_callback)
         self.overview_controller.freq_settings_changed_signal.connect(self.freq_settings_changed_signal_callback)
-
         self.overview_controller.cursor_position_signal.connect(self.correlation_controller.sync_cursors)
         self.correlation_controller.cursor_position_signal.connect(self.overview_controller.sync_cursors)
-
         self.correlation_controller.correlation_saved_signal.connect(self.correlation_saved_signal_callback)
-
         self.arrow_plot_controller.arrow_plot_freq_cursor_changed_signal.connect(self.arrow_plot_freq_cursor_changed_signal_callback)
-
         self.arrow_plot_controller.arrow_plot_del_clicked_signal.connect(self.arrow_plot_del_clicked_signal_callback)
+        self.arrow_plot_controller.arrow_plot_clear_clicked_signal.connect(self.arrow_plot_clear_clicked_signal_callback)
 
     def arrow_plot_del_clicked_signal_callback(self, del_info):
         fname = del_info['filename_waveform']
@@ -87,6 +83,16 @@ class TimeOfFlightController(QObject):
         deleted = self.echoes_results_model.delete_echo(fname, freq, wave_type)
         if deleted:
             self.arrow_plot_controller.echo_deleted(del_info)
+            self.overview_controller.echo_deleted(del_info)
+            
+
+    def arrow_plot_clear_clicked_signal_callback(self, clear_info):
+        wave_type = clear_info['wave_type']
+        condition = clear_info['condition']
+        cleared = self.echoes_results_model.clear_by_condition(condition, wave_type)
+        if cleared:
+            self.arrow_plot_controller.condition_cleared(clear_info)
+      
 
 
     def arrow_plot_freq_cursor_changed_signal_callback(self, cursor_info):
@@ -109,7 +115,8 @@ class TimeOfFlightController(QObject):
         self.echoes_results_model.add_echoe(correlation)
         self.echoes_results_model.save_result(correlation)
 
-        
+        self.arrow_plot_controller.refresh_model()
+
     
     def folder_selected_signal_callback(self, folder):
         self.widget.setWindowTitle("Time-of-flight analysis. V." + __version__ + "  © R. Hrubiak, 2022. Folder: "+ os.path.abspath( folder))
@@ -150,9 +157,7 @@ class TimeOfFlightController(QObject):
 
         echoes_p, echoes_s = self.echoes_results_model.get_echoes()
 
-        
-
-        
+    
         if fname in echoes_p:
             echo_p = echoes_p[fname]
             bounds_p = echo_p['echo_bounds']
@@ -187,7 +192,7 @@ class TimeOfFlightController(QObject):
         echoes_by_condition = self.echoes_results_model.get_echoes_by_condition(cond, echo_type)
         self.arrow_plot_controller.set_wave_type(echo_type)
         self.arrow_plot_controller.set_condition( cond) 
-        self.arrow_plot_controller.set_data_by_dict(echoes_by_condition)
+        self.arrow_plot_controller.refresh_model()
         self.arrow_plot_controller.set_frequency_cursor(freq)
 
 

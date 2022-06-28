@@ -33,6 +33,13 @@ class WaterfallModel( ):
                 new_waveforms[fname] = self.waveforms[fname]
         self.waveforms = new_waveforms
 
+    def del_echoe(self, fname, wave_type):
+        if wave_type == 'P':
+            del self.echoes_p_ind[fname] 
+
+        elif wave_type == 'S':
+            del self.echoes_s_ind[fname] 
+
     def set_echoe(self, fname, wave_type, echoes_bounds):
         # echoes_bounds = list, [[0,0],[0,0]]
         # echoes_bounds[0]: P bounds

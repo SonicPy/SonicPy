@@ -70,6 +70,9 @@ class OverViewModel():
         
         self.results_model = results_model
 
+        self.f_start = 15
+        self.f_step = 2
+
         self.spectra = {}
 
         self.file_server = FileServer()
@@ -108,6 +111,35 @@ class OverViewModel():
         cond_waterfall.set_echoe(filename_waveform ,wave_type, bounds)'''
 
         self.set_echoes(filename_waveform ,wave_type, bounds)
+
+    def del_echoes(self, condition, wave_type, freq):
+        str_ind_freq = f'{self.freq_val_to_ind(freq):03d}' 
+        fname = self.spectra[condition][str_ind_freq]['filename']
+        if wave_type == 'P':
+            del self.echoes_p[fname] 
+            
+
+        elif wave_type == 'S':
+            del self.echoes_s[fname] 
+
+        waterfall = self.waterfalls[str_ind_freq]
+        waterfall.del_echoe(fname, wave_type)
+        waterfall = self.waterfalls[condition]
+        waterfall.del_echoe(fname, wave_type)
+
+    def freq_val_to_ind(self, freq):
+        ind = None
+        freqs = list(self.fps_Hz.keys())
+        f_start = self.f_start
+        f_step = self.f_step
+        freqs_vals = []
+        for freq_ind in range(len(freqs)):
+            freq_val = (f_start + freq_ind * f_step) * 1e6
+            freqs_vals.append(freq_val)
+        if freq in freqs_vals:
+            ind = freqs_vals.index(freq)
+        return ind
+
         
     def set_echoes(self, fname, wave_type, echoes_bounds):
         # echoes_bounds = list, [[0.0,0.0],[0.0,0.0]] (values are in seconds)
@@ -220,6 +252,13 @@ class OverViewModel():
         
         if exists:
             self.fp = folder
+            settings_file =  os.path.join(folder, 'settings.json')
+
+            settings_exist = os.path.isfile(settings_file)
+            if settings_exist:
+                settings = self.read_result_file(settings_file)
+                print(settings)
+
             self.understand_folder_structure()
         
 

@@ -1,6 +1,7 @@
 
 from argparse import FileType
 import enum
+from importlib.machinery import FileFinder
 import os.path, sys
 from turtle import update
 from utilities.utilities import *
@@ -26,7 +27,7 @@ from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtCore import QObject
 from natsort import natsorted 
  
-
+import shutil
 
 
 class EchoesResultsModel():
@@ -49,14 +50,34 @@ class EchoesResultsModel():
 
     def delete_echo(self, filename_waveform, frequency, wave_type):
         deleted = False
-        if wave_type == "P":
-            if filename_waveform in self.echoes_p:
-                del self.echoes_p[filename_waveform]
+        
+
+        #  delete in filesystem
+        saved_path = os.path.normpath(filename_waveform)
+        file_split = os.path.split(saved_path)[-1]
+        base_folder = os.path.split(os.path.split(saved_path)[0])[-1]
+            
+            
+        folder = os.path.join(self.folder, base_folder, wave_type)
+        exists = os.path.exists(folder)
+        if exists:
+            json_search = os.path.join(folder,'*'+str(round(frequency*1e-6,1))+'_MHz.json')
+            res_files = glob.glob(json_search)
+            if len(res_files):
+                file_for_deletion = res_files[0]
+
+                os.remove(file_for_deletion)
                 deleted = True
-        elif wave_type == "S":
-            if filename_waveform in self.echoes_s:
-                del self.echoes_s[filename_waveform]
-                deleted = True
+
+                if wave_type == "P":
+                    if filename_waveform in self.echoes_p:
+                        del self.echoes_p[filename_waveform]
+                        #deleted = True
+                elif wave_type == "S":
+                    if filename_waveform in self.echoes_s:
+                        del self.echoes_s[filename_waveform]
+                        #deleted = True
+                
 
         return deleted
 
@@ -114,7 +135,19 @@ class EchoesResultsModel():
             except:
                 print('could not save file: '+ filename)
 
-    def load_result_from_file(self, ):
+    def clear_by_condition(self, cond, wave_type):
+        cleared = False
+        dir_path = os.path.join(self.folder, cond, wave_type)
+        exists = os.path.exists(dir_path)
+        if exists:
+            try:
+                shutil.rmtree(dir_path)
+                cleared = True
+            except OSError as e:
+                print("Error: %s : %s" % (dir_path, e.strerror))
+        return cleared
+
+    def load_result_from_file(self ):
 
         for subfolder in self.subfolders:
             wave_types = ['P','S']

@@ -45,9 +45,13 @@ class OverViewController(QObject):
 
         
 
+        
+
         if app is not None:
             self.setStyle(app)
         self.widget = OverViewWidget()
+        self.widget.freq_step.setValue(self.model.f_step)
+        self.widget.freq_start.setValue(self.model.f_start)
         self.folder_widget = FolderListWidget()
 
         self.widget.clip_cbx.setChecked(self.model.settings['clip'])
@@ -59,7 +63,10 @@ class OverViewController(QObject):
         self.cond = '0psi'
 
         
-        
+        f_start = self.widget.freq_start.value()
+        f_step = self.widget.freq_step.value()
+
+
         
         
     def make_connections(self):  
@@ -118,6 +125,15 @@ class OverViewController(QObject):
         for correlation in correlations:
             self.model.add_echoes(correlations[correlation])
 
+    def echo_deleted(self, del_info):
+        
+        fname = del_info['filename_waveform']
+        freq = del_info['frequency']
+        wave_type = del_info['wave_type']
+        self. model.del_echoes(self.cond, wave_type, freq)
+
+        self.re_plot_single_frequency()
+        self.re_plot_single_condition()
         
 
     def save_result(self):
@@ -156,28 +172,27 @@ class OverViewController(QObject):
             data['cond'] = cond
             data['freq'] = freq
 
+
+            current_frequency = copy.copy(self.freq)
+            current_condition = copy.copy(self.cond)
+
+            
+            if freq != current_frequency:
+                ind = list(self.model.fps_Hz.keys()).index(freq)
+                self.set_frequency(ind)
+            if cond != current_condition:
+                self.set_condition(cond)
+            
+            if temp_fname != self.selected_fname:
+                self.re_plot_single_frequency()
+                self.re_plot_single_condition()
+
             selected = self.model.spectra[cond][self.freq]['waveform']
             
             data['t'] = selected[0]
             data['spectrum'] = selected[1]
             
             self.file_selected_signal.emit(data)
-
-            current_frequency = copy.copy(self.freq)
-            current_condition = copy.copy(self.cond)
-
-           
-            if freq != current_frequency:
-                if temp_fname != self.selected_fname:
-                    ind = list(self.model.fps_Hz.keys()).index(freq)
-                    self.set_frequency(ind)
-            else:
-                if cond != current_condition:
-
-                    self.set_condition(cond)
-                else:
-                    if temp_fname != self.selected_fname:
-                        self.re_plot_single_frequency()
                 
 
     def single_condition_cursor_y_signal_callback(self, y_pos):
@@ -190,6 +205,7 @@ class OverViewController(QObject):
                 #self.selected_fname = fnames[index]
                 fname = fnames[index]
                 self.select_fname(fname)
+                #self.re_plot_single_condition()
 
                 '''cond = self.model.file_dict[self.selected_fname][0]
                 self.cond = cond
@@ -239,9 +255,11 @@ class OverViewController(QObject):
 
     def freq_scroll_callback(self, val):
         self.set_frequency(val)
+        self.re_plot_single_frequency()
 
     def cond_scroll_callback(self, val):
         self.set_condition(val)
+        self.re_plot_single_condition()
 
     def freq_btn_callback(self, step):
         val = self.widget.freq_scroll.value()
@@ -267,7 +285,7 @@ class OverViewController(QObject):
         self.set_US_folder()
 
     def set_US_folder(self, *args, **kwargs):
-        self.model.clear()
+        
         default_frequency_index = 0
         default_condition_index = 0
         if 'folder' in kwargs:
@@ -277,6 +295,8 @@ class OverViewController(QObject):
                                                      directory='')
 
         if os.path.isdir(folder):
+
+            self.model.clear()
             
             self.model.set_folder_path(folder)
             folders = self.model.conditions_folders_sorted
@@ -298,17 +318,12 @@ class OverViewController(QObject):
 
             self.folder_selected_signal.emit(folder)
         
+    
+
     def set_frequency_by_value(self, freq):
-        freqs = list(self.model.fps_Hz.keys())
-        f_start = self.widget.freq_start.value()
-        f_step = self.widget.freq_step.value()
-        freqs_vals = []
-        for freq_ind in range(len(freqs)):
-            freq_val = (f_start + freq_ind * f_step) * 1e6
-            freqs_vals.append(freq_val)
-        if freq in freqs_vals:
-            ind = freqs_vals.index(freq)
-            self.set_frequency(ind)
+        str_ind = self.model. freq_val_to_ind(freq)
+        if str_ind != None:
+            self.set_frequency(str_ind)
 
     def set_frequency(self, index):
         freqs = list(self.model.fps_Hz.keys())
@@ -320,7 +335,7 @@ class OverViewController(QObject):
             self.widget.freq_scroll.setValue(index)
             self.widget.freq_scroll.blockSignals(False)
             
-            self.re_plot_single_frequency()
+            
             self.widget.frequency_lbl.setText(str(self.freq))
 
     def set_condition(self, index):
@@ -333,7 +348,7 @@ class OverViewController(QObject):
             self.widget.cond_scroll.blockSignals(True)
             self.widget.cond_scroll.setValue(index)
             self.widget.cond_scroll.blockSignals(False)
-            self.re_plot_single_condition()
+            
             self.widget.condition_lbl.setText(str(self.cond))
 
     def re_plot_single_frequency(self ):

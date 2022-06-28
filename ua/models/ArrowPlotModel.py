@@ -104,7 +104,8 @@ class optima():
 class ArrowPlotsModel():
     def __init__(self, results_model: EchoesResultsModel):
 
-        self.arrow_plot_models = {}
+        self.arrow_plot_models_p = {}
+        self.arrow_plot_models_s = {}
         self.results_model = results_model
 
     def clear(self):
@@ -112,18 +113,26 @@ class ArrowPlotsModel():
 
     
     
-    def add_result_from_file(self, cond, filename):
-        if not cond in self.arrow_plot_models:
-            self.arrow_plot_models[cond] = ArrowPlot()
+    def add_result_from_file(self, cond, wave_type, filename):
+        if wave_type == 'P':
+            arrow_plot_models = self.arrow_plot_models_p
+        elif wave_type == 'S':
+            arrow_plot_models = self.arrow_plot_models_s
+            
+        if not cond in arrow_plot_models:
+            arrow_plot_models[cond] = ArrowPlot()
         
 
         data = read_result_file(filename)
-        self.arrow_plot_models[cond].add_freq(data)
+        arrow_plot_models[cond].add_freq(data)
 
-    def set_all_freqs(self, cond, correlations):
-
-        if not cond in self.arrow_plot_models:
-            self.arrow_plot_models[cond] = ArrowPlot()
+    def set_all_freqs(self, cond,wave_type, correlations):
+        if wave_type == 'P':
+            arrow_plot_models = self.arrow_plot_models_p
+        elif wave_type == 'S':
+            arrow_plot_models = self.arrow_plot_models_s
+        if not cond in arrow_plot_models:
+            arrow_plot_models[cond] = ArrowPlot()
 
         #self.arrow_plot_models[cond].clear()
         freqs = []
@@ -137,12 +146,16 @@ class ArrowPlotsModel():
         for freq in freqs:
             correlation = freq[1]
         
-            self.arrow_plot_models[cond].add_freq(correlation)
+            arrow_plot_models[cond].add_freq(correlation)
 
-    def delete_optima(self, cond, freq):
-        if cond in self.arrow_plot_models:
-            if freq in self.arrow_plot_models[cond].optima:
-                del self.arrow_plot_models[cond].optima[freq]
+    def delete_optima(self, cond, wave_type, freq):
+        if wave_type == 'P':
+            arrow_plot_models = self.arrow_plot_models_p
+        elif wave_type == 'S':
+            arrow_plot_models = self.arrow_plot_models_s
+        if cond in arrow_plot_models:
+            if freq in arrow_plot_models[cond].optima:
+                del arrow_plot_models[cond].optima[freq]
 
     def save_result(self, filename):
         # not implemented yet

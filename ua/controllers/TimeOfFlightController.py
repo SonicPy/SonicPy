@@ -123,6 +123,13 @@ class TimeOfFlightController(QObject):
         self.overview_controller.re_plot_single_frequency()
         self.overview_controller.re_plot_single_condition()
 
+        echo_type = ''
+        if  self.correlation_controller.display_window.p_wave_btn.isChecked():
+            echo_type = "P"
+        elif self.correlation_controller.display_window.s_wave_btn.isChecked():
+            echo_type = "S"
+        self.arrow_plot_controller.set_wave_type(echo_type)
+
     def freq_settings_changed_signal_callback(self, freq):
         
 
@@ -178,6 +185,7 @@ class TimeOfFlightController(QObject):
 
         
         echoes_by_condition = self.echoes_results_model.get_echoes_by_condition(cond, echo_type)
+        self.arrow_plot_controller.set_wave_type(echo_type)
         self.arrow_plot_controller.set_condition( cond) 
         self.arrow_plot_controller.set_data_by_dict(echoes_by_condition)
         self.arrow_plot_controller.set_frequency_cursor(freq)

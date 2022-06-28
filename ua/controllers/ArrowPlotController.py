@@ -37,7 +37,7 @@ class ArrowPlotController(QObject):
         
         self.model = ArrowPlotsModel(results_model)
         self.cond = None
-        self.echo_type = None
+        self.wave_type = 'P'
         if app is not None:
             self.setStyle(app)
         self.arrow_plot_window = ArrowPlotWidget()
@@ -56,9 +56,13 @@ class ArrowPlotController(QObject):
         self.arrow_plot_window.del_btn.clicked.connect(self. del_btn_callback)
 
     def del_btn_callback(self):
-        if self.cond != None:
-            if self.cond in self.model.arrow_plot_models:
-                arrow_plot = self.model.arrow_plot_models[self.cond]
+        if self.cond != None and (self.wave_type == 'P' or self.wave_type =='S'):
+            if self.wave_type == 'P':
+                arrow_plot_models = self.model.arrow_plot_models_p
+            elif self.wave_type == 'S':
+                arrow_plot_models = self.model.arrow_plot_models_s
+            if self.cond in arrow_plot_models:
+                arrow_plot = arrow_plot_models[self.cond]
                 freq = 1/self. arrow_plot_window.get_cursor_pos()
                 if freq in arrow_plot.optima:
                     fname = arrow_plot.optima[freq].filename_waveform
@@ -66,16 +70,21 @@ class ArrowPlotController(QObject):
                     self.arrow_plot_del_clicked_signal.emit({'frequency':freq, 'filename_waveform':fname, 'wave_type': wave_type})
 
     def echo_deleted(self, del_info):
+        
         fname = del_info['filename_waveform']
         freq = del_info['frequency']
         wave_type = del_info['wave_type']
-        self. model.delete_optima(freq)
+        self. model.delete_optima(self.cond, wave_type, freq)
         self.update_plot()
 
     def cursor_changed_singal_callback(self, *args):
-        if self.cond != None:
-            if self.cond in self.model.arrow_plot_models:
-                arrow_plot = self.model.arrow_plot_models[self.cond]
+        if self.cond != None and (self.wave_type == 'P' or self.wave_type =='S'):
+            if self.wave_type == 'P':
+                arrow_plot_models = self.model.arrow_plot_models_p
+            elif self.wave_type == 'S':
+                arrow_plot_models = self.model.arrow_plot_models_s
+            if self.cond in arrow_plot_models:
+                arrow_plot = arrow_plot_models[self.cond]
                 freqs = np.asarray(list(arrow_plot.optima.keys()))
                 freq = 1/args[0]
                 if freq <= np.amin(freqs):
@@ -98,9 +107,13 @@ class ArrowPlotController(QObject):
         # starts the automatic point sorting and finding the most horizontal line, the 
         # most horizontal points are the opt_data_points, other points are the other_data_points
 
-        if self.cond != None:
-            if self.cond in self.model.arrow_plot_models:
-                arrow_plot = self.model.arrow_plot_models[self.cond]
+        if self.cond != None and (self.wave_type == 'P' or self.wave_type =='S'):
+            if self.wave_type == 'P':
+                arrow_plot_models = self.model.arrow_plot_models_p
+            elif self.wave_type == 'S':
+                arrow_plot_models = self.model.arrow_plot_models_s
+            if self.cond in arrow_plot_models:
+                arrow_plot = arrow_plot_models[self.cond]
                 num_pts = len(arrow_plot.optima)
                 if num_pts > 2:
                     opt = self.get_opt()
@@ -110,9 +123,13 @@ class ArrowPlotController(QObject):
                 else: self.error_not_enough_datapoints()
  
     def point_clicked_callback(self, pt):
-        if self.cond != None:
-            if self.cond in self.model.arrow_plot_models:
-                arrow_plot = self.model.arrow_plot_models[self.cond]
+        if self.cond != None and (self.wave_type == 'P' or self.wave_type =='S'):
+            if self.wave_type == 'P':
+                arrow_plot_models = self.model.arrow_plot_models_p
+            elif self.wave_type == 'S':
+                arrow_plot_models = self.model.arrow_plot_models_s
+            if self.cond in arrow_plot_models:
+                arrow_plot = arrow_plot_models[self.cond]
                 f = pt[0]
                 t = pt[1]
                 opt = self.get_opt()
@@ -150,9 +167,13 @@ class ArrowPlotController(QObject):
         return opt
 
     def update_plot(self):
-        if self.cond != None:
-            if self.cond in self.model.arrow_plot_models:
-                arrow_plot = self.model.arrow_plot_models[self.cond]
+        if self.cond != None and (self.wave_type == 'P' or self.wave_type =='S'):
+            if self.wave_type == 'P':
+                arrow_plot_models = self.model.arrow_plot_models_p
+            elif self.wave_type == 'S':
+                arrow_plot_models = self.model.arrow_plot_models_s
+            if self.cond in arrow_plot_models:
+                arrow_plot = arrow_plot_models[self.cond]
                 opt = self.get_opt()
                 xMax, yMax = arrow_plot.get_opt_data_points(opt)
                 xData, yData = arrow_plot.get_other_data_points(opt)
@@ -168,9 +189,13 @@ class ArrowPlotController(QObject):
     
 
     def calculate_data(self):
-        if self.cond != None:
-            if self.cond in self.model.arrow_plot_models:
-                arrow_plot = self.model.arrow_plot_models[self.cond]
+        if self.cond != None and (self.wave_type == 'P' or self.wave_type =='S'):
+            if self.wave_type == 'P':
+                arrow_plot_models = self.model.arrow_plot_models_p
+            elif self.wave_type == 'S':
+                arrow_plot_models = self.model.arrow_plot_models_s
+            if self.cond in arrow_plot_models:
+                arrow_plot = arrow_plot_models[self.cond]
                 num_pts = len(arrow_plot.optima)
                 if num_pts > 2:
                     opt = self.get_opt()
@@ -215,12 +240,16 @@ class ArrowPlotController(QObject):
                 self.update_plot()
 
     def set_data_by_dict(self, correlations):
-        if self.cond != None:
-            self.model.set_all_freqs(self.cond, correlations)
+        if self.cond != None and (self.wave_type == 'P' or self.wave_type =='S'):
+            
+            self.model.set_all_freqs(self.cond, self.wave_type, correlations)
             self.update_plot()
 
     def set_condition(self, cond):
         self.cond = cond
+
+    def set_wave_type(self, wave_type):
+        self.wave_type = wave_type
 
     def show_window(self):
         self.arrow_plot_window.raise_widget()

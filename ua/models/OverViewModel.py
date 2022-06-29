@@ -132,8 +132,8 @@ class OverViewModel():
     def freq_val_to_ind(self, freq):
         ind = None
         freqs = list(self.fps_Hz.keys())
-        f_start = self.f_start
-        f_step = self.f_step
+        f_start = self.settings['f_start']
+        f_step = self.settings['f_step']
         freqs_vals = []
         for freq_ind in range(len(freqs)):
             freq_val = (f_start + freq_ind * f_step) * 1e6

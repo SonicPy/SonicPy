@@ -128,6 +128,9 @@ class OverViewController(QObject):
         for correlation in correlations:
             self.model.add_echoes(correlations[correlation])
 
+        self.re_plot_single_frequency()
+        self.re_plot_single_condition()
+
     def echo_deleted(self, del_info):
         
         fname = del_info['filename_waveform']
@@ -289,12 +292,18 @@ class OverViewController(QObject):
 
     def sync_widget_controls_with_model_non_signaling(self):
 
-        self.widget.blockSignals(True)
+        self.widget.freq_step.blockSignals(True)
+        self.widget.freq_start.blockSignals(True)
+        self.widget.clip_cbx.blockSignals(True)
+        self.widget.scale_ebx.blockSignals(True)
         self.widget.freq_step.setValue(self.model.settings['f_step'])
         self.widget.freq_start.setValue(self.model.settings['f_start'])
         self.widget.clip_cbx.setChecked(self.model.settings['clip'])
         self.widget.scale_ebx.setValue(self.model.settings['scale'])
-        self.widget.blockSignals(False)
+        self.widget.freq_step.blockSignals(False)
+        self.widget.freq_start.blockSignals(False)
+        self.widget.clip_cbx.blockSignals(False)
+        self.widget.scale_ebx.blockSignals(False)
 
     def set_US_folder(self, *args, **kwargs):
         

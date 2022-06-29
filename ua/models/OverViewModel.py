@@ -70,8 +70,6 @@ class OverViewModel():
         
         self.results_model = results_model
 
-        self.f_start = 15
-        self.f_step = 2
 
         self.spectra = {}
 
@@ -91,7 +89,11 @@ class OverViewModel():
         self.file_type = ''
 
         self.settings = {'scale':10,
-                         'clip':True}
+                         'clip':True,
+                         'f_start': 15,
+                         'f_step': 2}
+
+        self.settings_fname = 'settings.json'
 
         self.conditions_folders_sorted = []
 
@@ -110,17 +112,17 @@ class OverViewModel():
         
         cond_waterfall.set_echoe(filename_waveform ,wave_type, bounds)'''
 
-        self.set_echoes(filename_waveform ,wave_type, bounds)
+        #self.set_echoes(filename_waveform ,wave_type, bounds)
 
     def del_echoes(self, condition, wave_type, freq):
         str_ind_freq = f'{self.freq_val_to_ind(freq):03d}' 
         fname = self.spectra[condition][str_ind_freq]['filename']
-        if wave_type == 'P':
+        '''if wave_type == 'P':
             del self.echoes_p[fname] 
             
 
         elif wave_type == 'S':
-            del self.echoes_s[fname] 
+            del self.echoes_s[fname] '''
 
         waterfall = self.waterfalls[str_ind_freq]
         waterfall.del_echoe(fname, wave_type)
@@ -141,7 +143,7 @@ class OverViewModel():
         return ind
 
         
-    def set_echoes(self, fname, wave_type, echoes_bounds):
+    '''def set_echoes(self, fname, wave_type, echoes_bounds):
         # echoes_bounds = list, [[0.0,0.0],[0.0,0.0]] (values are in seconds)
         # echoes_bounds[0]: P bounds
         # echoes_bounds[0]: S bounds
@@ -149,18 +151,30 @@ class OverViewModel():
             self.echoes_p[fname] = echoes_bounds
 
         elif wave_type == 'S':
-            self.echoes_s[fname] = echoes_bounds
+            self.echoes_s[fname] = echoes_bounds'''
 
     def clear(self):
         self.__init__(self.results_model)
 
+    def set_freq_start_step(self, f_start, f_step):
+        self.settings['f_start']= f_start
+        self.settings['f_step']= f_step
+
+        self.save_folder_settings(self.fp)
+
     def set_scale(self, scale):
+
+        self.settings['scale']= scale
+        self.save_folder_settings(self.fp)
 
         for key in self.waterfalls:
             w = self.waterfalls[key]
             w.settings['scale']=scale
 
     def set_clip(self, clip):
+
+        self.settings['clip']= clip
+        self.save_folder_settings(self.fp)
 
         for key in self.waterfalls:
             w = self.waterfalls[key]
@@ -245,23 +259,26 @@ class OverViewModel():
                 self.waterfalls[cond].add_multiple_waveforms(self.spectra[cond])
                 
 
+    def restore_folder_settings(self, folder):
+        settings_file =  os.path.join(folder, self.settings_fname)
+        settings_exist = os.path.isfile(settings_file)
+        if settings_exist:
+            settings = self.read_result_file(settings_file)
+            self.settings = settings
+        else:
+            self.write_data_dict_to_json(settings_file,self.settings)
+
+    def save_folder_settings(self, folder):
+        settings_file =  os.path.join(folder, self.settings_fname)
+        self.write_data_dict_to_json(settings_file,self.settings)
 
     def set_folder_path(self, folder):
-        
         exists = os.path.isdir(folder)
-        
         if exists:
             self.fp = folder
-            settings_file =  os.path.join(folder, 'settings.json')
-
-            settings_exist = os.path.isfile(settings_file)
-            if settings_exist:
-                settings = self.read_result_file(settings_file)
-                print(settings)
-
+            self.restore_folder_settings(folder)
             self.understand_folder_structure()
         
-
     
     def get_conditions_folders(self, folder):
         '''
@@ -424,6 +441,7 @@ class OverViewModel():
     def read_result_file(self, filename):
         with open(filename) as json_file:
             data = json.load(json_file)
+            json_file.close()
 
         return data
 
@@ -435,7 +453,11 @@ class OverViewModel():
         data = {'frequency':self.freq,'minima_t':list(self.minima[0]),'minima':list(self.minima[1]), 
                             'maxima_t':list(self.maxima[0]),'maxima':list(self.maxima[1])}
         
-        if filename.endswith('.json'):
-            with open(filename, 'w') as json_file:
-                json.dump(data, json_file,indent = 2)    
+        
+        self.write_data_dict_to_json(filename,data)
 
+
+    def write_data_dict_to_json(self, filename, data):
+        with open(filename, 'w') as json_file:
+            json.dump(data, json_file,indent = 2)  
+            json_file.close()  

@@ -50,12 +50,10 @@ class OverViewController(QObject):
         if app is not None:
             self.setStyle(app)
         self.widget = OverViewWidget()
-        self.widget.freq_step.setValue(self.model.f_step)
-        self.widget.freq_start.setValue(self.model.f_start)
+        self.sync_widget_controls_with_model_non_signaling()
         self.folder_widget = FolderListWidget()
 
-        self.widget.clip_cbx.setChecked(self.model.settings['clip'])
-        self.widget.scale_ebx.setValue(self.model.settings['scale'])
+        
         self.make_connections()
         self.line_plots = {}
         self.selected_fname = ''
@@ -106,8 +104,13 @@ class OverViewController(QObject):
 
 
     def freq_start_step_callback(self, *args, **kwargs):
+
+        
         f_start = self.widget.freq_start.value()
         f_step = self.widget.freq_step.value()
+
+        self.model.set_freq_start_step(f_start, f_step)
+
         display_freq = f_start + int(self.freq) * f_step
         self.widget.single_frequency_waterfall.set_name ( str(display_freq) + ' MHz')
         #self.freq_settings_changed_signal.emit(display_freq)
@@ -284,6 +287,15 @@ class OverViewController(QObject):
     def open_btn_callback(self):
         self.set_US_folder()
 
+    def sync_widget_controls_with_model_non_signaling(self):
+
+        self.widget.blockSignals(True)
+        self.widget.freq_step.setValue(self.model.settings['f_step'])
+        self.widget.freq_start.setValue(self.model.settings['f_start'])
+        self.widget.clip_cbx.setChecked(self.model.settings['clip'])
+        self.widget.scale_ebx.setValue(self.model.settings['scale'])
+        self.widget.blockSignals(False)
+
     def set_US_folder(self, *args, **kwargs):
         
         default_frequency_index = 0
@@ -299,6 +311,9 @@ class OverViewController(QObject):
             self.model.clear()
             
             self.model.set_folder_path(folder)
+
+            self.sync_widget_controls_with_model_non_signaling()
+
             folders = self.model.conditions_folders_sorted
             self.folder_widget.set_folders(folders)
             
@@ -353,17 +368,17 @@ class OverViewController(QObject):
 
     def re_plot_single_frequency(self ):
         waterfall = self.model.waterfalls[self.freq]
-        echoes_p = self.model.echoes_p
-        echoes_s = self.model.echoes_s
+        echoes_p = self.model.results_model.echoes_p
+        echoes_s = self.model.results_model.echoes_s
 
         for echo_p_name in echoes_p:
-            bounds = echoes_p[echo_p_name]
+            bounds = echoes_p[echo_p_name]['echo_bounds']
             filename_waveform = echo_p_name
             wave_type = "P"
             waterfall.set_echoe(filename_waveform ,wave_type, bounds)
 
         for echo_s_name in echoes_s:
-            bounds = echoes_s[echo_s_name]
+            bounds = echoes_s[echo_s_name]['echo_bounds']
             filename_waveform = echo_s_name
             wave_type = "S"
             waterfall.set_echoe(filename_waveform ,wave_type, bounds)
@@ -388,17 +403,17 @@ class OverViewController(QObject):
     def re_plot_single_condition(self ):
         waterfall = self.model.waterfalls[self.cond]
 
-        echoes_p = self.model.echoes_p
-        echoes_s = self.model.echoes_s
+        echoes_p = self.model.results_model.echoes_p
+        echoes_s = self.model.results_model.echoes_s
 
         for echo_p_name in echoes_p:
-            bounds = echoes_p[echo_p_name]
+            bounds = echoes_p[echo_p_name]['echo_bounds']
             filename_waveform = echo_p_name
             wave_type = "P"
             waterfall.set_echoe(filename_waveform ,wave_type, bounds)
 
         for echo_s_name in echoes_s:
-            bounds = echoes_s[echo_s_name]
+            bounds = echoes_s[echo_s_name]['echo_bounds']
             filename_waveform = echo_s_name
             wave_type = "S"
             waterfall.set_echoe(filename_waveform ,wave_type, bounds)

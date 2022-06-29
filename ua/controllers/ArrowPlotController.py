@@ -60,7 +60,7 @@ class ArrowPlotController(QObject):
     def del_btn_callback(self):
         arrow_plot = self.model.get_arrow_plot(self.cond, self.wave_type)
         if arrow_plot != None:
-            freq = 1/self. arrow_plot_window.get_cursor_pos()
+            freq = round(1/self. arrow_plot_window.get_cursor_pos(),1)
             if freq in arrow_plot.optima:
                 fname = arrow_plot.optima[freq].filename_waveform
                 wave_type = arrow_plot.optima[freq].wave_type

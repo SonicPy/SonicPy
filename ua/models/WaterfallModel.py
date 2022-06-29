@@ -52,6 +52,7 @@ class WaterfallModel( ):
             waveform = self.waveforms[fnames[0]]
             x_values = waveform[0]
             lb1 = int(get_partial_index(x_values,echoes_bounds[0][0]))
+            
             rb1 = int(get_partial_index(x_values,echoes_bounds[0][1]))
             lb2 = int(get_partial_index(x_values,echoes_bounds[1][0]))
             rb2 = int(get_partial_index(x_values,echoes_bounds[1][1]))

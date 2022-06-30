@@ -4,7 +4,8 @@ import numpy as np
 from um.models.ScopeModel import Scope
 from um.models.tek_fileIO import *
 from utilities.utilities import *
-import visa, logging, os, struct, sys
+import logging, os, struct, sys
+import pyvisa as visa
 from um.models.PyTektronixScope import TektronixScope
 from PyQt5.QtCore import QThread, pyqtSignal
 import time
@@ -89,6 +90,7 @@ class SaveDataModel(pvModel):
                         'path':
                                 {'desc': 'Path', 'val':'', 
                                 
+                                'methods':{'set':False, 'get':True},
                                 'param':{'type':'s'}},
                         'path_exists':     
                                 {'desc': 'Path exists;Yes/No', 'val':False, 
@@ -96,6 +98,7 @@ class SaveDataModel(pvModel):
                         'name':
                                 {'desc': 'Last file', 'val':'', 
                                 
+                                'methods':{'set':False, 'get':True},
                                 'param':{'type':'s'}},
                         'format':
                                 {'desc': '# format', 'val':'%3d', 
@@ -106,6 +109,7 @@ class SaveDataModel(pvModel):
                         'latest_event':
                                 {'desc': 'Status', 'val':'', 'epics_PV_out':'16bmb:scope_file:WriteMessage',
                                 
+                                'methods':{'set':False, 'get':True},
                                 'param':{'type':'s'}},
 
                       }       
@@ -152,7 +156,7 @@ class SaveDataModel(pvModel):
             x = waveform[0]
             y = waveform[1]
         
-            R = 10
+            '''R = 10
 
             pad_size = math.ceil(float(x.size)/R)*R - x.size
 
@@ -165,7 +169,7 @@ class SaveDataModel(pvModel):
             x = nanmean(x.reshape(-1,R), axis=1)
             y = y.reshape(-1, R)
             y = nanmean(y.reshape(-1,R), axis=1)
-
+            '''
             path, fname = os.path.split(filename)
 
             '''subsample = np.arange(0,len(x),10)
@@ -268,7 +272,7 @@ class SaveDataModel(pvModel):
     
     def _set_save(self, state):
         self.pvs['save']._val = state
-        print('received save state: ' + str(state))
+        #print('received save state: ' + str(state))
         if state:
 
             file_system_path = self.pvs['file_system_path']._val
@@ -316,7 +320,7 @@ class SaveDataModel(pvModel):
                     pass
 
                 self.write_file(file_name, params=params)
-            print(self.pvs['save']._pv_name + ' save done')
+            #print(self.pvs['save']._pv_name + ' save done')
             #self.pvs['save']._pv_name
             self.pvs['save'].set(False)
             

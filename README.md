@@ -7,6 +7,7 @@ In addition to the python packages in Anaconda, the required packages are:
 pyqt5 5.9.2 
 pyqtgraph 0.10.0
 opencv-python 4.5.3.56
+natsort 8.1.0
 
 Executables
 

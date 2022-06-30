@@ -1,3 +1,4 @@
+from binhex import getfileinfo
 import numpy as np
 from scipy import signal
 from scipy import blackman, nanmean
@@ -5,38 +6,12 @@ from scipy.signal import hilbert
 from scipy.fftpack import rfft, irfft, fftfreq, fft
 import scipy.fftpack
 import csv
-from um.models.tek_fileIO import read_tek_csv
+from um.models.tek_fileIO import get_file_format, read_tek_csv, read_tek_csv_files_2d, read_ascii_scope_files_2d
 import math
+from PyQt5 import QtCore, QtWidgets
+import time, os
 
-def read_multiple_spectra(filenames, subsample = 1):
-    spectra = []
-    f = filenames[0]
-    X,Y = read_tek_csv(f, return_x=True, subsample=subsample)
-    
-    for f in filenames:
-        Y = read_tek_csv(f, return_x=False, subsample=subsample)
-        y = Y
-        
-        spectra.append(y)
-    return spectra, X
 
-def read_multiple_spectra_dict(filenames, subsample = 1):
-    spectra = []
-    f = filenames[0]
-    X,Y = read_tek_csv(f, return_x=True, subsample=subsample)
-    x = np.asarray(X)
-    missing_couner = 1
-    missing_waveform = [np.asarray([]),np.asarray([])]
-    for f in filenames:
-        if f is not None:
-            Y = read_tek_csv(f, return_x=False, subsample=subsample)
-            y = np.asarray(Y)
-            spectra.append({ 'filename':f,'waveform':[x, y]})
-        else:
-            spectra.append({ 'filename':'missing_file_'+str(missing_couner),'waveform':missing_waveform})
-        
-        
-    return spectra
 
 
 def butter_bandstop_filter(data, lowcut, highcut, order):

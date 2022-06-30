@@ -22,8 +22,10 @@ from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 import pyqtgraph as pg
 
+offline = True
 
-def main(offline= True):
+
+def main():
     from um.controllers.UltrasoundController import UltrasoundController
     if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
         QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)

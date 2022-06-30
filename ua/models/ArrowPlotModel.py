@@ -1,5 +1,6 @@
 
 import os.path, sys
+from ua.models.OverViewModel import Sort_Tuple
 from utilities.utilities import *
 from utilities.HelperModule import move_window_relative_to_screen_center, get_partial_index, get_partial_value
 import numpy as np
@@ -13,10 +14,13 @@ from scipy import signal
 import pyqtgraph as pg
 from utilities.utilities import zero_phase_bandpass_filter
 import json
-
+from ua.models.EchoesResultsModel import EchoesResultsModel
 
 class optima():
-    def __init__(self, data, frequency):
+    def __init__(self, data, frequency, filename_waveform, wave_type):
+        self.data = data
+        self.filename_waveform = filename_waveform
+        self.wave_type = wave_type
         self.freq = frequency
         self.minima = data['minima']
         self.maxima = data['maxima']
@@ -24,7 +28,10 @@ class optima():
         self.maxima_t = data['maxima_t']
         self.num_opt = {}
         self.all_optima = {}
+        
         self.init_optima()
+
+    
         
     def init_optima(self):
         self.center_opt={}
@@ -98,15 +105,111 @@ class optima():
                 self.other_opt[opt].pop(other_opt_ind)
 
 
-class ArrowPlotModel():
-    def __init__(self):
+class ArrowPlotsModel():
+    def __init__(self, results_model: EchoesResultsModel):
+
+        self.arrow_plot_models_p = {}
+        self.arrow_plot_models_s = {}
+        self.results_model = results_model
+
+
+    def get_arrow_plot(self, cond, wave_type):
+
+        if wave_type == 'P':
+            arrow_plot_models = self.arrow_plot_models_p
+        elif wave_type == 'S':
+            arrow_plot_models = self.arrow_plot_models_s
+        if cond in arrow_plot_models:
+            arrow_plot = arrow_plot_models[cond]
+        else:
+            arrow_plot = arrow_plot_models[cond] = ArrowPlot()
+
+        return arrow_plot
+
+    def clear_condition(self, condition, wave_type):
+        arrow_plot = self.get_arrow_plot(condition, wave_type)
+
+        del arrow_plot
+    
+    
+    '''def add_result_from_file(self, condition, wave_type, filename):
+        arrow_plot = self.get_arrow_plot(condition, wave_type)
         
+
+        data = read_result_file(filename)
+        arrow_plot.add_freq(data)'''
+
+    def refresh_all_freqs(self, condition,wave_type):
+        arrow_plot = self.get_arrow_plot(condition, wave_type)
+
+        echoes_by_condition = self.results_model.get_echoes_by_condition(condition, wave_type)
+        freqs = []
+        for correlation in echoes_by_condition:
+            freq = correlation['frequency']
+            fname = correlation['filename_waveform']
+            freqs.append((freq, correlation))
+        
+        freqs = Sort_Tuple(freqs, 0)
+        for freq in freqs:
+            correlation = freq[1]
+        
+            arrow_plot.add_freq(correlation)
+
+    
+
+    def delete_optima(self, condition, wave_type, freq):
+        arrow_plot = self.get_arrow_plot(condition, wave_type)
+
+        if freq in arrow_plot.optima:
+            del arrow_plot.optima[freq]
+
+    '''def save_result(self, filename):
+        # not implemented yet
+        data = {}
+        
+        if filename.endswith('.json'):
+            with open(filename, 'w') as json_file:
+                json.dump(data, json_file,indent = 2)    '''
+            
+
+class ArrowPlot():
+    def __init__(self):
+
         self.optima = {}
+        self.line_plots = {}
+        self.out = {}
+
+    def clear(self):
+        self.__init__()
+
+    
+            
+    def add_freq(self, data):
+        freq = data['frequency']
+
+        filename_waveform = data['filename_waveform']
+        wave_type = data['wave_type']
+        correlation_optima = data['correlation']
+
+        if not freq in self.optima:
+            data_pt = optima(correlation_optima, freq, filename_waveform, wave_type)
+            self.optima[freq]=data_pt
+        else:
+            data_pt = self.optima[freq]
+            stored_filename_waveform = data_pt.filename_waveform
+            stored_wave_type = data_pt.wave_type
+            stored_correlation_optima = data_pt.data
+            same = stored_filename_waveform== filename_waveform and stored_wave_type ==wave_type and stored_correlation_optima==correlation_optima
+            if not same:
+                data_pt = optima(correlation_optima, freq, filename_waveform, wave_type)
+                self.optima[freq]=data_pt
 
 
-    def add_result_from_file(self, filename):
-        data = self.read_result_file(filename)
-        self.add_freq(data)
+    def delete_optima(self, cond, freq):
+
+        del self.optima[freq]
+
+
 
     def get_other_data_points(self, opt):
         optima = self.optima
@@ -131,6 +234,15 @@ class ArrowPlotModel():
                 xData.append(1/freq)
                 yData.append(pt)
         return xData, yData
+
+
+    def set_optimum(self, opt, t, f_inv):
+        
+        keys = list(self.optima.keys())
+        freqs = abs(np.asarray(keys) - 1/f_inv)
+        ind = np.argmin(freqs)
+        freq = keys[ind]
+        self.optima[freq].set_optimum(opt, t)
 
     def auto_sort_optima(self, opt):
         '''
@@ -165,22 +277,39 @@ class ArrowPlotModel():
             x, y, fit= self.get_line(opt,line_ind)
             line_slopes.append(fit[0])
         min_slope_ind = lines_ind[np.argmin(abs(np.asarray(line_slopes)))]
-        #print(min_slope_ind)
+       
         if min_slope_ind != 0:
             for freq in freqs:
                 best_opt = self.optima[freq].get_optimum(opt, min_slope_ind)
                 self.optima[freq].set_optimum(opt, best_opt)
 
-
-    def clear(self):
-        self.__init__()
-
-
-    def read_result_file(self, filename):
-        with open(filename) as json_file:
-            data = json.load(json_file)
-
-        return data
+    def calculate_lines(self, opt = 'max'):
+        arrow_plot = self
+        
+        num_pts = len(arrow_plot.optima)
+        if num_pts > 2:
+            
+            indexes = [-2,-1,0,1,2]
+            X = []
+            Y = []
+            fits = []
+            for i in indexes:
+                x, y, fit = arrow_plot.get_line(opt,i)
+                fits.append(fit[1])
+                X = X +x
+                Y = Y+y
+                X = X +[np.nan]
+                Y = Y+[np.nan]
+            self.line_plots[opt] = (np.asarray(X),np.asarray(Y))
+            
+            s = np.std(np.asarray(fits))
+            out = 'Time delay = ' + \
+                str(round(sum(np.asarray(fits))/len(fits)*1e6,5)) + \
+                    ' microseconds, st.dev. = ' + \
+                        str(round(s*1e6,5)) +' microseconds'
+            self.out[opt] = out
+        else:
+            self.error_not_enough_datapoints()
 
     
 
@@ -203,40 +332,23 @@ class ArrowPlotModel():
         return X, Y, fit
 
 
-    def set_optimum(self, opt, t, f_inv):
-        
-        keys = list(self.optima.keys())
-        freqs = abs(np.asarray(keys) - 1/f_inv)
-        ind = np.argmin(freqs)
-        freq = keys[ind]
-        self.optima[freq].set_optimum(opt, t)
-
     def fit_line(self, X, Y):
         fit = np.polyfit(X,Y,1)
         return fit
 
-            
-    def add_freq(self, data):
-        freq = data['frequency']
-        if 'correlation' in data:
-            correlation_optima = data['correlation']
-        else:
-            correlation_optima = data
-        data_pt = optima(correlation_optima, freq)
-        self.optima[freq]=data_pt
-        
-
-    def save_result(self, filename):
-        
-        data = {'frequency':self.freq,'minima_t':list(self.minima[0]),'minima':list(self.minima[1]), 
-                            'maxima_t':list(self.maxima[0]),'maxima':list(self.maxima[1])}
-        
-        if filename.endswith('.json'):
-            with open(filename, 'w') as json_file:
-                json.dump(data, json_file,indent = 2)    
+    def error_not_enough_datapoints(self):
+        pass
+   
 
     
-   
+
+def read_result_file( filename):
+        with open(filename) as json_file:
+            data = json.load(json_file)
+
+        return data
+
+
 
 def index_of_nearest(values, value):
     items = []
@@ -310,6 +422,5 @@ def get_local_optimum(x, xData, yData, optima_type=None):
             optima_x = array([optima_x])
             optima_y = array([optima_y[optima_pind]])
         
-        #print (optima_x)
-        #print (optima_type)
+       
         return (optima_x, optima_y), optima_type

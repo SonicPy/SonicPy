@@ -5,6 +5,8 @@
 
 # TODO project file
 
+# TODO save echoes per frequency in file dict
+
 
 from ua import TOF
 

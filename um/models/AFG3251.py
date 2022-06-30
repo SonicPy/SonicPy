@@ -9,8 +9,8 @@
 # Copyright:   (c) Tektronix 2016
 #-------------------------------------------------------------------------------
 
-
-import visa, time, logging, os, struct, sys, copy, os.path
+import pyvisa as visa
+import time, logging, os, struct, sys, copy, os.path
 
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtGui, QtCore
@@ -85,7 +85,7 @@ class AFG_AFG3251(Afg, pvModel):
                                 {'desc': 'Upload waveform;Go','val':False, 
                                 'param':{'type':'b'}},
                         'auto_upload_user1_waveform':     
-                                {'desc': 'Auto-pload waveform;ON/OFF','val':True, 
+                                {'desc': 'Autoload;ON/OFF','val':True, 
                                 'param':{'type':'b'}},
                       }       
 

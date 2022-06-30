@@ -31,8 +31,8 @@ class SweepController(pvController):
                         #'save_data_read_channel',
                         'start_point',
                         'end_point',
+			  'n',
                         'step',
-                        'n',
                         'current_point',
                         'setpoint',
                         'scan_go']

@@ -1,10 +1,12 @@
 
-__version__ = "0.5.0"
+__version__ = "0.5.9"
 
 import sys
 import os
 
 theme = 1
+
+autoload = True
 
 resources_path = os.path.join(os.path.dirname(__file__), 'resources')
 calibrants_path = os.path.join(resources_path, 'calibrants')
@@ -33,6 +35,7 @@ def main():
     
     controller = UltrasoundAnalysisController(app = app, offline= True)
     controller.display_window.show()
+  
     
 
     if _platform == "Darwin":    #macOs has a 'special' way of handling preferences menu
@@ -61,6 +64,21 @@ def TOF():
     controller = TimeOfFlightController(app = app)
     controller.show_window()
 
+    if autoload:
+        folder = ''
+        #mac_folder = '/Users/hrubiak/Desktop/Aihaiti-e244302/sam2/US'
+        win_folder = 'C:\\Users\\hrubiak\\Desktop\\US\\US'
+        mac_folder = '/Users/hrubiak/Downloads/Ultrasound_XRD_datasets_for_dissemination/Ultrasound_data_for_dissemination_June_2018_Exp4/US'
+        if os.path.isdir(mac_folder):
+            folder = mac_folder
+        if os.path.isdir(win_folder):
+            folder = win_folder
+        if len(folder):
+            if os.path.isdir(folder):
+                controller.overview_controller.set_US_folder(folder=folder)
+    
+    
+
     if _platform == "Darwin":    #macOs has a 'special' way of handling preferences menu
         window = controller.widget
         pact = QtWidgets.QAction('Preferences', app)
@@ -72,37 +90,3 @@ def TOF():
       
     return app.exec_()
 
-
-    '''def arrow_plot():
-    from ua.controllers.ArrowPlotController import ArrowPlotController
-    if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
-        QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
-    if hasattr(QtCore.Qt, 'AA_UseHighDpiPixmaps'):
-        QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
-
-    _platform = platform.system()
-
-    app = QtWidgets.QApplication([])
-    app.aboutToQuit.connect(app.deleteLater)
-    
-    controller = ArrowPlotController(app = app)
-    controller.show_window()'''
-    '''
-    controller.update_data( filenames=
-                            ['resources/ultrasonic/4000psi-300K_+15MHz000.csv.json',
-                            'resources/ultrasonic/4000psi-300K_+18MHz000.csv.json',
-                            'resources/ultrasonic/4000psi-300K_+20MHz000.csv.json',
-                            'resources/ultrasonic/4000psi-300K_+21MHz000.csv.json',
-                            'resources/ultrasonic/4000psi-300K_+24MHz000.csv.json',
-                            'resources/ultrasonic/4000psi-300K_+25MHz000.csv.json',
-                            'resources/ultrasonic/4000psi-300K_+27MHz000.csv.json',
-                            'resources/ultrasonic/4000psi-300K_+30MHz000.csv.json',
-                            'resources/ultrasonic/4000psi-300K_+33MHz000.csv.json',
-                            'resources/ultrasonic/4000psi-300K_+36MHz000.csv.json',
-                            'resources/ultrasonic/4000psi-300K_+39MHz000.csv.json',
-                            'resources/ultrasonic/4000psi-300K_+42MHz000.csv.json']
-                            )                            
-    
-    
-    return app.exec_()
-    '''

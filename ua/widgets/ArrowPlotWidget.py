@@ -27,7 +27,7 @@ class ArrowPlotWidget(QWidget):
         self.t = None
         self.spectrum = None
         self.setWindowTitle('Inverse frequency analysis')
-        self.resize(600, 800)
+        #self.resize(600, 800)
         self.make_widget()
         self.create_plots()
         self.style_widgets()
@@ -35,9 +35,9 @@ class ArrowPlotWidget(QWidget):
     def create_plots(self):
         self.plot_win = self.win.fig.win
         self.main_plot = pg.PlotDataItem([], [], title="",
-                        antialias=True, pen=None, symbolBrush=(255,0,100), symbolPen=None, symbolSize = 9)
+                        antialias=True, pen=None, symbolBrush=(255,0,100), symbolPen=None, symbolSize = 7)
         self.maximums = pg.PlotDataItem([], [], title="",
-                        antialias=True, pen=None, symbolBrush=(0,100,255), symbolPen=None, symbolSize = 9)
+                        antialias=True, pen=None, symbolBrush=(0,100,255), symbolPen=None, symbolSize = 7)
         self.max_line_plot = pg.PlotDataItem([], [], title="",
                         antialias=True, pen=pg.mkPen(color=(255,255,255,150), width=2), connect="finite" )
         self.main_plot.sigPointsClicked.connect(self.point_clicked)
@@ -45,6 +45,15 @@ class ArrowPlotWidget(QWidget):
         self.plot_win.addItem(self.max_line_plot)
         self.plot_win.addItem(self.main_plot)
         self.plot_win.addItem(self.maximums)
+
+        # next lines are needed to create the legend items for the plot even though these plots are not the ones used
+        # may change how this is done later
+        
+        self.plot_win.create_plots([],[],[],[],'')
+        self.plot_win.set_colors( { 
+                        'data_color': '#eeeeee',\
+                        'rois_color': (0,255,100), \
+                        })
 
     def point_clicked(self, item, pt):
         point = [pt[0].pos().x(),pt[0].pos().y()]
@@ -62,6 +71,18 @@ class ArrowPlotWidget(QWidget):
         
         if xData is not None and yData is not None:
             self.maximums.setData(xData, yData)
+
+    def get_cursor_pos(self):
+        return self.win.fig.win.get_cursor_pos()
+
+    def set_selected_folder (self, text):
+        self. win.setText(text , 0)
+
+    def set_selected_frequency (self, text):
+        self. win.setText(text , 1)
+
+    def set_name (self, text):
+        self. win.setText(text , 0)
          
     def make_widget(self):
         my_widget = self
@@ -79,6 +100,7 @@ class ArrowPlotWidget(QWidget):
         self.open_btn = QtWidgets.QPushButton("Open")
         self.auto_btn = QtWidgets.QPushButton("Auto")
         self.calc_btn = QtWidgets.QPushButton("Calculate")
+        self.del_btn = QtWidgets.QPushButton('Delete')
         self.clear_btn = QtWidgets.QPushButton('Clear')
         self.fname_lbl = QtWidgets.QLineEdit('')
         freq_lbl = QtWidgets.QLabel('   Inverse Frequency (1/MHz):')
@@ -91,10 +113,11 @@ class ArrowPlotWidget(QWidget):
         self.save_btn = QtWidgets.QPushButton('Save result')
 
         
-        _buttons_layout_top.addWidget(self.open_btn)
+        #_buttons_layout_top.addWidget(self.open_btn)
         _buttons_layout_top.addWidget(self.N_cbx)
         _buttons_layout_top.addWidget(self.calc_btn)
         _buttons_layout_top.addWidget(self.auto_btn)
+        _buttons_layout_top.addWidget(self.del_btn)
         _buttons_layout_top.addWidget(self.clear_btn)
         
         _buttons_layout_top.addSpacerItem(HorizontalSpacerItem())
@@ -104,6 +127,9 @@ class ArrowPlotWidget(QWidget):
         _layout.addWidget(buttons_widget_top)
         params = "Arrow Plot", 'Time delay (s)', 'Inverse frequency (1/Hz)'
         self.win = SimpleDisplayWidget(params)
+
+        
+        
         _layout.addWidget(self.win)
 
 
@@ -111,7 +137,8 @@ class ArrowPlotWidget(QWidget):
         detail_widget.setLayout(_detail_layout)
         _layout.addWidget(detail_widget)
         
-        #_buttons_layout_bottom.addWidget(QtWidgets.QLabel('2-way travel time:'))
+        self.output_condition_lbl =QtWidgets.QLabel('')
+        _buttons_layout_bottom.addWidget(self.output_condition_lbl)
         self.output_ebx = QtWidgets.QLineEdit('')
         _buttons_layout_bottom.addWidget(self.output_ebx)
         #_buttons_layout_bottom.addSpacerItem(HorizontalSpacerItem())

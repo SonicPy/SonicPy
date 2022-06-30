@@ -19,9 +19,13 @@ from utilities.utilities import zero_phase_bandpass_filter
 import json
 from utilities.CARSMath import fit_gaussian, polyfitw
 
+from .. models.SelectedEchoesModel import SelectedEchoesModel
+from ua.models.EchoesResultsModel import EchoesResultsModel
 
 class UltrasoundAnalysisModel():
-    def __init__(self):
+    def __init__(self, results_model: EchoesResultsModel):
+
+        self.results_model = results_model
         self.waveform = None
         self.envelope = None
         self.t = None
@@ -34,68 +38,60 @@ class UltrasoundAnalysisModel():
         self.wave_type = 'P' # or 'S'
         self.settings = {'tukey_alpha':0.2}
 
+        
+
+        self.minima = []
+        self.maxima = []
+
     def fit_func(self, x, a, b,c,d):
+        '''
+        calculated a cosine function, can be used for regression
+        '''
         return a * np.cos(b * x+c)+d
 
+    def filter_echo(self, t, spectrum, l, r, freq, freq_range=0.1, order = 3, tukey_alpha=0.2):
+        '''
+        applies tuckey window and bandpass filter to an echo
+        '''
+        pilo = int(get_partial_index(t,l))
+        pihi = int(get_partial_index(t,r))
+        echo = np.asarray(spectrum)[pilo:pihi]
+        tk = tukey(len(echo), tukey_alpha)
+        echo_tk = echo*tk
+        zero_pad = np.zeros(len(spectrum))
+        zero_pad[pilo:pihi] = echo_tk
+        filtered = zero_phase_bandpass_filter([t,zero_pad],freq-freq*(freq_range/2),freq+freq*(freq_range/2), order)
+        return filtered, [t,zero_pad]
+    
     def filter_echoes(self, l1, r1, l2, r2, freq):
+        '''
+        windows and filters selected echoes
+        '''
         self.freq = freq
         self.bounds = [[l1, r1],[l2, r2]]
         t = self.t
         spectrum = self.spectrum
-        
         tukey_alpha = self.settings['tukey_alpha']
-        
-            
-        # get partial indeces lo and hi for echo 1 and 2  
-        pilo1 = int(get_partial_index(t,l1))
-        pihi1 = int(get_partial_index(t,r1))
+        self.filtered1, self.echo_tk1 = self.filter_echo(t,spectrum,l1,r1,freq,tukey_alpha)
+        self.filtered2, self.echo_tk2 = self.filter_echo(t,spectrum,l2,r2,freq,tukey_alpha)
 
-        pilo2 = int(get_partial_index(t,l2))
-        pihi2 = int(get_partial_index(t,r2))
-
-        echo1 = np.asarray(spectrum)[pilo1:pihi1]
-        echo2 = np.asarray(spectrum)[pilo2:pihi2]
-
-        echo1_max = max(echo1)
-        echo2_max = max(echo2)
-        max_ratio = echo1_max/echo2_max
-
-        tk1 = tukey(len(echo1), tukey_alpha)
-        tk2 = tukey(len(echo2), tukey_alpha)
-
-        echo1_tk = echo1*tk1
-        echo2_tk = echo2*tk2
-
-        zero_pad1 = np.zeros(int(len(spectrum)))
-        zero_pad2 = np.zeros(int(len(spectrum)))
-
-        zero_pad1[pilo1:pihi1] = echo1_tk
-        zero_pad2[pilo2:pihi2] = echo2_tk
-
-        [_,filtered1] = zero_phase_bandpass_filter([t,zero_pad1],freq-freq*0.1,freq+freq*0.05, 1)
-        [_,filtered2] = zero_phase_bandpass_filter([t,zero_pad2],freq-freq*0.1,freq+freq*0.05, 1)
-
-        self.filtered1 = (t, filtered1)
-        self.filtered2 = (t, filtered2)
-        
-
-
-        '''shift_range = len(t1)
-        cross_corr = []
-        for shift in range(shift_range):
-            
-            echo2_shifted = filtered2[pilo2-int(shift_range/2)+shift:pihi2-int(shift_range/2)+shift]*tk2
-            c = np.correlate(echo1_filtered, echo2_shifted)[0]
-            cross_corr.append(c)'''
-
-    def find_echo_bounds(self, echo):
+    def find_echo_bounds(self, echo, echo_bounds_cutoff = 0.05):
+        '''
+        input: echo, windowed and filtered echo
+        return: left bound (lb) and right bound (rb) for a region 
+        the amplitude of the echo is more than echo_bounds_cutoff
+        '''
         m = max(abs(echo))
         echo_norm = abs(echo/m)
-        lb = np.argmax(echo_norm> 0.05)
-        rb = len(echo)- np.argmax(np.flip(echo_norm)>0.05)
+        lb = np.argmax(echo_norm> echo_bounds_cutoff)
+        rb = len(echo)- np.argmax(np.flip(echo_norm)>echo_bounds_cutoff)
         return lb, rb
 
     def cross_correlate(self):
+        '''
+        computes correlation values between 
+        two echoes for diffeent values of shift
+        '''
         echo1 = self.filtered1[1]
         echo2 = self.filtered2[1]
         max1_ind = np.argmax(echo1)
@@ -105,8 +101,6 @@ class UltrasoundAnalysisModel():
         echo1_sub = echo1[lb1:rb1]
         echo2_sub = echo2[lb2:rb2]
         distance = max(max1_ind, max2_ind) - min(max1_ind, max2_ind)
-        #print(distance)
-
 
         shift_range = int((rb1-lb1)/2)*2
         cross_corr = []
@@ -122,6 +116,10 @@ class UltrasoundAnalysisModel():
         self.cross_corr_shift = np.asarray(shifts) * dt
 
     def exract_optima(self):
+        '''
+        extracts opitima from previusly computed 
+        cross correlation between two echoes
+        '''
         corr = self.cross_corr
         lag = self.cross_corr_shift
 
@@ -129,68 +127,32 @@ class UltrasoundAnalysisModel():
         self.maxima = get_optima_peaks(lag,corr,optima_type='max')
 
     def save_result(self, fname):
-        oritinal_folder =  os.path.split(fname)[:-1]
-        subfolder = os.path.join(*oritinal_folder,self.wave_type)
-        exists = os.path.exists(subfolder)
-        if not exists:
-            try:
-                os.mkdir(subfolder)
-            except:
-                print('could not make subfolder: '+ subfolder)
-                
-        basename = os.path.basename(fname)+'.'+str(round(self.freq*1e-6,1))+'_MHz.json'
+        '''
+        saves result of correlation between two echoes to file
+        '''
+        if len(self.minima):
+            
 
-        filename = os.path.join(subfolder,basename)
-        data = {'frequency':self.freq,
-                    'correlation':{
-                    'minima_t':list(np.around(self.minima[0],12)),
-                    'minima':list(np.around(self.minima[1],12)), 
-                    'maxima_t':list(np.around(self.maxima[0],12)),
-                    'maxima':list(np.around(self.maxima[1],12))},
-                    'filename_waweform':fname,
-                    'echo_bounds':self.bounds,
-                    'filter': {'tukey_alpha':self.settings['tukey_alpha']} ,
-                    'wave_type':self.wave_type}
-        
-        saved = False
-        try:
-            if filename.endswith('.json'):
-                with open(filename, 'w') as json_file:
-                    json.dump(data, json_file,indent = 2) 
-                    saved = True   
-        except:
-            print('could not save file: '+ filename)
-        
-        return {'saved':saved, 'data':data}
+            
+            data = {'frequency':self.freq,
+                        'correlation':{
+                        'minima_t':list(np.around(self.minima[0],12)),
+                        'minima':list(np.around(self.minima[1],12)), 
+                        'maxima_t':list(np.around(self.maxima[0],12)),
+                        'maxima':list(np.around(self.maxima[1],12))},
+                        'filename_waveform':fname,
+                        'echo_bounds':self.bounds,
+                        'filter': {'tukey_alpha':self.settings['tukey_alpha']} ,
+                        'wave_type':self.wave_type}
+            
+            saved = True
+           
+            
+            return {'ok':True,'data':data}
+
+        return {'ok': False,'data':{}}
 
 
-
-def index_of_nearest(values, value):
-    items = []
-    for ind, v in enumerate(values):
-        diff = abs(v-value)
-        item = (diff, v, ind)
-        items.append(item)
-    def getKey(item):
-        return item[0]
-    s = sorted(items, key=getKey)
-    closest = s[0][1]
-    closest_ind = s[0][2]
-    return closest_ind
-
-
-def get_optima(xData,yData, optima_type=None):
-    f = None
-    if optima_type == 'min':
-        f = less
-    elif optima_type == 'max':
-        f = greater
-    if f is not None:
-        optima_ind = argrelextrema(yData, f)
-        optima_x = xData[optima_ind]
-        optima_y = yData[optima_ind]
-        return optima_x, optima_y
-    return ([],[])
 
 def get_optima_peaks(xData, yData, optima_type = None):
     optima_x, optima_y = [],[]
@@ -228,7 +190,34 @@ def get_fractional_max_x( xData, yData, opt_ind, fit_range):
     return fract_x
 
 
-def get_local_optimum(x, xData, yData, optima_type=None):
+'''def index_of_nearest(values, value):
+    items = []
+    for ind, v in enumerate(values):
+        diff = abs(v-value)
+        item = (diff, v, ind)
+        items.append(item)
+    def getKey(item):
+        return item[0]
+    s = sorted(items, key=getKey)
+    closest = s[0][1]
+    closest_ind = s[0][2]
+    return closest_ind'''
+
+
+'''def get_optima(xData,yData, optima_type=None):
+    f = None
+    if optima_type == 'min':
+        f = less
+    elif optima_type == 'max':
+        f = greater
+    if f is not None:
+        optima_ind = argrelextrema(yData, f)
+        optima_x = xData[optima_ind]
+        optima_y = yData[optima_ind]
+        return optima_x, optima_y
+    return ([],[])'''
+
+'''def get_local_optimum(x, xData, yData, optima_type=None):
 
     if len(xData) and len(yData):
         pind = get_partial_index(xData,x)
@@ -272,7 +261,5 @@ def get_local_optimum(x, xData, yData, optima_type=None):
                 optima_type='maximum'
             optima_x = array([optima_x])
             optima_y = array([optima_y[optima_pind]])
-        
-        #print (optima_x)
-        #print (optima_type)
-        return (optima_x, optima_y), optima_type
+
+        return (optima_x, optima_y), optima_type'''

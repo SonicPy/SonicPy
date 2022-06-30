@@ -99,11 +99,11 @@ class OverlayController(object):
     def showWidget(self):
         self.overlay_widget.raise_widget()
         self.active = True
-        #print(self.active)
+      
 
     def widget_closed(self):
         self.active = False
-        #print(self.active)
+      
 
     def connect_click_function(self, emitter, function):
         emitter.clicked.connect(function)
@@ -305,7 +305,7 @@ class OverlayController(object):
         background or unset if it already. Any other overlay which was set before as bkg will
         """
         cur_ind = self.overlay_widget.get_selected_overlay_row()
-        if cur_ind is -1:  # no overlay selected
+        if cur_ind == -1:  # no overlay selected
             self.overlay_widget.set_as_bkg_btn.setChecked(False)
             return
 

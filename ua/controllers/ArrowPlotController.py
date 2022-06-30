@@ -3,6 +3,7 @@
 
 
 import os.path, sys
+import wave
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QObject, pyqtSignal
 import numpy as np
@@ -14,23 +15,31 @@ from numpy import arange
 from utilities.utilities import *
 from ua.widgets.UltrasoundAnalysisWidget import UltrasoundAnalysisWidget
 from ua.widgets.ArrowPlotWidget import ArrowPlotWidget
-from ua.models.UltrasoundAnalysisModel import get_local_optimum, UltrasoundAnalysisModel
+from ua.models.UltrasoundAnalysisModel import UltrasoundAnalysisModel
 from utilities.HelperModule import move_window_relative_to_screen_center, get_partial_index, get_partial_value
 import math
 
-from ua.models.ArrowPlotModel import ArrowPlotModel
+from ua.models.ArrowPlotModel import ArrowPlotsModel
 
 import utilities.hpMCAutilities as mcaUtil
 from utilities.HelperModule import increment_filename, increment_filename_extra
 from um.widgets.UtilityWidgets import open_file_dialog, open_files_dialog
-
+from ua.models.EchoesResultsModel import EchoesResultsModel
 
 ############################################################
 
 class ArrowPlotController(QObject):
-    def __init__(self, app = None):
+
+    arrow_plot_freq_cursor_changed_signal = pyqtSignal(dict)
+    arrow_plot_del_clicked_signal = pyqtSignal(dict)
+    arrow_plot_clear_clicked_signal = pyqtSignal(dict)
+
+    def __init__(self, app = None, results_model= EchoesResultsModel()):
         super().__init__()
-        self.model = ArrowPlotModel()
+        
+        self.model = ArrowPlotsModel(results_model)
+        self.cond = None
+        self.wave_type = 'P'
         if app is not None:
             self.setStyle(app)
         self.arrow_plot_window = ArrowPlotWidget()
@@ -45,42 +54,100 @@ class ArrowPlotController(QObject):
         self.arrow_plot_window.N_cbx.stateChanged.connect(self.update_plot)
         self.arrow_plot_window.point_clicked_signal.connect(self.point_clicked_callback)
         #self.arrow_plot_window.save_btn.clicked.connect(self.save_result)
+        self.arrow_plot_window.win.cursor_changed_singal.connect(self.cursor_changed_singal_callback)
+        self.arrow_plot_window.del_btn.clicked.connect(self. del_btn_callback)
+
+    def del_btn_callback(self):
+        arrow_plot = self.model.get_arrow_plot(self.cond, self.wave_type)
+        if arrow_plot != None:
+            freq = round(1/self. arrow_plot_window.get_cursor_pos(),1)
+            if freq in arrow_plot.optima:
+                fname = arrow_plot.optima[freq].filename_waveform
+                wave_type = arrow_plot.optima[freq].wave_type
+                self.arrow_plot_del_clicked_signal.emit({'frequency':freq, 'filename_waveform':fname, 'wave_type': wave_type})
+
+    def echo_deleted(self, del_info):
+        
+        fname = del_info['filename_waveform']
+        freq = del_info['frequency']
+        wave_type = del_info['wave_type']
+        self. model.delete_optima(self.cond, wave_type, freq)
+
+        self.update_plot()
+
+    def condition_cleared(self, clear_info):
+        wave_type = clear_info['wave_type']
+        condition = clear_info['condition']
+        self.model.clear_condition(condition, wave_type)
+        self.update_plot()
+
+    def cursor_changed_singal_callback(self, *args):
+        
+        arrow_plot = self.model.get_arrow_plot(self.cond, self.wave_type)
+        if arrow_plot != None:
+            freqs = np.asarray(list(arrow_plot.optima.keys()))
+            freq = 1/args[0]
+            if freq <= np.amin(freqs): 
+                part_ind = 0
+            elif freq >= np.amax(freqs):
+                part_ind = len(freqs)-1
+            else:
+                part_ind = get_partial_index(freqs, freq)
+            ind = int(round(part_ind))
+            freq_out = freqs[ind]
+            optima = arrow_plot.optima[freq_out]
+            fname = optima.filename_waveform
+            self.arrow_plot_freq_cursor_changed_signal.emit({'frequency':freq_out, 'filename_waveform':fname})
 
     def calc_callback(self):
         self.calculate_data()
         self.update_plot()
 
     def auto_data(self):
-        num_pts = len(self.model.optima)
-        if num_pts > 2:
-            opt = self.get_opt()
-            self.model.auto_sort_optima(opt)
-            self.calculate_data()
-            self.update_plot()
-        else: self.error_not_enough_datapoints()
+        # starts the automatic point sorting and finding the most horizontal line, the 
+        # most horizontal points are the opt_data_points, other points are the other_data_points
+
+        arrow_plot = self.model.get_arrow_plot(self.cond, self.wave_type)
+        if arrow_plot != None:
+            num_pts = len(arrow_plot.optima)
+            if num_pts > 2:
+                opt = self.get_opt()
+                arrow_plot.auto_sort_optima(opt)
+                self.calculate_data()
+                self.update_plot()
+            else: self.error_not_enough_datapoints()
  
     def point_clicked_callback(self, pt):
-        f = pt[0]
-        t = pt[1]
-        opt = self.get_opt()
-        self.model.set_optimum(opt, t,f)
-        self.update_plot()
-        #self.calculate_data()
+        arrow_plot = self.model.get_arrow_plot(self.cond, self.wave_type)
+        if arrow_plot != None:
+            f = pt[0]
+            t = pt[1]
+            opt = self.get_opt()
+            arrow_plot.set_optimum(opt, t,f)
+            self.update_plot()
+            #self.calculate_data()
 
     def clear_data(self):
-        self.line_plots = {}
-        self.model.clear()
-        self.update_plot()
-        self.arrow_plot_window.update_max_line([],[])
+        cond = self.cond
+        wave_type = self.wave_type
+
+        self.arrow_plot_clear_clicked_signal.emit({'condition':cond, 'wave_type': wave_type})
 
     def save_result(self):
         pass
         #filename = self.fname + '.json'
         #self.model.save_result(filename)
 
+    def set_frequency_cursor(self, freq):
+        inv_freq = 1/(freq*1e6)
+        self.sync_cursors(inv_freq)
+
+        self.arrow_plot_window.set_selected_frequency(str(freq)+ ' MHz')
+
     def sync_cursors(self, pos):
-        self.display_window.win.fig.set_cursor(pos)
-        self.display_window.detail_win1.fig.set_cursor(pos)
+        self.arrow_plot_window.win.blockSignals(True)
+        self.arrow_plot_window.win.update_cursor(pos)
+        self.arrow_plot_window.win.blockSignals(False)
 
     def get_opt(self):
         N = self.arrow_plot_window.N_cbx.checkState()
@@ -91,61 +158,64 @@ class ArrowPlotController(QObject):
         return opt
 
     def update_plot(self):
-        opt = self.get_opt()
-        xMax, yMax = self.model.get_opt_data_points(opt)
-        xData, yData = self.model.get_other_data_points(opt)
-        self.arrow_plot_window.update_view(xData,yData)
-        self.arrow_plot_window.update_maximums(np.asarray(xMax),np.asarray(yMax))
-        if opt in self.line_plots:
-            self.arrow_plot_window.update_max_line(*self.line_plots[opt])
-        else:
-            self.arrow_plot_window.update_max_line([],[])
+        arrow_plot = self.model.get_arrow_plot(self.cond, self.wave_type)
+        if arrow_plot != None:
+            opt = self.get_opt()
+            xMax, yMax = arrow_plot.get_opt_data_points(opt)
+            xData, yData = arrow_plot.get_other_data_points(opt)
+
+
+            self.arrow_plot_window.update_view(xData,yData)
+            self.arrow_plot_window.update_maximums(np.asarray(xMax),np.asarray(yMax))
+
+            self.arrow_plot_window.set_selected_folder(str(self.cond))
+
+            if opt in arrow_plot.line_plots:
+                self.arrow_plot_window.update_max_line(*arrow_plot.line_plots[opt])
+                self.arrow_plot_window.output_ebx.setText(arrow_plot.out[opt])
+            else:
+                self.arrow_plot_window.update_max_line([],[])
+                self.arrow_plot_window.output_ebx.setText('')
+            
 
     def error_not_enough_datapoints(self):
-        print('Not enough datapoints')
+        pass
+    
 
     def calculate_data(self):
-        
-        num_pts = len(self.model.optima)
-        if num_pts > 2:
+        arrow_plot = self.model.get_arrow_plot(self.cond, self.wave_type)
+        if arrow_plot != None:
             opt = self.get_opt()
+            arrow_plot.calculate_lines(opt)
 
-            indexes = [-3,-2,-1,0,1,2,3]
-            X = []
-            Y = []
-            fits = []
-            for i in indexes:
-                x, y, fit = self.model.get_line(opt,i)
-                fits.append(fit[1])
-                X = X +x
-                Y = Y+y
-                X = X +[np.nan]
-                Y = Y+[np.nan]
-            self.line_plots[opt] = (np.asarray(X),np.asarray(Y))
-            
-            s = np.std(np.asarray(fits))
-            out = 'Time delay = ' + \
-                str(round(sum(np.asarray(fits))/len(fits)*1e6,5)) + \
-                    ' microseconds, st.dev. = ' + \
-                        str(round(s*1e6,5)) +' microseconds'
-            self.arrow_plot_window.output_ebx.setText(out)
-        else:
-            self.error_not_enough_datapoints()
-
-    def load_file(self, filename):
+    '''def load_file(self, filename):
         t, spectrum = read_tek_csv(filename, subsample=4)
         t, spectrum = zero_phase_highpass_filter([t,spectrum],1e4,1)
-        return t,spectrum, filename
+        return t,spectrum, filename'''
         
     def update_data(self, *args, **kwargs):
-        filenames = kwargs.get('filenames', None)
-        if filenames is None:
-            filenames = open_files_dialog(self.arrow_plot_window, 'Open files',filter='*.json')
-        if len(filenames):
-            for fname in filenames:
-                self.model.add_result_from_file(fname)
-            #self.auto_data()
-            self.update_plot()
+        if self.cond != None:
+            
+            filenames = kwargs.get('filenames', None)
+            if filenames is None:
+                filenames = open_files_dialog(self.arrow_plot_window, 'Open files',filter='*.json')
+            if len(filenames):
+                for fname in filenames:
+                    self.model.add_result_from_file(self.cond,fname)
+                #self.auto_data()
+                self.update_plot()
+
+    
+
+    def refresh_model(self):
+        self.model.refresh_all_freqs(self.cond, self.wave_type)
+        self.update_plot()
+
+    def set_condition(self, cond):
+        self.cond = cond
+
+    def set_wave_type(self, wave_type):
+        self.wave_type = wave_type
 
     def show_window(self):
         self.arrow_plot_window.raise_widget()

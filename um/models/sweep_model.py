@@ -19,10 +19,13 @@ from um.models.pv_model import pvModel
 from um.models.pvServer import pvServer
 
 
+
+
 class setpointSweep(pvModel):
     model_value_changed_signal = pyqtSignal(dict)
     detector_busy_signal = pyqtSignal(bool)
     positioner_busy_signal = pyqtSignal(bool)
+
     def __init__(self, parent):
         super().__init__(parent)
         self.parent= parent
@@ -36,7 +39,7 @@ class setpointSweep(pvModel):
                                 {'desc': 'Current set-point index', 'val':0,'min':0,'max':10000,
                                 'param':{'type':'i'}},
                         'current_setpoint': 
-                                {'desc': 'Current set-point', 'val':0., 'increment':0.1, 'min':-10e11,'max':10e11,
+                                {'desc': 'Current set-point', 'val':0., 'increment':0.01, 'min':-10e11,'max':10e11,
                                 'param':{'type':'f'}},
                         'setpoints':     
                                 {'desc': 'Setpoints', 'val':None, 
@@ -226,7 +229,7 @@ class setpointSweep(pvModel):
 
     def wait_for_save_data_done(self, pv, param):
         param = param[0]
-        print(param)
+        #print(param)
         if not param:
             save_data_pvname = self.parent.pvs['save_data_read_channel']._val
             save_data_pv = self.pv_server.get_pv(save_data_pvname)
@@ -260,7 +263,9 @@ class setpointSweep(pvModel):
             self.pvs['run_state'].set(False)
         
 
-
+class setpointSweepWithAutoscale(setpointSweep):
+    def __init__(self, parent):
+        super().__init__(parent)
         
 class SweepModel(pvModel):
 
@@ -270,7 +275,8 @@ class SweepModel(pvModel):
         super().__init__(parent)
 
         ## device speficic:
-        self.setpointSweepThread = setpointSweep(self)
+        self.setpointSweepThread = setpointSweepWithAutoscale(self)
+        
         self.instrument = 'ScanModel'
         
         
@@ -322,7 +328,9 @@ class SweepModel(pvModel):
                                 'param':{ 'type':'b'}},
                         'setpoint': 
                                 {'desc': 'Set-point', 'val':30., 'increment':0.1, 'min':0.1,'max':100,
+                                'methods':{'set':False, 'get':True},
                                 'param':{ 'type':'f'}}
+                                
                                 }
 
         self.create_pvs(self.tasks)
@@ -394,14 +402,17 @@ class SweepModel(pvModel):
             self.setpointSweepThread.clear_queue()
     
     def get_points(self):
-        points, step = get_points(self.pvs['start_point']._val,  self.pvs['end_point']._val, self.pvs['n']._val)
+        points, step = _get_points(self.pvs['start_point']._val,  self.pvs['end_point']._val, self.pvs['n']._val)
+        #print(points)
+        #print(step)
         self.points = self.points={'setpoints':points}
         self.pvs['step'].set(step)
         
-def get_points(start_point, end_point, n):
+def _get_points(start_point, end_point, n):
+    #print('_get_points ' + 'start_point '+str(start_point) +' end_point '+str(end_point) +' n '+str(n))
     rng = end_point - start_point
     step = rng / (n -1)
     points = []
-    for i in range(n):
+    for i in range(int(n)):
         points.append(float(round(start_point+i*step,10)))
     return points, float(step)

@@ -4,7 +4,7 @@ from time import *
 import numbers
 import numpy as np
 import sys
-import visa
+import pyvisa as visa
 
 
 class TektronixScopeError(Exception):

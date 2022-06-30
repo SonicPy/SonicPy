@@ -78,7 +78,7 @@ class SimpleDisplayWidget(QtWidgets.QWidget):
 
     def update_cursor(self, pos):
         c = "<span style='color: #00CC00'>%0.3e</span>"  % (pos)
-        #print(c)
+     
         self.cursor.setText(c)
         self.fig.set_cursor(pos)
         self.cursor_changed_singal.emit(pos)
@@ -365,7 +365,7 @@ class PltWidget(pg.PlotWidget):
     def set_colors(self, params):
 
         self.colors = copy.deepcopy(params)
-        #print(params)
+   
         for p in params:
             color = params[p]
             self.colors[p] = color

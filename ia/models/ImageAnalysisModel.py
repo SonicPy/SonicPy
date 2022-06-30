@@ -63,7 +63,7 @@ class ImageROI():
         
         #order = 3
         self.w_weighted = pixel_cluster_polynom_fit(I_orig, order=order, threshold = threshold)
-        #print(self.w_weighted)
+        
         '''w_weighted = copy.copy(self.w_weighted)
         w_weighted[0]=w_weighted[0]+self.pos[1]
         w_strings = []

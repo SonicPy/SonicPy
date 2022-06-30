@@ -123,7 +123,7 @@ class ArbFilterController(pvController):
         data = data[0]
         
         if len(data):
-            print('waveform_changed_signal_callback. pv: '+ str(pv_name))
+            #print('waveform_changed_signal_callback. pv: '+ str(pv_name))
             pv = self.pv_server.get_pv(self.model.pvs['user1_channel']._val)
             pv.set(data)
     
@@ -132,8 +132,9 @@ class ArbFilterController(pvController):
         self.arb_filter_edit_controller.select_controller(key)
 
     def arb_filter_edited_apply_clicked_signal_callback(self, selected):
-        print(selected)
-
+        pass
+        
+        
 
     def edit_state_signal_callback(self, pv_name, data):
         data = data[0]

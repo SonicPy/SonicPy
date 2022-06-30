@@ -180,7 +180,7 @@ class plotWindow(QtWidgets.QWidget):
         self.plots.append(Plot)
          # can display name in upper right corner in same color 
         self.win.legend.addItem(self.plots[-1], '')
-        return Plot
+        return Plot 
             
 
     def closeEvent(self, event):
@@ -425,13 +425,23 @@ class PltWidget(pg.PlotWidget):
         #self.roi_cursor_legend.anchor(itemPos=(0, 0), parentPos=(0, 0), offset=(0, 30))
         # initialize roi plot 
         rois_color = self.colors['rois_color']
+        echo_p_color = '#ff0099'
+        echo_s_color = '#ff0099'
         self.plotRoi = pg.PlotDataItem(roiHorz, roiData, 
             antialias=True, pen=rois_color, connect="finite", width=1)
         self.addItem(self.plotRoi)  
         self.legend.addItem(self.plotRoi, '')
+        self.plotPEcho = pg.PlotDataItem([], [], 
+            antialias=True, pen=echo_p_color, connect="finite", width=1)
+        self.addItem(self.plotPEcho)  
+        self.legend.addItem(self.plotPEcho, '')
+        self.plotSEcho = pg.PlotDataItem([], [], 
+            antialias=True, pen=echo_s_color, connect="finite", width=1)
+        self.addItem(self.plotSEcho)  
+        self.legend.addItem(self.plotSEcho, '')
         self.setLabel('bottom', xLabel) 
 
-    def plotData(self, xAxis,data,roiHorz=[],roiData=[], xLabel='', dataLabel=''):
+    def plotData(self, xAxis,data,roiHorz=[],roiData=[],echoPHorz=[],echoPData=[],echoSHorz=[],echoSData=[], xLabel='', dataLabel=''):
         if len(xAxis)==len(data):
             self.xAxis = xAxis
             self.yData = data
@@ -440,6 +450,8 @@ class PltWidget(pg.PlotWidget):
             else:
                 self.plotForeground.setData(xAxis, data) 
                 self.plotRoi.setData(roiHorz, roiData) 
+                self.plotPEcho.setData(echoPHorz,echoPData)
+                self.plotSEcho.setData(echoSHorz,echoSData)
             # if nonzero ROI data, show ROI legend on plot
             if len(roiHorz) > 0: roiLabel = 'ROIs'
             else:   roiLabel = ''

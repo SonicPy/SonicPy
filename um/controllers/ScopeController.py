@@ -35,7 +35,13 @@ class ScopeController(pvController):
                             'num_av',
                             'num_acq',
                             'run_state',
-                            'stop_after_num_av_preset']
+                            'stop_after_num_av_preset',
+                            '_divider',
+                            'autoscale_t_min',
+                            'autoscale_t_max',
+                            'autoscale_margin',
+                            'do_autoscale',
+                            'auto_autoscale']
         self.init_panel("Scope", self.panel_items)
         self.make_connections()
 

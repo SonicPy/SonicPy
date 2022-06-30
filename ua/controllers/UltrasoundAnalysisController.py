@@ -3,6 +3,7 @@
 
 
 import os.path, sys
+import wave
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QObject, pyqtSignal
 import numpy as np
@@ -14,9 +15,10 @@ from numpy import arange
 from utilities.utilities import *
 from ua.widgets.UltrasoundAnalysisWidget import UltrasoundAnalysisWidget
 from ua.widgets.ArrowPlotWidget import ArrowPlotWidget
-from ua.models.UltrasoundAnalysisModel import get_local_optimum, UltrasoundAnalysisModel
+from ua.models.UltrasoundAnalysisModel import UltrasoundAnalysisModel
+from um.models.tek_fileIO import load_any_waveform_file 
 from utilities.HelperModule import move_window_relative_to_screen_center, get_partial_index, get_partial_value
-import math
+import math, time
 
 from ua.controllers.ArrowPlotController import ArrowPlotController
 from functools import partial
@@ -30,22 +32,24 @@ from functools import partial
 from utilities.HelperModule import increment_filename, increment_filename_extra
 from um.widgets.UtilityWidgets import open_file_dialog
 
-
+from ua.models.EchoesResultsModel import EchoesResultsModel
 
 ############################################################
 
 class UltrasoundAnalysisController(QObject):
     cursor_position_signal = pyqtSignal(float)
     correlation_saved_signal = pyqtSignal(dict)
-    def __init__(self, app=None, offline = False):
+    wave_type_toggled_signal = pyqtSignal(str)
+
+    def __init__(self, app=None, results_model= EchoesResultsModel()):
         super().__init__()
-        self.model = UltrasoundAnalysisModel()
+        self.model = UltrasoundAnalysisModel(results_model)
         self.fname = None
     
         if app is not None:
             self.setStyle(app)
         self.display_window = UltrasoundAnalysisWidget()
-        self.arrow_plot_controller = ArrowPlotController()
+        
         self.make_connections()
        
         
@@ -55,19 +59,27 @@ class UltrasoundAnalysisController(QObject):
     def make_connections(self): 
         self.display_window.open_btn.clicked.connect(self.update_data)
         self.display_window.freq_ebx.valueChanged.connect(self.calculate_data)
-        self.display_window.lr1.sigRegionChangeFinished.connect(self.calculate_data)
-        self.display_window.lr2.sigRegionChangeFinished.connect(self.calculate_data)
+        self.display_window.lr1_p.sigRegionChangeFinished.connect(self.calculate_data)
+        self.display_window.lr2_p.sigRegionChangeFinished.connect(self.calculate_data)
+
+        self.display_window.lr1_s.sigRegionChangeFinished.connect(self.calculate_data)
+        self.display_window.lr2_s.sigRegionChangeFinished.connect(self.calculate_data)
+
         self.display_window.N_cbx.stateChanged.connect(self.calculate_data)
 
         self.display_window.plot_widget.cursor_changed_singal.connect(self.sync_cursors)
+        self.display_window.detail_win0.cursor_changed_singal.connect(self.sync_cursors)
         self.display_window.detail_win1.cursor_changed_singal.connect(self.sync_cursors)
+
         self.display_window.plot_widget.cursor_changed_singal.connect(self.emit_cursor)
+        self.display_window.detail_win0.cursor_changed_singal.connect(self.emit_cursor)
         self.display_window.detail_win1.cursor_changed_singal.connect(self.emit_cursor)
+        
 
         self.display_window.save_btn.clicked.connect(self.save_result)
 
        
-        self.display_window.arrow_plt_btn.clicked.connect(self.ArrowPlotShow)
+        
 
         self.display_window.echo1_cursor_btn.clicked.connect(partial(self.set_echo_region_position,0))
         self.display_window.echo2_cursor_btn.clicked.connect(partial(self.set_echo_region_position,1))
@@ -77,16 +89,31 @@ class UltrasoundAnalysisController(QObject):
 
 
     def p_s_wave_btn_callback(self, wave_type):
-        self.model.wave_type = wave_type
+        self.display_window.plot_win.removeItem(self.display_window.lr1_s)
+        self.display_window.plot_win.removeItem(self.display_window.lr2_s)
+        self.display_window.plot_win.removeItem(self.display_window.lr1_p)
+        self.display_window.plot_win.removeItem(self.display_window.lr2_p)
 
-    def ArrowPlotShow(self):
-        self.arrow_plot_controller.arrow_plot_window.raise_widget()
+        if wave_type == 'P':
+            
+            self.display_window.plot_win.addItem(self.display_window.lr1_p)
+            self.display_window.plot_win.addItem(self.display_window.lr2_p)
+        if wave_type == 'S':
+            self.display_window.plot_win.addItem(self.display_window.lr1_s)
+            self.display_window.plot_win.addItem(self.display_window.lr2_s)
+
+        self.model.wave_type = wave_type
+        self.calculate_data()
+
+        self.wave_type_toggled_signal.emit(wave_type)
+
+    
 
     def save_result(self):
         if self.fname is not None:
             filename = self.fname + '.json'
             out = self.model.save_result(self.fname)
-            if out['saved']:
+            if out['ok']: 
                 self.correlation_saved_signal.emit(out['data'])
 
 
@@ -98,6 +125,8 @@ class UltrasoundAnalysisController(QObject):
         
         self.display_window.plot_widget.fig.set_cursor(pos)
         self.display_window.plot_widget.cursor_pos = pos
+        self.display_window.detail_win0.fig.set_cursor(pos)
+        self.display_window.detail_win0.cursor_pos = pos
         self.display_window.detail_win1.fig.set_cursor(pos)
         self.display_window.detail_win1.cursor_pos = pos
 
@@ -105,8 +134,13 @@ class UltrasoundAnalysisController(QObject):
     def set_echo_region_position(self, index):
         center = self.display_window.plot_widget.cursor_pos
         pad = 0.06e-6
-        echo = self.display_window.echo_bounds[index]
-        echo.setRegion([center-pad, center+pad])
+        wave_type = self.model.wave_type
+        if wave_type == 'P':
+            echo = self.display_window.echo_bounds_p[index]
+            echo.setRegion([center-pad, center+pad])
+        elif wave_type == 'S':
+            echo = self.display_window.echo_bounds_s[index]
+            echo.setRegion([center-pad, center+pad])
         
 
     def calculate_data(self):
@@ -116,24 +150,34 @@ class UltrasoundAnalysisController(QObject):
         t = self.model.t
         spectrum = self.model.spectrum
         if t is not None and spectrum is not None:
+                
+            min_roi = abs(t[1]-t[0])*10
 
-            t_f, spectrum_f = zero_phase_lowpass_filter([t,spectrum],60e6,1)
-            min_roi = abs(t_f[1]-t_f[0])*10
-            [l1, r1] = self.display_window.get_echo_bounds(0)
-            [l2, r2] = self.display_window.get_echo_bounds(1)
+            wave_type = self.model.wave_type
+            if wave_type == 'P':
+                [l1, r1] = self.display_window.get_echo_bounds_p(0)
+                [l2, r2] = self.display_window.get_echo_bounds_p(1)
+            elif wave_type == 'S':
+                [l1, r1] = self.display_window.get_echo_bounds_s(0)
+                [l2, r2] = self.display_window.get_echo_bounds_s(1)
+            
             if l1 >  0 and l2 >0 and abs(l1-r1) > min_roi and abs(l2-r2) > min_roi:
 
-                #pg.plot(np.asarray(spectrum_f), title="spectrum_f")
                 
                 
+                start_time = time.time()
                 self.model.filter_echoes(l1, r1, l2, r2, freq)
 
                 self.model.cross_correlate()
                 self.model.exract_optima()
+               
 
-
+                self.display_window.detail_plot0.setData(*self.model.echo_tk1)
+                self.display_window.detail_plot0_bg.setData(*self.model.echo_tk2)
+                
                 self.display_window.detail_plot1.setData(*self.model.filtered1)
                 self.display_window.detail_plot1_bg.setData(*self.model.filtered2)
+                
                 self.display_window.detail_plot2.setData(self.model.cross_corr_shift, self.model.cross_corr)
 
             
@@ -181,22 +225,37 @@ class UltrasoundAnalysisController(QObject):
 
  
     def load_file(self, filename):
+
+        t, spectrum = load_any_waveform_file(filename)
         
-        t, spectrum = read_tek_csv(filename, subsample=1)
-        t, spectrum = zero_phase_highpass_filter([t,spectrum],1e4,1)
         return t,spectrum, filename
-        
+
     def update_data(self, *args, **kwargs):
         filename = kwargs.get('filename', None)
         if filename is None:
-            filename = open_file_dialog(None, "Load File(s).",filter='*.csv')
+            filename = open_file_dialog(None, "Load File(s).")
         if len(filename):
-            self.model.t, self.model.spectrum, self.fname = self.load_file(filename)
-            self.display_window.update_view(self.model.t, self.model.spectrum, self.fname)
-            name = os.path.split(self.fname)[-1]
-            self.display_window.plot_widget.setText(name,0)
+            t, spectrum, fname = self.load_file(filename)
 
-    
+            if len(spectrum):
+                self._update_spectrum (t, spectrum, fname)
+
+    def update_data_by_dict(self, data):
+        t, spectrum, fname = data['t'], data['spectrum'], data['fname']
+        self._update_spectrum(t, spectrum, fname)
+        
+    def _update_spectrum(self, t, spectrum, fname):
+        
+        if len(spectrum):
+            self.model.t, self.model.spectrum, self.fname = t, spectrum, fname
+            self.display_window.update_view(self.model.t, self.model.spectrum, self.fname)
+            
+
+            path = os.path.normpath(self.fname)
+            fldr = path.split(os.sep)[-2]
+            file = path.split(os.sep)[-1]
+            name = os.path.join( fldr,file)
+            self.display_window.plot_widget.setText(name,0)
 
 
     def cursor_dragged(self, cursor):

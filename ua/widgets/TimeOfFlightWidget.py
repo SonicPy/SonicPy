@@ -21,18 +21,21 @@ class TimeOfFlightWidget(QMainWindow):
     up_down_signal = pyqtSignal(str)
     panelClosedSignal = pyqtSignal()
 
-    def __init__(self, overview_widget, analysis_widget):
+    def __init__(self, app, overview_widget, analysis_widget, arrow_plot_widget):
         super().__init__()
-        
+        self.app = app
         self.overview_widget = overview_widget
         
         self.analysis_widget = analysis_widget
+
+        self.arrow_plot_widget = arrow_plot_widget
+
         #self.analysis_widget.resize(800,800)
 
 
         self.setWindowTitle('Time-of-flight analysis. (C) R. Hrubiak 2021')
 
-        self.resize(1600, 900)
+        self.resize(1920, 1000)
         
         self.make_widget()
 
@@ -41,7 +44,9 @@ class TimeOfFlightWidget(QMainWindow):
         self.create_menu()
         self.style_widgets()
 
- 
+    def closeEvent(self, QCloseEvent, *event):
+        self.app.closeAllWindows()
+        self.panelClosedSignal.emit()
 
     def make_widget(self):
         self.my_widget = QtWidgets.QWidget()
@@ -77,8 +82,10 @@ class TimeOfFlightWidget(QMainWindow):
         self.splitter_horizontal.addWidget(self.overview_widget)
 
         self.splitter_horizontal.addWidget(self.analysis_widget)
+
+        self.splitter_horizontal.addWidget(self.arrow_plot_widget)
         
-        self.splitter_horizontal.setSizes([800,800])
+        self.splitter_horizontal.setSizes([600,600, 600])
 
         self._center_widget_layout.addWidget(self.splitter_horizontal)
 
@@ -100,8 +107,6 @@ class TimeOfFlightWidget(QMainWindow):
 
     
 
-    def closeEvent(self, QCloseEvent, *event):
-        self.panelClosedSignal.emit()
         
 
     def keyPressEvent(self, e):

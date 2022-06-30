@@ -159,7 +159,7 @@ class ArrowPlotController(QObject):
 
     def update_plot(self):
         arrow_plot = self.model.get_arrow_plot(self.cond, self.wave_type)
-        package = self.model.package_optima()
+        
         if arrow_plot != None:
             opt = self.get_opt()
             xMax, yMax = arrow_plot.get_opt_data_points(opt)
@@ -184,7 +184,7 @@ class ArrowPlotController(QObject):
                 self.arrow_plot_window.update_max_line([],[])
                 self.arrow_plot_window.output_ebx.setText('')
             
-            optima =  arrow_plot.package_optima()
+          
             
 
     def error_not_enough_datapoints(self):
@@ -196,6 +196,9 @@ class ArrowPlotController(QObject):
         if arrow_plot != None:
             opt = self.get_opt()
             arrow_plot.calculate_lines(opt)
+            package = arrow_plot.package
+            
+
 
     '''def load_file(self, filename):
         t, spectrum = read_tek_csv(filename, subsample=4)

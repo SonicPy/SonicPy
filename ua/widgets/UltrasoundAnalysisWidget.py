@@ -118,7 +118,7 @@ class UltrasoundAnalysisWidget(QWidget):
         
         self.t, self.spectrum, self.fname = t, spectrum, fname
         if t is not None and spectrum is not None:
-            self.main_plot.setData(self.t, self.spectrum,)
+            self.main_plot.setData(self.t, self.spectrum)
             #self.detail_plot1.setData(self.t, self.spectrum,)
             #self.detail_plot2.setData(self.t, self.spectrum,)
             
@@ -127,8 +127,7 @@ class UltrasoundAnalysisWidget(QWidget):
                 self.init_region_items(self.t)'''
             #self.fname_lbl.setText(self.fname)
 
-    def set_name (self, text):
-        self. plot_widget.setText(text , 0)
+    
 
     def updatePlot1(self):
         self.lr1_pr = self.lr1_p.getRegion()

@@ -65,6 +65,15 @@ class ArrowPlotWidget(QWidget):
 
     def get_cursor_pos(self):
         return self.win.fig.win.get_cursor_pos()
+
+    def set_selected_folder (self, text):
+        self. win.setText(text , 0)
+
+    def set_selected_frequency (self, text):
+        self. win.setText(text , 1)
+
+    def set_name (self, text):
+        self. win.setText(text , 0)
          
     def make_widget(self):
         my_widget = self
@@ -109,6 +118,15 @@ class ArrowPlotWidget(QWidget):
         _layout.addWidget(buttons_widget_top)
         params = "Arrow Plot", 'Time delay (s)', 'Inverse frequency (1/Hz)'
         self.win = SimpleDisplayWidget(params)
+
+        # next lines are needed to create the legend items for the plot even though these plots are not the ones used
+        # may change how this is done later
+        win  = self.win.fig.win
+        win.create_plots([],[],[],[],'')
+        win.set_colors( { 
+                        'data_color': '#eeeeee',\
+                        'rois_color': (0,255,100), \
+                        })
         
         _layout.addWidget(self.win)
 

@@ -28,7 +28,10 @@ class optima():
         self.maxima_t = data['maxima_t']
         self.num_opt = {}
         self.all_optima = {}
+        
         self.init_optima()
+
+    
         
     def init_optima(self):
         self.center_opt={}
@@ -173,10 +176,13 @@ class ArrowPlot():
     def __init__(self):
 
         self.optima = {}
+        self.line_plots = {}
+        self.out = {}
 
     def clear(self):
         self.__init__()
 
+    
             
     def add_freq(self, data):
         freq = data['frequency']
@@ -277,6 +283,35 @@ class ArrowPlot():
                 best_opt = self.optima[freq].get_optimum(opt, min_slope_ind)
                 self.optima[freq].set_optimum(opt, best_opt)
 
+    def calculate_lines(self, opt = 'max'):
+        arrow_plot = self
+        
+        num_pts = len(arrow_plot.optima)
+        if num_pts > 2:
+            
+            indexes = [-2,-1,0,1,2]
+            X = []
+            Y = []
+            fits = []
+            for i in indexes:
+                x, y, fit = arrow_plot.get_line(opt,i)
+                fits.append(fit[1])
+                X = X +x
+                Y = Y+y
+                X = X +[np.nan]
+                Y = Y+[np.nan]
+            self.line_plots[opt] = (np.asarray(X),np.asarray(Y))
+            
+            s = np.std(np.asarray(fits))
+            out = 'Time delay = ' + \
+                str(round(sum(np.asarray(fits))/len(fits)*1e6,5)) + \
+                    ' microseconds, st.dev. = ' + \
+                        str(round(s*1e6,5)) +' microseconds'
+            self.out[opt] = out
+        else:
+            self.error_not_enough_datapoints()
+
+    
 
     def get_line(self, opt, ind=0):
         '''
@@ -301,6 +336,10 @@ class ArrowPlot():
         fit = np.polyfit(X,Y,1)
         return fit
 
+    def error_not_enough_datapoints(self):
+        pass
+   
+
     
 
 def read_result_file( filename):
@@ -308,7 +347,8 @@ def read_result_file( filename):
             data = json.load(json_file)
 
         return data
-   
+
+
 
 def index_of_nearest(values, value):
     items = []

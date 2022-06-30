@@ -142,6 +142,8 @@ class ArrowPlotController(QObject):
         inv_freq = 1/(freq*1e6)
         self.sync_cursors(inv_freq)
 
+        self.arrow_plot_window.set_selected_frequency(str(freq)+ ' MHz')
+
     def sync_cursors(self, pos):
         self.arrow_plot_window.win.blockSignals(True)
         self.arrow_plot_window.win.update_cursor(pos)
@@ -161,14 +163,20 @@ class ArrowPlotController(QObject):
             opt = self.get_opt()
             xMax, yMax = arrow_plot.get_opt_data_points(opt)
             xData, yData = arrow_plot.get_other_data_points(opt)
+
+
             self.arrow_plot_window.update_view(xData,yData)
             self.arrow_plot_window.update_maximums(np.asarray(xMax),np.asarray(yMax))
 
-            self.arrow_plot_window.output_condition_lbl.setText(str(self.cond) + ' ' + self.wave_type)
-            if opt in self.line_plots:
-                self.arrow_plot_window.update_max_line(*self.line_plots[opt])
+            self.arrow_plot_window.set_selected_folder(str(self.cond))
+
+            if opt in arrow_plot.line_plots:
+                self.arrow_plot_window.update_max_line(*arrow_plot.line_plots[opt])
+                self.arrow_plot_window.output_ebx.setText(arrow_plot.out[opt])
             else:
                 self.arrow_plot_window.update_max_line([],[])
+                self.arrow_plot_window.output_ebx.setText('')
+            
 
     def error_not_enough_datapoints(self):
         pass
@@ -177,31 +185,8 @@ class ArrowPlotController(QObject):
     def calculate_data(self):
         arrow_plot = self.model.get_arrow_plot(self.cond, self.wave_type)
         if arrow_plot != None:
-            num_pts = len(arrow_plot.optima)
-            if num_pts > 2:
-                opt = self.get_opt()
-
-                indexes = [-2,-1,0,1,2]
-                X = []
-                Y = []
-                fits = []
-                for i in indexes:
-                    x, y, fit = arrow_plot.get_line(opt,i)
-                    fits.append(fit[1])
-                    X = X +x
-                    Y = Y+y
-                    X = X +[np.nan]
-                    Y = Y+[np.nan]
-                self.line_plots[opt] = (np.asarray(X),np.asarray(Y))
-                
-                s = np.std(np.asarray(fits))
-                out = 'Time delay = ' + \
-                    str(round(sum(np.asarray(fits))/len(fits)*1e6,5)) + \
-                        ' microseconds, st.dev. = ' + \
-                            str(round(s*1e6,5)) +' microseconds'
-                self.arrow_plot_window.output_ebx.setText(out)
-            else:
-                self.error_not_enough_datapoints()
+            opt = self.get_opt()
+            arrow_plot.calculate_lines(opt)
 
     '''def load_file(self, filename):
         t, spectrum = read_tek_csv(filename, subsample=4)

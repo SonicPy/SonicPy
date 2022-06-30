@@ -65,6 +65,7 @@ class TimeOfFlightController(QObject):
 
         self.correlation_controller.cursor_position_signal.connect(self.overview_controller.sync_cursors)
         self.correlation_controller.correlation_saved_signal.connect(self.correlation_saved_signal_callback)
+        self.correlation_controller.wave_type_toggled_signal.connect(self.wave_type_toggled_signal_callback)
 
         self.arrow_plot_controller.arrow_plot_freq_cursor_changed_signal.connect(self.arrow_plot_freq_cursor_changed_signal_callback)
         self.arrow_plot_controller.arrow_plot_del_clicked_signal.connect(self.arrow_plot_del_clicked_signal_callback)
@@ -114,12 +115,13 @@ class TimeOfFlightController(QObject):
 
         self.correlation_controller.update_data_by_dict(data)
         
-        # setting frequency input triggers calculation of correlation
-        current_freq = self.correlation_controller.display_window.freq_ebx.value()
-        if current_freq != freq:
-            self.correlation_controller.display_window.freq_ebx.setValue(freq)
-        else:
-            self.correlation_controller.calculate_data()
+        # setting frequency input normally triggers calculation of correlation so set with out triggeing signals        
+        self.correlation_controller.display_window.freq_ebx.blockSignals(True)
+        self.correlation_controller.display_window.freq_ebx.setValue(freq)
+        self.correlation_controller.display_window.freq_ebx.blockSignals(False)
+        
+        
+        self.correlation_controller.calculate_data()
 
         echoes_by_condition = self.echoes_results_model.get_echoes_by_condition(cond, echo_type)
         self.arrow_plot_controller.set_wave_type(echo_type)
@@ -163,6 +165,10 @@ class TimeOfFlightController(QObject):
 
         self.arrow_plot_controller.refresh_model()
 
+    def wave_type_toggled_signal_callback(self, wave_type):
+        
+        self.arrow_plot_controller.set_wave_type(wave_type)
+        self.arrow_plot_controller.refresh_model()
     ###
     # Arrow plot controller callbacks
     ##
@@ -189,6 +195,7 @@ class TimeOfFlightController(QObject):
         
         #self.overview_controller. set_frequency_by_value(freq)
         self.overview_controller. select_fname(fname)
+
 
 
     ###

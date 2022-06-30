@@ -146,8 +146,8 @@ class OverViewWidget(QWidget):
         self._buttons_layout_top.setContentsMargins(0, 0, 0, 0)
         
         
-        self.open_btn = QtWidgets.QPushButton("Open folder")
-        self.sort_btn = QtWidgets.QPushButton("Sort folders")
+        self.open_btn = QtWidgets.QPushButton("Open")
+        self.sort_btn = QtWidgets.QPushButton("Sort")
         '''self.fname_lbl = QtWidgets.QLineEdit('')
         self.fname_lbl.setMinimumWidth(300)'''
         self.scale_lbl = QtWidgets.QLabel('   Scale:')
@@ -179,9 +179,9 @@ class OverViewWidget(QWidget):
         self.freq_step.setSingleStep(0.5)
         self.freq_step.setValue(2)
 
-        self._buttons_layout_top.addWidget(QtWidgets.QLabel('𝑓 start [MHz]'))
+        self._buttons_layout_top.addWidget(QtWidgets.QLabel('𝑓 start'))
         self._buttons_layout_top.addWidget(self.freq_start)
-        self._buttons_layout_top.addWidget(QtWidgets.QLabel('𝑓 step [MHz]'))
+        self._buttons_layout_top.addWidget(QtWidgets.QLabel('𝑓 step'))
         self._buttons_layout_top.addWidget(self.freq_step)
 
         self.buttons_widget_top.setLayout(self._buttons_layout_top)

@@ -3,6 +3,7 @@
 
 
 import os.path, sys
+import wave
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QObject, pyqtSignal
 import numpy as np
@@ -38,6 +39,8 @@ from ua.models.EchoesResultsModel import EchoesResultsModel
 class UltrasoundAnalysisController(QObject):
     cursor_position_signal = pyqtSignal(float)
     correlation_saved_signal = pyqtSignal(dict)
+    wave_type_toggled_signal = pyqtSignal(str)
+
     def __init__(self, app=None, results_model= EchoesResultsModel()):
         super().__init__()
         self.model = UltrasoundAnalysisModel(results_model)
@@ -97,6 +100,8 @@ class UltrasoundAnalysisController(QObject):
 
         self.model.wave_type = wave_type
         self.calculate_data()
+
+        self.wave_type_toggled_signal.emit(wave_type)
 
     
 

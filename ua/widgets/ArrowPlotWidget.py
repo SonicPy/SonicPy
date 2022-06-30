@@ -95,7 +95,7 @@ class ArrowPlotWidget(QWidget):
         self.save_btn = QtWidgets.QPushButton('Save result')
 
         
-        _buttons_layout_top.addWidget(self.open_btn)
+        #_buttons_layout_top.addWidget(self.open_btn)
         _buttons_layout_top.addWidget(self.N_cbx)
         _buttons_layout_top.addWidget(self.calc_btn)
         _buttons_layout_top.addWidget(self.auto_btn)

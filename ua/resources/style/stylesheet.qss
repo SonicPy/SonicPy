@@ -500,7 +500,7 @@ QFrame#main_frame {
    border-bottom-right-radius: 8px;
  }
 
-#cond_btn, #cond_btn_first, #cond_btn_last {
+#cond_btn, #cond_btn_first, #cond_btn_last, #p_wave_btn, #s_wave_btn {
     font: normal 12px;
     border-radius: 1px;
 }

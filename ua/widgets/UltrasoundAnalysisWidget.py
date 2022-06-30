@@ -53,11 +53,21 @@ class UltrasoundAnalysisWidget(QWidget):
 
 
         self.main_plot = self.plot_win.plotForeground
-        
-        self.plot_win_detail1 = self.detail_win1.fig.win
 
+        self.plot_win_detail0 = self.detail_win0.fig.win
+        self.plot_win_detail1 = self.detail_win1.fig.win
         self.plot_win_detail2 = self.detail_win2.fig.win
-        
+
+        detail_plot0 = self.detail_win0.fig.win
+        detail_plot0.create_plots([],[],[],[],'Time')
+        detail_plot0.set_colors( { 
+                        'data_color': (0,200,255),\
+                        'rois_color': (255,0,100), \
+                        })
+        self.detail_plot0 = detail_plot0.plotForeground
+        self.detail_plot0_bg = detail_plot0.plotRoi
+        self.detail_win0.setText('Echo 1' , 0)
+        self.detail_win0.setText('Echo 2' , 1)
 
         detail_plot1 = self.detail_win1.fig.win
         detail_plot1.create_plots([],[],[],[],'Time')
@@ -75,7 +85,6 @@ class UltrasoundAnalysisWidget(QWidget):
         detail_plot2.set_colors( { 
                         'data_color': (0,255,100),\
                         })
-        
         self.detail_plot2 = detail_plot2.plotForeground
         self.detail_plot2_bg = pg.PlotDataItem([], [], title="",
                         antialias=True, pen=None, symbolBrush=(0,255,100,150), symbolPen=None)
@@ -103,8 +112,6 @@ class UltrasoundAnalysisWidget(QWidget):
         self.lr2_p.setRegion([0, 0])
 
         self.echo_bounds_s = [self.lr1_s, self.lr2_s]
-        #self.plot_win.addItem(self.lr1_s)
-        #self.plot_win.addItem(self.lr2_s) 
         self.lr1_s.setRegion([0, 0])
         self.lr2_s.setRegion([0, 0])
 
@@ -119,15 +126,6 @@ class UltrasoundAnalysisWidget(QWidget):
         self.t, self.spectrum, self.fname = t, spectrum, fname
         if t is not None and spectrum is not None:
             self.main_plot.setData(self.t, self.spectrum)
-            #self.detail_plot1.setData(self.t, self.spectrum,)
-            #self.detail_plot2.setData(self.t, self.spectrum,)
-            
-            '''if not self.initialized:
-
-                self.init_region_items(self.t)'''
-            #self.fname_lbl.setText(self.fname)
-
-    
 
     def updatePlot1(self):
         self.lr1_pr = self.lr1_p.getRegion()
@@ -148,8 +146,8 @@ class UltrasoundAnalysisWidget(QWidget):
         
         self._layout = QtWidgets.QVBoxLayout()
         self._layout.setContentsMargins(10, 10, 10, 10)
-        self.detail_widget = QWidget()
-        self._detail_layout = QtWidgets.QHBoxLayout()
+        self.detail_widget = QtWidgets.QTabWidget()
+        self._detail_layout = QtWidgets.QTabWidget()
         self._detail_layout.setContentsMargins(0, 0, 0, 0)
         self.buttons_widget_top = QWidget()
         self._buttons_layout_top = QtWidgets.QHBoxLayout()
@@ -159,7 +157,7 @@ class UltrasoundAnalysisWidget(QWidget):
         self._buttons_layout_bottom.setContentsMargins(0, 0, 0, 0)
         self.open_btn = QtWidgets.QPushButton("Open")
         self.fname_lbl = QtWidgets.QLineEdit('')
-        self.freq_lbl = QtWidgets.QLabel('   𝑓:')
+        self.freq_lbl = QtWidgets.QLabel(' 𝑓')
         self.freq_ebx = DoubleSpinBoxAlignRight()
         self.freq_ebx.setMaximum(100)
         self.freq_ebx.setMinimum(1)
@@ -187,10 +185,10 @@ class UltrasoundAnalysisWidget(QWidget):
         self._p_s_widget_layout = QtWidgets.QHBoxLayout(self.p_s_widget)
         self._p_s_widget_layout.setContentsMargins(0,0,0,0)
         self._p_s_widget_layout.setSpacing(0)
-        self.p_wave_btn = QtWidgets.QPushButton('P-wave')
+        self.p_wave_btn = QtWidgets.QPushButton('P')
         self.p_wave_btn.setObjectName('p_wave_btn')
         self.p_wave_btn.setCheckable(True)
-        self.s_wave_btn = QtWidgets.QPushButton('S-wave')
+        self.s_wave_btn = QtWidgets.QPushButton('S')
         self.s_wave_btn.setObjectName('s_wave_btn')
         self.s_wave_btn.setCheckable(True)
         self._p_s_widget_layout.addWidget(self.p_wave_btn)
@@ -209,25 +207,37 @@ class UltrasoundAnalysisWidget(QWidget):
         self.buttons_widget_top.setLayout(self._buttons_layout_top)
         self._layout.addWidget(self.buttons_widget_top)
         params = "Ultrasound echo analysis", 'Amplitude', 'Time'
-        self.plot_widget = SimpleDisplayWidget(params)
-        self._layout.addWidget(self.plot_widget)
 
-        self.detail1 = "Ultrasound echo 1", 'Amplitude', 'Time'
+        self.splitter_vertical = QtWidgets.QSplitter(Qt.Vertical)
+
+
+        self.plot_widget = SimpleDisplayWidget(params)
+        self.splitter_vertical.addWidget(self.plot_widget)
+
+        self.detail0 = "Selected echoes", 'Amplitude', 'Time'
+        self.detail_win0 = SimpleDisplayWidget(self.detail0)
+        self.detail1 = "Filtered echoes", 'Amplitude', 'Time'
         self.detail_win1 = SimpleDisplayWidget(self.detail1)
-        self.detail2 = "Ultrasound echo 2", 'Amplitude', 'Time'
+        self.detail2 = "Correlation", 'Amplitude', 'Time'
         self.detail_win2 = SimpleDisplayWidget(self.detail2)
-        self._detail_layout.addWidget(self.detail_win1)
-        self._detail_layout.addWidget(self.detail_win2)
-        self.detail_widget.setLayout(self._detail_layout)
-        self._layout.addWidget(self.detail_widget)
-        self.calc_btn = QtWidgets.QPushButton('Correlate')
+
+        self.detail_widget.addTab(self.detail_win0, 'Selected')
+        self.detail_widget.addTab(self.detail_win1, 'Filtered')
+        self.detail_widget.addTab(self.detail_win2, 'Correlation')
+
+        #self.detail_widget.setLayout(self._detail_layout)
+        self.splitter_vertical.addWidget(self.detail_widget)
+
+        self._layout.addWidget(self.splitter_vertical)
+
+        #self.calc_btn = QtWidgets.QPushButton('Correlate')
         #_buttons_layout_bottom.addWidget(calc_btn)
         #_buttons_layout_bottom.addWidget(QtWidgets.QLabel('2-way travel time:'))
-        self.output_ebx = QtWidgets.QLineEdit('')
+        #self.output_ebx = QtWidgets.QLineEdit('')
         #_buttons_layout_bottom.addWidget(output_ebx)
-        self._buttons_layout_bottom.addSpacerItem(HorizontalSpacerItem())
-        self.buttons_widget_bottom.setLayout(self._buttons_layout_bottom)
-        self._layout.addWidget(self.buttons_widget_bottom)
+        #self._buttons_layout_bottom.addSpacerItem(HorizontalSpacerItem())
+        #self.buttons_widget_bottom.setLayout(self._buttons_layout_bottom)
+        #self._layout.addWidget(self.buttons_widget_bottom)
         self.setLayout(self._layout)
         
 

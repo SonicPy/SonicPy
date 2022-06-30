@@ -68,9 +68,13 @@ class UltrasoundAnalysisController(QObject):
         self.display_window.N_cbx.stateChanged.connect(self.calculate_data)
 
         self.display_window.plot_widget.cursor_changed_singal.connect(self.sync_cursors)
+        self.display_window.detail_win0.cursor_changed_singal.connect(self.sync_cursors)
         self.display_window.detail_win1.cursor_changed_singal.connect(self.sync_cursors)
+
         self.display_window.plot_widget.cursor_changed_singal.connect(self.emit_cursor)
+        self.display_window.detail_win0.cursor_changed_singal.connect(self.emit_cursor)
         self.display_window.detail_win1.cursor_changed_singal.connect(self.emit_cursor)
+        
 
         self.display_window.save_btn.clicked.connect(self.save_result)
 
@@ -121,6 +125,8 @@ class UltrasoundAnalysisController(QObject):
         
         self.display_window.plot_widget.fig.set_cursor(pos)
         self.display_window.plot_widget.cursor_pos = pos
+        self.display_window.detail_win0.fig.set_cursor(pos)
+        self.display_window.detail_win0.cursor_pos = pos
         self.display_window.detail_win1.fig.set_cursor(pos)
         self.display_window.detail_win1.cursor_pos = pos
 
@@ -166,8 +172,12 @@ class UltrasoundAnalysisController(QObject):
                 self.model.exract_optima()
                
 
+                self.display_window.detail_plot0.setData(*self.model.echo_tk1)
+                self.display_window.detail_plot0_bg.setData(*self.model.echo_tk2)
+                
                 self.display_window.detail_plot1.setData(*self.model.filtered1)
                 self.display_window.detail_plot1_bg.setData(*self.model.filtered2)
+                
                 self.display_window.detail_plot2.setData(self.model.cross_corr_shift, self.model.cross_corr)
 
             

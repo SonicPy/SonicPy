@@ -27,7 +27,7 @@ class ArrowPlotWidget(QWidget):
         self.t = None
         self.spectrum = None
         self.setWindowTitle('Inverse frequency analysis')
-        self.resize(600, 800)
+        #self.resize(600, 800)
         self.make_widget()
         self.create_plots()
         self.style_widgets()
@@ -35,9 +35,9 @@ class ArrowPlotWidget(QWidget):
     def create_plots(self):
         self.plot_win = self.win.fig.win
         self.main_plot = pg.PlotDataItem([], [], title="",
-                        antialias=True, pen=None, symbolBrush=(255,0,100), symbolPen=None, symbolSize = 9)
+                        antialias=True, pen=None, symbolBrush=(255,0,100), symbolPen=None, symbolSize = 7)
         self.maximums = pg.PlotDataItem([], [], title="",
-                        antialias=True, pen=None, symbolBrush=(0,100,255), symbolPen=None, symbolSize = 9)
+                        antialias=True, pen=None, symbolBrush=(0,100,255), symbolPen=None, symbolSize = 7)
         self.max_line_plot = pg.PlotDataItem([], [], title="",
                         antialias=True, pen=pg.mkPen(color=(255,255,255,150), width=2), connect="finite" )
         self.main_plot.sigPointsClicked.connect(self.point_clicked)
@@ -45,6 +45,15 @@ class ArrowPlotWidget(QWidget):
         self.plot_win.addItem(self.max_line_plot)
         self.plot_win.addItem(self.main_plot)
         self.plot_win.addItem(self.maximums)
+
+        # next lines are needed to create the legend items for the plot even though these plots are not the ones used
+        # may change how this is done later
+        
+        self.plot_win.create_plots([],[],[],[],'')
+        self.plot_win.set_colors( { 
+                        'data_color': '#eeeeee',\
+                        'rois_color': (0,255,100), \
+                        })
 
     def point_clicked(self, item, pt):
         point = [pt[0].pos().x(),pt[0].pos().y()]
@@ -119,14 +128,7 @@ class ArrowPlotWidget(QWidget):
         params = "Arrow Plot", 'Time delay (s)', 'Inverse frequency (1/Hz)'
         self.win = SimpleDisplayWidget(params)
 
-        # next lines are needed to create the legend items for the plot even though these plots are not the ones used
-        # may change how this is done later
-        win  = self.win.fig.win
-        win.create_plots([],[],[],[],'')
-        win.set_colors( { 
-                        'data_color': '#eeeeee',\
-                        'rois_color': (0,255,100), \
-                        })
+        
         
         _layout.addWidget(self.win)
 

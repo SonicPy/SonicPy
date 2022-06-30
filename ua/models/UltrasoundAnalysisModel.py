@@ -61,7 +61,7 @@ class UltrasoundAnalysisModel():
         zero_pad = np.zeros(len(spectrum))
         zero_pad[pilo:pihi] = echo_tk
         filtered = zero_phase_bandpass_filter([t,zero_pad],freq-freq*(freq_range/2),freq+freq*(freq_range/2), order)
-        return filtered
+        return filtered, [t,zero_pad]
     
     def filter_echoes(self, l1, r1, l2, r2, freq):
         '''
@@ -72,8 +72,8 @@ class UltrasoundAnalysisModel():
         t = self.t
         spectrum = self.spectrum
         tukey_alpha = self.settings['tukey_alpha']
-        self.filtered1 = self.filter_echo(t,spectrum,l1,r1,freq,tukey_alpha)
-        self.filtered2 = self.filter_echo(t,spectrum,l2,r2,freq,tukey_alpha)
+        self.filtered1, self.echo_tk1 = self.filter_echo(t,spectrum,l1,r1,freq,tukey_alpha)
+        self.filtered2, self.echo_tk2 = self.filter_echo(t,spectrum,l2,r2,freq,tukey_alpha)
 
     def find_echo_bounds(self, echo, echo_bounds_cutoff = 0.05):
         '''

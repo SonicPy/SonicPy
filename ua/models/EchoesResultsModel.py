@@ -30,6 +30,7 @@ from natsort import natsorted
 import shutil
 
 
+
 class EchoesResultsModel():
     def __init__(self):
         
@@ -37,6 +38,10 @@ class EchoesResultsModel():
         self.folder = ''
         self.echoes_p = {}
         self.echoes_s = {}
+
+
+        self.sorted_correlations_p = {}
+        self.sorted_correlations_s = {}
 
     def add_echoe(self, correlation):
         

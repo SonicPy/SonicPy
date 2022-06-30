@@ -159,6 +159,7 @@ class ArrowPlotController(QObject):
 
     def update_plot(self):
         arrow_plot = self.model.get_arrow_plot(self.cond, self.wave_type)
+        package = self.model.package_optima()
         if arrow_plot != None:
             opt = self.get_opt()
             xMax, yMax = arrow_plot.get_opt_data_points(opt)
@@ -172,10 +173,18 @@ class ArrowPlotController(QObject):
 
             if opt in arrow_plot.line_plots:
                 self.arrow_plot_window.update_max_line(*arrow_plot.line_plots[opt])
-                self.arrow_plot_window.output_ebx.setText(arrow_plot.out[opt])
+                
+                result = arrow_plot.result[opt]
+                out_str = 'Time delay = ' + \
+                            str(result['time_delay']) + \
+                                ' microseconds, st.dev. = ' + \
+                                    str(result['time_delay_std']) +' microseconds'
+                self.arrow_plot_window.output_ebx.setText(out_str)
             else:
                 self.arrow_plot_window.update_max_line([],[])
                 self.arrow_plot_window.output_ebx.setText('')
+            
+            optima =  arrow_plot.package_optima()
             
 
     def error_not_enough_datapoints(self):

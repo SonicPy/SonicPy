@@ -1,5 +1,6 @@
 
 import os.path, sys
+from this import d
 from ua.models.OverViewModel import Sort_Tuple
 from utilities.utilities import *
 from utilities.HelperModule import move_window_relative_to_screen_center, get_partial_index, get_partial_value
@@ -17,8 +18,8 @@ import json
 from ua.models.EchoesResultsModel import EchoesResultsModel
 
 class optima():
-    def __init__(self, data, frequency, filename_waveform, wave_type):
-        self.data = data
+    def __init__(self, data, frequency, filename_waveform, wave_type, init = True):
+        
         self.filename_waveform = filename_waveform
         self.wave_type = wave_type
         self.freq = frequency
@@ -26,12 +27,25 @@ class optima():
         self.maxima = data['maxima']
         self.minima_t = data['minima_t']
         self.maxima_t = data['maxima_t']
+
         self.num_opt = {}
         self.all_optima = {}
+        self.center_opt = {}
         
-        self.init_optima()
+        if init:
+            self.init_optima()
 
-    
+    def package_for_saving(self):
+        package = {} 
+        package['num_opt'] = self.num_opt
+        package['all_optima'] = self.all_optima
+        package['center_opt'] = self.center_opt
+        return package
+
+    def restore_from_package(self, package):
+        self.num_opt = package['num_opt']
+        self.all_optima = package['all_optima']
+        self.center_opt = package['center_opt']
         
     def init_optima(self):
         self.center_opt={}
@@ -111,7 +125,10 @@ class ArrowPlotsModel():
         self.arrow_plot_models_p = {}
         self.arrow_plot_models_s = {}
         self.results_model = results_model
-
+        self.package_p = {}
+        self.package_s = {}
+        
+    
 
     def get_arrow_plot(self, cond, wave_type):
 
@@ -122,7 +139,8 @@ class ArrowPlotsModel():
         if cond in arrow_plot_models:
             arrow_plot = arrow_plot_models[cond]
         else:
-            arrow_plot = arrow_plot_models[cond] = ArrowPlot()
+            arrow_plot = arrow_plot_models[cond] = ArrowPlot(self.results_model)
+            arrow_plot.condition = cond
 
         return arrow_plot
 
@@ -173,16 +191,40 @@ class ArrowPlotsModel():
             
 
 class ArrowPlot():
-    def __init__(self):
+    def __init__(self,results_model: EchoesResultsModel):
+
+        self.results_model = results_model
+        self.condition = ''
 
         self.optima = {}
         self.line_plots = {}
-        self.out = {}
+        self.result = {}
+
+        self.package = {}
 
     def clear(self):
-        self.__init__()
+        self.__init__(self.results_model)
 
-    
+    def package_optima(self):
+        package = {}
+        _optima = {}
+        for opt in self.optima:
+            _optima [opt ]= self.optima[opt].package_for_saving()
+
+        package['condition'] = self.condition
+        package['optima']=_optima
+        package['line_plots']=self.line_plots
+        package['result']=self.result
+        return package
+
+    def restore_optima(self, package):
+        self.condition = package['condition']
+        _optima= package['optima']
+        self.line_plots = package['line_plots']
+        self.result = package['result']
+        for opt in _optima:
+            self.optima[opt].restore_from_package(_optima[opt])
+
             
     def add_freq(self, data):
         freq = data['frequency']
@@ -198,18 +240,26 @@ class ArrowPlot():
             data_pt = self.optima[freq]
             stored_filename_waveform = data_pt.filename_waveform
             stored_wave_type = data_pt.wave_type
-            stored_correlation_optima = data_pt.data
-            same = stored_filename_waveform== filename_waveform and stored_wave_type ==wave_type and stored_correlation_optima==correlation_optima
+            
+            
+            same = stored_filename_waveform == filename_waveform and \
+                           stored_wave_type == wave_type and \
+                           self.compare_optima(correlation_optima, data_pt)
             if not same:
                 data_pt = optima(correlation_optima, freq, filename_waveform, wave_type)
                 self.optima[freq]=data_pt
 
+    def compare_optima(self, opt1, opt2):
+        '''comparison between a dict and an 'optima' object based on stored values
+        used in order to decide if to create a new object or reuse existing'''
+        equal = opt1['minima'] ==   opt2.minima and \
+                opt1['maxima'] ==   opt2.maxima and \
+                opt1['minima_t'] == opt2.minima_t and \
+                opt1['maxima_t'] == opt2.maxima_t 
+        return equal
 
     def delete_optima(self, cond, freq):
-
         del self.optima[freq]
-
-
 
     def get_other_data_points(self, opt):
         optima = self.optima
@@ -303,11 +353,16 @@ class ArrowPlot():
             self.line_plots[opt] = (np.asarray(X),np.asarray(Y))
             
             s = np.std(np.asarray(fits))
-            out = 'Time delay = ' + \
-                str(round(sum(np.asarray(fits))/len(fits)*1e6,5)) + \
-                    ' microseconds, st.dev. = ' + \
-                        str(round(s*1e6,5)) +' microseconds'
-            self.out[opt] = out
+
+            time_delay = round(sum(np.asarray(fits))/len(fits)*1e6,5)
+            time_delay_std = round(s*1e6,5)
+
+            result = {'time_delay':time_delay, 'time_delay_std':time_delay_std}
+
+            
+            self.result[opt] = result
+
+            self.package[opt] = self.package_optima()
         else:
             self.error_not_enough_datapoints()
 

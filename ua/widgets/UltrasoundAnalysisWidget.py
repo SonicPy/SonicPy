@@ -49,7 +49,7 @@ class UltrasoundAnalysisWidget(QWidget):
                         'rois_color': '#FF6977', \
                         })
         self._CH1_plot = self.plot_win.plotForeground
-        self._plot_selected = self.plot_win.plotRoi
+        self.plot_demodulated = self.plot_win.plotRoi
 
 
         self.main_plot = self.plot_win.plotForeground
@@ -126,6 +126,11 @@ class UltrasoundAnalysisWidget(QWidget):
         self.t, self.spectrum, self.fname = t, spectrum, fname
         if t is not None and spectrum is not None:
             self.main_plot.setData(self.t, self.spectrum)
+
+    def update_demodulated(self, t, spectrum):
+        
+        if t is not None and spectrum is not None:
+            self.plot_demodulated.setData(t, spectrum)
 
     def updatePlot1(self):
         self.lr1_pr = self.lr1_p.getRegion()

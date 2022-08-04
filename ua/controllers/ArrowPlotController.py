@@ -87,18 +87,19 @@ class ArrowPlotController(QObject):
         if arrow_plot != None:
             freqs = np.asarray(list(arrow_plot.optima.keys()))
             freq = 1/args[0]
-            if freq <= np.amin(freqs): 
-                part_ind = 0
-            elif freq >= np.amax(freqs):
-                part_ind = len(freqs)-1
-            else:
-                part_ind = get_partial_index(freqs, freq)
-            ind = int(round(part_ind))
-            if ind < len(freqs):
-                freq_out = freqs[ind]
-                optima = arrow_plot.optima[freq_out]
-                fname = optima.filename_waveform
-                self.arrow_plot_freq_cursor_changed_signal.emit({'frequency':freq_out, 'filename_waveform':fname})
+            if len(freqs):
+                if freq <= np.amin(freqs): 
+                    part_ind = 0
+                elif freq >= np.amax(freqs):
+                    part_ind = len(freqs)-1
+                else:
+                    part_ind = get_partial_index(freqs, freq)
+                ind = int(round(part_ind))
+                if ind < len(freqs):
+                    freq_out = freqs[ind]
+                    optima = arrow_plot.optima[freq_out]
+                    fname = optima.filename_waveform
+                    self.arrow_plot_freq_cursor_changed_signal.emit({'frequency':freq_out, 'filename_waveform':fname})
 
     def calc_callback(self):
         self.calculate_data()

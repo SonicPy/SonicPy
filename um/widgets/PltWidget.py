@@ -10,7 +10,9 @@ from um.widgets.ExLegendItem import LegendItem
 from um.widgets.PhasePlot import PhasePlot
 import pyqtgraph.exporters
 import unicodedata
-from numpy import argmax, nan, greater,less, append, sort, array
+from numpy import argmax, nan, greater,less, append, sort, array, isnan
+
+
 from PyQt5 import QtWidgets
 import copy
 from functools import partial
@@ -35,12 +37,15 @@ class SimpleDisplayWidget(QtWidgets.QWidget):
         self.cursor_fast_lbl.setFixedWidth(70)
         self.cursor_lbl  = QLabel()
         self.cursor_lbl.setFixedWidth(70)
+        self.cursor_diff_lbl  = QLabel()
+        self.cursor_diff_lbl.setFixedWidth(70)
         self.cursor_widget = QWidget()
         self._cursor_widget_layout = QtWidgets.QHBoxLayout()
         self._cursor_widget_layout.setContentsMargins(0,0,0,0)
         self._cursor_widget_layout.addSpacerItem(HorizontalSpacerItem())
         self._cursor_widget_layout.addWidget(self.cursor_fast_lbl)
         self._cursor_widget_layout.addWidget(self.cursor_lbl)
+        self._cursor_widget_layout.addWidget(self.cursor_diff_lbl)
         self._cursor_widget_layout.addSpacerItem(HorizontalSpacerItem())
         self.cursor_widget.setLayout(self._cursor_widget_layout)
         self._layout.addWidget(self.cursor_widget)
@@ -75,20 +80,33 @@ class SimpleDisplayWidget(QtWidgets.QWidget):
         self.cursor_fast_lbl.setText(c)
         self.fig.set_fast_cursor(pos)
         self.fast_cursor_changed_singal.emit(pos)
+        self.update_diff()
 
     def update_cursor(self, pos):
         c = "<span style='color: #00CC00'>%0.3e</span>"  % (pos)
-        #print(c)
+        
         self.cursor_lbl.setText(c)
         self.cursor_pos = pos
         self.fig.set_cursor(pos)
         self.cursor_changed_singal.emit(pos)
+        self.update_diff()
+    
+    
 
     def update_cursor_y(self, pos):
         '''c = "<span style='color: #00CC00'>%0.3e</span>"  % (pos)
         self.cursor_lbl.setText(c)
         self.fig.set_cursor(pos)'''
         self.cursor_y_signal.emit(pos)
+        
+
+    def update_diff(self):
+        diff = self. fig.win.diff
+        if not isnan(diff ):
+            d =  "<span style='color: #CCCC00'>%0.3e</span>"  % (diff)
+        else:
+            d = ''
+        self.cursor_diff_lbl.setText(d)
 
     def setText(self, text, plot_ind):
         self.fig.set_plot_label(text,plot_ind)
@@ -287,6 +305,7 @@ class PltWidget(pg.PlotWidget):
         
        
         self.cursorPoints = [nan,nan]
+        self.diff = nan
         # defined default colors
         self.colors = { 'plot_background_color': '#000000',\
                         'data_color': '#FFFF00',\
@@ -347,13 +366,25 @@ class PltWidget(pg.PlotWidget):
         self.vLineFast.blockSignals(True)
         self.vLineFast.setPos(pos)
         self.cursorPoints[1] = pos
+        self.update_diff()
         self.vLineFast.blockSignals(False)
 
     def set_cursor_pos(self, pos):
         self.vLine.blockSignals(True)
         self.vLine.setPos(pos)
         self.cursorPoints[0] = pos
+        self.update_diff()
         self.vLine.blockSignals(False)
+
+    def update_diff(self):
+        fast_cursor_pos = self.cursorPoints[1]
+        cursor_pos = self.cursorPoints[0]
+        if not isnan(fast_cursor_pos)  and not isnan(cursor_pos):
+            self.diff = fast_cursor_pos - cursor_pos
+        else:
+            self.diff = nan
+            
+            
 
     def get_cursor_pos(self):
         return self.cursorPoints[0]

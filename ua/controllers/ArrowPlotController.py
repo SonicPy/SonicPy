@@ -32,7 +32,7 @@ class ArrowPlotController(QObject):
 
     arrow_plot_freq_cursor_changed_signal = pyqtSignal(dict)
     arrow_plot_del_clicked_signal = pyqtSignal(dict)
-    arrow_plot_clear_clicked_signal = pyqtSignal(dict)
+    arrow_plot_clear_clicked_signal = pyqtSignal(dict) # contains list of del type dicts
 
     def __init__(self, app = None, results_model= EchoesResultsModel()):
         super().__init__()
@@ -76,6 +76,7 @@ class ArrowPlotController(QObject):
         self.update_plot()
 
     def condition_cleared(self, clear_info):
+
         wave_type = clear_info['wave_type']
         condition = clear_info['condition']
         self.model.clear_condition(condition, wave_type)
@@ -130,10 +131,19 @@ class ArrowPlotController(QObject):
             #self.calculate_data()
 
     def clear_data(self):
-        cond = self.cond
+
+        arrow_plot = self.model.get_arrow_plot(self.cond, self.wave_type)
+      
         wave_type = self.wave_type
 
-        self.arrow_plot_clear_clicked_signal.emit({'condition':cond, 'wave_type': wave_type})
+        clear_info = []
+
+        for freq in arrow_plot.optima:
+            fname = arrow_plot.optima[freq].filename_waveform
+            wave_type = arrow_plot.optima[freq].wave_type
+            clear_info.append({'frequency':freq, 'filename_waveform':fname, 'wave_type': wave_type, 'condition':self.cond})
+
+        self.arrow_plot_clear_clicked_signal.emit({'condition':self.cond,'wave_type':wave_type, 'clear_info':clear_info})
 
     def save_result(self):
         pass

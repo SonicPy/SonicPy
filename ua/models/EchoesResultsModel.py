@@ -86,6 +86,17 @@ class EchoesResultsModel():
 
         return deleted
 
+    def delete_echoes(self, clear_info):
+        cleared = True
+        for cl in clear_info:
+            wave_type = cl['wave_type']
+            frequency = cl['frequency']
+            fname = cl['filename_waveform']
+
+            cleared = self.delete_echo(fname, frequency, wave_type)
+
+        return cleared
+
     def clear(self):
         self.__init__()
 
@@ -140,17 +151,7 @@ class EchoesResultsModel():
             except:
                 print('could not save file: '+ filename)
 
-    def clear_by_condition(self, cond, wave_type):
-        cleared = False
-        dir_path = os.path.join(self.folder, cond, wave_type)
-        exists = os.path.exists(dir_path)
-        if exists:
-            try:
-                shutil.rmtree(dir_path)
-                cleared = True
-            except OSError as e:
-                print("Error: %s : %s" % (dir_path, e.strerror))
-        return cleared
+    
 
     def load_result_from_file(self ):
 

@@ -117,6 +117,7 @@ class ArrowPlotWidget(QWidget):
         _buttons_layout_top.addWidget(self.N_cbx)
         _buttons_layout_top.addWidget(self.calc_btn)
         _buttons_layout_top.addWidget(self.auto_btn)
+        _buttons_layout_top.addSpacerItem(HorizontalSpacerItem())
         _buttons_layout_top.addWidget(self.del_btn)
         _buttons_layout_top.addWidget(self.clear_btn)
         

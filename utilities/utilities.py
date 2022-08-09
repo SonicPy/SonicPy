@@ -170,7 +170,7 @@ def demodulate(x,y, freq=None, carrier_known=False):
     
     analytic_signal = hilbert(y)
     amplitude_envelope = np.abs(analytic_signal)
-    instantaneous_phase = np.unwrap(np.angle(analytic_signal))
+    '''instantaneous_phase = np.unwrap(np.angle(analytic_signal))
     
     if freq == None:
         instantaneous_frequency = None
@@ -187,8 +187,8 @@ def demodulate(x,y, freq=None, carrier_known=False):
         p = np.poly1d(np.polyfit(t,instantaneous_phase,1)) #linearly fit the instaneous phase
         estimated = p(t) #re-evaluate the offset term using the fitted values
         offsetTerm = estimated             
-    phase_shift = instantaneous_phase - offsetTerm 
-    return amplitude_envelope, phase_shift, instantaneous_frequency
+    phase_shift = instantaneous_phase - offsetTerm '''
+    return amplitude_envelope #, phase_shift, instantaneous_frequency
 
 def fft_sig(X, Y):
     # Number of samplepoints

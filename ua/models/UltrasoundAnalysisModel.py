@@ -30,6 +30,7 @@ class UltrasoundAnalysisModel():
         self.envelope = None
         self.t = None
         self.spectrum = None
+        self.demodulated = None
         self.plot1_bg=([],[])
         self.plot2_bg=([],[])
         self.c_diff_optimized = 0

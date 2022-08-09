@@ -117,17 +117,30 @@ class OverViewModel():
     def del_echoes(self, condition, wave_type, freq):
         str_ind_freq = f'{self.freq_val_to_ind(freq):03d}' 
         fname = self.spectra[condition][str_ind_freq]['filename']
-        '''if wave_type == 'P':
-            del self.echoes_p[fname] 
-            
-
-        elif wave_type == 'S':
-            del self.echoes_s[fname] '''
+  
 
         waterfall = self.waterfalls[str_ind_freq]
         waterfall.del_echoe(fname, wave_type)
         waterfall = self.waterfalls[condition]
         waterfall.del_echoe(fname, wave_type)
+
+    def clear_condition(self, condition, wave_type):
+
+        #self.fps_cond = {}
+        freqs = list(self.fps_Hz.keys())
+        for str_ind_freq in freqs:
+            
+       
+            if str_ind_freq in self.waterfalls:
+                waterfall = self.waterfalls[str_ind_freq]
+                fname = self.spectra[condition][str_ind_freq]['filename']
+                waterfall.del_echoe(fname, wave_type)
+                
+        if condition in self.waterfalls:
+            waterfall = self.waterfalls[condition]
+            waterfall.clear_echoes(wave_type)
+
+
 
     def freq_val_to_ind(self, freq):
         ind = None

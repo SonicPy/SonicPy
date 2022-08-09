@@ -149,6 +149,9 @@ class UltrasoundAnalysisController(QObject):
         
         t = self.model.t
         spectrum = self.model.spectrum
+
+        
+
         if t is not None and spectrum is not None:
                 
             min_roi = abs(t[1]-t[0])*10
@@ -170,6 +173,8 @@ class UltrasoundAnalysisController(QObject):
 
                 self.model.cross_correlate()
                 self.model.exract_optima()
+
+                
                
 
                 self.display_window.detail_plot0.setData(*self.model.echo_tk1)
@@ -247,8 +252,13 @@ class UltrasoundAnalysisController(QObject):
     def _update_spectrum(self, t, spectrum, fname):
         
         if len(spectrum):
+
             self.model.t, self.model.spectrum, self.fname = t, spectrum, fname
+            #freq = self.display_window.freq_ebx.value()
+            #amplitude_envelope  =  demodulate(t, spectrum, freq, True)
+            #self.model.demodulated = amplitude_envelope
             self.display_window.update_view(self.model.t, self.model.spectrum, self.fname)
+            #self.display_window.update_demodulated(t, self.model.demodulated)
             
 
             path = os.path.normpath(self.fname)

@@ -32,7 +32,7 @@ class ArrowPlotController(QObject):
 
     arrow_plot_freq_cursor_changed_signal = pyqtSignal(dict)
     arrow_plot_del_clicked_signal = pyqtSignal(dict)
-    arrow_plot_clear_clicked_signal = pyqtSignal(dict)
+    arrow_plot_clear_clicked_signal = pyqtSignal(dict) # contains list of del type dicts
 
     def __init__(self, app = None, results_model= EchoesResultsModel()):
         super().__init__()
@@ -76,9 +76,9 @@ class ArrowPlotController(QObject):
         self.update_plot()
 
     def condition_cleared(self, clear_info):
-        wave_type = clear_info['wave_type']
-        condition = clear_info['condition']
-        self.model.clear_condition(condition, wave_type)
+
+        
+        self.model.clear_condition(clear_info)
         self.update_plot()
 
     def cursor_changed_singal_callback(self, *args):
@@ -87,17 +87,19 @@ class ArrowPlotController(QObject):
         if arrow_plot != None:
             freqs = np.asarray(list(arrow_plot.optima.keys()))
             freq = 1/args[0]
-            if freq <= np.amin(freqs): 
-                part_ind = 0
-            elif freq >= np.amax(freqs):
-                part_ind = len(freqs)-1
-            else:
-                part_ind = get_partial_index(freqs, freq)
-            ind = int(round(part_ind))
-            freq_out = freqs[ind]
-            optima = arrow_plot.optima[freq_out]
-            fname = optima.filename_waveform
-            self.arrow_plot_freq_cursor_changed_signal.emit({'frequency':freq_out, 'filename_waveform':fname})
+            if len(freqs):
+                if freq <= np.amin(freqs): 
+                    part_ind = 0
+                elif freq >= np.amax(freqs):
+                    part_ind = len(freqs)-1
+                else:
+                    part_ind = get_partial_index(freqs, freq)
+                ind = int(round(part_ind))
+                if ind < len(freqs):
+                    freq_out = freqs[ind]
+                    optima = arrow_plot.optima[freq_out]
+                    fname = optima.filename_waveform
+                    self.arrow_plot_freq_cursor_changed_signal.emit({'frequency':freq_out, 'filename_waveform':fname})
 
     def calc_callback(self):
         self.calculate_data()
@@ -128,10 +130,19 @@ class ArrowPlotController(QObject):
             #self.calculate_data()
 
     def clear_data(self):
-        cond = self.cond
+
+        arrow_plot = self.model.get_arrow_plot(self.cond, self.wave_type)
+      
         wave_type = self.wave_type
 
-        self.arrow_plot_clear_clicked_signal.emit({'condition':cond, 'wave_type': wave_type})
+        clear_info = []
+
+        for freq in arrow_plot.optima:
+            fname = arrow_plot.optima[freq].filename_waveform
+            wave_type = arrow_plot.optima[freq].wave_type
+            clear_info.append({'frequency':freq, 'filename_waveform':fname, 'wave_type': wave_type, 'condition':self.cond})
+
+        self.arrow_plot_clear_clicked_signal.emit({'condition':self.cond,'wave_type':wave_type, 'clear_info':clear_info})
 
     def save_result(self):
         pass
@@ -159,6 +170,7 @@ class ArrowPlotController(QObject):
 
     def update_plot(self):
         arrow_plot = self.model.get_arrow_plot(self.cond, self.wave_type)
+        
         if arrow_plot != None:
             opt = self.get_opt()
             xMax, yMax = arrow_plot.get_opt_data_points(opt)
@@ -172,10 +184,18 @@ class ArrowPlotController(QObject):
 
             if opt in arrow_plot.line_plots:
                 self.arrow_plot_window.update_max_line(*arrow_plot.line_plots[opt])
-                self.arrow_plot_window.output_ebx.setText(arrow_plot.out[opt])
+                
+                result = arrow_plot.result[opt]
+                out_str = 'Time delay = ' + \
+                            str(result['time_delay']) + \
+                                ' microseconds, st.dev. = ' + \
+                                    str(result['time_delay_std']) +' microseconds'
+                self.arrow_plot_window.output_ebx.setText(out_str)
             else:
                 self.arrow_plot_window.update_max_line([],[])
                 self.arrow_plot_window.output_ebx.setText('')
+            
+          
             
 
     def error_not_enough_datapoints(self):
@@ -187,6 +207,9 @@ class ArrowPlotController(QObject):
         if arrow_plot != None:
             opt = self.get_opt()
             arrow_plot.calculate_lines(opt)
+            package = arrow_plot.package
+            
+
 
     '''def load_file(self, filename):
         t, spectrum = read_tek_csv(filename, subsample=4)

@@ -144,18 +144,8 @@ class ArrowPlotsModel():
 
         return arrow_plot
 
-    def clear_condition(self, condition, wave_type):
-        arrow_plot = self.get_arrow_plot(condition, wave_type)
-
-        del arrow_plot
     
     
-    '''def add_result_from_file(self, condition, wave_type, filename):
-        arrow_plot = self.get_arrow_plot(condition, wave_type)
-        
-
-        data = read_result_file(filename)
-        arrow_plot.add_freq(data)'''
 
     def refresh_all_freqs(self, condition,wave_type):
         arrow_plot = self.get_arrow_plot(condition, wave_type)
@@ -181,13 +171,16 @@ class ArrowPlotsModel():
         if freq in arrow_plot.optima:
             del arrow_plot.optima[freq]
 
-    '''def save_result(self, filename):
-        # not implemented yet
-        data = {}
-        
-        if filename.endswith('.json'):
-            with open(filename, 'w') as json_file:
-                json.dump(data, json_file,indent = 2)    '''
+    def clear_condition(self, clear_info):
+
+        wave_type = clear_info['wave_type']
+        condition = clear_info['condition']
+
+        arrow_plot = self.get_arrow_plot(condition, wave_type)
+
+        freqs = list(arrow_plot.optima.keys())
+        for freq in  freqs:
+            del arrow_plot.optima[freq]
             
 
 class ArrowPlot():

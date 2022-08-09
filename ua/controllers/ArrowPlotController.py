@@ -77,9 +77,8 @@ class ArrowPlotController(QObject):
 
     def condition_cleared(self, clear_info):
 
-        wave_type = clear_info['wave_type']
-        condition = clear_info['condition']
-        self.model.clear_condition(condition, wave_type)
+        
+        self.model.clear_condition(clear_info)
         self.update_plot()
 
     def cursor_changed_singal_callback(self, *args):

@@ -92,7 +92,8 @@ class g_wavelet_controller(arb_function):
         panel_items =[
                       't_max',
                       'center_f',
-                      'sigma']
+                      'sigma',
+                      'opt']
         title = "Gaussian wavelet"
         arb_name = 'g_wavelet'
         arb_desc=title
@@ -134,7 +135,7 @@ class g_wavelet_controller(arb_function):
                                 {'symbol':u'opt',
                                     'desc':u"",
                                     'unit':u'MHz',
-                                    'val':0,
+                                    'val':1,
                                     'val_scale': 1e6,
                                     'hidden':True,
                                 'increment':0.5,'min':0,'max':1000 ,

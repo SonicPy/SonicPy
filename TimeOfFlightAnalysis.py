@@ -7,6 +7,8 @@
 
 # TODO save echoes per frequency in file dict
 
+# TODO cycle through all frequencies automatically
+
 
 from ua import TOF
 

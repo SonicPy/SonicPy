@@ -33,7 +33,7 @@ def main():
     app = QtWidgets.QApplication([])
     app.aboutToQuit.connect(app.deleteLater)
     
-    controller = UltrasoundAnalysisController(app = app, offline= True)
+    controller = UltrasoundAnalysisController(app = app)
     controller.display_window.show()
   
     

@@ -19,7 +19,6 @@ from utilities.utilities import zero_phase_bandpass_filter
 import json
 from utilities.CARSMath import fit_gaussian, polyfitw
 
-from .. models.SelectedEchoesModel import SelectedEchoesModel
 from ua.models.EchoesResultsModel import EchoesResultsModel
 
 class UltrasoundAnalysisModel():

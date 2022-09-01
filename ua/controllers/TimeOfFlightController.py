@@ -43,14 +43,14 @@ class TimeOfFlightController(QObject):
         self.echoes_results_model = EchoesResultsModel()
         self.overview_controller = OverViewController(self.app, self.echoes_results_model)
         overview_widget = self.overview_controller.widget
-        self.multiple_frequencies_controller = MultipleFrequencyController(self.app, self.echoes_results_model)
-        multiple_frequencies_widget = self.multiple_frequencies_controller.widget
+        
         self.correlation_controller = UltrasoundAnalysisController(self.app, self.echoes_results_model)
         analysis_widget = self.correlation_controller.display_window
 
         self.arrow_plot_controller = ArrowPlotController(self.app, self.echoes_results_model)
         arrow_plot_widget = self.arrow_plot_controller.arrow_plot_window
-
+        self.multiple_frequencies_controller = MultipleFrequencyController(self.overview_controller, self.correlation_controller, self.arrow_plot_controller, self.app, self.echoes_results_model)
+        multiple_frequencies_widget = self.multiple_frequencies_controller.widget
         self.widget = TimeOfFlightWidget(app, overview_widget, multiple_frequencies_widget, analysis_widget, arrow_plot_widget)
         self.widget.setWindowTitle("Time-of-flight analysis. ver." + __version__ + "  © R. Hrubiak, 2022.")
         
@@ -84,7 +84,9 @@ class TimeOfFlightController(QObject):
 
     def file_selected_signal_callback(self, data):
 
-        fname = data['fname']
+        self.multiple_frequencies_controller.file_selected(data)
+
+        '''fname = data['fname']
         fbase = data['freq']
         cond = data['cond']
 
@@ -130,7 +132,7 @@ class TimeOfFlightController(QObject):
         self.arrow_plot_controller.set_wave_type(echo_type)
         self.arrow_plot_controller.set_condition( cond) 
         self.arrow_plot_controller.refresh_model()
-        self.arrow_plot_controller.set_frequency_cursor(freq)
+        self.arrow_plot_controller.set_frequency_cursor(freq)'''
 
     
     def folder_selected_signal_callback(self, folder):

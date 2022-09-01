@@ -31,8 +31,9 @@ class TimeOfFlightWidget(QMainWindow):
 
         self.middle_widget = QtWidgets.QWidget()
         self._middle_widget_layout = QtWidgets.QVBoxLayout()
-        self._middle_widget_layout.addWidget(self.multiple_frequencies_widget)
         self._middle_widget_layout.addWidget(self.analysis_widget)
+        self._middle_widget_layout.addWidget(self.multiple_frequencies_widget)
+        
         self.middle_widget.setLayout(self._middle_widget_layout)
 
         self.arrow_plot_widget = arrow_plot_widget

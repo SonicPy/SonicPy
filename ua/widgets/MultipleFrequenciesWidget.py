@@ -19,7 +19,12 @@ class MultipleFrequenciesWidget(QtWidgets.QWidget):
         self.lbl = QtWidgets.QLabel('MultipleFrequenciesWidget')
 
         self._layout.addWidget(self.lbl)
-        
+
+        condition_lbl = QtWidgets.QLabel('Selected condition:')
+        self.condition_val = QtWidgets.QLabel()
+        self._layout.addWidget(condition_lbl)
+        self._layout.addWidget(self.condition_val)
+
         self.mode_tab_widget= QtWidgets.QTabWidget(self)
         self.mode_tab_widget.setObjectName("mode_tab_widget")
         
@@ -29,6 +34,7 @@ class MultipleFrequenciesWidget(QtWidgets.QWidget):
         self._frequency_sweep_widget_layout.setContentsMargins(0,0,0,0)
         self.frequency_sweep_widget_lbl = QtWidgets.QLabel('Frequency Sweep')
         self._frequency_sweep_widget_layout.addWidget(self.frequency_sweep_widget_lbl)
+        
 
         self.broadband_pulse_widget = QtWidgets.QWidget(self.mode_tab_widget)
         self._broadband_pulse_widget_layout = QtWidgets.QVBoxLayout(self.broadband_pulse_widget)

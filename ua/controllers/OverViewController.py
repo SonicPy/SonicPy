@@ -169,7 +169,8 @@ class OverViewController(QObject):
             
             self.select_fname(fname)
 
-    def select_fname(self, fname):
+    def get_data_by_filename(self, fname):
+        data = {}
         if fname in self.model.file_dict:
             temp_fname = copy.copy(self.selected_fname)
             self.selected_fname = fname
@@ -181,7 +182,7 @@ class OverViewController(QObject):
             ind  = conds.index(cond)
             self.set_condition(ind)
             
-            data = {}
+            
             
             data['fname'] = self.selected_fname
             data['cond'] = cond
@@ -206,8 +207,12 @@ class OverViewController(QObject):
             
             data['t'] = selected[0]
             data['spectrum'] = selected[1]
-            
-            self.file_selected_signal.emit(data)
+
+        return data
+
+    def select_fname(self, fname):
+        data = self.get_data_by_filename(fname)
+        self.file_selected_signal.emit(data)
                 
 
     def single_condition_cursor_y_signal_callback(self, y_pos):

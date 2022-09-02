@@ -9,6 +9,8 @@ class MultipleFrequenciesModel():
         self.results_model = results_model
         self.cond = None
         self.files = {}
+        self.fbase = None
+        self.fname = ""
 
     def set_condition(self, cond):
         self.cond = cond
@@ -16,6 +18,10 @@ class MultipleFrequenciesModel():
     def set_files(self, files):
         self.files = files
 
+    def set_fbase(self, fbase):
+        self.fbase = fbase
     
+    def set_fname(self, fname):
+        self.fname = fname
 
 

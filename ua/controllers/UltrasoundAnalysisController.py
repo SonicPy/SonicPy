@@ -56,14 +56,25 @@ class UltrasoundAnalysisController(QObject):
         '''filename='resources/ultrasonic/4000psi-300K_+21MHz000.csv'
         self.update_data(filename=filename)'''
 
-    def make_connections(self): 
-        self.display_window.open_btn.clicked.connect(self.update_data)
-        self.display_window.freq_ebx.valueChanged.connect(self.calculate_data)
+    def connect_regions(self):
         self.display_window.lr1_p.sigRegionChangeFinished.connect(self.calculate_data)
         self.display_window.lr2_p.sigRegionChangeFinished.connect(self.calculate_data)
 
         self.display_window.lr1_s.sigRegionChangeFinished.connect(self.calculate_data)
         self.display_window.lr2_s.sigRegionChangeFinished.connect(self.calculate_data)
+    
+    def disconnect_regions(self):
+        self.display_window.lr1_p.sigRegionChangeFinished.disconnect(self.calculate_data)
+        self.display_window.lr2_p.sigRegionChangeFinished.disconnect(self.calculate_data)
+
+        self.display_window.lr1_s.sigRegionChangeFinished.disconnect(self.calculate_data)
+        self.display_window.lr2_s.sigRegionChangeFinished.disconnect(self.calculate_data)
+
+    def make_connections(self): 
+        self.display_window.open_btn.clicked.connect(self.update_data)
+        self.display_window.freq_ebx.valueChanged.connect(self.calculate_data)
+
+        self.connect_regions()
 
         self.display_window.N_cbx.stateChanged.connect(self.calculate_data)
 
@@ -142,72 +153,59 @@ class UltrasoundAnalysisController(QObject):
             echo = self.display_window.echo_bounds_s[index]
             echo.setRegion([center-pad, center+pad])
         
+    def calculate_data_silent(self, freq, bounds):
+
+        before = time.time()
+
+        [l1, r1] = bounds [0]
+        [l2, r2] = bounds [1]
+
+        self.model.filter_echoes(l1, r1, l2, r2, freq)
+
+        self.model.cross_correlate()
+        self.model.exract_optima()
+            
+        after = time.time()
+        elapsed = after - before
+        print ("calculation took: " + str(elapsed) + " s")
+
+    def get_lr_bounds(self):
+        wave_type = self.model.wave_type
+        if wave_type == 'P':
+            [l1, r1] = self.display_window.get_echo_bounds_p(0)
+            [l2, r2] = self.display_window.get_echo_bounds_p(1)
+        elif wave_type == 'S':
+            [l1, r1] = self.display_window.get_echo_bounds_s(0)
+            [l2, r2] = self.display_window.get_echo_bounds_s(1)
+        
+        bounds = [[l1, r1],[l2, r2]]
+
+        return bounds
+
+    def get_freq(self):
+        freq = self.display_window.freq_ebx.value()*1e6
+        return freq
 
     def calculate_data(self):
-
-        freq = self.display_window.freq_ebx.value()*1e6
-        
+    
+        freq = self.get_freq()
         t = self.model.t
         spectrum = self.model.spectrum
-
-        
+        bounds = self.get_lr_bounds()
+        [l1, r1] = bounds [0]
+        [l2, r2] = bounds [1]
 
         if t is not None and spectrum is not None:
-                
             min_roi = abs(t[1]-t[0])*10
-
-            wave_type = self.model.wave_type
-            if wave_type == 'P':
-                [l1, r1] = self.display_window.get_echo_bounds_p(0)
-                [l2, r2] = self.display_window.get_echo_bounds_p(1)
-            elif wave_type == 'S':
-                [l1, r1] = self.display_window.get_echo_bounds_s(0)
-                [l2, r2] = self.display_window.get_echo_bounds_s(1)
-            
             if l1 >  0 and l2 >0 and abs(l1-r1) > min_roi and abs(l2-r2) > min_roi:
-
-                
-                
-                start_time = time.time()
-                self.model.filter_echoes(l1, r1, l2, r2, freq)
-
-                self.model.cross_correlate()
-                self.model.exract_optima()
-
-                
-               
-
+                self.calculate_data_silent(freq, bounds)
                 self.display_window.detail_plot0.setData(*self.model.echo_tk1)
                 self.display_window.detail_plot0_bg.setData(*self.model.echo_tk2)
-                
                 self.display_window.detail_plot1.setData(*self.model.filtered1)
                 self.display_window.detail_plot1_bg.setData(*self.model.filtered2)
-                
                 self.display_window.detail_plot2.setData(self.model.cross_corr_shift, self.model.cross_corr)
-
-            
-                
                 out = [np.append(self.model.maxima[0] ,self.model.minima[0]) , np.append(self.model.maxima[1] ,self.model.minima[1])]
-                
                 self.display_window.detail_plot2_bg.setData(*out)
-                #self.display_window.output_ebx.setText('%.5e' % (self.model.c_diff_optimized))
-            
-
-    '''def snap_cursors_to_optimum(self, c1, c2, t, spectrum):
-        cor_range = 50
-        pilo1 = int(get_partial_index(t,c1))-int(cor_range/2)
-        pihi1 = int(get_partial_index(t,c1))+int(cor_range/2)
-        pilo2 = int(get_partial_index(t,c2))-int(cor_range/2)
-        pihi2 = int(get_partial_index(t,c2))+int(cor_range/2)
-        slice1 = np.asarray(spectrum)[pilo1:pihi1]
-        #pg.plot(np.asarray(slice1), title="slice1")
-        t1 = np.asarray(t)[pilo1:pihi1]
-        slice2 = np.asarray(spectrum)[pilo2:pihi2]
-        #pg.plot(np.asarray(slice1), title="slice1")
-        t2 = np.asarray(t)[pilo2:pihi2]
-        (optima_x_1, optima_y_1), optima_type_1 = get_local_optimum (c1, t1, slice1)
-        (optima_x_2, optima_y_2), optima_type_2 = get_local_optimum (c2, t2, slice2)
-        return optima_x_1, optima_x_2, optima_y_1, optima_y_2'''
 
     def cursorsCallback(self):
         pass
@@ -222,8 +220,6 @@ class UltrasoundAnalysisController(QObject):
  
     def preferences_module(self, *args, **kwargs):
         pass
-
-  
 
     def saveFile(self, filename, params = {}):
         pass
@@ -244,8 +240,14 @@ class UltrasoundAnalysisController(QObject):
 
             if len(spectrum):
                 self._update_spectrum (t, spectrum, fname)
+                self._update_view()
 
     def update_data_by_dict(self, data):
+        t, spectrum, fname = data['t'], data['spectrum'], data['fname']
+        self._update_spectrum(t, spectrum, fname)
+        self._update_view()
+
+    def update_data_by_dict_silent(self, data):
         t, spectrum, fname = data['t'], data['spectrum'], data['fname']
         self._update_spectrum(t, spectrum, fname)
         
@@ -254,19 +256,21 @@ class UltrasoundAnalysisController(QObject):
         if len(spectrum):
 
             self.model.t, self.model.spectrum, self.fname = t, spectrum, fname
-            #freq = self.display_window.freq_ebx.value()
-            #amplitude_envelope  =  demodulate(t, spectrum, freq, True)
-            #self.model.demodulated = amplitude_envelope
-            self.display_window.update_view(self.model.t, self.model.spectrum, self.fname)
-            #self.display_window.update_demodulated(t, self.model.demodulated)
             
 
-            path = os.path.normpath(self.fname)
-            fldr = path.split(os.sep)[-2]
-            file = path.split(os.sep)[-1]
-            name = os.path.join( fldr,file)
-            self.display_window.plot_widget.setText(name,0)
+    def _update_view(self):
+        #freq = self.display_window.freq_ebx.value()
+        #amplitude_envelope  =  demodulate(t, spectrum, freq, True)
+        #self.model.demodulated = amplitude_envelope
+        self.display_window.update_view(self.model.t, self.model.spectrum, self.fname)
+        #self.display_window.update_demodulated(t, self.model.demodulated)
+    
 
+        path = os.path.normpath(self.fname)
+        fldr = path.split(os.sep)[-2]
+        file = path.split(os.sep)[-1]
+        name = os.path.join( fldr,file)
+        self.display_window.plot_widget.setText(name,0)
 
     def cursor_dragged(self, cursor):
         pos = cursor.getYPos()

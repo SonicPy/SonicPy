@@ -34,7 +34,8 @@ class MultipleFrequenciesWidget(QtWidgets.QWidget):
         self._frequency_sweep_widget_layout.setContentsMargins(0,0,0,0)
         self.frequency_sweep_widget_lbl = QtWidgets.QLabel('Frequency Sweep')
         self._frequency_sweep_widget_layout.addWidget(self.frequency_sweep_widget_lbl)
-        
+        self.do_all_frequencies_btn = QtWidgets.QPushButton("Do all")
+        self._frequency_sweep_widget_layout.addWidget(self.do_all_frequencies_btn)
 
         self.broadband_pulse_widget = QtWidgets.QWidget(self.mode_tab_widget)
         self._broadband_pulse_widget_layout = QtWidgets.QVBoxLayout(self.broadband_pulse_widget)

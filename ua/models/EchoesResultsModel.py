@@ -40,18 +40,27 @@ class EchoesResultsModel():
         self.echoes_s = {}
 
 
-        self.sorted_correlations_p = {}
-        self.sorted_correlations_s = {}
+        '''self.sorted_correlations_p = {}
+        self.sorted_correlations_s = {}'''
 
     def add_echoe(self, correlation):
         
         wave_type = correlation['wave_type']
         if wave_type == "P":
-
-            self.echoes_p[correlation['filename_waveform']] = correlation
+            if correlation['filename_waveform'] in self.echoes_p:
+                correlations = self.echoes_p[correlation['filename_waveform']]
+            else:
+                correlations = []
+            correlations.append(correlation)
+            self.echoes_p[correlation['filename_waveform']] = correlations
         elif wave_type == "S":
 
-            self.echoes_s[correlation['filename_waveform']] = correlation
+            if correlation['filename_waveform'] in self.echoes_s:
+                correlations = self.echoes_s[correlation['filename_waveform']]
+            else:
+                correlations = []
+            correlations.append(correlation)
+            self.echoes_s[correlation['filename_waveform']] = correlations
 
     def delete_echo(self, filename_waveform, frequency, wave_type):
         deleted = False
@@ -113,12 +122,14 @@ class EchoesResultsModel():
             echoes = self.echoes_s
         if len(echoes):
             for fname in echoes:
-                echo = echoes[fname]
+                echo_f = echoes[fname]
+                for echo in echo_f:
+                    
                 
-                freq = echo['frequency']
-                folder = os.path.split(os.path.split(fname)[0])[-1]
-                if folder == condition:
-                    echoes_out.append(echo)
+                    freq = echo['frequency']
+                    folder = os.path.split(os.path.split(fname)[0])[-1]
+                    if folder == condition:
+                        echoes_out.append( echo)
         return echoes_out
  
  

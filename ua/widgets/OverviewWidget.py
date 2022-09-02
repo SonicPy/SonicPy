@@ -139,7 +139,7 @@ class OverViewWidget(QWidget):
     def make_widget(self):
         
         self._layout = QtWidgets.QVBoxLayout()
-        self._layout.setContentsMargins(10, 10, 10, 10)
+        self._layout.setContentsMargins(5, 5, 5, 5)
         
         self.buttons_widget_top = QtWidgets.QWidget()
         self._buttons_layout_top = QtWidgets.QHBoxLayout()

@@ -1,7 +1,7 @@
 
 from argparse import FileType
 import enum
-import os.path, sys
+import os.path, sys, shutil
 from utilities.utilities import *
 from utilities.HelperModule import move_window_relative_to_screen_center, get_partial_index, get_partial_value
 import numpy as np
@@ -69,6 +69,8 @@ class OverViewModel():
     def __init__(self, results_model: EchoesResultsModel):
         
         self.results_model = results_model
+
+        self.mode = 'discrete_f'
 
 
         self.spectra = {}
@@ -286,6 +288,7 @@ class OverViewModel():
         self.write_data_dict_to_json(settings_file,self.settings)
 
     def set_folder_path(self, folder):
+        
         exists = os.path.isdir(folder)
         if exists:
             self.fp = folder
@@ -302,6 +305,7 @@ class OverViewModel():
         conditions_folders_sorted = []
 
         if len(subfolders):
+            
             folder_norm = []
 
             for subfolder in subfolders:
@@ -309,12 +313,56 @@ class OverViewModel():
                 fldr = path.split(os.sep)[-1]
                 folder_norm.append(fldr)
             conditions_folders_sorted = natsorted(folder_norm)
+        else:
             
+            ext = self.get_extension(folder)
+            search_string = os.path.join(folder,'*'+ext)
+
+            files = glob.glob(search_string, recursive = False)
+            selected = self.select_files_by_extension(files, ext)
+
+            for file in selected:
+                self.copy_broadband_file_to_subfolder(file)
+
+            folder_norm = []
+
+            for subfolder in subfolders:
+                path = os.path.normpath(subfolder)
+                fldr = path.split(os.sep)[-1]
+                folder_norm.append(fldr)
+            conditions_folders_sorted = natsorted(folder_norm)
+
+        
         return conditions_folders_sorted
 
+    def copy_broadband_file_to_subfolder(self, file):
+        parts = os.path.split(file)
+        fname = parts[-1]
+        folder = parts[0]
+        new_dir = os.path.join(folder, fname + '_subfolder')
+        if not os.path.isdir(new_dir):
+            os.mkdir(new_dir)
+        shutil.move(file,  os.path.join(new_dir, fname))
+
+    def select_files_by_extension(self, files, ext):
+        selected = []
+        
+        for file in files:
+            fname = f_ext = os.path.split(file)[-1]
+            if '.' in fname:
+                f_ext = '.' + fname.split('.')[-1]
+
+            else:
+                f_ext = ''
+            
+            if f_ext == ext:
+                selected.append(file)
+
+        return selected
 
     def create_file_dicts(self):
 
+        mode = self.mode
 
         conditions_folders_sorted = self.conditions_folders_sorted
         self.fps_cond = {}
@@ -368,6 +416,8 @@ class OverViewModel():
     def get_frequencies_sorted(self):
         conditions_folders_sorted = self.conditions_folders_sorted
         folder = self.fp
+        mode = self.mode
+
         file_type = self.file_type
 
         condition_0 = conditions_folders_sorted[0]
@@ -410,33 +460,40 @@ class OverViewModel():
          
         return types
 
-    def get_extension(self ):
+    def get_extension(self, folder):
         '''
         get extension by searching the first folder and determining the most common file type: '.csv', '', etc..
         '''
-        folder = self.fp
-        condition_0 = self.conditions_folders_sorted[0]
-        first_folder = os.path.join(folder,condition_0)
-        types = self.get_file_types_in_folder(first_folder)
+        
+        types = self.get_file_types_in_folder(folder)
         extensions = []
         for t in types:
             extensions.append((t,types[t]))
         extensions = Sort_Tuple(extensions)
-        ext = extensions[0][0]
+        ext = extensions[-1][0]
         return ext
 
 
     def understand_folder_structure(self):
         
         folder = self.fp
+
+        mode = self.mode
+        
         self.conditions_folders_sorted = self.get_conditions_folders(folder)
 
-        self.file_type =  self.get_extension()
+
+        
+        condition_0 = self.conditions_folders_sorted[0]
+        first_folder = os.path.join(folder,condition_0)
+        
+        self.file_type =  self.get_extension(first_folder)
 
         self.frequencies_sorted = self.get_frequencies_sorted()
 
         if len(self.conditions_folders_sorted):
             self.create_file_dicts()
+        
     
     def condition_index(self,condition):
         return self.conditions_folders_sorted.index(condition)

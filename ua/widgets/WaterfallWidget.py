@@ -15,7 +15,7 @@ class WaterfallWidget(QtWidgets.QWidget):
         
         self._layout = QtWidgets.QVBoxLayout()
         self._layout.setSpacing(0)
-        self._layout.setContentsMargins(8, 0, 8, 0)
+        self._layout.setContentsMargins(5, 0, 5, 0)
         
         self.plot_widget = SimpleDisplayWidget(params)
         
@@ -23,9 +23,7 @@ class WaterfallWidget(QtWidgets.QWidget):
         
         self._button_layout = QtWidgets.QHBoxLayout()
         self._button_layout.setSpacing(10)
-        self._button_layout.setContentsMargins(0, 8, 0, 12)
-
-        #self._button_layout.addWidget(QtWidgets.QLabel('Scan view'))
+        self._button_layout.setContentsMargins(0, 5, 0, 5)
       
         self._status_layout = QtWidgets.QVBoxLayout()
 

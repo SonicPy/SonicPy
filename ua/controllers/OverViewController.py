@@ -126,7 +126,7 @@ class OverViewController(QObject):
     def correlation_echoes_added(self , correlations):
         
         for correlation in correlations:
-            self.model.add_echoes(correlations[correlation])
+            self.model.add_echoes(correlations[correlation][0])
 
         self.re_plot_single_frequency()
         self.re_plot_single_condition()
@@ -329,26 +329,19 @@ class OverViewController(QObject):
             
             self.model.set_folder_path(folder)
 
-            self.sync_widget_controls_with_model_non_signaling()
-
-            folders = self.model.conditions_folders_sorted
-            self.folder_widget.set_folders(folders)
-            
-
-            
-
-            freqs = list(self.model.fps_Hz.keys())
-
-            conds = list(self.model.fps_cond.keys())
-
-            self.set_frequency(default_frequency_index)
-            self.widget.freq_scroll.setMaximum(len(freqs)-1)
-            
-
-            self.set_condition(default_condition_index)
-            self.widget.cond_scroll.setMaximum(len(conds)-1)
-
-            self.folder_selected_signal.emit(folder)
+            if self.model.mode == 'discrete_f':
+                self.sync_widget_controls_with_model_non_signaling()
+                folders = self.model.conditions_folders_sorted
+                self.folder_widget.set_folders(folders)
+                freqs = list(self.model.fps_Hz.keys())
+                conds = list(self.model.fps_cond.keys())
+                self.set_frequency(default_frequency_index)
+                self.widget.freq_scroll.setMaximum(len(freqs)-1)
+                self.set_condition(default_condition_index)
+                self.widget.cond_scroll.setMaximum(len(conds)-1)
+                self.folder_selected_signal.emit(folder)
+            elif self.model.mode == 'broadband':
+                print('broadband controllr not implemented')
         
     
 
@@ -389,13 +382,13 @@ class OverViewController(QObject):
         echoes_s = self.model.results_model.echoes_s
 
         for echo_p_name in echoes_p:
-            bounds = echoes_p[echo_p_name]['echo_bounds']
+            bounds = echoes_p[echo_p_name][0]['echo_bounds']
             filename_waveform = echo_p_name
             wave_type = "P"
             waterfall.set_echoe(filename_waveform ,wave_type, bounds)
 
         for echo_s_name in echoes_s:
-            bounds = echoes_s[echo_s_name]['echo_bounds']
+            bounds = echoes_s[echo_s_name][0]['echo_bounds']
             filename_waveform = echo_s_name
             wave_type = "S"
             waterfall.set_echoe(filename_waveform ,wave_type, bounds)
@@ -424,13 +417,13 @@ class OverViewController(QObject):
         echoes_s = self.model.results_model.echoes_s
 
         for echo_p_name in echoes_p:
-            bounds = echoes_p[echo_p_name]['echo_bounds']
+            bounds = echoes_p[echo_p_name][0]['echo_bounds']
             filename_waveform = echo_p_name
             wave_type = "P"
             waterfall.set_echoe(filename_waveform ,wave_type, bounds)
 
         for echo_s_name in echoes_s:
-            bounds = echoes_s[echo_s_name]['echo_bounds']
+            bounds = echoes_s[echo_s_name][0]['echo_bounds']
             filename_waveform = echo_s_name
             wave_type = "S"
             waterfall.set_echoe(filename_waveform ,wave_type, bounds)

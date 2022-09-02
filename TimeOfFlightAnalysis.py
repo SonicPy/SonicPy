@@ -9,6 +9,8 @@
 
 # TODO cycle through all frequencies automatically
 
+# TODO broad pulse 
+
 
 from ua import TOF
 

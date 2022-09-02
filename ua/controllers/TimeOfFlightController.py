@@ -86,54 +86,6 @@ class TimeOfFlightController(QObject):
 
         self.multiple_frequencies_controller.file_selected(data)
 
-        '''fname = data['fname']
-        fbase = data['freq']
-        cond = data['cond']
-
-        echo_type = ''
-        if  self.correlation_controller.display_window.p_wave_btn.isChecked():
-            echo_type = "P"
-        elif self.correlation_controller.display_window.s_wave_btn.isChecked():
-            echo_type = "S"
-
-
-        echoes_p, echoes_s = self.echoes_results_model.get_echoes()
-
-    
-        if fname in echoes_p:
-            echo_p = echoes_p[fname]
-            bounds_p = echo_p['echo_bounds']
-            self.correlation_controller.display_window.lr1_p.setRegion(bounds_p[0])
-            self.correlation_controller.display_window.lr2_p.setRegion(bounds_p[1])
-        
-        if fname in echoes_s:
-            echo_s = echoes_s[fname]
-            bounds_s = echo_s['echo_bounds']
-            self.correlation_controller.display_window.lr1_s.setRegion(bounds_s[0])
-            self.correlation_controller.display_window.lr2_s.setRegion(bounds_s[1])
-
-        f_start = self.overview_controller.widget.freq_start.value()
-        f_step = self.overview_controller.widget.freq_step.value()
-        
-        f_freq_ind = int(fbase)
-        freq = f_start + f_freq_ind * f_step
-
-        self.correlation_controller.update_data_by_dict(data)
-        
-        # setting frequency input normally triggers calculation of correlation so set with out triggeing signals        
-        self.correlation_controller.display_window.freq_ebx.blockSignals(True)
-        self.correlation_controller.display_window.freq_ebx.setValue(freq)
-        self.correlation_controller.display_window.freq_ebx.blockSignals(False)
-        
-        
-        self.correlation_controller.calculate_data()
-
-        echoes_by_condition = self.echoes_results_model.get_echoes_by_condition(cond, echo_type)
-        self.arrow_plot_controller.set_wave_type(echo_type)
-        self.arrow_plot_controller.set_condition( cond) 
-        self.arrow_plot_controller.refresh_model()
-        self.arrow_plot_controller.set_frequency_cursor(freq)'''
-
     
     def folder_selected_signal_callback(self, folder):
         self.widget.setWindowTitle("Time-of-flight analysis. V." + __version__ + "  © R. Hrubiak, 2022. Folder: "+ os.path.abspath( folder))
@@ -160,7 +112,7 @@ class TimeOfFlightController(QObject):
 
     def correlation_saved_signal_callback(self, correlation):
         
-        correlations = {correlation['filename_waveform']:correlation}
+        correlations = {correlation['filename_waveform']:[correlation]}
         
 
         self.echoes_results_model.add_echoe(correlation)

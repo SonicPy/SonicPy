@@ -41,23 +41,32 @@ class MultipleFrequencyController(QObject):
         self.widget.frequency_sweep_widget.do_all_frequencies_btn.clicked.connect(self.do_all_frequencies_btn_callback)
         self.widget.broadband_pulse_widget.do_all_frequencies_btn.clicked.connect(self.do_all_frequencies_btn_callback)
 
+        self.widget.frequency_sweep_widget.f_min_bx.valueChanged.connect(self.model.set_f_min_sweep)
+        self.widget.frequency_sweep_widget.f_max_bx.valueChanged.connect(self.model.set_f_max_sweep)
+
     def do_all_frequencies_btn_callback(self):
 
-        mode = self.widget.mode_tab_widget.currentIndex()
-        if mode == 0:
+        if len(self.model.files):
+            mode = self.widget.mode_tab_widget.currentIndex()
+            if mode == 0:
+                pts = len(self.model.files)
+            elif mode == 1:
+                f_start = self.widget.broadband_pulse_widget.f_min_bx.value()
+                f_end = self.widget.broadband_pulse_widget.f_max_bx.value()
+                f_step = self.widget.broadband_pulse_widget.f_step_bx.value()
+                pts = int((f_end - f_start) / f_step) 
+            progress_dialog = QtWidgets.QProgressDialog("Calculating", "Abort", 0, pts, None)
+            progress_dialog.setWindowModality(QtCore.Qt.WindowModal)
+            progress_dialog.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+            progress_dialog.show()
+            QtWidgets.QApplication.processEvents()
+            if mode == 0:
+                self.do_all_frequency_sweep(progress_dialog=progress_dialog) 
+            elif mode == 1:
+                self.do_all_broadband_pulse(f_start, f_end, f_step, progress_dialog=progress_dialog)
 
-            if len(self.model.files):
-                progress_dialog = QtWidgets.QProgressDialog("Calculating", "Abort", 0, len(self.model.files), None)
-                progress_dialog.setWindowModality(QtCore.Qt.WindowModal)
-                progress_dialog.setWindowFlags(QtCore.Qt.FramelessWindowHint)
-                progress_dialog.show()
-                QtWidgets.QApplication.processEvents()
-                self.do_all_frequency_sweep(progress_dialog=progress_dialog)
-                progress_dialog.close()
-                QtWidgets.QApplication.processEvents()
-        elif mode == 1:
-            self.do_all_broadband_pulse()
-                
+            progress_dialog.close()
+            QtWidgets.QApplication.processEvents() 
 
     def do_all_frequency_sweep(self, *args, **kwargs):
         files = self.model.files
@@ -67,27 +76,73 @@ class MultipleFrequencyController(QObject):
         else:
             progress_dialog = QtWidgets.QProgressDialog()
 
+        min_f = self.widget.frequency_sweep_widget.f_min_bx.value()
+        max_f = self.widget.frequency_sweep_widget.f_max_bx.value()
+
         
         for d, f in enumerate(files):
+
+            
             
             #update progress bar only every 2 files to save time
             progress_dialog.setValue(d)
-            QtWidgets.QApplication.processEvents()
-            fname = files[f]
-            data = self.overview_controller.get_data_by_filename(fname)
-            self.correlation_controller. update_data_by_dict_silent(data)
-            bounds = self.correlation_controller.get_lr_bounds()
-            freq = f * 1e6
-            self.correlation_controller.calculate_data_silent(freq,bounds)
-            self.correlation_controller.save_result(signaling = False)
+            
+            if f >= min_f and f <= max_f:
+                QtWidgets.QApplication.processEvents()
+                fname = files[f]
+                data = self.overview_controller.get_data_by_filename(fname)
+                self.correlation_controller. update_data_by_dict_silent(data)
+                bounds = self.correlation_controller.get_lr_bounds()
+                freq = f * 1e6
+                self.correlation_controller.calculate_data_silent(freq,bounds)
+                self.correlation_controller.save_result(signaling = False)
 
-            if progress_dialog.wasCanceled():
-                break
+                if progress_dialog.wasCanceled():
+                    break
         QtWidgets.QApplication.processEvents()
             
 
-    def do_all_broadband_pulse(self):
-        print('do all broadband pulse')
+    def do_all_broadband_pulse(self, *args, **kwargs):
+        f_start = args[0]
+        f_end= args[1]
+        f_step= args[2]
+
+        
+
+        pts = int((f_end - f_start) / f_step) 
+        if pts > 0:
+            freqs = []
+            for i in range(pts):
+                freq = f_start + i * f_step
+                freqs.append(freq)
+
+            files = self.model.files
+            cond = self.model.cond
+            if 'progress_dialog' in kwargs:
+                progress_dialog = kwargs['progress_dialog']
+            else:
+                progress_dialog = QtWidgets.QProgressDialog()
+
+            first_key = list(files.keys())[0]
+            fname = files[first_key]
+            data = self.overview_controller.get_data_by_filename(fname)
+            self.correlation_controller. update_data_by_dict_silent(data)
+            bounds = self.correlation_controller.get_lr_bounds()
+
+            for d, f in enumerate(freqs):
+
+                progress_dialog.setValue(d)
+                
+                QtWidgets.QApplication.processEvents()
+                
+                
+                freq = f * 1e6
+                self.correlation_controller.calculate_data_silent(freq,bounds)
+                self.correlation_controller.save_result(signaling = False)
+
+                if progress_dialog.wasCanceled():
+                    break
+            QtWidgets.QApplication.processEvents()
 
     def file_selected(self, data):
 
@@ -103,7 +158,7 @@ class MultipleFrequencyController(QObject):
             self.model.set_condition(cond)
             self.model.set_fbase(fbase) 
             self.model.set_fname(fname)
-            self.widget.condition_val.setText(str(self.model.cond))
+            #self.widget.condition_val.setText(str(self.model.cond))
 
             freqs = self.overview_controller.model.fps_cond[cond]
             
@@ -119,9 +174,31 @@ class MultipleFrequencyController(QObject):
             all_freqs = list(self.model.files.keys())
             max_f = max(all_freqs)
             min_f = min(all_freqs)
-            count = len(all_freqs)
-            text_out = str(count)+" available frequencies from " +str(min_f)+" to " +str(max_f)
-            self.widget.frequency_sweep_widget.frequency_sweep_widget_lbl.setText(text_out)
+            count = len(all_freqs)\
+
+            self.widget.frequency_sweep_widget.f_min_bx.blockSignals(True)
+            self.widget.frequency_sweep_widget.f_max_bx.blockSignals(True)
+
+            self.widget.frequency_sweep_widget.f_min_bx.setMinimum(min_f)
+            self.widget.frequency_sweep_widget.f_min_bx.setMaximum(max_f)
+            self.widget.frequency_sweep_widget.f_max_bx.setMinimum(min_f)
+            self.widget.frequency_sweep_widget.f_max_bx.setMaximum(max_f)
+
+            max_f_model = self.model.f_max_sweep
+            min_f_model = self.model.f_min_sweep
+
+            if min_f_model != None:
+                min_f = min_f_model
+
+            if max_f_model != None:
+                max_f = max_f_model
+
+            self.widget.frequency_sweep_widget.f_min_bx.setValue(min_f)
+            self.widget.frequency_sweep_widget.f_max_bx.setValue(max_f)
+
+            self.widget.frequency_sweep_widget.f_min_bx.blockSignals(False)
+            self.widget.frequency_sweep_widget.f_max_bx.blockSignals(False)
+
         
         self.recover_selected_regions(fname)
         self.update_analysis(data)
@@ -134,14 +211,14 @@ class MultipleFrequencyController(QObject):
         # changing a region typically triggers calculations so we disable this connection here and reanable it later
         self.correlation_controller.disconnect_regions()
         if fname in echoes_p:
-            echo_p = echoes_p[fname]
+            echo_p = echoes_p[fname][0]
             bounds_p = echo_p['echo_bounds']
 
             self.correlation_controller.display_window.lr1_p.setRegion(bounds_p[0])
             self.correlation_controller.display_window.lr2_p.setRegion(bounds_p[1])
         
         if fname in echoes_s:
-            echo_s = echoes_s[fname]
+            echo_s = echoes_s[fname][0]
             bounds_s = echo_s['echo_bounds']
 
             self.correlation_controller.display_window.lr1_s.setRegion(bounds_s[0])

@@ -15,8 +15,8 @@ class MultipleFrequenciesModel():
         self.f_min_sweep = None
         self.f_max_sweep = None
 
-        self.f_min_broadband = None
-        self.f_max_broadband = None
+        self.f_min_broadband = 15
+        self.f_max_broadband = 70
         self.step_broadband = 2
 
     def set_condition(self, cond):
@@ -31,4 +31,17 @@ class MultipleFrequenciesModel():
     def set_fname(self, fname):
         self.fname = fname
 
+    def set_f_min_sweep(self, f_min):
+        self.f_min_sweep = f_min
 
+    def set_f_max_sweep(self, f_max):
+        self.f_max_sweep = f_max
+
+    def set_f_min_broadband(self, f_min):
+        self.f_min_broadband = f_min
+
+    def set_f_max_broadband(self, f_max):
+        self.f_max_broadband = f_max
+
+    def set_step_broadband(self, step):
+        self.step_broadband = step

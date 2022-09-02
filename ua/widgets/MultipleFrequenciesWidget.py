@@ -6,7 +6,7 @@ from PyQt5.QtCore import QObject, pyqtSignal, Qt
 from um.widgets.CustomWidgets import HorizontalSpacerItem, VerticalSpacerItem, FlatButton
 
 class MultipleFrequenciesWidget(QtWidgets.QWidget):
-    panelClosedSignal = pyqtSignal()
+   
     def __init__(self, ctrls = [],params=[]):
         super().__init__()
         
@@ -29,19 +29,11 @@ class MultipleFrequenciesWidget(QtWidgets.QWidget):
         self.mode_tab_widget.setObjectName("mode_tab_widget")
         
 
-        self.frequency_sweep_widget = QtWidgets.QWidget(self.mode_tab_widget)
-        self._frequency_sweep_widget_layout = QtWidgets.QVBoxLayout(self.frequency_sweep_widget)
-        self._frequency_sweep_widget_layout.setContentsMargins(0,0,0,0)
-        self.frequency_sweep_widget_lbl = QtWidgets.QLabel('Frequency Sweep')
-        self._frequency_sweep_widget_layout.addWidget(self.frequency_sweep_widget_lbl)
-        self.do_all_frequencies_btn = QtWidgets.QPushButton("Do all")
-        self._frequency_sweep_widget_layout.addWidget(self.do_all_frequencies_btn)
+        self.frequency_sweep_widget = FrequencySweepWidget(self.mode_tab_widget)
+       
 
-        self.broadband_pulse_widget = QtWidgets.QWidget(self.mode_tab_widget)
-        self._broadband_pulse_widget_layout = QtWidgets.QVBoxLayout(self.broadband_pulse_widget)
-        self._broadband_pulse_widget_layout.setContentsMargins(0,0,0,0)
-        self.broadband_pulse_widget_lbl = QtWidgets.QLabel('Broadband pulse')
-        self._broadband_pulse_widget_layout.addWidget(self.broadband_pulse_widget_lbl)
+        self.broadband_pulse_widget = BroadbandPulseWidget(self.mode_tab_widget)
+       
 
         self.mode_tab_widget.addTab(self.frequency_sweep_widget, "Frequency sweep")
         self.mode_tab_widget.addTab(self.broadband_pulse_widget, "Broadband pulse")
@@ -72,4 +64,37 @@ class MultipleFrequenciesWidget(QtWidgets.QWidget):
         #self.raise_()  
 
 
+class FrequencySweepWidget(QtWidgets.QWidget):
+    
+    def __init__(self, parent=None, ctrls = [],params=[]):
+        super().__init__(parent = parent)  
 
+        self._layout = QtWidgets.QHBoxLayout()
+        self._layout.setSpacing(0)
+        self._layout.setContentsMargins(0, 0, 0, 0)
+
+        self.frequency_sweep_widget_lbl = QtWidgets.QLabel('Frequency Sweep')
+        self._layout.addWidget(self.frequency_sweep_widget_lbl)
+        self.do_all_frequencies_btn = QtWidgets.QPushButton("Do all")
+        self._layout.addWidget(self.do_all_frequencies_btn)
+
+
+        self.setLayout(self._layout)
+
+
+class BroadbandPulseWidget(QtWidgets.QWidget):
+    
+    def __init__(self, parent=None, ctrls = [],params=[]):
+        super().__init__(parent = parent)  
+
+        self._layout = QtWidgets.QHBoxLayout()
+        self._layout.setSpacing(0)
+        self._layout.setContentsMargins(0, 0, 0, 0)
+
+        self.frequency_sweep_widget_lbl = QtWidgets.QLabel('Broadband Pulse')
+        self._layout.addWidget(self.frequency_sweep_widget_lbl)
+        self.do_all_frequencies_btn = QtWidgets.QPushButton("Do all")
+        self._layout.addWidget(self.do_all_frequencies_btn)
+
+
+        self.setLayout(self._layout)

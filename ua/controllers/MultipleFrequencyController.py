@@ -11,6 +11,8 @@ from ua.controllers.OverViewController import OverViewController
 from ua.controllers.UltrasoundAnalysisController import UltrasoundAnalysisController
 from ua.controllers.ArrowPlotController import ArrowPlotController
 
+from PyQt5 import QtWidgets, QtCore
+
 ############################################################
 
 class MultipleFrequencyController(QObject):
@@ -36,7 +38,8 @@ class MultipleFrequencyController(QObject):
         
     def make_connections(self): 
         
-        self.widget.do_all_frequencies_btn.clicked.connect(self.do_all_frequencies_btn_callback)
+        self.widget.frequency_sweep_widget.do_all_frequencies_btn.clicked.connect(self.do_all_frequencies_btn_callback)
+        self.widget.broadband_pulse_widget.do_all_frequencies_btn.clicked.connect(self.do_all_frequencies_btn_callback)
 
     def do_all_frequencies_btn_callback(self):
 
@@ -44,28 +47,43 @@ class MultipleFrequencyController(QObject):
         if mode == 0:
 
             if len(self.model.files):
-                self.do_all_frequency_sweep()
+                progress_dialog = QtWidgets.QProgressDialog("Calculating", "Abort", 0, len(self.model.files), None)
+                progress_dialog.setWindowModality(QtCore.Qt.WindowModal)
+                progress_dialog.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+                progress_dialog.show()
+                QtWidgets.QApplication.processEvents()
+                self.do_all_frequency_sweep(progress_dialog=progress_dialog)
+                progress_dialog.close()
+                QtWidgets.QApplication.processEvents()
         elif mode == 1:
             self.do_all_broadband_pulse()
                 
 
-    def do_all_frequency_sweep(self):
+    def do_all_frequency_sweep(self, *args, **kwargs):
         files = self.model.files
         cond = self.model.cond
-        
-        for f in files:
-          
-            fname = files[f]
-            
-            data = self.overview_controller.get_data_by_filename(fname)
-            
-            self.correlation_controller. update_data_by_dict_silent(data)
+        if 'progress_dialog' in kwargs:
+            progress_dialog = kwargs['progress_dialog']
+        else:
+            progress_dialog = QtWidgets.QProgressDialog()
 
+        
+        for d, f in enumerate(files):
+            
+            #update progress bar only every 2 files to save time
+            progress_dialog.setValue(d)
+            QtWidgets.QApplication.processEvents()
+            fname = files[f]
+            data = self.overview_controller.get_data_by_filename(fname)
+            self.correlation_controller. update_data_by_dict_silent(data)
             bounds = self.correlation_controller.get_lr_bounds()
             freq = f * 1e6
             self.correlation_controller.calculate_data_silent(freq,bounds)
-            
             self.correlation_controller.save_result(signaling = False)
+
+            if progress_dialog.wasCanceled():
+                break
+        QtWidgets.QApplication.processEvents()
             
 
     def do_all_broadband_pulse(self):
@@ -103,7 +121,7 @@ class MultipleFrequencyController(QObject):
             min_f = min(all_freqs)
             count = len(all_freqs)
             text_out = str(count)+" available frequencies from " +str(min_f)+" to " +str(max_f)
-            self.widget.frequency_sweep_widget_lbl.setText(text_out)
+            self.widget.frequency_sweep_widget.frequency_sweep_widget_lbl.setText(text_out)
         
         self.recover_selected_regions(fname)
         self.update_analysis(data)

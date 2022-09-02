@@ -123,11 +123,11 @@ class UltrasoundAnalysisController(QObject):
     def save_result(self, signaling=True):
         if self.fname is not None:
             filename = self.fname + '.json'
-            before = time.time()
+            '''before = time.time()'''
             out = self.model.save_result(self.fname)
-            after = time.time()
+            '''after = time.time()
             elapsed = after - before
-            print ("file: " + self.fname + ", saving took: " + str(elapsed) + " s")
+            print ("file: " + self.fname + ", saving took: " + str(elapsed) + " s")'''
             if out['ok']: 
                 self.correlation_saved_signal.emit(out['data'])
 
@@ -159,7 +159,7 @@ class UltrasoundAnalysisController(QObject):
         
     def calculate_data_silent(self, freq, bounds):
 
-        before = time.time()
+        '''before = time.time()'''
 
         [l1, r1] = bounds [0]
         [l2, r2] = bounds [1]
@@ -169,9 +169,9 @@ class UltrasoundAnalysisController(QObject):
         self.model.cross_correlate()
         self.model.exract_optima()
             
-        after = time.time()
+        '''after = time.time()
         elapsed = after - before
-        print ("Frequency: " + str(freq) + ", calculation took: " + str(elapsed) + " s")
+        print ("Frequency: " + str(freq) + ", calculation took: " + str(elapsed) + " s")'''
 
     def get_lr_bounds(self):
         wave_type = self.model.wave_type

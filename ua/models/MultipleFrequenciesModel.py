@@ -12,6 +12,13 @@ class MultipleFrequenciesModel():
         self.fbase = None
         self.fname = ""
 
+        self.f_min_sweep = None
+        self.f_max_sweep = None
+
+        self.f_min_broadband = None
+        self.f_max_broadband = None
+        self.step_broadband = 2
+
     def set_condition(self, cond):
         self.cond = cond
 

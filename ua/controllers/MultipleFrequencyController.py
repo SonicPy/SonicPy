@@ -53,18 +53,19 @@ class MultipleFrequencyController(QObject):
         files = self.model.files
         cond = self.model.cond
         
-        for freq in files:
-            print(freq)
-            fname = files[freq]
-            before = time.time()
+        for f in files:
+          
+            fname = files[f]
+            
             data = self.overview_controller.get_data_by_filename(fname)
-            after = time.time()
-            elapsed = after - before
-            print ("get data took: " + str(elapsed) + " s")
+            
             self.correlation_controller. update_data_by_dict_silent(data)
 
             bounds = self.correlation_controller.get_lr_bounds()
+            freq = f * 1e6
             self.correlation_controller.calculate_data_silent(freq,bounds)
+            
+            self.correlation_controller.save_result(signaling = False)
             
 
     def do_all_broadband_pulse(self):

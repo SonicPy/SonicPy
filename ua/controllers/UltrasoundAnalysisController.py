@@ -120,10 +120,14 @@ class UltrasoundAnalysisController(QObject):
 
     
 
-    def save_result(self):
+    def save_result(self, signaling=True):
         if self.fname is not None:
             filename = self.fname + '.json'
+            before = time.time()
             out = self.model.save_result(self.fname)
+            after = time.time()
+            elapsed = after - before
+            print ("file: " + self.fname + ", saving took: " + str(elapsed) + " s")
             if out['ok']: 
                 self.correlation_saved_signal.emit(out['data'])
 
@@ -167,7 +171,7 @@ class UltrasoundAnalysisController(QObject):
             
         after = time.time()
         elapsed = after - before
-        print ("calculation took: " + str(elapsed) + " s")
+        print ("Frequency: " + str(freq) + ", calculation took: " + str(elapsed) + " s")
 
     def get_lr_bounds(self):
         wave_type = self.model.wave_type

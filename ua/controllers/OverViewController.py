@@ -172,38 +172,16 @@ class OverViewController(QObject):
     def get_data_by_filename(self, fname):
         data = {}
         if fname in self.model.file_dict:
-            temp_fname = copy.copy(self.selected_fname)
-            self.selected_fname = fname
-            
-                    
-            cond = self.model.file_dict[self.selected_fname][0]
-            freq = self.model.file_dict[self.selected_fname][1]
+            cond = self.model.file_dict[fname][0]
+            freq = self.model.file_dict[fname][1]
             conds = list(self.model.fps_cond.keys())
             ind  = conds.index(cond)
             self.set_condition(ind)
             
-            
-            
-            data['fname'] = self.selected_fname
+            data['fname'] = fname
             data['cond'] = cond
             data['freq'] = freq
-
-
-            current_frequency = copy.copy(self.freq)
-            current_condition = copy.copy(self.cond)
-
-            
-            if freq != current_frequency:
-                ind = list(self.model.fps_Hz.keys()).index(freq)
-                self.set_frequency(ind)
-            if cond != current_condition:
-                self.set_condition(cond)
-            
-            if temp_fname != self.selected_fname:
-                self.re_plot_single_frequency()
-                self.re_plot_single_condition()
-
-            selected = self.model.spectra[cond][self.freq]['waveform']
+            selected = self.model.spectra[cond][freq]['waveform']
             
             data['t'] = selected[0]
             data['spectrum'] = selected[1]
@@ -211,7 +189,23 @@ class OverViewController(QObject):
         return data
 
     def select_fname(self, fname):
+        temp_fname = copy.copy(self.selected_fname)
+        self.selected_fname = fname
         data = self.get_data_by_filename(fname)
+        current_frequency = copy.copy(self.freq)
+        current_condition = copy.copy(self.cond)
+        freq = data['freq']
+        cond = data['cond']
+        
+        if freq != current_frequency:
+            ind = list(self.model.fps_Hz.keys()).index(freq)
+            self.set_frequency(ind)
+        if cond != current_condition:
+            self.set_condition(cond)
+        
+        if temp_fname != self.selected_fname:
+            self.re_plot_single_frequency()
+            self.re_plot_single_condition()
         self.file_selected_signal.emit(data)
                 
 

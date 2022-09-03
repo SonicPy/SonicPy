@@ -11,6 +11,8 @@
 
 # TODO broad pulse 
 
+# TODO fix arrow plot updating
+
 
 from ua import TOF
 

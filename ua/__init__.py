@@ -68,7 +68,7 @@ def TOF():
         folder = ''
         mac_folder = '/Users/ross/Globus/s16bmb-20210717-e244302-Aihaiti/sam2/US'
         win_folder = 'C:\\Users\\hrubiak\\Desktop\\US\\US'
-        mac_folder = '/Users/hrubiak/Downloads/Ultrasound_XRD_datasets_for_dissemination/Ultrasound_data_for_dissemination_June_2018_Exp4/Gaussian'
+        mac_folder = '/Users/hrubiak/Downloads/Ultrasound_XRD_datasets_for_dissemination/Ultrasound_data_for_dissemination_June_2018_Exp4/US'
         if os.path.isdir(mac_folder):
             folder = mac_folder
         if os.path.isdir(win_folder):

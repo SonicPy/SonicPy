@@ -1,5 +1,5 @@
 
-__version__ = "0.5.9"
+__version__ = "0.6.0"
 
 import sys
 import os
@@ -62,6 +62,10 @@ def TOF():
     #app.aboutToQuit.connect(app.deleteLater)
     
     controller = TimeOfFlightController(app = app)
+    import sys
+    modulenames = set(sys.modules) & set(globals())
+    allmodules = [sys.modules[name] for name in modulenames]
+    print(allmodules)
     controller.show_window()
 
     if autoload:

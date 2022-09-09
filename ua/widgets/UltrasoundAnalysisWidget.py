@@ -30,7 +30,6 @@ class UltrasoundAnalysisWidget(QWidget):
 
         self.setWindowTitle('Ultrasound Analysis')
 
-        #self.resize(1250, 800)
         
         self.make_widget()
 
@@ -150,7 +149,7 @@ class UltrasoundAnalysisWidget(QWidget):
     def make_widget(self):
         
         self._layout = QtWidgets.QVBoxLayout()
-        self._layout.setContentsMargins(10, 10, 10, 10)
+        self._layout.setContentsMargins(0, 0, 0, 0)
         self.detail_widget = QtWidgets.QTabWidget()
         self._detail_layout = QtWidgets.QTabWidget()
         self._detail_layout.setContentsMargins(0, 0, 0, 0)

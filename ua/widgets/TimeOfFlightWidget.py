@@ -21,29 +21,36 @@ class TimeOfFlightWidget(QMainWindow):
     up_down_signal = pyqtSignal(str)
     panelClosedSignal = pyqtSignal()
 
-    def __init__(self, app, overview_widget, multiple_frequencies_widget, analysis_widget, arrow_plot_widget):
+    def __init__(self, app, overview_widget, multiple_frequencies_widget, analysis_widget, arrow_plot_widget, output_widget):
         super().__init__()
         self.app = app
         self.overview_widget = overview_widget
 
         self.multiple_frequencies_widget = multiple_frequencies_widget
         self.analysis_widget = analysis_widget
+        self.output_widget = output_widget
+        self.arrow_plot_widget = arrow_plot_widget
 
         self.middle_widget = QtWidgets.QWidget()
         self._middle_widget_layout = QtWidgets.QVBoxLayout()
         self._middle_widget_layout.addWidget(self.analysis_widget)
         self._middle_widget_layout.addWidget(self.multiple_frequencies_widget)
-        
         self.middle_widget.setLayout(self._middle_widget_layout)
 
-        self.arrow_plot_widget = arrow_plot_widget
+        self.right_widget = QtWidgets.QWidget()
+        self._right_widget_layout = QtWidgets.QVBoxLayout()
+        self._right_widget_layout.addWidget(self.arrow_plot_widget)
+        self._right_widget_layout.addWidget(self.output_widget)
+        self.right_widget.setLayout(self._right_widget_layout)
+
+        
 
         #self.analysis_widget.resize(800,800)
 
 
         self.setWindowTitle('Time-of-flight analysis. (C) R. Hrubiak 2021')
 
-        self.resize(1920, 1000)
+        self.resize(1900, 950)
         
         self.make_widget()
 
@@ -93,7 +100,7 @@ class TimeOfFlightWidget(QMainWindow):
 
         self.splitter_horizontal.addWidget(self.middle_widget)
 
-        self.splitter_horizontal.addWidget(self.arrow_plot_widget)
+        self.splitter_horizontal.addWidget(self.right_widget)
         
         self.splitter_horizontal.setSizes([600,600, 600])
 

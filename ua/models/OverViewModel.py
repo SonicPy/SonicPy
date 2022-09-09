@@ -296,7 +296,7 @@ class OverViewModel():
             self.understand_folder_structure()
         
     
-    def get_conditions_folders(self, folder):
+    def _get_conditions_folders(self, folder):
         '''
         returns list of naturally sorted conditions folders in folder
         '''
@@ -480,7 +480,7 @@ class OverViewModel():
 
         mode = self.mode
         
-        self.conditions_folders_sorted = self.get_conditions_folders(folder)
+        self.conditions_folders_sorted = self._get_conditions_folders(folder)
 
 
         

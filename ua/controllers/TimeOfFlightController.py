@@ -23,6 +23,7 @@ from ua.controllers.OverViewController import OverViewController
 from ua.controllers.UltrasoundAnalysisController import UltrasoundAnalysisController
 from ua.controllers.ArrowPlotController import ArrowPlotController
 from ua.controllers.MultipleFrequencyController import MultipleFrequencyController
+from ua.controllers.OutputController import OutputController
 
 import utilities.hpMCAutilities as mcaUtil
 from utilities.HelperModule import increment_filename, increment_filename_extra
@@ -41,6 +42,7 @@ class TimeOfFlightController(QObject):
         super().__init__()
         self.app = app
         self.echoes_results_model = EchoesResultsModel()
+        
         self.overview_controller = OverViewController(self.app, self.echoes_results_model)
         overview_widget = self.overview_controller.widget
         
@@ -49,9 +51,15 @@ class TimeOfFlightController(QObject):
 
         self.arrow_plot_controller = ArrowPlotController(self.app, self.echoes_results_model)
         arrow_plot_widget = self.arrow_plot_controller.arrow_plot_window
+        
         self.multiple_frequencies_controller = MultipleFrequencyController(self.overview_controller, self.correlation_controller, self.arrow_plot_controller, self.app, self.echoes_results_model)
         multiple_frequencies_widget = self.multiple_frequencies_controller.widget
-        self.widget = TimeOfFlightWidget(app, overview_widget, multiple_frequencies_widget, analysis_widget, arrow_plot_widget)
+
+        self.output_controller = OutputController(self.overview_controller, self.correlation_controller, self.arrow_plot_controller, self.app, self.echoes_results_model)
+        output_widget = self.output_controller.widget
+
+
+        self.widget = TimeOfFlightWidget(app, overview_widget, multiple_frequencies_widget, analysis_widget, arrow_plot_widget, output_widget)
         self.widget.setWindowTitle("Time-of-flight analysis. ver." + __version__ + "  © R. Hrubiak, 2022.")
         
         if app is not None:
@@ -105,6 +113,8 @@ class TimeOfFlightController(QObject):
         elif self.correlation_controller.display_window.s_wave_btn.isChecked():
             echo_type = "S"
         self.arrow_plot_controller.set_wave_type(echo_type)
+
+        self.output_controller.update_conditions()
 
     ###
     # Ultrasound controller callbacks

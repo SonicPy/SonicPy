@@ -6,6 +6,8 @@
 # TODO cycle through all frequencies automatically
 # TODO broad pulse 
 # TODO fix arrow plot updating
+# TODO Vp and Vs output
+# TODO plots/data output for publication
 
 from ua import TOF
 

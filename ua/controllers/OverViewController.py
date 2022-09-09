@@ -174,7 +174,7 @@ class OverViewController(QObject):
         if fname in self.model.file_dict:
             cond = self.model.file_dict[fname][0]
             freq = self.model.file_dict[fname][1]
-            conds = list(self.model.fps_cond.keys())
+            conds = self.get_conditions_list()
             ind  = conds.index(cond)
             self.set_condition(ind)
             
@@ -187,6 +187,10 @@ class OverViewController(QObject):
             data['spectrum'] = selected[1]
 
         return data
+
+    def get_conditions_list(self):
+        conds = list(self.model.fps_cond.keys())
+        return conds
 
     def select_fname(self, fname):
         temp_fname = copy.copy(self.selected_fname)

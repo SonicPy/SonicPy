@@ -27,7 +27,7 @@ class ArrowPlotWidget(QWidget):
         self.t = None
         self.spectrum = None
         self.setWindowTitle('Inverse frequency analysis')
-        #self.resize(600, 800)
+  
         self.make_widget()
         self.create_plots()
         self.style_widgets()
@@ -87,7 +87,7 @@ class ArrowPlotWidget(QWidget):
     def make_widget(self):
         my_widget = self
         _layout = QtWidgets.QVBoxLayout()
-        _layout.setContentsMargins(10, 10, 10, 10)
+        _layout.setContentsMargins(0, 0, 0, 0)
         detail_widget = QtWidgets.QWidget()
         _detail_layout = QtWidgets.QHBoxLayout()
         _detail_layout.setContentsMargins(0, 0, 0, 0)

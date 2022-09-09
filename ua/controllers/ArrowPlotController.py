@@ -34,6 +34,8 @@ class ArrowPlotController(QObject):
     arrow_plot_del_clicked_signal = pyqtSignal(dict)
     arrow_plot_clear_clicked_signal = pyqtSignal(dict) # contains list of del type dicts
 
+    new_result_calculated_signal = pyqtSignal(dict)
+
     def __init__(self, app = None, results_model= EchoesResultsModel()):
         super().__init__()
         
@@ -208,7 +210,8 @@ class ArrowPlotController(QObject):
             opt = self.get_opt()
             arrow_plot.calculate_lines(opt)
             package = arrow_plot.package
-            
+            package['wave_type']= self.wave_type
+            self.new_result_calculated_signal.emit(package)
 
 
     '''def load_file(self, filename):

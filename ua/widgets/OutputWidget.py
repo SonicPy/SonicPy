@@ -42,9 +42,9 @@ class OutputWidget(QtWidgets.QWidget):
         header_view = QtWidgets.QHeaderView(QtCore.Qt.Horizontal, tw)
         tw.setHorizontalHeader(header_view)
         tw.setHorizontalHeaderLabels(header_lbls)
-        #header_view.setResizeMode(0, QtWidgets.QHeaderView.Stretch)
-        for col in range(len(header_lbls)-1):
-            header_view.setResizeMode(col , QtWidgets.QHeaderView.ResizeToContents)
+        header_view.setResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
+        '''for col in range(len(header_lbls)-1):
+            header_view.setResizeMode(col , QtWidgets.QHeaderView.ResizeToContents)'''
         header_view.setResizeMode(len(header_lbls)-1, QtWidgets.QHeaderView.Stretch)
     
         tw.setItemDelegate(NoRectDelegate())
@@ -59,22 +59,22 @@ class OutputWidget(QtWidgets.QWidget):
         name_item.setTextAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         self.output_tw.setItem(current_rows, 0, name_item)
 
-        tp_item = QtWidgets.QTableWidgetItem(' '*12)
+        tp_item = QtWidgets.QTableWidgetItem(' '*8)
         tp_item.setFlags(tp_item.flags() & ~QtCore.Qt.ItemIsEditable)
         tp_item.setTextAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         self.output_tw.setItem(current_rows, 1, tp_item)
 
-        t_e_p_item = QtWidgets.QTableWidgetItem(' '*12)
+        t_e_p_item = QtWidgets.QTableWidgetItem(' '*8)
         t_e_p_item.setFlags(t_e_p_item.flags() & ~QtCore.Qt.ItemIsEditable)
         t_e_p_item.setTextAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         self.output_tw.setItem(current_rows, 2, t_e_p_item)
 
-        ts_item = QtWidgets.QTableWidgetItem(' '*12)
+        ts_item = QtWidgets.QTableWidgetItem(' '*8)
         ts_item.setFlags(ts_item.flags() & ~QtCore.Qt.ItemIsEditable)
         ts_item.setTextAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         self.output_tw.setItem(current_rows, 3, ts_item)
 
-        t_e_s_item = QtWidgets.QTableWidgetItem(' '*12)
+        t_e_s_item = QtWidgets.QTableWidgetItem(' '*8)
         t_e_s_item.setFlags(t_e_s_item.flags() & ~QtCore.Qt.ItemIsEditable)
         t_e_s_item.setTextAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         self.output_tw.setItem(current_rows, 4, t_e_s_item)
@@ -90,7 +90,9 @@ class OutputWidget(QtWidgets.QWidget):
         self.output_tw.blockSignals(False)
 
     def select_output(self, ind):
+        self.output_tw.blockSignals(True)
         self.output_tw.selectRow(ind)
+        self.output_tw.blockSignals(False)
 
     def get_selected_output_row(self):
         selected = self.output_tw.selectionModel().selectedRows()
@@ -102,6 +104,10 @@ class OutputWidget(QtWidgets.QWidget):
 
     def get_output(self):
         pass
+
+    def clear_output(self):
+        for row in range(self.output_tw.rowCount()):
+            self.del_output(-1)
 
     def del_output(self, ind):
         self.output_tw.blockSignals(True)
@@ -118,44 +124,44 @@ class OutputWidget(QtWidgets.QWidget):
         name_item = self.output_tw.item(ind, 0)
         name_item.setText(name)
 
-    def set_output_vp(self, ind, vp):
+    def set_output_tp(self, ind, vp):
         self.blockSignals(True)
         vp_item = self.output_tw.item(ind, 1)
         try:
-            vp_item.setText("{0:.2f} s".format(vp))
+            vp_item.setText("{0:.3f} ns".format(vp))
         except ValueError:
-            vp_item.setText("{0} s".format(vp))
+            vp_item.setText("{0} ns".format(vp))
         self.blockSignals(False)
 
-    def get_output_vp(self, ind):
+    def get_output_tp(self, ind):
         vp_item = self.output_tw.item(ind, 1)
         vp = float(str(vp_item.text()).split()[0])
         return vp
 
-    def set_output_v_e_p(self, ind, vep):
+    def set_output_t_e_p(self, ind, vep):
         self.blockSignals(True)
         vep_item = self.output_tw.item(ind, 2)
         try:
-            vep_item.setText("{0:.2f} s".format(vep))
+            vep_item.setText("{0:.3f} ns".format(vep))
         except ValueError:
-            vep_item.setText("{0} s".format(vep))
+            vep_item.setText("{0} ns".format(vep))
         self.blockSignals(False)
 
-    def get_output_v_e_p(self, ind):
+    def get_output_t_e_p(self, ind):
         vep_item = self.output_tw.item(ind, 2)
         vep = float(str(vep_item.text()).split()[0])
         return vep
 
-    def set_output_vs(self, ind, vs):
+    def set_output_ts(self, ind, vs):
         self.blockSignals(True)
         vs_item = self.output_tw.item(ind, 3)
         try:
-            vs_item.setText("{0:.2f} s".format(vs))
+            vs_item.setText("{0:.3f} ns".format(vs))
         except ValueError:
-            vs_item.setText("{0} s".format(vs))
+            vs_item.setText("{0} ns".format(vs))
         self.blockSignals(False)
 
-    def get_output_vs(self, ind):
+    def get_output_ts(self, ind):
         vs_item = self.output_tw.item(ind, 3)
         try:
             vs = float(str(vs_item.text()).split()[0])
@@ -163,16 +169,16 @@ class OutputWidget(QtWidgets.QWidget):
             vs = None
         return vs
 
-    def set_output_v_e_s(self, ind, ves):
+    def set_output_t_e_s(self, ind, ves):
         self.blockSignals(True)
         ves_item = self.output_tw.item(ind, 4)
         try:
-            ves_item.setText("{0:.2f} s".format(ves))
+            ves_item.setText("{0:.3f} ns".format(ves))
         except ValueError:
-            ves_item.setText("{0} s".format(ves))
+            ves_item.setText("{0} ns".format(ves))
         self.blockSignals(False)
 
-    def get_output_v_e_s(self, ind):
+    def get_output_t_e_s(self, ind):
         ves_item = self.output_tw.item(ind, 4)
         try:
             ves = float(str(ves_item.text()).split()[0])
@@ -181,43 +187,7 @@ class OutputWidget(QtWidgets.QWidget):
         return ves
 
 
-    
-
-
-
        ########################################################################################
-
-    def dragEnterEvent(self, e):
-        if e.mimeData().hasUrls:
-            e.accept()
-        else:
-            e.ignore()
-
-    def dragMoveEvent(self, e):
-        if e.mimeData().hasUrls:
-            e.accept()
-        else:
-            e.ignore()
-
-    def dropEvent(self, e):
-        """
-        Drop files directly onto the widget
-
-        File locations are stored in fname
-        :param e:
-        :return:
-        """
-        if e.mimeData().hasUrls:
-            e.setDropAction(QtCore.Qt.CopyAction)
-            e.accept()
-            fnames = list()
-            for url in e.mimeData().urls():
-                fname = str(url.toLocalFile())  
-                fnames.append(fname)
-            self.file_dragged_in.emit(fnames)
-        else:
-            e.ignore()     
-
 
 
     

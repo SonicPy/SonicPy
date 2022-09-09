@@ -355,7 +355,7 @@ class ArrowPlot():
             
             self.result[opt] = result
 
-            self.package_optima()
+            self.package = self.package_optima()
         else:
             self.error_not_enough_datapoints()
 

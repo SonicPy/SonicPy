@@ -82,6 +82,8 @@ class TimeOfFlightController(QObject):
         self.arrow_plot_controller.arrow_plot_del_clicked_signal.connect(self.arrow_plot_del_clicked_signal_callback)
         self.arrow_plot_controller.arrow_plot_clear_clicked_signal.connect(self.arrow_plot_clear_clicked_signal_callback)
 
+        self.arrow_plot_controller.new_result_calculated_signal.connect(self.new_result_calculated_signal_callback )
+
 
     ###
     # Overview controller callbacks
@@ -163,6 +165,12 @@ class TimeOfFlightController(QObject):
         
         #self.overview_controller. set_frequency_by_value(freq)
         self.overview_controller. select_fname(fname)
+
+    def new_result_calculated_signal_callback(self, package):
+        wave_type = package['wave_type']
+        condition = package['condition']
+        result = package['result']
+        self.output_controller.new_result(condition, wave_type, result)
 
 
 

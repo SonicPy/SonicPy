@@ -150,9 +150,11 @@ class UltrasoundAnalysisWidget(QWidget):
         
         self._layout = QtWidgets.QVBoxLayout()
         self._layout.setContentsMargins(0, 0, 0, 0)
+
         self.detail_widget = QtWidgets.QTabWidget()
-        self._detail_layout = QtWidgets.QTabWidget()
-        self._detail_layout.setContentsMargins(0, 0, 0, 0)
+        
+        '''self._detail_layout = QtWidgets.QTabWidget()
+        self._detail_layout.setContentsMargins(0, 0, 0, 0)'''
         self.buttons_widget_top = QWidget()
         self._buttons_layout_top = QtWidgets.QHBoxLayout()
         self._buttons_layout_top.setContentsMargins(0, 0, 0, 0)
@@ -230,7 +232,11 @@ class UltrasoundAnalysisWidget(QWidget):
         self.detail_widget.addTab(self.detail_win2, 'Correlation')
 
         #self.detail_widget.setLayout(self._detail_layout)
-        self.splitter_vertical.addWidget(self.detail_widget)
+        self._detail_widget = QtWidgets.QWidget()
+        self._detail_widget_layout = QtWidgets.QVBoxLayout(self._detail_widget)
+        self._detail_widget_layout.setContentsMargins(0,15,0,0)
+        self._detail_widget_layout.addWidget(self. detail_widget)
+        self.splitter_vertical.addWidget(self._detail_widget)
 
         self._layout.addWidget(self.splitter_vertical)
 

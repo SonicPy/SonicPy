@@ -8,5 +8,14 @@ class OutputModel():
 
         self.results_model = results_model
  
+        self.conds = []
 
+    def reset(self):
+        self.__init__(self.results_model)
+
+    def set_conds(self,conds):
+        self.conds = conds
+    
+    def get_conds(self):
+        return self.conds
     

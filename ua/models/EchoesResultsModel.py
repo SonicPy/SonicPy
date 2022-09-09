@@ -28,7 +28,7 @@ from PyQt5.QtCore import QObject
 from natsort import natsorted 
  
 import shutil
-
+from deepdiff import DeepDiff
 
 
 class EchoesResultsModel():
@@ -124,14 +124,42 @@ class EchoesResultsModel():
             for fname in echoes:
                 echo_f = echoes[fname]
                 for echo in echo_f:
-                    
-                
-                    freq = echo['frequency']
+                    #freq = echo['frequency']
                     folder = os.path.split(os.path.split(fname)[0])[-1]
                     if folder == condition:
                         echoes_out.append( echo)
         return echoes_out
- 
+
+    def save_new_centers(self, optimum, wave_type):
+        filename_waveform = optimum['filename_waveform']
+        center = optimum['center_opt']
+        freq = optimum['freq']
+        subfolder = os.path.split(filename_waveform)[0]
+        folder = os.path.join(subfolder, wave_type)
+
+        basename = os.path.basename(filename_waveform)+'.'+str(round(freq*1e-6,1))+'_MHz.json'
+        filename = os.path.join(folder,basename)
+
+        is_file = os.path.isfile(filename)
+        if is_file:
+            
+            with open(filename) as json_file:
+                data = json.load(json_file)
+                json_file.close()
+                if not 'centers' in data:
+                    data['centers']= center
+                else:
+                    if DeepDiff(data['centers'], center) == {}:
+                        
+                        return
+                    else:
+                
+                        with open(filename, 'w') as json_file:
+                            data['centers']= center
+                            json.dump(data, json_file, indent = 2) 
+                            print('updated ' + filename)
+                            json_file.close()
+           
  
     def save_result(self, correlation ):
         wave_type = correlation['wave_type']

@@ -84,6 +84,8 @@ class TimeOfFlightController(QObject):
 
         self.arrow_plot_controller.new_result_calculated_signal.connect(self.new_result_calculated_signal_callback )
 
+        self.output_controller.condition_selected_signal.connect(self.condition_selected_signal_callback)
+
 
     ###
     # Overview controller callbacks
@@ -95,6 +97,8 @@ class TimeOfFlightController(QObject):
     def file_selected_signal_callback(self, data):
 
         self.multiple_frequencies_controller.file_selected(data)
+        condition = data['cond']
+        self.output_controller.select_condition(condition)
 
     
     def folder_selected_signal_callback(self, folder):
@@ -167,12 +171,18 @@ class TimeOfFlightController(QObject):
         self.overview_controller. select_fname(fname)
 
     def new_result_calculated_signal_callback(self, package):
-        wave_type = package['wave_type']
-        condition = package['condition']
-        result = package['result']
-        self.output_controller.new_result(condition, wave_type, result)
+        
+        self.output_controller.new_result(package)
 
+    ###
+    # Output controller callbacks
+    ###
 
+    def condition_selected_signal_callback(self, condition):
+        conds = self.overview_controller.get_conditions_list()
+        ind = conds.index(condition)
+        self.overview_controller.widget.cond_scroll.setValue(ind)
+        #print(condition)
 
     ###
     # General stuff

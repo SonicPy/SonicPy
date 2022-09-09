@@ -48,9 +48,39 @@ class OutputController(QObject):
         condition = conds[row]
         self.condition_selected_signal.emit(condition)
 
+    def select_condition(self, condition):
+        conds = self.model.conds
+        row = conds.index(condition)
+        self.widget.select_output(row)
 
-    def new_result(self, condition, wave_type, result):
+    def save_result(self, package):
+        wave_type = package['wave_type']
+        condition = package['condition']
+        result = package['result']
+        optima = package['optima']
+        
 
+        # save center opt in the individual MHz files
+        # save rest of the result in a seperate [condition]_result.json file
+        em = self.echoes_results_model
+        centers = {}
+        for opt in optima:
+            
+            optimum = optima[opt]
+            filename_waveform = optimum['filename_waveform']
+            center = optimum['center_opt']
+            centers[filename_waveform]= center
+            
+
+            em.save_new_centers(optimum, wave_type)
+
+        print(centers)
+
+
+    def new_result(self, package):
+        wave_type = package['wave_type']
+        condition = package['condition']
+        result = package['result']
         
         if len(result):
             
@@ -71,6 +101,7 @@ class OutputController(QObject):
             if wave_type == 'S':
                 self.widget.set_output_ts(ind, time)
                 self.widget.set_output_t_e_s(ind, time_e)
+        self.save_result(package)
 
     def update_conditions(self):
         conds = self.get_all_conditions()

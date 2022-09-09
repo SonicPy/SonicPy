@@ -18,7 +18,7 @@ import json
 from ua.models.EchoesResultsModel import EchoesResultsModel
 
 class optima():
-    def __init__(self, data, frequency, filename_waveform, wave_type, init = True):
+    def __init__(self, data, frequency, filename_waveform, wave_type, centers, init = True):
         
         self.filename_waveform = filename_waveform
         self.wave_type = wave_type
@@ -30,16 +30,18 @@ class optima():
 
         self.num_opt = {}
         self.all_optima = {}
-        self.center_opt = {}
+        self.center_opt = centers
         
         if init:
             self.init_optima()
 
     def package_for_saving(self):
         package = {} 
+        package['filename_waveform'] = self.filename_waveform
         package['num_opt'] = self.num_opt
         package['all_optima'] = self.all_optima
         package['center_opt'] = self.center_opt
+        package['freq']= self.freq
         return package
 
     def restore_from_package(self, package):
@@ -48,10 +50,11 @@ class optima():
         self.center_opt = package['center_opt']
         
     def init_optima(self):
-        self.center_opt={}
+        
         self.other_opt={}
-        self.center_opt['min'] = self.minima_t[argmin(self.minima)]
-        self.center_opt['max'] = self.maxima_t[argmax(self.maxima)]
+        if self.center_opt == {}:
+            self.center_opt['min'] = self.minima_t[argmin(self.minima)]
+            self.center_opt['max'] = self.maxima_t[argmax(self.maxima)]
         self.num_opt['min'] = len(self.minima)
         self.num_opt['max'] = len(self.maxima)
         self.all_optima['max'] = self.maxima_t
@@ -208,6 +211,7 @@ class ArrowPlot():
         package['optima']=_optima
         package['line_plots']=self.line_plots
         package['result']=self.result
+        
         return package
 
     def restore_optima(self, package):
@@ -225,21 +229,27 @@ class ArrowPlot():
         filename_waveform = data['filename_waveform']
         wave_type = data['wave_type']
         correlation_optima = data['correlation']
+        centers_in_data = 'centers' in data
+        if centers_in_data:
+            centers = data['centers']
+        else:
+            centers = {}
 
         if not freq in self.optima:
-            data_pt = optima(correlation_optima, freq, filename_waveform, wave_type)
+            data_pt = optima(correlation_optima, freq, filename_waveform, wave_type, centers)
             self.optima[freq]=data_pt
         else:
             data_pt = self.optima[freq]
             stored_filename_waveform = data_pt.filename_waveform
             stored_wave_type = data_pt.wave_type
-            
+            stored_centers = data_pt.center_opt
             
             same = stored_filename_waveform == filename_waveform and \
                            stored_wave_type == wave_type and \
-                           self.compare_optima(correlation_optima, data_pt)
+                           self.compare_optima(correlation_optima, data_pt) and \
+                            centers == stored_centers
             if not same:
-                data_pt = optima(correlation_optima, freq, filename_waveform, wave_type)
+                data_pt = optima(correlation_optima, freq, filename_waveform, wave_type, centers)
                 self.optima[freq]=data_pt
 
     def compare_optima(self, opt1, opt2):

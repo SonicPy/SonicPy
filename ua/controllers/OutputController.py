@@ -55,8 +55,6 @@ class OutputController(QObject):
 
     def save_result(self, package):
         wave_type = package['wave_type']
-        condition = package['condition']
-        result = package['result']
         optima = package['optima']
         
 
@@ -74,7 +72,7 @@ class OutputController(QObject):
 
             em.save_new_centers(optimum, wave_type)
 
-        print(centers)
+        em.save_tof_result(package)
 
 
     def new_result(self, package):
@@ -111,6 +109,24 @@ class OutputController(QObject):
         for c in conds:
             self.widget.add_condition(c)
 
+    def update_tof_results(self):
+        # populates widget with results restored from file
+        em = self.echoes_results_model
+        tof_results_p = em.tof_results_p
+        tof_results_s = em.tof_results_s
+        for cond in tof_results_p:
+            res = tof_results_p[cond]['result']
+            ind = self.model.cond_to_ind(cond)
+            t, t_e = self.ave_time(res)
+            self.widget.set_output_tp(ind,t)
+            self.widget.set_output_t_e_p(ind,t_e)
+        for cond in tof_results_s:
+            res = tof_results_s[cond]['result']
+            ind = self.model.cond_to_ind(cond)
+            t, t_e = self.ave_time(res)
+            self.widget.set_output_ts(ind,t)
+            self.widget.set_output_t_e_s(ind,t_e)
+
     def get_all_conditions(self):
         conds = self.overview_controller.get_conditions_list()
         return conds
@@ -131,3 +147,17 @@ class OutputController(QObject):
             self.app.setStyleSheet(" ")
             #self.app.setPalette(self.win_palette)
             self.app.setStyle(WStyle)
+
+    def ave_time(self, result):
+        # calculates the average between the max correlation and min correlation time delays
+        times = []
+        times_e = []
+        for opt in result:
+            t = result[opt]['time_delay']
+            t_e = result[opt]['time_delay_std']
+            times.append(t)
+            times_e.append(t_e)
+        t = sum(times) / len(times) * 1e3
+        time_e = sum(times_e) / len(times_e ) * 1e3
+
+        return t, time_e

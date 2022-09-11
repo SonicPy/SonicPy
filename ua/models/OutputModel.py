@@ -19,3 +19,6 @@ class OutputModel():
     def get_conds(self):
         return self.conds
     
+    def cond_to_ind(self, cond):
+
+        return self.conds.index(cond)

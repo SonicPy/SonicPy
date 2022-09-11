@@ -75,6 +75,8 @@ class optima():
         return self.num_opt[opt]
         
     def get_optimum(self, opt, ind):
+        # ind = center optimum
+        # ind < or > 0, index above or below the center optimum
         if self.center_opt[opt] is None:
             return None
         if ind == 0:
@@ -131,7 +133,8 @@ class ArrowPlotsModel():
         self.package_p = {}
         self.package_s = {}
         
-    
+    def restore_tof_results(self, package):
+        print(package)
 
     def get_arrow_plot(self, cond, wave_type):
 
@@ -209,7 +212,19 @@ class ArrowPlot():
 
         package['condition'] = self.condition
         package['optima']=_optima
-        package['line_plots']=self.line_plots
+
+        output_line_plots = {}
+        for key in self.line_plots:
+            plot = self.line_plots[key]
+
+            line_plots_x = plot[0].tolist()
+            # every third element is a NaN, remove NaNs before packaging
+            del line_plots_x[3-1::3]
+            line_plots_y = plot[1].tolist()
+            # every third element is a NaN, remove NaNs before packaging
+            del line_plots_y[3-1::3]
+            output_line_plots[key] = [line_plots_x, line_plots_y]
+        package['line_plots']= output_line_plots
         package['result']=self.result
         
         return package
@@ -217,7 +232,25 @@ class ArrowPlot():
     def restore_optima(self, package):
         self.condition = package['condition']
         _optima= package['optima']
-        self.line_plots = package['line_plots']
+
+        
+        restored_plots = {}
+        for key in package['line_plots']:
+            plot = package['line_plots'][key]
+            line_plots_x = plot[0] 
+            line_plots_y = plot[1]
+            lp_len = len(line_plots_x)
+            nan_list_x = [np.nan]*lp_len
+            nan_list_y = [np.nan]*lp_len
+
+            line_plots_x = interleave_lists(line_plots_x, nan_list_x)
+            line_plots_y = interleave_lists(line_plots_y, nan_list_y)
+
+            plots = [np.asarray(line_plots_x), np.asarray(line_plots_y)]
+
+            restored_plots[key] = plots
+
+        self.line_plots = restored_plots
         self.result = package['result']
         for opt in _optima:
             self.optima[opt].restore_from_package(_optima[opt])
@@ -303,8 +336,15 @@ class ArrowPlot():
         '''
         freqs = list(self.optima.keys())
         
-        self.optima[freqs[0]].reset_optimum()
-        t = self.optima[freqs[0]].get_optimum(opt,0)
+        self.optima[freqs[0]] .reset_optimum() 
+
+        # use for loop to find lowest frequency with a selected optimum, 
+        # frequencies with all optima deselected will return t as None
+        # then use that frequency as the starting t 
+        for ind in range(len(freqs)):
+            t = self.optima[freqs[ind]].get_optimum(opt,0)
+            if t != None:
+                break
 
         for freq in freqs:
             if not self.optima[freq].get_optimum(opt,0) is None:
@@ -397,7 +437,15 @@ class ArrowPlot():
     def error_not_enough_datapoints(self):
         pass
    
-
+def interleave_lists(a_list, b_list):
+    result = []
+    while a_list and b_list:
+        result.append(a_list.pop(0))
+        result.append(a_list.pop(0))
+        result.append(b_list.pop(0))
+    result.extend(a_list)
+    result.extend(b_list)
+    return result
     
 
 def read_result_file( filename):

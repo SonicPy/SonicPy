@@ -106,7 +106,8 @@ class TimeOfFlightController(QObject):
         subfolders = copy.copy(self.overview_controller.model.conditions_folders_sorted)
         self.echoes_results_model.folder = folder
         self.echoes_results_model.subfolders = subfolders
-        self.echoes_results_model.load_result_from_file()
+        self.echoes_results_model.load_echoes_from_file()
+        self.echoes_results_model.load_tof_results_from_file()
         saved_echoes_p, saved_echoes_s = self.echoes_results_model.get_echoes()
         self.overview_controller.correlation_echoes_added(saved_echoes_p)
         self.overview_controller.correlation_echoes_added(saved_echoes_s)
@@ -118,9 +119,13 @@ class TimeOfFlightController(QObject):
             echo_type = "P"
         elif self.correlation_controller.display_window.s_wave_btn.isChecked():
             echo_type = "S"
+
+        
         self.arrow_plot_controller.set_wave_type(echo_type)
+        #self.arrow_plot_controller.
 
         self.output_controller.update_conditions()
+        self.output_controller.update_tof_results()
 
     ###
     # Ultrasound controller callbacks

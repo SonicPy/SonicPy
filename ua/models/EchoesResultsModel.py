@@ -39,7 +39,8 @@ class EchoesResultsModel():
         self.echoes_p = {}
         self.echoes_s = {}
 
-
+        self.tof_results_p = {}
+        self.tof_results_s = {}
         '''self.sorted_correlations_p = {}
         self.sorted_correlations_s = {}'''
 
@@ -131,6 +132,7 @@ class EchoesResultsModel():
         return echoes_out
 
     def save_new_centers(self, optimum, wave_type):
+        # save center opt in the individual MHz files
         filename_waveform = optimum['filename_waveform']
         center = optimum['center_opt']
         freq = optimum['freq']
@@ -146,20 +148,73 @@ class EchoesResultsModel():
             with open(filename) as json_file:
                 data = json.load(json_file)
                 json_file.close()
+                write = False
                 if not 'centers' in data:
                     data['centers']= center
+                    write = True
                 else:
-                    if DeepDiff(data['centers'], center) == {}:
+                    if DeepDiff(data['centers'], center) != {}:
+                        data['centers']= center
+                        write = True
+                if write:
+                    with open(filename, 'w') as json_file:
+                        json.dump(data, json_file, indent = 2) 
                         
-                        return
-                    else:
-                
-                        with open(filename, 'w') as json_file:
-                            data['centers']= center
-                            json.dump(data, json_file, indent = 2) 
-                            print('updated ' + filename)
-                            json_file.close()
-           
+                        json_file.close()
+                        if wave_type == "P":
+                            if filename_waveform in self.echoes_p:
+                                echoes =  self.echoes_p[filename_waveform]
+                                for ind in range(len(echoes)):
+                                    if echoes[ind]['frequency']== freq:
+
+                                        echoes[ind]['centers'] = center
+                                self.echoes_p[filename_waveform] = echoes
+                        elif wave_type == "S":
+                            if filename_waveform in self.echoes_s:
+                                echo =  self.echoes_s[filename_waveform]
+
+    def save_tof_result(self, package):
+        # save rest of the result in a seperate [condition].result.json file
+        wave_type = package['wave_type']
+        condition = package['condition']
+        result = package['result']
+        line_plots = package['line_plots']
+
+        # only output the result travel time and the arrow plot line fit 
+        output_package = {}
+        output_package['result'] = result
+        output_package['line_plots'] = line_plots
+        output_package['wave_type'] = wave_type
+        output_package['cond'] = condition
+
+        # update self:
+        if wave_type == 'P':
+            tof_results = self.tof_results_p
+        elif wave_type == 'S':
+            tof_results = self.tof_results_s
+        tof_results[condition] = output_package
+        
+
+        # save to file
+        folder = self.folder
+
+        p_folder = os.path.join(folder, condition, 'results')
+        exists = os.path.exists(p_folder)
+        if not exists:
+            try:
+                os.mkdir(p_folder)
+            except:
+                return
+
+        basename = condition + '.' + wave_type + '.json'
+        filename = os.path.join(p_folder,basename)
+        try:
+            with open(filename, 'w') as json_file:
+                json.dump(output_package, json_file, indent = 2) 
+
+                json_file.close()
+        except:
+            print('could not save file: '+ filename)                
  
     def save_result(self, correlation ):
         wave_type = correlation['wave_type']
@@ -190,9 +245,35 @@ class EchoesResultsModel():
             except:
                 print('could not save file: '+ filename)
 
-    
+    def load_tof_results_from_file(self ):
 
-    def load_result_from_file(self ):
+
+        loaded_package = {}
+        for subfolder in self.subfolders:
+            wave_types = ['P','S']
+            for wave_type in wave_types:
+                # update self:
+                if wave_type == 'P':
+                    tof_results = self.tof_results_p
+                elif wave_type == 'S':
+                    tof_results = self.tof_results_s
+
+                json_search = os.path.join(self.folder, subfolder,'results','*.'+ wave_type+ '.json')
+                res_files = glob.glob(json_search)
+                if len(res_files):
+                    for res in res_files:
+                        if subfolder in res:
+
+                            with open(res) as json_file:
+                                data = json.load(json_file)
+                                
+                                json_file.close()
+                            data['cond'] = subfolder
+                            data['wave_type'] = wave_type
+                            
+                            tof_results[subfolder] =  data
+
+    def load_echoes_from_file(self ):
 
         for subfolder in self.subfolders:
             wave_types = ['P','S']

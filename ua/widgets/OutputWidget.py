@@ -20,7 +20,7 @@ class OutputWidget(QtWidgets.QWidget):
         self.output_settings_widget = OutputSettingsWidget()
         self._layout.addWidget(self.output_settings_widget)
 
-        self.header_lbls = ['Condition', 'tp', 'tp st. dev.', 'ts','ts st. dev.', '']
+        self.header_lbls = ['Folder', 'tp', 'tp st. dev.', 'ts','ts st. dev.', '']
         self.output_tw = ListTableWidget(columns=len(self.header_lbls))
         self.set_up_tw(self.output_tw, self.header_lbls)
 
@@ -124,67 +124,69 @@ class OutputWidget(QtWidgets.QWidget):
         name_item = self.output_tw.item(ind, 0)
         name_item.setText(name)
 
-    def set_output_tp(self, ind, vp):
+    def set_output_tp(self, ind, tp):
         self.blockSignals(True)
-        vp_item = self.output_tw.item(ind, 1)
+        tp_item = self.output_tw.item(ind, 1)
         try:
-            vp_item.setText("{0:.3f} ns".format(vp))
+            tp_item.setText("{0:.3f} ns".format(tp))
         except ValueError:
-            vp_item.setText("{0} ns".format(vp))
+            tp_item.setText("{0} ns".format(tp))
         self.blockSignals(False)
 
+        
+    
     def get_output_tp(self, ind):
-        vp_item = self.output_tw.item(ind, 1)
-        vp = float(str(vp_item.text()).split()[0])
-        return vp
+        tp_item = self.output_tw.item(ind, 1)
+        tp = float(str(tp_item.text()).split()[0])
+        return tp
 
-    def set_output_t_e_p(self, ind, vep):
+    def set_output_t_e_p(self, ind, tep):
         self.blockSignals(True)
-        vep_item = self.output_tw.item(ind, 2)
+        tep_item = self.output_tw.item(ind, 2)
         try:
-            vep_item.setText("{0:.3f} ns".format(vep))
+            tep_item.setText("{0:.3f} ns".format(tep))
         except ValueError:
-            vep_item.setText("{0} ns".format(vep))
+            tep_item.setText("{0} ns".format(tep))
         self.blockSignals(False)
 
     def get_output_t_e_p(self, ind):
-        vep_item = self.output_tw.item(ind, 2)
-        vep = float(str(vep_item.text()).split()[0])
-        return vep
+        tep_item = self.output_tw.item(ind, 2)
+        tep = float(str(tep_item.text()).split()[0])
+        return tep
 
-    def set_output_ts(self, ind, vs):
+    def set_output_ts(self, ind, ts):
         self.blockSignals(True)
-        vs_item = self.output_tw.item(ind, 3)
+        ts_item = self.output_tw.item(ind, 3)
         try:
-            vs_item.setText("{0:.3f} ns".format(vs))
+            ts_item.setText("{0:.3f} ns".format(ts))
         except ValueError:
-            vs_item.setText("{0} ns".format(vs))
+            ts_item.setText("{0} ns".format(ts))
         self.blockSignals(False)
 
     def get_output_ts(self, ind):
-        vs_item = self.output_tw.item(ind, 3)
+        ts_item = self.output_tw.item(ind, 3)
         try:
-            vs = float(str(vs_item.text()).split()[0])
+            ts = float(str(ts_item.text()).split()[0])
         except:
-            vs = None
-        return vs
+            ts = None
+        return ts
 
-    def set_output_t_e_s(self, ind, ves):
+    def set_output_t_e_s(self, ind, tes):
         self.blockSignals(True)
-        ves_item = self.output_tw.item(ind, 4)
+        tes_item = self.output_tw.item(ind, 4)
         try:
-            ves_item.setText("{0:.3f} ns".format(ves))
+            tes_item.setText("{0:.3f} ns".format(tes))
         except ValueError:
-            ves_item.setText("{0} ns".format(ves))
+            tes_item.setText("{0} ns".format(tes))
         self.blockSignals(False)
 
     def get_output_t_e_s(self, ind):
-        ves_item = self.output_tw.item(ind, 4)
+        tes_item = self.output_tw.item(ind, 4)
         try:
-            ves = float(str(ves_item.text()).split()[0])
+            tes = float(str(tes_item.text()).split()[0])
         except:
-            ves = None
-        return ves
+            tes = None
+        return tes
 
 
        ########################################################################################

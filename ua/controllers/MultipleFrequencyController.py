@@ -246,6 +246,14 @@ class MultipleFrequencyController(QObject):
         
 
     def update_arrow_plot(self, data):
+
+        '''
+        This method is used to redraw the plot
+        data should contain frequency and condition 
+        condition is used to select the correct arrow plot
+        frequency is used to update the cursor
+        '''
+
         fbase = data['freq']
         cond = data['cond']
 

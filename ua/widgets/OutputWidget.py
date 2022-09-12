@@ -18,7 +18,7 @@ class OutputWidget(QtWidgets.QWidget):
         self._layout.setContentsMargins(8, 0, 8, 0)
 
         self.output_settings_widget = OutputSettingsWidget()
-        self._layout.addWidget(self.output_settings_widget)
+        #self._layout.addWidget(self.output_settings_widget)
 
         self.header_lbls = ['Folder', 'tp', 'tp st. dev.', 'ts','ts st. dev.', '']
         self.output_tw = ListTableWidget(columns=len(self.header_lbls))

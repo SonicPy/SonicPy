@@ -14,7 +14,7 @@ from um.models.tek_fileIO import *
 from scipy import signal
 import pyqtgraph as pg
 from utilities.utilities import zero_phase_bandpass_filter
-import json
+import json, copy
 from ua.models.EchoesResultsModel import EchoesResultsModel
 
 class optima():
@@ -156,7 +156,15 @@ class ArrowPlotsModel():
     def refresh_all_freqs(self, condition,wave_type):
         arrow_plot = self.get_arrow_plot(condition, wave_type)
 
-        echoes_by_condition = self.results_model.get_echoes_by_condition(condition, wave_type)
+        em = self.results_model
+
+        echoes_by_condition = em.get_echoes_by_condition(condition, wave_type)
+
+        results = em.get_results_by_condition(condition, wave_type)
+
+        if len(results):
+            arrow_plot.restore_results( copy.deepcopy(results))
+
         freqs = []
         for correlation in echoes_by_condition:
             freq = correlation['frequency']
@@ -229,10 +237,7 @@ class ArrowPlot():
         
         return package
 
-    def restore_optima(self, package):
-        self.condition = package['condition']
-        _optima= package['optima']
-
+    def restore_results(self, package):
         
         restored_plots = {}
         for key in package['line_plots']:
@@ -252,8 +257,7 @@ class ArrowPlot():
 
         self.line_plots = restored_plots
         self.result = package['result']
-        for opt in _optima:
-            self.optima[opt].restore_from_package(_optima[opt])
+       
 
             
     def add_freq(self, data):

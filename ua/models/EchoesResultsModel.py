@@ -131,6 +131,17 @@ class EchoesResultsModel():
                         echoes_out.append( echo)
         return echoes_out
 
+    def get_results_by_condition(self, condition, wave_type = 'P'):
+        results = {}
+        tof_results = {}
+        if wave_type == 'P':
+            tof_results = self.tof_results_p
+        elif wave_type == 'S':
+            tof_results = self.tof_results_s
+        if condition in tof_results:
+            results = tof_results[condition]
+        return results
+
     def save_new_centers(self, optimum, wave_type):
         # save center opt in the individual MHz files
         filename_waveform = optimum['filename_waveform']

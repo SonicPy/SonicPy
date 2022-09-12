@@ -46,7 +46,7 @@ class ArrowPlotController(QObject):
             self.setStyle(app)
         self.arrow_plot_window = ArrowPlotWidget()
         self.make_connections()
-        self.line_plots = {}
+       
         
     def make_connections(self): 
         self.arrow_plot_window.open_btn.clicked.connect(self.update_data)
@@ -214,10 +214,7 @@ class ArrowPlotController(QObject):
             self.new_result_calculated_signal.emit(package)
 
 
-    '''def load_file(self, filename):
-        t, spectrum = read_tek_csv(filename, subsample=4)
-        t, spectrum = zero_phase_highpass_filter([t,spectrum],1e4,1)
-        return t,spectrum, filename'''
+
         
     def update_data(self, *args, **kwargs):
         if self.cond != None:

@@ -1,23 +1,19 @@
 import pyqtgraph as pg
 from pyqtgraph import QtCore, mkPen, mkColor, hsvColor, ViewBox
 from PyQt5.QtCore import QObject, pyqtSignal, Qt, QPoint
-from PyQt5.QtGui import QColor, QPen
+
 from  PyQt5.QtWidgets import QDesktopWidget, QMainWindow, QApplication, QInputDialog, QWidget, QLabel
 from um.widgets.CustomWidgets import FlatButton, DoubleSpinBoxAlignRight, VerticalSpacerItem, NoRectDelegate, \
     HorizontalSpacerItem, ListTableWidget, VerticalLine, DoubleMultiplySpinBoxAlignRight
 from utilities.HelperModule import calculate_color, get_partial_index, get_partial_value
 from um.widgets.ExLegendItem import LegendItem
 from um.widgets.PhasePlot import PhasePlot
-import pyqtgraph.exporters
-import unicodedata
+
 from numpy import argmax, nan, greater,less, append, sort, array, isnan
 
 
 from PyQt5 import QtWidgets
 import copy
-from functools import partial
-
-from scipy.signal import argrelextrema
 
 
 class SimpleDisplayWidget(QtWidgets.QWidget):
@@ -110,6 +106,9 @@ class SimpleDisplayWidget(QtWidgets.QWidget):
 
     def setText(self, text, plot_ind):
         self.fig.set_plot_label(text,plot_ind)
+
+    def setColor(self, color, plot_ind):
+        self.fig.set_plot_label_color(color,plot_ind)
 
     def raise_widget(self):
         self.show()

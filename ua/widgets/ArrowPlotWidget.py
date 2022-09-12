@@ -40,11 +40,17 @@ class ArrowPlotWidget(QWidget):
                         antialias=True, pen=None, symbolBrush=(0,100,255), symbolPen=None, symbolSize = 7)
         self.max_line_plot = pg.PlotDataItem([], [], title="",
                         antialias=True, pen=pg.mkPen(color=(255,255,255,150), width=2), connect="finite" )
+        self.result_plot = pg.PlotDataItem([], [], title="",
+                        antialias=True, pen=pg.mkPen(color=(255,255,255,150), width=2), connect="finite" )
+        
         self.main_plot.sigPointsClicked.connect(self.point_clicked)
         self.maximums.sigPointsClicked.connect(self.point_clicked)
         self.plot_win.addItem(self.max_line_plot)
         self.plot_win.addItem(self.main_plot)
+        self.plot_win.addItem(self.result_plot)
         self.plot_win.addItem(self.maximums)
+
+        
 
         # next lines are needed to create the legend items for the plot even though these plots are not the ones used
         # may change how this is done later
@@ -54,6 +60,7 @@ class ArrowPlotWidget(QWidget):
                         'data_color': '#eeeeee',\
                         'rois_color': (0,255,100), \
                         })
+        self.set_color((255,255,255,150), 2)
 
     def point_clicked(self, item, pt):
         point = [pt[0].pos().x(),pt[0].pos().y()]
@@ -75,14 +82,18 @@ class ArrowPlotWidget(QWidget):
     def get_cursor_pos(self):
         return self.win.fig.win.get_cursor_pos()
 
-    def set_selected_folder (self, text):
-        self. win.setText(text , 0)
 
     def set_selected_frequency (self, text):
         self. win.setText(text , 1)
 
+    def set_color (self, color, ind):
+        self. win. setColor (color , ind)
+
     def set_name (self, text):
         self. win.setText(text , 0)
+
+    def set_result (self, text):
+        self. win.setText(text , 2)
          
     def make_widget(self):
         my_widget = self
@@ -141,10 +152,10 @@ class ArrowPlotWidget(QWidget):
         self.output_condition_lbl =QtWidgets.QLabel('')
         _buttons_layout_bottom.addWidget(self.output_condition_lbl)
         self.output_ebx = QtWidgets.QLineEdit('')
-        _buttons_layout_bottom.addWidget(self.output_ebx)
+        #_buttons_layout_bottom.addWidget(self.output_ebx)
         #_buttons_layout_bottom.addSpacerItem(HorizontalSpacerItem())
         buttons_widget_bottom.setLayout(_buttons_layout_bottom)
-        _layout.addWidget(buttons_widget_bottom)
+        #_layout.addWidget(buttons_widget_bottom)
         my_widget.setLayout(_layout)
         
 

@@ -1,17 +1,12 @@
-from binhex import getfileinfo
+
 import numpy as np
 from scipy import signal
 from scipy import blackman, nanmean
 from scipy.signal import hilbert
-from scipy.fftpack import rfft, irfft, fftfreq, fft
-import scipy.fftpack
-import csv
-from um.models.tek_fileIO import get_file_format, read_tek_csv, read_tek_csv_files_2d, read_ascii_scope_files_2d
+from scipy.fftpack import fft
+
+
 import math
-from PyQt5 import QtCore, QtWidgets
-import time, os
-
-
 
 
 def butter_bandstop_filter(data, lowcut, highcut, order):

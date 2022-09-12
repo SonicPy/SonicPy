@@ -6,17 +6,16 @@ from posixpath import basename
 from utilities.utilities import *
 from utilities.HelperModule import move_window_relative_to_screen_center, get_partial_index, get_partial_value
 import numpy as np
-from numpy import argmax, nan, greater,less, append, sort, array
 
-from scipy import optimize
+
 from scipy.signal import argrelextrema, tukey
-from functools import partial
+
 from um.models.tek_fileIO import *
-from scipy import signal
+
 from scipy.signal import find_peaks
-import pyqtgraph as pg
+
 from utilities.utilities import zero_phase_bandpass_filter
-import json
+
 from utilities.CARSMath import fit_gaussian, polyfitw
 
 from ua.models.EchoesResultsModel import EchoesResultsModel

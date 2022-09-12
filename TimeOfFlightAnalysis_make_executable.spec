@@ -5,6 +5,10 @@ import os
 from distutils.sysconfig import get_python_lib
 import sys
 
+import scipy
+
+scipy_libs = os.path.join(os.path.dirname(scipy.__file__), '.libs')
+
 sys.setrecursionlimit(5000)
 
 folder = os.getcwd()
@@ -22,7 +26,7 @@ extra_datas = [
 
 platform = ''
 extra_binaries=[]
-folder = ''
+#folder = ''
 
 if _platform == "linux" or _platform == "linux2":
     platform = "Linux"
@@ -49,7 +53,7 @@ excl = ['matplotlib', 'PySide','PyQt4']
 print('start Analysis')
 
 a = Analysis(['TimeOfFlightAnalysis.py'],
-             pathex=[folder],
+             pathex=[scipy_libs],
              binaries=extra_binaries,
              datas=extra_datas,
              hiddenimports=['pyeqt',

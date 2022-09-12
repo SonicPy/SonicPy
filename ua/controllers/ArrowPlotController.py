@@ -182,20 +182,20 @@ class ArrowPlotController(QObject):
             self.arrow_plot_window.update_view(xData,yData)
             self.arrow_plot_window.update_maximums(np.asarray(xMax),np.asarray(yMax))
 
-            self.arrow_plot_window.set_selected_folder(str(self.cond))
+            self.arrow_plot_window.set_name(str(self.cond))
 
             if opt in arrow_plot.line_plots:
                 self.arrow_plot_window.update_max_line(*arrow_plot.line_plots[opt])
                 
                 result = arrow_plot.result[opt]
-                out_str = 'Time delay = ' + \
-                            str(result['time_delay']) + \
-                                ' microseconds, st.dev. = ' + \
-                                    str(result['time_delay_std']) +' microseconds'
-                self.arrow_plot_window.output_ebx.setText(out_str)
+                out_str = f'\N{GREEK SMALL LETTER TAU} = ' + \
+                            str(round(result['time_delay']* 1000, 2)) + \
+                                f'(' + \
+                                    str(round(result['time_delay_std']* 1000, 2)) + f') ns'
+                self.arrow_plot_window.set_result(out_str)
             else:
                 self.arrow_plot_window.update_max_line([],[])
-                self.arrow_plot_window.output_ebx.setText('')
+                self.arrow_plot_window.set_result('')
             
           
             

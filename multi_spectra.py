@@ -5,7 +5,7 @@ import sys
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtGui, QtCore
 from um.widgets.PltWidget import SimpleDisplayWidget, DetailDisplayWidget
-from scipy import signal
+
 import time
 from utilities.utilities import *
 from utilities.HelperModule import move_window_relative_to_screen_center

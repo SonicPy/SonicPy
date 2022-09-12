@@ -1,5 +1,4 @@
 
-import os.path, sys
 from this import d
 from ua.models.OverViewModel import Sort_Tuple
 from utilities.utilities import *
@@ -7,12 +6,11 @@ from utilities.HelperModule import move_window_relative_to_screen_center, get_pa
 import numpy as np
 from numpy import argmax, nan, greater,less, append, sort, array, argmin
 
-from scipy import optimize
-from scipy.signal import argrelextrema, tukey
-from functools import partial
+
+from scipy.signal import argrelextrema
+
 from um.models.tek_fileIO import *
-from scipy import signal
-import pyqtgraph as pg
+
 from utilities.utilities import zero_phase_bandpass_filter
 import json, copy
 from ua.models.EchoesResultsModel import EchoesResultsModel

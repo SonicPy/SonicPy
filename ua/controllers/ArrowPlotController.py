@@ -210,8 +210,10 @@ class ArrowPlotController(QObject):
             opt = self.get_opt()
             arrow_plot.calculate_lines(opt)
             package = arrow_plot.package
-            package['wave_type']= self.wave_type
-            self.new_result_calculated_signal.emit(package)
+            if len(package):
+
+                package['wave_type']= self.wave_type
+                self.new_result_calculated_signal.emit(package)
 
 
 

@@ -93,15 +93,50 @@ class EchoesResultsModel():
         return deleted
 
     def delete_echoes(self, clear_info):
+        self.delete_result(clear_info)
+        cl = clear_info['clear_info']
+        wave_type = clear_info['wave_type']
+        condition = clear_info['condition']
+        
+        if wave_type == 'P':
+            if condition in self.tof_results_p:
+                del self.tof_results_p[condition]
+        elif wave_type == 'S':
+            if condition in self.tof_results_s:
+                del self.tof_results_s[condition]
         cleared = True
-        for cl in clear_info:
-            wave_type = cl['wave_type']
-            frequency = cl['frequency']
-            fname = cl['filename_waveform']
+        for c in cl:
+            wave_type = c['wave_type']
+            frequency = c['frequency']
+            fname = c['filename_waveform']
 
             cleared = self.delete_echo(fname, frequency, wave_type)
+        
 
         return cleared
+
+    def delete_result(self, clear_info):
+        wave_type = clear_info['wave_type']
+        condition = clear_info['condition']
+
+        # save to file
+        folder = self.folder
+
+        p_folder = os.path.join(folder, condition, 'results')
+        exists = os.path.exists(p_folder)
+        if not exists:
+            try:
+                os.mkdir(p_folder)
+            except:
+                return
+
+        basename = condition + '.' + wave_type + '.json'
+        filename = os.path.join(p_folder,basename)
+
+        if os.path.isfile(filename):
+
+            os.remove(filename)
+        
 
     def clear(self):
         self.__init__()

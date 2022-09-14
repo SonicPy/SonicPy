@@ -14,6 +14,8 @@ from ua.controllers.ArrowPlotController import ArrowPlotController
 
 from PyQt5 import QtWidgets, QtCore
 
+import csv
+
 ############################################################
 
 class OutputController(QObject):
@@ -41,6 +43,7 @@ class OutputController(QObject):
     def make_connections(self): 
         
         self.widget.output_tw.itemSelectionChanged.connect(self.option_tw_selection_changed_callback)
+        self.widget.output_settings_widget.save_btn.clicked.connect(self.save_btn_callback)
 
     def option_tw_selection_changed_callback(self, *args):
         row = self.widget.get_selected_output_row()
@@ -74,11 +77,37 @@ class OutputController(QObject):
 
         em.save_tof_result(package)
 
+    def save_btn_callback(self):
+        data = self.widget.get_table_data()
+        
+        output_csv = 'test_out.csv'
+        with open(output_csv, "w", newline='') as csv_file:
+            writer = csv.writer(csv_file, delimiter=',')
+            for line in data:
+                writer.writerow(line)
+            csv_file.close()
+
+
+    def delete_result(self, clear_info):
+        wave_type = clear_info['wave_type']
+        condition = clear_info['condition']
+
+        conds = self.model.conds
+        ind = conds.index(condition)
+
+        if wave_type == 'P':
+            self.widget.set_output_tp(ind, '')
+            self.widget.set_output_t_e_p(ind, '')
+        if wave_type == 'S':
+            self.widget.set_output_ts(ind, '')
+            self.widget.set_output_t_e_s(ind, '')
+
 
     def new_result(self, package):
         wave_type = package['wave_type']
         condition = package['condition']
         result = package['result']
+        
         
         if len(result):
             

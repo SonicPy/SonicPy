@@ -35,12 +35,16 @@ class UltrasoundAnalysisModel():
         self.bounds = [[0,0],[0,0]]
         self.freq = 0
         self.wave_type = 'P' # or 'S'
-        self.settings = {'tukey_alpha':0.2}
+        self.settings = {'tukey_alpha':0.2,
+                        'width':75.}
 
         
 
         self.minima = []
         self.maxima = []
+
+    def set_echo_width(self, value):
+        self.settings['width'] = float(value)
 
     def fit_func(self, x, a, b,c,d):
         '''

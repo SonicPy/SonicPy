@@ -189,10 +189,7 @@ class ArrowPlotsModel():
         condition = clear_info['condition']
 
         arrow_plot = self.get_arrow_plot(condition, wave_type)
-
-        freqs = list(arrow_plot.optima.keys())
-        for freq in  freqs:
-            del arrow_plot.optima[freq]
+        arrow_plot.clear()
             
 
 class ArrowPlot():
@@ -208,7 +205,11 @@ class ArrowPlot():
         self.package = {}
 
     def clear(self):
-        self.__init__(self.results_model)
+        self.optima = {}
+        self.line_plots = {}
+        self.result = {}
+
+        self.package = {}
 
     def package_optima(self):
         package = {}

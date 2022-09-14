@@ -45,10 +45,12 @@ class UltrasoundAnalysisController(QObject):
         super().__init__()
         self.model = UltrasoundAnalysisModel(results_model)
         self.fname = None
+
+        
     
         if app is not None:
             self.setStyle(app)
-        self.display_window = UltrasoundAnalysisWidget()
+        self.display_window = UltrasoundAnalysisWidget(settings = self.model.settings)
         
         self.make_connections()
        
@@ -73,6 +75,7 @@ class UltrasoundAnalysisController(QObject):
     def make_connections(self): 
         self.display_window.open_btn.clicked.connect(self.update_data)
         self.display_window.freq_ebx.valueChanged.connect(self.calculate_data)
+        self.display_window.echo_width.valueChanged.connect(self.model.set_echo_width)
 
         self.connect_regions()
 
@@ -148,14 +151,14 @@ class UltrasoundAnalysisController(QObject):
 
     def set_echo_region_position(self, index):
         center = self.display_window.plot_widget.cursor_pos
-        pad = 0.06e-6
+        pad = self.model.settings['width'] * 1e-9
         wave_type = self.model.wave_type
         if wave_type == 'P':
             echo = self.display_window.echo_bounds_p[index]
-            echo.setRegion([center-pad, center+pad])
+            echo.setRegion([center, center+pad])
         elif wave_type == 'S':
             echo = self.display_window.echo_bounds_s[index]
-            echo.setRegion([center-pad, center+pad])
+            echo.setRegion([center, center+pad])
         
     def calculate_data_silent(self, freq, bounds):
 

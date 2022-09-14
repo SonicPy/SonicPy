@@ -162,10 +162,12 @@ class TimeOfFlightController(QObject):
 
     def arrow_plot_clear_clicked_signal_callback(self, clear_info):
         cl = clear_info['clear_info']
-        cleared = self.echoes_results_model.delete_echoes(cl)
+        cleared = self.echoes_results_model.delete_echoes(clear_info)
+
         if cleared:
             self.arrow_plot_controller.condition_cleared(clear_info)
             self.overview_controller.condition_cleared(clear_info) 
+            self.output_controller.delete_result(clear_info)
 
 
     def arrow_plot_freq_cursor_changed_signal_callback(self, cursor_info):

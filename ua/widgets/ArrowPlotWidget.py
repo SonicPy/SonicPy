@@ -34,13 +34,13 @@ class ArrowPlotWidget(QWidget):
 
     def create_plots(self):
         self.plot_win = self.win.fig.win
-        self.main_plot = pg.PlotDataItem([], [], title="",
+        self.main_plot = pg.PlotDataItem([], [],
                         antialias=True, pen=None, symbolBrush=(255,0,100), symbolPen=None, symbolSize = 7)
-        self.maximums = pg.PlotDataItem([], [], title="",
+        self.maximums = pg.PlotDataItem([], [],
                         antialias=True, pen=None, symbolBrush=(0,100,255), symbolPen=None, symbolSize = 7)
-        self.max_line_plot = pg.PlotDataItem([], [], title="",
+        self.max_line_plot = pg.PlotDataItem([], [], 
                         antialias=True, pen=pg.mkPen(color=(255,255,255,150), width=2), connect="finite" )
-        self.result_plot = pg.PlotDataItem([], [], title="",
+        self.result_plot = pg.PlotDataItem([], [], 
                         antialias=True, pen=pg.mkPen(color=(255,255,255,150), width=2), connect="finite" )
         
         self.main_plot.sigPointsClicked.connect(self.point_clicked)
@@ -55,7 +55,7 @@ class ArrowPlotWidget(QWidget):
         # next lines are needed to create the legend items for the plot even though these plots are not the ones used
         # may change how this is done later
         
-        self.plot_win.create_plots([],[],[],[],'')
+        self.plot_win.create_plots([],[],[],[],'Inverse frequency (1/Hz)')
         self.plot_win.set_colors( { 
                         'data_color': '#eeeeee',\
                         'rois_color': (0,255,100), \
@@ -137,7 +137,7 @@ class ArrowPlotWidget(QWidget):
 
         buttons_widget_top.setLayout(_buttons_layout_top)
         _layout.addWidget(buttons_widget_top)
-        params = "Arrow Plot", 'Time delay (s)', 'Inverse frequency (1/Hz)'
+        params = "Arrow Plot", f'\N{GREEK SMALL LETTER TAU} (s)', 'Inverse frequency (1/Hz)'
         self.win = SimpleDisplayWidget(params)
 
         

@@ -21,7 +21,7 @@ class UltrasoundAnalysisWidget(QWidget):
     up_down_signal = pyqtSignal(str)
     panelClosedSignal = pyqtSignal()
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         super().__init__()
         self.initialized = False
         self.t = None
@@ -36,7 +36,14 @@ class UltrasoundAnalysisWidget(QWidget):
 
         self.create_plots()
     
- 
+        if 'settings' in kwargs:
+            settings = kwargs['settings']
+            if 'width' in settings:
+                width = settings['width']
+            else:
+                width = 75
+            self.echo_width.setValue(float(width))
+
 
     def create_plots(self):
 
@@ -80,7 +87,7 @@ class UltrasoundAnalysisWidget(QWidget):
         self.detail_win1.setText('Echo 2' , 1)
 
         detail_plot2 = self.detail_win2.fig.win
-        detail_plot2.create_plots([],[],[],[],'Time')
+        detail_plot2.create_plots([],[],[],[],f'\N{GREEK SMALL LETTER TAU} (s)')
         detail_plot2.set_colors( { 
                         'data_color': (0,255,100),\
                         })
@@ -165,24 +172,29 @@ class UltrasoundAnalysisWidget(QWidget):
         self.fname_lbl = QtWidgets.QLineEdit('')
         self.freq_lbl = QtWidgets.QLabel(' 𝑓')
         self.freq_ebx = DoubleSpinBoxAlignRight()
-        self.freq_ebx.setMaximum(100)
+        self.freq_ebx.setMaximum(1000)
         self.freq_ebx.setMinimum(1)
         self.freq_ebx.setValue(21)
         self.N_cbx = QtWidgets.QCheckBox('+/-')
         self.N_cbx.setChecked(True)
         self.save_btn = QtWidgets.QPushButton('Save')
         self.arrow_plt_btn = QtWidgets.QPushButton(u'Inverse 𝑓')
+        self.echo_width = DoubleSpinBoxAlignRight()
+        self.echo_width.setDecimals(0)
+        self.echo_width.setMaximum(10000)
+        self.echo_width_lbl = QtWidgets.QLabel('Width (ns)')
 
         self.echo1_cursor_btn = QtWidgets.QPushButton('Echo 1')
         self.echo2_cursor_btn = QtWidgets.QPushButton('Echo 2')
 
         
         
-        self._buttons_layout_top.addWidget(self.open_btn)
+        #self._buttons_layout_top.addWidget(self.open_btn)
         #self._buttons_layout_top.addWidget(self.fname_lbl)
         self._buttons_layout_top.addWidget(self.freq_lbl)
         self._buttons_layout_top.addWidget(self.freq_ebx)
-
+        self._buttons_layout_top.addWidget(self.echo_width_lbl)
+        self._buttons_layout_top.addWidget(self.echo_width)
         self._buttons_layout_top.addWidget(self.echo1_cursor_btn)
         self._buttons_layout_top.addWidget(self.echo2_cursor_btn)
         #self._buttons_layout_top.addWidget(self.N_cbx)
@@ -224,7 +236,7 @@ class UltrasoundAnalysisWidget(QWidget):
         self.detail_win0 = SimpleDisplayWidget(self.detail0)
         self.detail1 = "Filtered echoes", 'Amplitude', 'Time'
         self.detail_win1 = SimpleDisplayWidget(self.detail1)
-        self.detail2 = "Correlation", 'Amplitude', 'Time'
+        self.detail2 = "Correlation", 'Amplitude', f'\N{GREEK SMALL LETTER TAU} (s)'
         self.detail_win2 = SimpleDisplayWidget(self.detail2)
 
         self.detail_widget.addTab(self.detail_win0, 'Selected')

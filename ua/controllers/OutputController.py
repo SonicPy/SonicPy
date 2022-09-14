@@ -14,6 +14,8 @@ from ua.controllers.ArrowPlotController import ArrowPlotController
 
 from PyQt5 import QtWidgets, QtCore
 
+from um.widgets.UtilityWidgets import save_file_dialog
+
 import csv
 
 ############################################################
@@ -77,10 +79,15 @@ class OutputController(QObject):
 
         em.save_tof_result(package)
 
-    def save_btn_callback(self):
-        data = self.widget.get_table_data()
+    def save_btn_callback(self, **kwargs):
         
-        output_csv = 'test_out.csv'
+        filename = save_file_dialog(self.widget, 'Save as...', self.model.results_model.folder, '*.csv', True)
+        if len(filename):
+            self.export_table(filename)
+
+    def export_table(self, filename):
+        data = self.widget.get_table_data()
+        output_csv = filename
         with open(output_csv, "w", newline='') as csv_file:
             writer = csv.writer(csv_file, delimiter=',')
             for line in data:

@@ -37,13 +37,10 @@ class TimeOfFlightWidget(QMainWindow):
         self._middle_widget_layout.addWidget(self.multiple_frequencies_widget)
         self.middle_widget.setLayout(self._middle_widget_layout)
 
-        self.right_widget = QtWidgets.QWidget()
-        self._right_widget_layout = QtWidgets.QVBoxLayout()
-        self._right_widget_layout.addWidget(self.arrow_plot_widget)
-        self._right_widget_layout.addWidget(self.output_widget)
-        self.right_widget.setLayout(self._right_widget_layout)
-
-        
+        self.right_widget = QtWidgets.QSplitter(Qt.Vertical)
+        self.right_widget.addWidget(self.arrow_plot_widget)
+        self.right_widget.addWidget(self.output_widget)
+   
 
         #self.analysis_widget.resize(800,800)
 
@@ -93,17 +90,10 @@ class TimeOfFlightWidget(QMainWindow):
         
 
         self.splitter_horizontal = QtWidgets.QSplitter(Qt.Horizontal)
-
         self.splitter_horizontal.addWidget(self.overview_widget)
-
-
-
         self.splitter_horizontal.addWidget(self.middle_widget)
-
         self.splitter_horizontal.addWidget(self.right_widget)
-        
         self.splitter_horizontal.setSizes([600,600, 600])
-
         self._center_widget_layout.addWidget(self.splitter_horizontal)
 
 

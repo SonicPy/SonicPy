@@ -98,7 +98,7 @@ class ArrowPlotWidget(QWidget):
     def make_widget(self):
         my_widget = self
         _layout = QtWidgets.QVBoxLayout()
-        _layout.setContentsMargins(0, 0, 0, 0)
+        _layout.setContentsMargins(8, 0, 0, 0)
         detail_widget = QtWidgets.QWidget()
         _detail_layout = QtWidgets.QHBoxLayout()
         _detail_layout.setContentsMargins(0, 0, 0, 0)

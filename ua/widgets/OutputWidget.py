@@ -15,7 +15,7 @@ class OutputWidget(QtWidgets.QWidget):
         
         self._layout = QtWidgets.QVBoxLayout()
         self._layout.setSpacing(0)
-        self._layout.setContentsMargins(0, 0, 0, 0)
+        self._layout.setContentsMargins(8, 12, 0, 0)
 
         
 
@@ -233,7 +233,7 @@ class OutputMenuWidget(QtWidgets.QWidget):
         self._layout.setSpacing(7)
         self._layout.setContentsMargins(5, 5, 5, 5)
 
-        self.save_btn = QtWidgets.QPushButton('Save')
+        self.save_btn = QtWidgets.QPushButton('Export table')
         self._layout.addWidget(self.save_btn)
 
     

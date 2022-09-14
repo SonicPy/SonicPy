@@ -67,7 +67,7 @@ class Overlay_xy():
         self.success=True
 
     def get_data_from_csv_file(self, filename):
-        data = read_tek_csv(filename,subsample=2)
+        data = read_tek_csv(filename,subsample=1)
         return data
 
     def get_det_setting(self):

@@ -6,7 +6,7 @@ import os
 
 theme = 1
 
-autoload = True
+autoload = False
 
 resources_path = os.path.join(os.path.dirname(__file__), 'resources')
 calibrants_path = os.path.join(resources_path, 'calibrants')

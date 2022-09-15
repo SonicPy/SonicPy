@@ -98,16 +98,19 @@ class OutputController(QObject):
     def delete_result(self, clear_info):
         wave_type = clear_info['wave_type']
         condition = clear_info['condition']
+        cl = clear_info['clear_info']
 
-        conds = self.model.conds
-        ind = conds.index(condition)
+        if len(cl):
 
-        if wave_type == 'P':
-            self.widget.set_output_tp(ind, '')
-            self.widget.set_output_t_e_p(ind, '')
-        if wave_type == 'S':
-            self.widget.set_output_ts(ind, '')
-            self.widget.set_output_t_e_s(ind, '')
+            conds = self.model.conds
+            ind = conds.index(condition)
+
+            if wave_type == 'P':
+                self.widget.set_output_tp(ind, '')
+                self.widget.set_output_t_e_p(ind, '')
+            if wave_type == 'S':
+                self.widget.set_output_ts(ind, '')
+                self.widget.set_output_t_e_s(ind, '')
 
 
     def new_result(self, package):

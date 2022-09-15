@@ -104,6 +104,8 @@ class TimeOfFlightController(QObject):
     def folder_selected_signal_callback(self, folder):
         self.widget.setWindowTitle("Time-of-flight analysis. V." + __version__ + "  © R. Hrubiak, 2022. Folder: "+ os.path.abspath( folder))
         subfolders = copy.copy(self.overview_controller.model.conditions_folders_sorted)
+
+        self.echoes_results_model.clear()
         self.echoes_results_model.folder = folder
         self.echoes_results_model.subfolders = subfolders
         self.echoes_results_model.load_echoes_from_file()
@@ -114,14 +116,16 @@ class TimeOfFlightController(QObject):
         self.overview_controller.re_plot_single_frequency()
         self.overview_controller.re_plot_single_condition()
 
+        self.correlation_controller.clear()
+
         echo_type = ''
         if  self.correlation_controller.display_window.p_wave_btn.isChecked():
             echo_type = "P"
         elif self.correlation_controller.display_window.s_wave_btn.isChecked():
             echo_type = "S"
 
-        
-        self.arrow_plot_controller.set_wave_type(echo_type)
+        self.arrow_plot_controller.clear()
+        self.arrow_plot_controller.refresh_model()
         #self.arrow_plot_controller.
 
         self.output_controller.update_conditions()

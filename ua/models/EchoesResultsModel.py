@@ -40,6 +40,9 @@ class EchoesResultsModel():
         '''self.sorted_correlations_p = {}
         self.sorted_correlations_s = {}'''
 
+    def clear(self):
+        self.__init__()
+
     def add_echoe(self, correlation):
         
         wave_type = correlation['wave_type']
@@ -118,24 +121,26 @@ class EchoesResultsModel():
     def delete_result(self, clear_info):
         wave_type = clear_info['wave_type']
         condition = clear_info['condition']
-
+        cl = clear_info['clear_info']
         # save to file
-        folder = self.folder
 
-        p_folder = os.path.join(folder, condition, 'results')
-        exists = os.path.exists(p_folder)
-        if not exists:
-            try:
-                os.mkdir(p_folder)
-            except:
-                return
+        if len(cl):
+            folder = self.folder
 
-        basename = condition + '.' + wave_type + '.json'
-        filename = os.path.join(p_folder,basename)
+            p_folder = os.path.join(folder, condition, 'results')
+            exists = os.path.exists(p_folder)
+            if not exists:
+                try:
+                    os.mkdir(p_folder)
+                except:
+                    return
 
-        if os.path.isfile(filename):
+            basename = condition + '.' + wave_type + '.json'
+            filename = os.path.join(p_folder,basename)
 
-            os.remove(filename)
+            if os.path.isfile(filename):
+
+                os.remove(filename)
         
 
     def clear(self):

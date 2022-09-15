@@ -130,6 +130,10 @@ class ArrowPlotsModel():
         self.results_model = results_model
         self.package_p = {}
         self.package_s = {}
+
+    def clear(self):
+
+        self.__init__(self.results_model)
         
     def restore_tof_results(self, package):
         print(package)

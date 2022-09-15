@@ -43,6 +43,21 @@ class UltrasoundAnalysisModel():
         self.minima = []
         self.maxima = []
 
+    def clear(self):
+        self.waveform = None
+        self.envelope = None
+        self.t = None
+        self.spectrum = None
+        self.demodulated = None
+        self.plot1_bg=([],[])
+        self.plot2_bg=([],[])
+        self.c_diff_optimized = 0
+        self.bounds = [[0,0],[0,0]]
+        self.freq = 0
+
+        self.minima = []
+        self.maxima = []
+
     def set_echo_width(self, value):
         self.settings['width'] = float(value)
 

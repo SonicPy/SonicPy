@@ -145,11 +145,13 @@ class OverViewController(QObject):
        
         condition = clear_info['condition']
         wave_type = clear_info['wave_type']
-        self. model.clear_condition(condition, wave_type) 
+        cl = clear_info['clear_info']
+        if len(cl):
+            self. model.clear_condition(condition, wave_type) 
 
-        self.re_plot_single_frequency() 
-        self.re_plot_single_condition()
-        
+            self.re_plot_single_frequency() 
+            self.re_plot_single_condition()
+            
 
     def save_result(self):
         pass

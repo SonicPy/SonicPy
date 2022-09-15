@@ -44,6 +44,24 @@ class UltrasoundAnalysisWidget(QWidget):
                 width = 75
             self.echo_width.setValue(float(width))
 
+    def clear(self):
+        self.plot_widget.setText('',0)
+        self.update_view([],[],'')
+
+        self.lr1_p.setRegion([0, 0])
+        self.lr2_p.setRegion([0, 0])
+
+        self.lr1_s.setRegion([0, 0])
+        self.lr2_s.setRegion([0, 0])
+
+        out = [[],[]]
+        self.detail_plot0.setData(*out)
+        self.detail_plot0_bg.setData(*out)
+        self.detail_plot1.setData(*out)
+        self.detail_plot1_bg.setData(*out)
+        self.detail_plot2.setData(*out)
+        self.detail_plot2_bg.setData(*out)
+
 
     def create_plots(self):
 

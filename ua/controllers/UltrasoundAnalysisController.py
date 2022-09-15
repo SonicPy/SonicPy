@@ -58,6 +58,11 @@ class UltrasoundAnalysisController(QObject):
         '''filename='resources/ultrasonic/4000psi-300K_+21MHz000.csv'
         self.update_data(filename=filename)'''
 
+    def clear(self):
+        self.display_window.clear()
+        self.model.clear()
+        
+
     def connect_regions(self):
         self.display_window.lr1_p.sigRegionChangeFinished.connect(self.calculate_data)
         self.display_window.lr2_p.sigRegionChangeFinished.connect(self.calculate_data)

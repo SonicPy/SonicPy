@@ -230,7 +230,10 @@ class ArrowPlotController(QObject):
                 #self.auto_data()
                 self.update_plot()
 
-    
+    def clear(self):
+        self.model.clear()
+        self.arrow_plot_window.set_selected_frequency('')
+        self.arrow_plot_window.set_name('')
 
     def refresh_model(self):
         self.model.refresh_all_freqs(self.cond, self.wave_type)

@@ -9,6 +9,7 @@
 # TODO Vp and Vs output into spreadsheet
 # TODO plots/data output for publication
 # TODO selecting Vp/Vs in the results table
+# TODO save metadata in um, read metadata in ua
 
 from ua import TOF
 

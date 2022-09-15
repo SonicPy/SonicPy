@@ -13,6 +13,7 @@ calibrants_path = os.path.join(resources_path, 'calibrants')
 icons_path = os.path.join(resources_path, 'icons')
 data_path = os.path.join(resources_path, 'data')
 style_path = os.path.join(resources_path, 'style')
+print(style_path)
 from pathlib import Path
 home_path = str(Path.home())
 

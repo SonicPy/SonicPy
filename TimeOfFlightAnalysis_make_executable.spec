@@ -21,10 +21,7 @@ block_cipher = None
 from sys import platform as _platform
 
 
-extra_datas = [
-    ("ua/resources", "ua/resources"),
-    ("dask", "dask")
-]
+
 
 platform = ''
 extra_binaries=[]
@@ -37,11 +34,21 @@ elif _platform == "win32" or _platform == "cygwin":
     platform = "Win"
     name = "TimeOfFlight.exe"
     sys.path.append("C:\\Users\\hrubiak\\Documents\\GitHub\\sonicPy")
+    extra_datas = [
+        ("ua\\resources", "ua\\resources"),
+        ("dask", "dask"),
+        ("angle-down.png", "angle-down.png"),
+        ("angle-up.png", "angle-up.png")
+    ]
  
 elif _platform == "darwin":
     platform = "Mac"
     extra_binaries=[ ]
     name = "run_TimeOfFlight"
+    extra_datas = [
+        ("ua/resources", "ua/resources"),
+        ("dask", "dask")
+    ]
 
 import ua
 

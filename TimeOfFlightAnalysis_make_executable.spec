@@ -36,9 +36,8 @@ elif _platform == "win32" or _platform == "cygwin":
     sys.path.append("C:\\Users\\hrubiak\\Documents\\GitHub\\sonicPy")
     extra_datas = [
         ("ua\\resources", "ua\\resources"),
-        ("dask", "dask"),
-        ("angle-down.png", "angle-down.png"),
-        ("angle-up.png", "angle-up.png")
+        ("um\\resources", "um\\resources"),
+        ("dask", "dask")
     ]
  
 elif _platform == "darwin":
@@ -47,6 +46,7 @@ elif _platform == "darwin":
     name = "run_TimeOfFlight"
     extra_datas = [
         ("ua/resources", "ua/resources"),
+        ("um/resources", "um/resources"),
         ("dask", "dask")
     ]
 
@@ -59,7 +59,7 @@ else:
     platform += "32"
 
 
-excl = ['matplotlib', 'PySide','PyQt4']
+excl = ['matplotlib', 'PySide','PyQt4','pyeqt']
 
 
 print('start Analysis')

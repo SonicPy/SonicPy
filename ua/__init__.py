@@ -6,14 +6,14 @@ import os
 
 theme = 1
 
-autoload = False
+autoload = True
 
 resources_path = os.path.join(os.path.dirname(__file__), 'resources')
 calibrants_path = os.path.join(resources_path, 'calibrants')
 icons_path = os.path.join(resources_path, 'icons')
 data_path = os.path.join(resources_path, 'data')
 style_path = os.path.join(resources_path, 'style')
-print(style_path)
+
 from pathlib import Path
 home_path = str(Path.home())
 

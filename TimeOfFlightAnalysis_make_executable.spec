@@ -1,11 +1,13 @@
 # -*- mode: python ; coding: utf-8 -*-
 
 from sys import platform as _platform
+
 import os
 from distutils.sysconfig import get_python_lib
 import sys
 
 import scipy
+
 
 scipy_libs = os.path.join(os.path.dirname(scipy.__file__), '.libs')
 
@@ -34,11 +36,14 @@ if _platform == "linux" or _platform == "linux2":
 elif _platform == "win32" or _platform == "cygwin":
     platform = "Win"
     name = "TimeOfFlight.exe"
+    sys.path.append("C:\\Users\\hrubiak\\Documents\\GitHub\\sonicPy")
  
 elif _platform == "darwin":
     platform = "Mac"
     extra_binaries=[ ]
     name = "run_TimeOfFlight"
+
+import ua
 
 # checking whether the platform is 64 or 32 bit
 if sys.maxsize > 2 ** 32:
@@ -56,13 +61,8 @@ a = Analysis(['TimeOfFlightAnalysis.py'],
              pathex=[scipy_libs],
              binaries=extra_binaries,
              datas=extra_datas,
-             hiddenimports=['pyeqt',
-                            'pyeqt.pvWidgets',
-                            'pyeqt.pvWidgets.pvQDoubleSpinBox', 
-                            'pyeqt.pvWidgets.pvQLineEdit', 
-                            'pyeqt.pvWidgets.pvQLabel', 
-                            'pyeqt.pvWidgets.pvQMessageButton', 
-                            'pyeqt.pvWidgets.pvQOZButton'
+             hiddenimports=[
+                            "ua"
                             ],
              hookspath=[],
              runtime_hooks=[],

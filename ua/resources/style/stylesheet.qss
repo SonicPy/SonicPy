@@ -222,13 +222,13 @@ QDoubleSpinBox::up-button {
 }
 
 QDoubleSpinBox::down-arrow {
-    image: url(um/resources/style/angle-down.png);
+    image: url(ua/resources/style/angle-down.png);
     width: 12px;
     height: 12px;
 }
 
 QDoubleSpinBox::up-arrow {
-    image: url(um/resources/style/angle-up.png);
+    image: url(ua/resources/style/angle-up.png);
     width: 12px;
     height: 12px;
 }

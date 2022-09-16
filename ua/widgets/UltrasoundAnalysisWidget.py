@@ -21,7 +21,7 @@ class UltrasoundAnalysisWidget(QWidget):
     up_down_signal = pyqtSignal(str)
     panelClosedSignal = pyqtSignal()
 
-    def __init__(self, **kwargs):
+    def __init__(self):
         super().__init__()
         self.initialized = False
         self.t = None
@@ -36,13 +36,7 @@ class UltrasoundAnalysisWidget(QWidget):
 
         self.create_plots()
     
-        if 'settings' in kwargs:
-            settings = kwargs['settings']
-            if 'width' in settings:
-                width = settings['width']
-            else:
-                width = 75
-            self.echo_width.setValue(float(width))
+     
 
     def clear(self):
         self.plot_widget.setText('',0)

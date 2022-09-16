@@ -50,13 +50,21 @@ class UltrasoundAnalysisController(QObject):
     
         if app is not None:
             self.setStyle(app)
-        self.display_window = UltrasoundAnalysisWidget(settings = self.model.settings)
+        self.display_window = UltrasoundAnalysisWidget()
         
         self.make_connections()
        
+        self.sync_widget_controls_with_model_non_signaling()
         
-        '''filename='resources/ultrasonic/4000psi-300K_+21MHz000.csv'
-        self.update_data(filename=filename)'''
+      
+
+    def sync_widget_controls_with_model_non_signaling(self):
+
+        self.display_window.echo_width.blockSignals(True)
+  
+        self.display_window.echo_width.setValue(self.model.settings['echo_width'])
+
+        self.display_window.echo_width.blockSignals(False)
 
     def clear(self):
         self.display_window.clear()
@@ -156,7 +164,7 @@ class UltrasoundAnalysisController(QObject):
 
     def set_echo_region_position(self, index):
         center = self.display_window.plot_widget.cursor_pos
-        pad = self.model.settings['width'] * 1e-9
+        pad = self.model.settings['echo_width'] * 1e-9
         wave_type = self.model.wave_type
         if wave_type == 'P':
             echo = self.display_window.echo_bounds_p[index]

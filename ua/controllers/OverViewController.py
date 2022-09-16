@@ -43,30 +43,19 @@ class OverViewController(QObject):
         super().__init__()
         self.model = OverViewModel(results_model)
 
-        
-
-        
-
         if app is not None:
             self.setStyle(app)
         self.widget = OverViewWidget()
         self.sync_widget_controls_with_model_non_signaling()
         self.folder_widget = FolderListWidget()
 
-        
         self.make_connections()
         self.line_plots = {}
         self.selected_fname = ''
         self.freq = '000'
         self.cond = '0psi'
 
-        
-        f_start = self.widget.freq_start.value()
-        f_step = self.widget.freq_step.value()
-
-
-        
-        
+       
     def make_connections(self):  
 
         self.widget.open_btn.clicked.connect(self.open_btn_callback)

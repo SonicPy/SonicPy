@@ -106,8 +106,8 @@ class TimeOfFlightController(QObject):
         subfolders = copy.copy(self.overview_controller.model.conditions_folders_sorted)
 
         self.echoes_results_model.clear()
-        self.echoes_results_model.folder = folder
-        self.echoes_results_model.subfolders = subfolders
+        self.echoes_results_model.set_folder(folder)
+        self.echoes_results_model.set_subfolders(subfolders)
         self.echoes_results_model.load_echoes_from_file()
         self.echoes_results_model.load_tof_results_from_file()
         saved_echoes_p, saved_echoes_s = self.echoes_results_model.get_echoes()
@@ -117,6 +117,8 @@ class TimeOfFlightController(QObject):
         self.overview_controller.re_plot_single_condition()
 
         self.correlation_controller.clear()
+        self.correlation_controller.model.restore_folder_settings(folder)
+        self.correlation_controller.sync_widget_controls_with_model_non_signaling()
 
         echo_type = ''
         if  self.correlation_controller.display_window.p_wave_btn.isChecked():

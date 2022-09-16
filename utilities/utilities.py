@@ -5,8 +5,38 @@ from scipy import blackman, nanmean
 from scipy.signal import hilbert
 from scipy.fftpack import fft
 
+import json
+import os
 
 import math
+
+def write_data_dict_to_json(filename, data):
+    with open(filename, 'w') as json_file:
+        json.dump(data, json_file,indent = 2)  
+        json_file.close()  
+
+def update_data_dict_json(filename, data):
+    
+    if os.path.isfile(filename):
+        with open(filename, 'r') as json_file:
+            old_data = json.load(json_file)
+            for key in data:
+                old_data[key] = data[key]
+            new_data = old_data
+            json_file.close()  
+    else:
+        new_data = data
+    with open(filename, 'w') as json_file:
+        
+        json.dump(new_data, json_file,indent = 2)  
+        json_file.close()  
+
+def read_result_file( filename):
+        with open(filename) as json_file:
+            data = json.load(json_file)
+            json_file.close()
+
+        return data
 
 
 def butter_bandstop_filter(data, lowcut, highcut, order):

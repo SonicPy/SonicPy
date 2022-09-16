@@ -261,15 +261,22 @@ class OverViewModel():
     def restore_folder_settings(self, folder):
         settings_file =  os.path.join(folder, self.settings_fname)
         settings_exist = os.path.isfile(settings_file)
+        write_out = False
         if settings_exist:
-            settings = self.read_result_file(settings_file)
+            settings = read_result_file(settings_file)
+            for key in self.settings:
+                if not key in settings:
+                    settings[key] = self.settings[key]
+                    write_out = True
             self.settings = settings
         else:
-            self.write_data_dict_to_json(settings_file,self.settings)
+            write_out = True
+        if write_out:
+            write_data_dict_to_json(settings_file,self.settings)
 
     def save_folder_settings(self, folder):
         settings_file =  os.path.join(folder, self.settings_fname)
-        self.write_data_dict_to_json(settings_file,self.settings)
+        update_data_dict_json(settings_file,self.settings)
 
     def set_folder_path(self, folder):
         
@@ -485,34 +492,9 @@ class OverViewModel():
     def frequency_index(self,frequency):
         return self.frequencies_sorted.index(frequency)
 
-    def add_result_from_file(self, filename):
-        data = self.read_result_file(filename)
-        self.add_freq(data)
 
 
 
 
+    
 
-    def read_result_file(self, filename):
-        with open(filename) as json_file:
-            data = json.load(json_file)
-            json_file.close()
-
-        return data
-
-
- 
- 
-    def save_result(self, filename):
-        
-        data = {'frequency':self.freq,'minima_t':list(self.minima[0]),'minima':list(self.minima[1]), 
-                            'maxima_t':list(self.maxima[0]),'maxima':list(self.maxima[1])}
-        
-        
-        self.write_data_dict_to_json(filename,data)
-
-
-    def write_data_dict_to_json(self, filename, data):
-        with open(filename, 'w') as json_file:
-            json.dump(data, json_file,indent = 2)  
-            json_file.close()  

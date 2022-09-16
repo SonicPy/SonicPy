@@ -9,7 +9,7 @@ import os.path
 
 import json
 import glob
-
+import h5py
 
 from deepdiff import DeepDiff
 
@@ -17,6 +17,7 @@ from deepdiff import DeepDiff
 class EchoesResultsModel():
     def __init__(self):
         
+        self._h5py = None
         self.subfolders = []
         self.folder = ''
         self.echoes_p = {}
@@ -24,11 +25,21 @@ class EchoesResultsModel():
 
         self.tof_results_p = {}
         self.tof_results_s = {}
-        '''self.sorted_correlations_p = {}
-        self.sorted_correlations_s = {}'''
+  
 
     def clear(self):
         self.__init__()
+
+    def set_folder(self, folder):
+        self.folder = folder
+        self._h5py = os.path.join(folder,'mytestfile.hdf5') 
+        self.storate_file = h5py.File(self._h5py, 'a')
+
+    def set_subfolders(self, subfolders):
+        self.subfolders = subfolders
+        for subfolder in subfolders:
+            if not subfolder in self.storate_file:
+                self.storate_file.create_group(subfolder)
 
     def add_echoe(self, correlation):
         
@@ -39,7 +50,6 @@ class EchoesResultsModel():
                 correlations = self.echoes_p[correlation['filename_waveform']]
             else:
                 correlations = {}
-            
             correlations[freq] = correlation
             self.echoes_p[correlation['filename_waveform']] = correlations
         elif wave_type == "S":
@@ -48,7 +58,6 @@ class EchoesResultsModel():
                 correlations = self.echoes_s[correlation['filename_waveform']]
             else:
                 correlations = {}
-            
             correlations[freq] = correlation
             self.echoes_s[correlation['filename_waveform']] = correlations
 
@@ -263,25 +272,40 @@ class EchoesResultsModel():
             freq = echo['frequency']
             folder = os.path.split(fname)[:-1]
 
+            rel_folder = os.path.split(folder[0])[-1]
 
             p_folder = os.path.join(*folder, wave_type)
+
+            rel_p_folder = os.path.join(rel_folder, wave_type)
             exists = os.path.exists(p_folder)
+            rel_exists = rel_p_folder in self.storate_file
             if not exists:
                 try:
                     os.mkdir(p_folder)
                 except:
                     return
 
+            if not rel_exists:
+                try:
+                    self.storate_file.create_group(rel_p_folder)
+
+                except:
+                    return
+
             data = echo
             basename = os.path.basename(fname)+'.'+str(round(freq*1e-6,1))+'_MHz.json'
             filename = os.path.join(p_folder,basename)
-            try:
-                with open(filename, 'w') as json_file:
-                    json.dump(data, json_file, indent = 2) 
+            rel_filename = os.path.join(rel_p_folder,basename)
+            
+            with open(filename, 'w') as json_file:
+                json.dump(data, json_file, indent = 2) 
+                
+                json_file.close()
 
-                    json_file.close()
-            except:
-                print('could not save file: '+ filename)
+            '''self.storate_file.create_dataset(rel_filename, data=str(data),dtype='str')
+            print(str(data))'''
+            
+            
 
     def load_tof_results_from_file(self ):
 

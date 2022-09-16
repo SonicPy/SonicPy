@@ -36,30 +36,42 @@ class UltrasoundAnalysisModel():
         self.freq = 0
         self.wave_type = 'P' # or 'S'
         self.settings = {'tukey_alpha':0.2,
-                        'width':75.}
+                        'echo_width':75.,
+                         'filter_order':3,
+                         'freq_range': 0.1}
 
-        
+        self.settings_fname = 'settings.json'
 
         self.minima = []
         self.maxima = []
 
     def clear(self):
-        self.waveform = None
-        self.envelope = None
-        self.t = None
-        self.spectrum = None
-        self.demodulated = None
-        self.plot1_bg=([],[])
-        self.plot2_bg=([],[])
-        self.c_diff_optimized = 0
-        self.bounds = [[0,0],[0,0]]
-        self.freq = 0
-
-        self.minima = []
-        self.maxima = []
+        self.__init__(self.results_model)
 
     def set_echo_width(self, value):
-        self.settings['width'] = float(value)
+        self.settings['echo_width'] = float(value)
+        folder = self.results_model.folder
+        self.save_folder_settings(folder)
+
+    def save_folder_settings(self, folder):
+        settings_file =  os.path.join(folder, self.settings_fname)
+        update_data_dict_json(settings_file,self.settings)
+
+    def restore_folder_settings(self, folder):
+        settings_file =  os.path.join(folder, self.settings_fname)
+        settings_exist = os.path.isfile(settings_file)
+        write_out = False
+        if settings_exist:
+            settings = read_result_file(settings_file)
+            for key in self.settings:
+                if not key in settings:
+                    settings[key] = self.settings[key]
+                    write_out = True
+            self.settings = settings
+        else:
+            write_out = True
+        if write_out:
+            write_data_dict_to_json(settings_file,self.settings)
 
     def fit_func(self, x, a, b,c,d):
         '''
@@ -90,8 +102,10 @@ class UltrasoundAnalysisModel():
         t = self.t
         spectrum = self.spectrum
         tukey_alpha = self.settings['tukey_alpha']
-        self.filtered1, self.echo_tk1 = self.filter_echo(t,spectrum,l1,r1,freq,tukey_alpha)
-        self.filtered2, self.echo_tk2 = self.filter_echo(t,spectrum,l2,r2,freq,tukey_alpha)
+        filter_order = self.settings['filter_order']
+        freq_range = self.settings['freq_range']
+        self.filtered1, self.echo_tk1 = self.filter_echo(t,spectrum,l1,r1,freq, freq_range=freq_range, order = filter_order, tukey_alpha=tukey_alpha)
+        self.filtered2, self.echo_tk2 = self.filter_echo(t,spectrum,l2,r2,freq, freq_range=freq_range, order = filter_order, tukey_alpha=tukey_alpha)
 
     def find_echo_bounds(self, echo, echo_bounds_cutoff = 0.05):
         '''
@@ -124,7 +138,7 @@ class UltrasoundAnalysisModel():
         echo2_sub = echo2[lb2:rb2]
         distance = max(max1_ind, max2_ind) - min(max1_ind, max2_ind)
 
-        shift_range = int((rb1-lb1)/2)*2
+        shift_range = int((rb1-lb1)/2)
         cross_corr = []
         shifts =[]
         for shift in range(shift_range):

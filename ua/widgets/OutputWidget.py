@@ -111,7 +111,7 @@ class OutputWidget(QtWidgets.QWidget):
         for row in range(num_rows):
             self.del_output(0)
         num_rows = self.output_tw.rowCount()
-        print(num_rows)
+    
 
     def del_output(self, ind):
         self.output_tw.blockSignals(True)

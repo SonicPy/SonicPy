@@ -3,27 +3,14 @@
 
 
 import os.path
-from turtle import update
-from utilities.utilities import *
-from utilities.HelperModule import move_window_relative_to_screen_center, get_partial_index, get_partial_value
+
+'''from utilities.utilities import *'''
 
 
-
-from um.models.tek_fileIO import *
-
-from utilities.utilities import zero_phase_bandpass_filter,  \
-                                 zero_phase_highpass_filter, \
-                                zero_phase_bandstop_filter, zero_phase_lowpass_filter
-
-#from ua.models.WaterfallModel import WaterfallModel
 import json
 import glob
-import time
-from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtCore import QObject
-from natsort import natsorted 
- 
-import shutil
+
+
 from deepdiff import DeepDiff
 
 
@@ -46,20 +33,23 @@ class EchoesResultsModel():
     def add_echoe(self, correlation):
         
         wave_type = correlation['wave_type']
+        freq = correlation['frequency']
         if wave_type == "P":
             if correlation['filename_waveform'] in self.echoes_p:
                 correlations = self.echoes_p[correlation['filename_waveform']]
             else:
-                correlations = []
-            correlations.append(correlation)
+                correlations = {}
+            
+            correlations[freq] = correlation
             self.echoes_p[correlation['filename_waveform']] = correlations
         elif wave_type == "S":
 
             if correlation['filename_waveform'] in self.echoes_s:
                 correlations = self.echoes_s[correlation['filename_waveform']]
             else:
-                correlations = []
-            correlations.append(correlation)
+                correlations = {}
+            
+            correlations[freq] = correlation
             self.echoes_s[correlation['filename_waveform']] = correlations
 
     def delete_echo(self, filename_waveform, frequency, wave_type):
@@ -161,10 +151,11 @@ class EchoesResultsModel():
             for fname in echoes:
                 echo_f = echoes[fname]
                 for echo in echo_f:
+                    e = echo_f[echo]
                     #freq = echo['frequency']
                     folder = os.path.split(os.path.split(fname)[0])[-1]
                     if folder == condition:
-                        echoes_out.append( echo)
+                        echoes_out.append( e)
         return echoes_out
 
     def get_results_by_condition(self, condition, wave_type = 'P'):
@@ -211,10 +202,10 @@ class EchoesResultsModel():
                         if wave_type == "P":
                             if filename_waveform in self.echoes_p:
                                 echoes =  self.echoes_p[filename_waveform]
-                                for ind in range(len(echoes)):
-                                    if echoes[ind]['frequency']== freq:
+                                for f in echoes:
+                                    if echoes[f]['frequency']== freq:
 
-                                        echoes[ind]['centers'] = center
+                                        echoes[f]['centers'] = center
                                 self.echoes_p[filename_waveform] = echoes
                         elif wave_type == "S":
                             if filename_waveform in self.echoes_s:

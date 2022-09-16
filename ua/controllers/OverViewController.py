@@ -115,6 +115,14 @@ class OverViewController(QObject):
         self.widget.single_frequency_waterfall.set_name ( str(display_freq) + ' MHz')
         #self.freq_settings_changed_signal.emit(display_freq)
 
+    def freq_str_ind_to_val(self, str_ind):
+        f_start = self.widget.freq_start.value()
+        f_step = self.widget.freq_step.value()
+
+
+        val_freq = f_start + int(str_ind) * f_step
+        return val_freq * 1e6
+
     def emit_cursor(self, pos):
         self.cursor_position_signal.emit(pos)
 
@@ -125,8 +133,7 @@ class OverViewController(QObject):
 
     def correlation_echoes_added(self , correlations):
         
-        for correlation in correlations:
-            self.model.add_echoes(correlations[correlation][0])
+        
 
         self.re_plot_single_frequency()
         self.re_plot_single_condition()
@@ -387,17 +394,23 @@ class OverViewController(QObject):
         echoes_p = self.model.results_model.echoes_p
         echoes_s = self.model.results_model.echoes_s
 
+        freq = self.freq_str_ind_to_val(self.freq)
+
         for echo_p_name in echoes_p:
-            bounds = echoes_p[echo_p_name][0]['echo_bounds']
-            filename_waveform = echo_p_name
-            wave_type = "P"
-            waterfall.set_echoe(filename_waveform ,wave_type, bounds)
+            echoes = echoes_p[echo_p_name]
+            if freq in echoes:
+                bounds = echoes[freq]['echo_bounds']
+                filename_waveform = echo_p_name
+                wave_type = "P"
+                waterfall.set_echoe(filename_waveform ,wave_type, bounds)
 
         for echo_s_name in echoes_s:
-            bounds = echoes_s[echo_s_name][0]['echo_bounds']
-            filename_waveform = echo_s_name
-            wave_type = "S"
-            waterfall.set_echoe(filename_waveform ,wave_type, bounds)
+            echoes = echoes_s[echo_s_name]
+            if freq in echoes:
+                bounds = echoes[freq]['echo_bounds']
+                filename_waveform = echo_s_name
+                wave_type = "S"
+                waterfall.set_echoe(filename_waveform ,wave_type, bounds)
 
         waterfall.get_rescaled_waveforms(caller='re_plot_single_frequency')
     
@@ -423,16 +436,22 @@ class OverViewController(QObject):
         echoes_s = self.model.results_model.echoes_s
 
         for echo_p_name in echoes_p:
-            bounds = echoes_p[echo_p_name][0]['echo_bounds']
-            filename_waveform = echo_p_name
-            wave_type = "P"
-            waterfall.set_echoe(filename_waveform ,wave_type, bounds)
+            echoes = echoes_p[echo_p_name]
+            for freq in echoes:
+                echo = echoes[freq]
+                bounds = echo['echo_bounds']
+                filename_waveform = echo_p_name
+                wave_type = "P"
+                waterfall.set_echoe(filename_waveform ,wave_type, bounds)
 
         for echo_s_name in echoes_s:
-            bounds = echoes_s[echo_s_name][0]['echo_bounds']
-            filename_waveform = echo_s_name
-            wave_type = "S"
-            waterfall.set_echoe(filename_waveform ,wave_type, bounds)
+            echoes = echoes_p[echo_p_name]
+            for freq in echoes:
+                echo = echoes[freq]
+                bounds = echo['echo_bounds']
+                filename_waveform = echo_s_name
+                wave_type = "S"
+                waterfall.set_echoe(filename_waveform ,wave_type, bounds)
 
         waterfall.get_rescaled_waveforms(caller='re_plot_single_condition')
     

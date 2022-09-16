@@ -98,19 +98,7 @@ class OverViewModel():
         self.echoes_p = {}
         self.echoes_s = {}
 
-    def add_echoes(self, correlation):
-        filename_waveform = correlation['filename_waveform']
-        bounds = correlation['echo_bounds']
-        wave_type = correlation['wave_type']
-
-   
-
-        # i was here
-        '''freq_waterfall.set_echoe(filename_waveform ,wave_type, bounds)
-        
-        cond_waterfall.set_echoe(filename_waveform ,wave_type, bounds)'''
-
-        #self.set_echoes(filename_waveform ,wave_type, bounds)
+    
 
     def del_echoes(self, condition, wave_type, freq):
         str_ind_freq = f'{self.freq_val_to_ind(freq):03d}' 

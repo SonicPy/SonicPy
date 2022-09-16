@@ -100,9 +100,13 @@ class UltrasoundAnalysisModel():
         the amplitude of the echo is more than echo_bounds_cutoff
         '''
         m = max(abs(echo))
-        echo_norm = abs(echo/m)
-        lb = np.argmax(echo_norm> echo_bounds_cutoff)
-        rb = len(echo)- np.argmax(np.flip(echo_norm)>echo_bounds_cutoff)
+        if m !=0:
+            echo_norm = abs(echo/m)
+            lb = np.argmax(echo_norm> echo_bounds_cutoff)
+            rb = len(echo)- np.argmax(np.flip(echo_norm)>echo_bounds_cutoff)
+        else:
+            lb = 0
+            rb = 0
         return lb, rb
 
     def cross_correlate(self):

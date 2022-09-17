@@ -74,14 +74,18 @@ class EchoesResultsModel():
             self.echoes_s[correlation['filename_waveform']] = correlations
 
     def delete_echo(self, filename_waveform, frequency, wave_type):
+        if self.mode == 'h5py':
+            self._delete_echo_h5py(filename_waveform, frequency, wave_type)
+        elif self.mode == 'fs':
+            self._delete_echo_fs(filename_waveform, frequency, wave_type)
+
+    def _delete_echo_h5py(self, filename_waveform, frequency, wave_type):
         deleted = False
-        
 
         #  delete in filesystem
         saved_path = os.path.normpath(filename_waveform)
         file_split = os.path.split(saved_path)[-1]
         base_folder = os.path.split(os.path.split(saved_path)[0])[-1]
-            
             
         folder = os.path.join(self.folder, base_folder, wave_type)
         exists = os.path.exists(folder)
@@ -93,17 +97,38 @@ class EchoesResultsModel():
 
                 os.remove(file_for_deletion)
                 deleted = True
-
                 if wave_type == "P":
                     if filename_waveform in self.echoes_p:
                         del self.echoes_p[filename_waveform]
-                        #deleted = True
                 elif wave_type == "S":
                     if filename_waveform in self.echoes_s:
                         del self.echoes_s[filename_waveform]
-                        #deleted = True
-                
+        return deleted
 
+    def _delete_echo_fs(self, filename_waveform, frequency, wave_type):
+        deleted = False
+
+        #  delete in filesystem
+        saved_path = os.path.normpath(filename_waveform)
+        file_split = os.path.split(saved_path)[-1]
+        base_folder = os.path.split(os.path.split(saved_path)[0])[-1]
+            
+        folder = os.path.join(self.folder, base_folder, wave_type)
+        exists = os.path.exists(folder)
+        if exists:
+            json_search = os.path.join(folder,'*'+str(round(frequency*1e-6,1))+'_MHz.json')
+            res_files = glob.glob(json_search)
+            if len(res_files):
+                file_for_deletion = res_files[0]
+
+                os.remove(file_for_deletion)
+                deleted = True
+                if wave_type == "P":
+                    if filename_waveform in self.echoes_p:
+                        del self.echoes_p[filename_waveform]
+                elif wave_type == "S":
+                    if filename_waveform in self.echoes_s:
+                        del self.echoes_s[filename_waveform]
         return deleted
 
     def delete_echoes(self, clear_info):
@@ -130,6 +155,12 @@ class EchoesResultsModel():
         return cleared
 
     def delete_result(self, clear_info):
+        if self.mode == 'h5py':
+            self._delete_result_fs(clear_info)
+        elif self.mode == 'fs':
+            self._delete_result_fs(clear_info)
+
+    def _delete_result_fs(self, clear_info):
         wave_type = clear_info['wave_type']
         condition = clear_info['condition']
         cl = clear_info['clear_info']
@@ -282,7 +313,7 @@ class EchoesResultsModel():
                             if echoes[f]['frequency']== freq:
                                 echoes[f]['centers'] = center
                         echoes_set[filename_waveform] = echoes
-                        
+
     def save_tof_result(self, package):
         # save rest of the result in a seperate [condition].result.json file
         wave_type = package['wave_type']
@@ -303,7 +334,36 @@ class EchoesResultsModel():
         elif wave_type == 'S':
             tof_results = self.tof_results_s
         tof_results[condition] = output_package
+
+        if self.mode == 'h5py':
+            self._save_tof_result_h5py(output_package)
+        elif self.mode == 'fs':
+            self._save_tof_result_fs(output_package)    
+
+    def _save_tof_result_h5py(self, package):
         
+        
+        wave_type = package['wave_type']
+        condition = package['cond']
+
+        p_folder = condition +'/results'
+        with h5py.File(self._h5py, 'r') as h5file:
+            exists = p_folder in h5file
+        
+        with h5py.File(self._h5py, 'a') as h5file:
+            if not exists:
+                h5file.create_group(p_folder)
+            basename = condition + '.' + wave_type + '.json'
+            path = p_folder + '/'+ basename 
+            if path in h5file:
+                del h5file[path]
+            recursively_save_dict_contents_to_group(h5file, path + '/', package)
+            
+                        
+    def _save_tof_result_fs(self, package):
+        
+        wave_type = package['wave_type']
+        condition = package['cond']
 
         # save to file
         folder = self.folder
@@ -320,7 +380,7 @@ class EchoesResultsModel():
         filename = os.path.join(p_folder,basename)
         try:
             with open(filename, 'w') as json_file:
-                json.dump(output_package, json_file, indent = 2) 
+                json.dump(package, json_file, indent = 2) 
 
                 json_file.close()
         except:
@@ -341,21 +401,20 @@ class EchoesResultsModel():
             folder = os.path.split(fname)[:-1]
             rel_folder = os.path.split(folder[0])[-1]
             rel_p_folder = rel_folder +'/'+  wave_type
-            with h5py.File(self._h5py, 'a') as h5file:
+            with h5py.File(self._h5py, 'r') as h5file:
                 rel_exists = rel_p_folder in h5file
-            if not rel_exists:
-                with h5py.File(self._h5py, 'a') as h5file:
-                    h5file.create_group(rel_p_folder)
-            data = echo
-            basename = os.path.basename(fname)+'.'+str(round(freq*1e-6,1))+'_MHz.json'
+            
             with h5py.File(self._h5py, 'a') as h5file:
+                if not rel_exists:
+                    h5file.create_group(rel_p_folder)
+                data = echo
+                basename = os.path.basename(fname)+'.'+str(round(freq*1e-6,1))+'_MHz.json'
+            
                 path = rel_p_folder + '/'+ basename +'/'
                 if path in h5file:
                     del h5file[path]
                 recursively_save_dict_contents_to_group(h5file, path, data)
 
-                dd = recursively_load_dict_contents_from_group(h5file,path)
-                print(dd)
 
     def _save_result_fs(self, correlation ):
         wave_type = correlation['wave_type']
@@ -379,8 +438,42 @@ class EchoesResultsModel():
                 json_file.close()
 
     def load_tof_results_from_file(self ):
+        if self.mode == 'h5py':
+            self._load_tof_results_from_file_h5py()
+        elif self.mode == 'fs':
+            self._load_tof_results_from_file_fs()
 
-        loaded_package = {}
+    def _load_tof_results_from_file_h5py(self ):  
+        for subfolder in self.subfolders:
+            wave_types = ['P','S']
+            for wave_type in wave_types:
+                # update self:
+                if wave_type == 'P':
+                    tof_results = self.tof_results_p
+                elif wave_type == 'S':
+                    tof_results = self.tof_results_s
+
+                p_folder = subfolder +'/results'
+                with h5py.File(self._h5py, 'r') as h5file:
+                    exists = p_folder in h5file
+
+                if exists:
+                    with h5py.File(self._h5py, 'r') as h5file:
+                        res_files = list(h5file[p_folder].keys())
+
+                        for file in res_files:
+                            if wave_type+ '.json' in file:
+                        
+                                if subfolder in file:
+
+                                    data = recursively_load_dict_contents_from_group(h5file, p_folder + '/' +file +'/')
+                            
+                                    data['cond'] = subfolder
+                                    data['wave_type'] = wave_type
+                                    
+                                    tof_results[subfolder] =  data
+
+    def _load_tof_results_from_file_fs(self ):  
         for subfolder in self.subfolders:
             wave_types = ['P','S']
             for wave_type in wave_types:
@@ -443,11 +536,9 @@ class EchoesResultsModel():
                 rel_folder = subfolder + '/' + wave_type
                 with h5py.File(self._h5py, 'r') as h5file:
                     rel_exists = rel_folder in h5file
-                if rel_exists:
-                    with h5py.File(self._h5py, 'r') as h5file:
+                    if rel_exists:
                         res_files = list(h5file[rel_folder].keys())
-                    for file in res_files:
-                        with h5py.File(self._h5py, 'r') as h5file:
+                        for file in res_files:
                             data = recursively_load_dict_contents_from_group(h5file, rel_folder + '/' +file +'/')
                             correlation = data
                             self._add_echo_by_dict(correlation)

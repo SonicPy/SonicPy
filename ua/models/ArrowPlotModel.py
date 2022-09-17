@@ -4,7 +4,7 @@ from ua.models.OverViewModel import Sort_Tuple
 from utilities.utilities import *
 from utilities.HelperModule import move_window_relative_to_screen_center, get_partial_index, get_partial_value
 import numpy as np
-from numpy import argmax, nan, greater,less, append, sort, array, argmin
+from numpy import argmax, isin, nan, greater,less, append, sort, array, argmin
 
 
 from scipy.signal import argrelextrema
@@ -445,6 +445,10 @@ class ArrowPlot():
         pass
    
 def interleave_lists(a_list, b_list):
+    if isinstance(a_list, np.ndarray):
+        a_list = list(a_list)
+    if isinstance(b_list, np.ndarray):
+        b_list = list(b_list)
     result = []
     while a_list and b_list:
         result.append(a_list.pop(0))

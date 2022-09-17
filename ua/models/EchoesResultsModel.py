@@ -309,11 +309,14 @@ class EchoesResultsModel():
                 
                 path = rel_p_folder + '/'+ basename +'/'
                 dic = h5
+                if path in h5file:
+                    del h5file[path]
                 recursively_save_dict_contents_to_group(h5file, path, dic)
 
-                dd = recursively_load_dict_contents_from_group(h5file, rel_p_folder)
+            with h5py.File(self._h5py, 'r') as h5file:
+                dd = recursively_load_dict_contents_from_group(h5file, rel_p_folder + '/')
             
-                print(dd)
+                #print(dd)
             
 
     def load_tof_results_from_file(self ):
@@ -417,7 +420,7 @@ def recursively_load_dict_contents_from_group(h5file, path):
     ans = {}
     for key, item in h5file[path].items():
         if isinstance(item, h5py._hl.dataset.Dataset):
-            val = item.value
+            val = item[()]
             if isinstance(val,(np.ndarray)):
                 val = list(val)
             ans[key] = val

@@ -3,7 +3,7 @@
 
 
 import os.path
-
+import numpy as np
 '''from utilities.utilities import *'''
 
 
@@ -33,13 +33,14 @@ class EchoesResultsModel():
     def set_folder(self, folder):
         self.folder = folder
         self._h5py = os.path.join(folder,'mytestfile.hdf5') 
-        self.storate_file = h5py.File(self._h5py, 'a')
+       
 
     def set_subfolders(self, subfolders):
         self.subfolders = subfolders
         for subfolder in subfolders:
-            if not subfolder in self.storate_file:
-                self.storate_file.create_group(subfolder)
+            with  h5py.File(self._h5py, 'a') as h5file:
+                if not subfolder in h5file:
+                    h5file.create_group(subfolder)
 
     def add_echoe(self, correlation):
         
@@ -278,7 +279,9 @@ class EchoesResultsModel():
 
             rel_p_folder = os.path.join(rel_folder, wave_type)
             exists = os.path.exists(p_folder)
-            rel_exists = rel_p_folder in self.storate_file
+            with h5py.File(self._h5py, 'a') as h5file:
+                rel_exists = rel_p_folder in h5file
+
             if not exists:
                 try:
                     os.mkdir(p_folder)
@@ -286,11 +289,10 @@ class EchoesResultsModel():
                     return
 
             if not rel_exists:
-                try:
-                    self.storate_file.create_group(rel_p_folder)
+                
+                with h5py.File(self._h5py, 'a') as h5file:
+                    h5file.create_group(rel_p_folder)
 
-                except:
-                    return
 
             data = echo
             basename = os.path.basename(fname)+'.'+str(round(freq*1e-6,1))+'_MHz.json'
@@ -301,10 +303,17 @@ class EchoesResultsModel():
                 json.dump(data, json_file, indent = 2) 
                 
                 json_file.close()
-
-            '''self.storate_file.create_dataset(rel_filename, data=str(data),dtype='str')
-            print(str(data))'''
             
+            h5 = data
+            with h5py.File(self._h5py, 'a') as h5file:
+                
+                path = rel_p_folder + '/'+ basename +'/'
+                dic = h5
+                recursively_save_dict_contents_to_group(h5file, path, dic)
+
+                dd = recursively_load_dict_contents_from_group(h5file, rel_p_folder)
+            
+                print(dd)
             
 
     def load_tof_results_from_file(self ):
@@ -370,3 +379,48 @@ class EchoesResultsModel():
                             json_file.close()
 
             
+def save_dict_to_hdf5(dic, filename):
+    """
+    ....
+    """
+    with h5py.File(filename, 'a') as h5file:
+        recursively_save_dict_contents_to_group(h5file, '/', dic)
+
+def recursively_save_dict_contents_to_group(h5file, path, dic):
+    """
+    ....
+    """
+    for key, item in dic.items():
+        if isinstance(item, (float,int)):
+            item = np.float64(item)
+        if isinstance(item,(list)):
+            item = np.asarray(item, dtype=np.float64)
+        if isinstance(item, (np.ndarray, np.int64, np.float64, str, bytes)):
+            h5file[path + key] = item
+        elif isinstance(item, dict):
+            recursively_save_dict_contents_to_group(h5file, path + key + '/', item)
+        else:
+            print(item)
+            raise ValueError('Cannot save %s type'%type(item))
+
+def load_dict_from_hdf5(filename):
+    """
+    ....
+    """
+    with h5py.File(filename, 'r') as h5file:
+        return recursively_load_dict_contents_from_group(h5file, '/')
+
+def recursively_load_dict_contents_from_group(h5file, path):
+    """
+    ....
+    """
+    ans = {}
+    for key, item in h5file[path].items():
+        if isinstance(item, h5py._hl.dataset.Dataset):
+            val = item.value
+            if isinstance(val,(np.ndarray)):
+                val = list(val)
+            ans[key] = val
+        elif isinstance(item, h5py._hl.group.Group):
+            ans[key] = recursively_load_dict_contents_from_group(h5file, path + key + '/')
+    return ans

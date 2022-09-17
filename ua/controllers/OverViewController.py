@@ -434,7 +434,7 @@ class OverViewController(QObject):
                 waterfall.set_echoe(filename_waveform ,wave_type, bounds)
 
         for echo_s_name in echoes_s:
-            echoes = echoes_p[echo_p_name]
+            echoes = echoes_s[echo_s_name]
             for freq in echoes:
                 echo = echoes[freq]
                 bounds = echo['echo_bounds']

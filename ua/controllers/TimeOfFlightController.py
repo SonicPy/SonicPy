@@ -108,7 +108,7 @@ class TimeOfFlightController(QObject):
         self.echoes_results_model.clear()
         self.echoes_results_model.set_folder(folder)
         self.echoes_results_model.set_subfolders(subfolders)
-        self.echoes_results_model.load_echoes_from_file()
+        self.echoes_results_model.load_echoes_from_file()   
         self.echoes_results_model.load_tof_results_from_file()
         saved_echoes_p, saved_echoes_s = self.echoes_results_model.get_echoes()
         self.overview_controller.correlation_echoes_added(saved_echoes_p)

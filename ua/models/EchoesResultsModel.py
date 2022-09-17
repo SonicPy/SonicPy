@@ -277,7 +277,7 @@ class EchoesResultsModel():
 
             p_folder = os.path.join(*folder, wave_type)
 
-            rel_p_folder = os.path.join(rel_folder, wave_type)
+            rel_p_folder = rel_folder +'/'+  wave_type
             exists = os.path.exists(p_folder)
             with h5py.File(self._h5py, 'a') as h5file:
                 rel_exists = rel_p_folder in h5file

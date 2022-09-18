@@ -105,7 +105,10 @@ class TimeOfFlightController(QObject):
         self.widget.setWindowTitle("Time-of-flight analysis. V." + __version__ + "  © R. Hrubiak, 2022. Folder: "+ os.path.abspath( folder))
         subfolders = copy.copy(self.overview_controller.model.conditions_folders_sorted)
 
-        self.echoes_results_model.clear()
+        
+        
+        project_file = os.path.join(folder,'mytestfile.hdf5') 
+        self.echoes_results_model.set_h5py(project_file)
         self.echoes_results_model.set_folder(folder)
         self.echoes_results_model.set_subfolders(subfolders)
         self.echoes_results_model.load_echoes_from_file()   

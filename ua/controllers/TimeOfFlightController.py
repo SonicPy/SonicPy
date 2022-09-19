@@ -101,14 +101,14 @@ class TimeOfFlightController(QObject):
     ###
 
     def new_project_act_callback(self):
-        filename = save_file_dialog(None, "New project file", filter = 'Time of Flight Analysis Project (*.json)', warn_overwrite=True)
+        filename = save_file_dialog(None, "New project file", filter = 'Time of Flight Analysis Project (*.json;*.bz)', warn_overwrite=True)
         
         if os.path.isfile(filename):
             os.rename(filename, filename + '.bak')
         self._open_project(filename)
         
     def open_project_act_callback(self):
-        filename = open_file_dialog(None, "Open project file", filter = 'Time of Flight Analysis Project (*.json)')
+        filename = open_file_dialog(None, "Open project file", filter = 'Time of Flight Analysis Project (*.json;*.bz)')
         
         if os.path.isfile(filename):
             self._open_project(filename)
@@ -116,7 +116,7 @@ class TimeOfFlightController(QObject):
         
 
     def _open_project(self, filename):
-        print(filename)
+        #print(filename)
         set_ok = self.echoes_results_model.open_project(filename)
 
         self.project_menus_enabled(set_ok)
@@ -126,6 +126,7 @@ class TimeOfFlightController(QObject):
         else:
             folder = self.echoes_results_model.folder
             if os.path.isdir(folder) and len(folder):
+                QtWidgets.QApplication.processEvents()
                 self.overview_controller.set_US_folder(folder=folder)
 
     def close_project_act_callback(self):
@@ -136,11 +137,10 @@ class TimeOfFlightController(QObject):
         ### needs more work to clear the other controllers
 
     def save_project_as_act_callback(self):
-        filename = self.echoes_results_model.get_project_file_name()
-        if os.path.isfile(filename):
-            new_filename = save_file_dialog(None, "New project file", filter = 'Time of Flight Analysis Project (*.json)', warn_overwrite=True)
-            shutil.copy(filename, new_filename)
-            set_ok = self.echoes_results_model.set_new_project_file_path(new_filename)
+        new_filename = save_file_dialog(None, "New project file", filter = 'Time of Flight Analysis Project (*.json;*.bz)', warn_overwrite=True)
+        if len(new_filename):
+            QtWidgets.QApplication.processEvents()
+            set_ok = self.echoes_results_model.save_project_as(new_filename)
            
         
 

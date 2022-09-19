@@ -86,13 +86,24 @@ class EchoesResultsModel():
         return set_ok
 
     def save_project(self):
+        set_ok = False
         if self.mode == 'json':
+            
             set_ok = self._save_project_json()
+        return set_ok
+
+    def save_project_as(self, filename):
+        set_ok = False
+        if self.mode == 'json':
+            self._json = filename
+            set_ok = self._save_project_json()
+
+        return set_ok
 
     def _save_project_json(self):
         now = time.time()
-        write_data_dict_to_json(self._json,self.project)
-        print('saved in ' + str(time.time()-now) + ' s')
+        self._write_project(self._json,self.project)
+        #print('saved in ' + str(time.time()-now) + ' s')
 
     def set_new_project_file_path(self, fname):
         set_ok = False
@@ -117,13 +128,35 @@ class EchoesResultsModel():
         set_ok = False
         self._json = fname
         if os.path.isfile(fname) and len(fname):
-            data = read_result_file(fname)
+            extension = os.path.basename(fname).split('.')[-1]
+            if extension == 'json':
+                data = read_result_file(fname)
+            elif extension == 'bz':
+                data = self._read_project(fname)
             self.project = data
             set_ok = True
         else:
-            write_data_dict_to_json(fname, {})
+            self._write_project(fname, {})
             set_ok = True
         return set_ok
+
+    def _read_project(self, fname):
+        extension = os.path.basename(fname).split('.')[-1]
+        data = {}
+        if extension == 'json':
+            data = read_result_file(fname)
+        elif extension == 'bz':
+            data = read_result_file_compressed(fname)
+        return data
+
+    def _write_project(self, fname, data):
+        extension = os.path.basename(fname).split('.')[-1]
+     
+        if extension == 'json':
+            write_data_dict_to_json(fname, data)
+        elif extension == 'bz':
+            write_data_dict_to_compressed_json(fname, data)
+        
 
     def set_folder(self, folder):
         self.folder = folder

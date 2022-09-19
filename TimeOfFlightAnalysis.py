@@ -15,6 +15,7 @@
 #  save settings in project file
 # TODO toggle echo show/hide in overview widget
 # TODO sort output folders
+# TODO close and clear project
 
 
 from ua import TOF

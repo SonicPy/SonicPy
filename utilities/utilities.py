@@ -9,10 +9,19 @@ import json
 import os
 
 import math
+import compress_json
+
+
+def write_data_dict_to_compressed_json(filename, data):
+    
+    
+    compress_json.dump(data, filename)
+
 
 
 
 def write_data_dict_to_json(filename, data):
+
     with open(filename, 'w') as json_file:
         json.dump(data, json_file,indent = 2)  
         json_file.close()  
@@ -37,6 +46,11 @@ def read_result_file( filename):
         with open(filename) as json_file:
             data = json.load(json_file)
             json_file.close()
+
+        return data
+
+def read_result_file_compressed( filename):
+        data = compress_json.load(filename)
 
         return data
 

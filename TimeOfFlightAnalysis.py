@@ -11,8 +11,10 @@
 # TODO selecting Vp/Vs in the results table
 # TODO save metadata in um, read metadata in ua
 #  json project file
-# TODO save sorted folders
-# TODO save settings in project file
+#  save sorted folders
+#  save settings in project file
+# TODO toggle echo show/hide in overview widget
+# TODO sort output folders
 
 
 from ua import TOF

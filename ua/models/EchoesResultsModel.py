@@ -31,7 +31,7 @@ class EchoesResultsModel():
         self.mode = modes[mode_ind]
 
         self.project = {}
-        self.folders_sorted = []
+        
   
 
     def clear(self, mode_ind =2):
@@ -50,10 +50,16 @@ class EchoesResultsModel():
             return {}
 
     def set_folders_sorted(self, folders_sorted):
-        self.folders_sorted = folders_sorted
+        
+        self.project['folders_sorted'] = folders_sorted
 
     def get_folders_sorted(self):
-        return self.folders_sorted
+        if 'folders_sorted' in self.project:
+            folders_sorted = self.project['folders_sorted']
+        else:
+            folders_sorted = []
+            self.project['folders_sorted'] = []
+        return folders_sorted
 
     def get_project_file_name(self):
         if self.mode == 'h5py':

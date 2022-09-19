@@ -476,9 +476,18 @@ class OverViewModel():
 
         mode = self.mode
         
-        self.results_model.set_folders_sorted (self._get_conditions_folders(folder))
+        previous_folders_sorted = self.results_model.get_folders_sorted()
+        
+        new_folders_sorted = self._get_conditions_folders(folder)
 
-
+        all_folders_found = True
+        if len(previous_folders_sorted) == len(new_folders_sorted):
+            for f in new_folders_sorted:
+                if not f in previous_folders_sorted:
+                    all_folders_found = False
+        if not all_folders_found:
+            self.results_model.set_folders_sorted(new_folders_sorted)
+        
         
         condition_0 = self.results_model.get_folders_sorted()[0]
         first_folder = os.path.join(folder,condition_0)

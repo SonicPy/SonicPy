@@ -51,27 +51,23 @@ class UltrasoundAnalysisModel():
     def set_echo_width(self, value):
         self.settings['echo_width'] = float(value)
         folder = self.results_model.folder
-        self.save_folder_settings(folder)
+        self.save_folder_settings()
 
-    def save_folder_settings(self, folder):
-        settings_file =  os.path.join(folder, self.settings_fname)
-        update_data_dict_json(settings_file,self.settings)
+    def save_folder_settings(self):
+        
+        self.results_model.update_settings(self.settings)
 
     def restore_folder_settings(self, folder):
-        settings_file =  os.path.join(folder, self.settings_fname)
-        settings_exist = os.path.isfile(settings_file)
         write_out = False
-        if settings_exist:
-            settings = read_result_file(settings_file)
-            for key in self.settings:
-                if not key in settings:
-                    settings[key] = self.settings[key]
-                    write_out = True
-            self.settings = settings
-        else:
-            write_out = True
+        settings = self.results_model.get_settings() 
+        for key in self.settings:
+            if not key in settings:
+                settings[key] = self.settings[key]
+                write_out = True
+        self.settings = settings
+        
         if write_out:
-            write_data_dict_to_json(settings_file,self.settings)
+            self.results_model.update_settings(self.settings)
 
     def fit_func(self, x, a, b,c,d):
         '''

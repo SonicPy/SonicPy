@@ -47,30 +47,43 @@ class MultipleFrequencyController(QObject):
     def do_all_frequencies_btn_callback(self):
 
         if len(self.model.files):
-            mode = self.widget.mode_tab_widget.currentIndex()
-            if mode == 0:
-                pts = len(self.model.files)
-            elif mode == 1:
-                f_start = self.widget.broadband_pulse_widget.f_min_bx.value()
-                f_end = self.widget.broadband_pulse_widget.f_max_bx.value()
-                f_step = self.widget.broadband_pulse_widget.f_step_bx.value()
-                pts = int((f_end - f_start) / f_step) 
-            progress_dialog = QtWidgets.QProgressDialog("Calculating", "Abort", 0, pts, None)
-            progress_dialog.setWindowModality(QtCore.Qt.WindowModal)
-            progress_dialog.setWindowFlags(QtCore.Qt.FramelessWindowHint)
-            progress_dialog.show()
-            QtWidgets.QApplication.processEvents()
-            if mode == 0:
-                self.do_all_frequency_sweep(progress_dialog=progress_dialog) 
-            elif mode == 1:
-                self.do_all_broadband_pulse(f_start, f_end, f_step, progress_dialog=progress_dialog)
+            bounds = self.correlation_controller. get_lr_bounds()
+            bounds_ok = bounds[0][0] > 0 and bounds[0][1] > 0 and bounds[1][0] > 0 and bounds[1][1] > 0
+            if bounds_ok:
+                mode = self.widget.mode_tab_widget.currentIndex()
+                if mode == 0:
+                    pts = len(self.model.files)
+                elif mode == 1:
+                    f_start = self.widget.broadband_pulse_widget.f_min_bx.value()
+                    f_end = self.widget.broadband_pulse_widget.f_max_bx.value()
+                    f_step = self.widget.broadband_pulse_widget.f_step_bx.value()
+                    pts = int((f_end - f_start) / f_step) 
+                progress_dialog = QtWidgets.QProgressDialog("Calculating", "Abort", 0, pts, None)
+                progress_dialog.setWindowModality(QtCore.Qt.WindowModal)
+                progress_dialog.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+                progress_dialog.show()
+                QtWidgets.QApplication.processEvents()
+                if mode == 0:
+                    self.do_all_frequency_sweep(progress_dialog=progress_dialog) 
+                elif mode == 1:
+                    self.do_all_broadband_pulse(f_start, f_end, f_step, progress_dialog=progress_dialog)
 
-            progress_dialog.close()
-            QtWidgets.QApplication.processEvents() 
-            '''self.overview_controller.re_plot_single_frequency()
-            self.overview_controller.re_plot_single_condition()'''
+                progress_dialog.close()
+                QtWidgets.QApplication.processEvents() 
+                '''self.overview_controller.re_plot_single_frequency()
+                self.overview_controller.re_plot_single_condition()'''
+            else:
+                msg = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Information,"Notice","Echo bounds invalid")
+                msg.exec()
+        else:
+            msg = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Information,"Notice","No waveform selected")
+            msg.exec()
+                
 
     def do_all_frequency_sweep(self, *args, **kwargs):
+
+        
+
         files = self.model.files
         cond = self.model.cond
         if 'progress_dialog' in kwargs:
@@ -102,6 +115,7 @@ class MultipleFrequencyController(QObject):
                 if progress_dialog.wasCanceled():
                     break
         QtWidgets.QApplication.processEvents()
+        
             
 
     def do_all_broadband_pulse(self, *args, **kwargs):

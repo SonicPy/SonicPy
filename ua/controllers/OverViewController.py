@@ -88,6 +88,7 @@ class OverViewController(QObject):
 
     def list_changed_signal_callback(self, folders):
         
+        self.model.results_model.set_folders_sorted(folders)
         self.model.conditions_folders_sorted = folders
         self.model.load_multiple_files_by_frequency(self.freq)
         self.re_plot_single_frequency()
@@ -336,7 +337,7 @@ class OverViewController(QObject):
 
                 if self.model.mode == 'discrete_f':
                     self.sync_widget_controls_with_model_non_signaling()
-                    folders = self.model.conditions_folders_sorted
+                    folders = self.model.results_model.get_folders_sorted()
                     self.folder_widget.set_folders(folders)
                     freqs = list(self.model.fps_Hz.keys())
                     conds = list(self.model.fps_cond.keys())

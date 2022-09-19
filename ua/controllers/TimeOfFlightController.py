@@ -121,7 +121,8 @@ class TimeOfFlightController(QObject):
 
         self.project_menus_enabled(set_ok)
         if not set_ok:
-            QtWidgets.QMessageBox(None,"Notice","Project file not selected")
+            msg = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Information,"Notice","Project file not selected")
+            msg.exec()
         else:
             folder = self.echoes_results_model.folder
             if os.path.isdir(folder) and len(folder):
@@ -171,7 +172,7 @@ class TimeOfFlightController(QObject):
     
     def folder_selected_signal_callback(self, folder):
         self.widget.setWindowTitle("Time-of-flight analysis. V." + __version__ + "  © R. Hrubiak, 2022. Data folder: "+ os.path.abspath( folder))
-        subfolders = copy.copy(self.overview_controller.model.conditions_folders_sorted)
+        subfolders = copy.copy(self.echoes_results_model.get_folders_sorted())
         self.echoes_results_model.set_folder(folder)
         self.echoes_results_model.set_subfolders(subfolders)
         self.echoes_results_model.load_echoes_from_file()   

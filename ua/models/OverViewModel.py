@@ -95,7 +95,7 @@ class OverViewModel():
 
         self.settings_fname = 'settings.json'
 
-        self.conditions_folders_sorted = []
+        
 
         self.echoes_p = {}
         self.echoes_s = {}
@@ -161,12 +161,12 @@ class OverViewModel():
         self.settings['f_start']= f_start
         self.settings['f_step']= f_step
 
-        self.save_folder_settings(self.fp)
+        self.save_folder_settings()
 
     def set_scale(self, scale):
 
         self.settings['scale']= scale
-        self.save_folder_settings(self.fp)
+        self.save_folder_settings()
 
         for key in self.waterfalls:
             w = self.waterfalls[key]
@@ -175,14 +175,14 @@ class OverViewModel():
     def set_clip(self, clip):
 
         self.settings['clip']= clip
-        self.save_folder_settings(self.fp)
+        self.save_folder_settings()
 
         for key in self.waterfalls:
             w = self.waterfalls[key]
             w.settings['clip']=clip
 
     def load_multiple_files_by_frequency(self, freq):
-        conditions = self.conditions_folders_sorted # list(self.fps_cond.keys())
+        conditions = self.results_model.get_folders_sorted()  
         fnames = []
         for c in conditions:
             fname_list = self.fps_cond[c]
@@ -261,24 +261,20 @@ class OverViewModel():
                 
 
     def restore_folder_settings(self, folder):
-        settings_file =  os.path.join(folder, self.settings_fname)
-        settings_exist = os.path.isfile(settings_file)
         write_out = False
-        if settings_exist:
-            settings = read_result_file(settings_file)
-            for key in self.settings:
-                if not key in settings:
-                    settings[key] = self.settings[key]
-                    write_out = True
-            self.settings = settings
-        else:
-            write_out = True
+        settings = self.results_model.get_settings() 
+        for key in self.settings:
+            if not key in settings:
+                settings[key] = self.settings[key]
+                write_out = True
+        self.settings = settings
+        
         if write_out:
-            write_data_dict_to_json(settings_file,self.settings)
+            self.results_model.update_settings(self.settings)
 
-    def save_folder_settings(self, folder):
-        settings_file =  os.path.join(folder, self.settings_fname)
-        update_data_dict_json(settings_file,self.settings)
+    def save_folder_settings(self):
+        self.results_model.update_settings(self.settings) 
+        
 
     def set_folder_path(self, folder):
         folder = os.path.normpath(folder)
@@ -358,7 +354,7 @@ class OverViewModel():
 
         mode = self.mode
 
-        conditions_folders_sorted = self.conditions_folders_sorted
+        conditions_folders_sorted = self.results_model.get_folders_sorted()
         self.fps_cond = {}
         self.file_dict = {}
         self.fps_Hz = {}
@@ -414,7 +410,7 @@ class OverViewModel():
 
 
     def get_frequencies_sorted(self):
-        conditions_folders_sorted = self.conditions_folders_sorted
+        conditions_folders_sorted = self.results_model.get_folders_sorted()
         folder = self.fp
         mode = self.mode
 
@@ -480,18 +476,18 @@ class OverViewModel():
 
         mode = self.mode
         
-        self.conditions_folders_sorted = self._get_conditions_folders(folder)
+        self.results_model.set_folders_sorted (self._get_conditions_folders(folder))
 
 
         
-        condition_0 = self.conditions_folders_sorted[0]
+        condition_0 = self.results_model.get_folders_sorted()[0]
         first_folder = os.path.join(folder,condition_0)
         
         self.file_type =  self.get_extension(first_folder)
 
         self.frequencies_sorted = self.get_frequencies_sorted()
 
-        if len(self.conditions_folders_sorted):
+        if len(self.results_model.get_folders_sorted()):
             self.create_file_dicts()
 
         
@@ -504,7 +500,7 @@ class OverViewModel():
         
     
     def condition_index(self,condition):
-        return self.conditions_folders_sorted.index(condition)
+        return self.results_model.get_folders_sorted().index(condition)
 
     def frequency_index(self,frequency):
         return self.frequencies_sorted.index(frequency)

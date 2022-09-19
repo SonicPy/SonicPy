@@ -3,15 +3,14 @@
 
 
 import os.path
-import wave
-import numpy as np
+
 '''from utilities.utilities import *'''
 
 from utilities.utilities import *
 import json
 import glob
 import h5py
-
+import time
 from deepdiff import DeepDiff
 
 
@@ -32,10 +31,29 @@ class EchoesResultsModel():
         self.mode = modes[mode_ind]
 
         self.project = {}
+        self.folders_sorted = []
   
 
     def clear(self, mode_ind =2):
         self.__init__(mode_ind=mode_ind)
+
+    def update_settings(self, settings):
+        if not 'settings' in self.project:
+            self.project['settings'] = {}
+        for key in settings:
+            self.project['settings'][key] = settings[key]
+
+    def get_settings(self):
+        if 'settings' in self.project:
+            return self.project['settings']
+        else:
+            return {}
+
+    def set_folders_sorted(self, folders_sorted):
+        self.folders_sorted = folders_sorted
+
+    def get_folders_sorted(self):
+        return self.folders_sorted
 
     def get_project_file_name(self):
         if self.mode == 'h5py':
@@ -65,7 +83,9 @@ class EchoesResultsModel():
             set_ok = self._save_project_json()
 
     def _save_project_json(self):
+        now = time.time()
         write_data_dict_to_json(self._json,self.project)
+        print('saved in ' + str(time.time()-now) + ' s')
 
     def set_new_project_file_path(self, fname):
         set_ok = False

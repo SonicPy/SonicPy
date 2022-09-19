@@ -137,6 +137,7 @@ class UltrasoundAnalysisController(QObject):
     
 
     def save_result(self, signaling=True):
+        
         if self.fname is not None:
             filename = self.fname + '.json'
             '''before = time.time()'''
@@ -146,6 +147,9 @@ class UltrasoundAnalysisController(QObject):
             print ("file: " + self.fname + ", saving took: " + str(elapsed) + " s")'''
             if out['ok']: 
                 self.correlation_saved_signal.emit(out['data'])
+        else:
+            msg = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Information,"Notice","No waveform selected")
+            msg.exec()
 
 
     def emit_cursor(self, pos):

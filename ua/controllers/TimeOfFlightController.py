@@ -104,6 +104,7 @@ class TimeOfFlightController(QObject):
         filename = save_file_dialog(None, "New project file", filter = 'Time of Flight Analysis Project (*.json;*.bz)', warn_overwrite=True)
         
         if len(filename):
+            self.close_project_act_callback()
             if os.path.isfile(filename):
                 os.rename(filename, filename + '.bak')
             self._open_project(filename)
@@ -112,6 +113,8 @@ class TimeOfFlightController(QObject):
         filename = open_file_dialog(None, "Open project file", filter = 'Time of Flight Analysis Project (*.json;*.bz)')
         
         if os.path.isfile(filename):
+
+            self.close_project_act_callback()
             self._open_project(filename)
         
         

@@ -485,6 +485,8 @@ class OverViewModel():
             for f in new_folders_sorted:
                 if not f in previous_folders_sorted:
                     all_folders_found = False
+        else:
+            all_folders_found = False
         if not all_folders_found:
             self.results_model.set_folders_sorted(new_folders_sorted)
         

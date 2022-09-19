@@ -80,8 +80,9 @@ class EchoesResultsModel():
             elif self.mode == 'json':
                 if 'folder' in self.project:
                     folder = self.project['folder']
-            
-            self.folder = os.path.normpath(folder)
+                    if len(folder):
+                        folder = os.path.normpath(folder)
+            self.folder = folder
         return set_ok
 
     def save_project(self):

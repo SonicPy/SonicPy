@@ -70,7 +70,7 @@ def TOF():
         fname = ''
         mac_file = '/Users/ross/Globus/s16bmb-20210717-e244302-Aihaiti/sam2/US/myproject.json'
         win_file = 'C:\\Users\\hrubiak\\Desktop\\US\\myproject.json'
-        mac_file_2 = '/Users/hrubiak/Downloads/Ultrasound_XRD_datasets_for_dissemination/Ultrasound_data_for_dissemination_June_2018_Exp4/US/mytestfile.tof'
+        mac_file_2 = '/Users/hrubiak/Downloads/Ultrasound_XRD_datasets_for_dissemination/Ultrasound_data_for_dissemination_June_2018_Exp4/US/myproject.json'
             
         possible_files = [mac_file,
                             win_file,

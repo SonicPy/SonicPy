@@ -33,6 +33,9 @@ class OutputWidget(QtWidgets.QWidget):
 
         self.setLayout(self._layout)
 
+    def clear_widget(self):
+        self.clear_output()
+
     def raise_widget(self):
         self.show()
         self.setWindowState(self.windowState() & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)

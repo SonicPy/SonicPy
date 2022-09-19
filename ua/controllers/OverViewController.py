@@ -84,6 +84,9 @@ class OverViewController(QObject):
 
         self.folder_widget.list_changed_signal.connect(self.list_changed_signal_callback)
 
+    def reset(self):
+        self.model.clear()
+        self.widget.clear_widget()
     
 
     def list_changed_signal_callback(self, folders):
@@ -215,37 +218,38 @@ class OverViewController(QObject):
                 
 
     def single_condition_cursor_y_signal_callback(self, y_pos):
-
-        index = round(y_pos)
         
-        fnames = list(self.model.waterfalls[self.cond].waveforms.keys())
-        if index >=0 and index < len(fnames):
-            if fnames[index] in self.model.file_dict:
-                #self.selected_fname = fnames[index]
-                fname = fnames[index]
-                self.select_fname(fname)
-                #self.re_plot_single_condition()
+        if self.cond in self.model.waterfalls:
+            index = round(y_pos)
+            
+            fnames = list(self.model.waterfalls[self.cond].waveforms.keys())
+            if index >=0 and index < len(fnames):
+                if fnames[index] in self.model.file_dict:
+                    #self.selected_fname = fnames[index]
+                    fname = fnames[index]
+                    self.select_fname(fname)
+                    #self.re_plot_single_condition()
 
-                '''cond = self.model.file_dict[self.selected_fname][0]
-                self.cond = cond
-                freq = self.model.file_dict[self.selected_fname][1]
-                freqs = list(self.model.fps_Hz.keys())
-                ind  = freqs.index(freq)
-                self.set_frequency(ind)
+                    '''cond = self.model.file_dict[self.selected_fname][0]
+                    self.cond = cond
+                    freq = self.model.file_dict[self.selected_fname][1]
+                    freqs = list(self.model.fps_Hz.keys())
+                    ind  = freqs.index(freq)
+                    self.set_frequency(ind)
 
-                data = {}
+                    data = {}
+                    
+                    data['fname'] = self.selected_fname
+                    data['cond'] = cond
+                    data['freq'] = freq
+
+                    selected = self.model.spectra[self.cond][freq]['waveform']
                 
-                data['fname'] = self.selected_fname
-                data['cond'] = cond
-                data['freq'] = freq
-
-                selected = self.model.spectra[self.cond][freq]['waveform']
-               
-                data['t'] = selected[0]
-                data['spectrum'] = selected[1]
-                
-                self.file_selected_signal.emit(data)
-                self.re_plot_single_condition()'''
+                    data['t'] = selected[0]
+                    data['spectrum'] = selected[1]
+                    
+                    self.file_selected_signal.emit(data)
+                    self.re_plot_single_condition()'''
 
     def preferences_module(self, *args, **kwargs):
         pass
@@ -328,32 +332,27 @@ class OverViewController(QObject):
             folder = QtWidgets.QFileDialog.getExistingDirectory(self.widget, caption='Select US folder',
                                                      directory='')
         done = False
-        while not done:
-            if os.path.isdir(folder):
+        
+        if os.path.isdir(folder):
 
-                self.model.clear()
-                
-                self.model.set_folder_path(folder)
+            self.model.clear()
+            
+            self.model.set_folder_path(folder)
 
-                if self.model.mode == 'discrete_f':
-                    self.sync_widget_controls_with_model_non_signaling()
-                    folders = self.model.results_model.get_folders_sorted()
-                    self.folder_widget.set_folders(folders)
-                    freqs = list(self.model.fps_Hz.keys())
-                    conds = list(self.model.fps_cond.keys())
-                    self.set_frequency(default_frequency_index)
-                    self.widget.freq_scroll.setMaximum(len(freqs)-1)
-                    self.set_condition(default_condition_index)
-                    self.widget.cond_scroll.setMaximum(len(conds)-1)
-                    self.folder_selected_signal.emit(folder)
-                elif self.model.mode == 'broadband':
-                    print('broadband controllr not implemented')
-                done  = True
-            else:
-                folder = os.path.normpath( QtWidgets.QFileDialog.getExistingDirectory(self.widget, caption='Select US folder',
-                                                     directory=''))
-                if not len(folder):
-                    done = True
+            if self.model.mode == 'discrete_f':
+                self.sync_widget_controls_with_model_non_signaling()
+                folders = self.model.results_model.get_folders_sorted()
+                self.folder_widget.set_folders(folders)
+                freqs = list(self.model.fps_Hz.keys())
+                conds = list(self.model.fps_cond.keys())
+                self.set_frequency(default_frequency_index)
+                self.widget.freq_scroll.setMaximum(len(freqs)-1)
+                self.set_condition(default_condition_index)
+                self.widget.cond_scroll.setMaximum(len(conds)-1)
+                self.folder_selected_signal.emit(folder)
+            elif self.model.mode == 'broadband':
+                print('broadband controller not implemented')
+          
 
     def set_frequency_by_value(self, freq):
         str_ind = self.model. freq_val_to_ind(freq)
@@ -387,83 +386,85 @@ class OverViewController(QObject):
             self.widget.condition_lbl.setText(str(self.cond))
 
     def re_plot_single_frequency(self ):
-        waterfall = self.model.waterfalls[self.freq]
-        echoes_p = self.model.results_model.echoes_p
-        echoes_s = self.model.results_model.echoes_s
+        if self.freq in self.model.waterfalls:
+            waterfall = self.model.waterfalls[self.freq]
+            echoes_p = self.model.results_model.echoes_p
+            echoes_s = self.model.results_model.echoes_s
 
-        freq = self.freq_str_ind_to_val(self.freq)
+            freq = self.freq_str_ind_to_val(self.freq)
 
-        for echo_p_name in echoes_p:
-            echoes = echoes_p[echo_p_name]
-            if freq in echoes:
-                bounds = echoes[freq]['echo_bounds']
-                filename_waveform = echo_p_name
-                wave_type = "P"
-                waterfall.set_echoe(filename_waveform ,wave_type, bounds)
+            for echo_p_name in echoes_p:
+                echoes = echoes_p[echo_p_name]
+                if freq in echoes:
+                    bounds = echoes[freq]['echo_bounds']
+                    filename_waveform = echo_p_name
+                    wave_type = "P"
+                    waterfall.set_echoe(filename_waveform ,wave_type, bounds)
 
-        for echo_s_name in echoes_s:
-            echoes = echoes_s[echo_s_name]
-            if freq in echoes:
-                bounds = echoes[freq]['echo_bounds']
-                filename_waveform = echo_s_name
-                wave_type = "S"
-                waterfall.set_echoe(filename_waveform ,wave_type, bounds)
+            for echo_s_name in echoes_s:
+                echoes = echoes_s[echo_s_name]
+                if freq in echoes:
+                    bounds = echoes[freq]['echo_bounds']
+                    filename_waveform = echo_s_name
+                    wave_type = "S"
+                    waterfall.set_echoe(filename_waveform ,wave_type, bounds)
 
-        waterfall.get_rescaled_waveforms(caller='re_plot_single_frequency')
-    
-        selected_fname = self.selected_fname
-        waterfall_waveform, \
-            selected, \
-                selected_name_out, \
-                    echoes_p, echoes_s = waterfall.prepare_waveforms_for_plot( selected_fname)
-
-        self.widget.single_frequency_waterfall.clear_plot()
+            waterfall.get_rescaled_waveforms(caller='re_plot_single_frequency')
         
-        self.update_plot_sigle_frequency(waterfall_waveform,selected, echoes_p, echoes_s)
-        f_start = self.widget.freq_start.value()
-        f_step = self.widget.freq_step.value()
-        display_freq = f_start + int(self.freq) * f_step
-        self.widget.single_frequency_waterfall.set_name ( str(display_freq) + ' MHz')
-        self.widget.single_frequency_waterfall.set_selected_name (selected_name_out)
+            selected_fname = self.selected_fname
+            waterfall_waveform, \
+                selected, \
+                    selected_name_out, \
+                        echoes_p, echoes_s = waterfall.prepare_waveforms_for_plot( selected_fname)
+
+            self.widget.single_frequency_waterfall.clear_plot()
+            
+            self.update_plot_sigle_frequency(waterfall_waveform,selected, echoes_p, echoes_s)
+            f_start = self.widget.freq_start.value()
+            f_step = self.widget.freq_step.value()
+            display_freq = f_start + int(self.freq) * f_step
+            self.widget.single_frequency_waterfall.set_name ( str(display_freq) + ' MHz')
+            self.widget.single_frequency_waterfall.set_selected_name (selected_name_out)
 
     def re_plot_single_condition(self ):
-        waterfall = self.model.waterfalls[self.cond]
+        if self.cond in self.model.waterfalls:
+            waterfall = self.model.waterfalls[self.cond]
 
-        echoes_p = self.model.results_model.echoes_p
-        echoes_s = self.model.results_model.echoes_s
+            echoes_p = self.model.results_model.echoes_p
+            echoes_s = self.model.results_model.echoes_s
 
-        for echo_p_name in echoes_p:
-            echoes = echoes_p[echo_p_name]
-            for freq in echoes:
-                echo = echoes[freq]
-                bounds = echo['echo_bounds']
-                filename_waveform = echo_p_name
-                wave_type = "P"
-                waterfall.set_echoe(filename_waveform ,wave_type, bounds)
+            for echo_p_name in echoes_p:
+                echoes = echoes_p[echo_p_name]
+                for freq in echoes:
+                    echo = echoes[freq]
+                    bounds = echo['echo_bounds']
+                    filename_waveform = echo_p_name
+                    wave_type = "P"
+                    waterfall.set_echoe(filename_waveform ,wave_type, bounds)
 
-        for echo_s_name in echoes_s:
-            echoes = echoes_s[echo_s_name]
-            for freq in echoes:
-                echo = echoes[freq]
-                bounds = echo['echo_bounds']
-                filename_waveform = echo_s_name
-                wave_type = "S"
-                waterfall.set_echoe(filename_waveform ,wave_type, bounds)
+            for echo_s_name in echoes_s:
+                echoes = echoes_s[echo_s_name]
+                for freq in echoes:
+                    echo = echoes[freq]
+                    bounds = echo['echo_bounds']
+                    filename_waveform = echo_s_name
+                    wave_type = "S"
+                    waterfall.set_echoe(filename_waveform ,wave_type, bounds)
 
-        waterfall.get_rescaled_waveforms(caller='re_plot_single_condition')
-    
-        selected_fname = self.selected_fname
-
-        waterfall_waveform, \
-            selected, \
-                selected_name_out, \
-                    echoes_p, echoes_s = waterfall.prepare_waveforms_for_plot( selected_fname)
-
-        self.widget.single_condition_waterfall.clear_plot()
+            waterfall.get_rescaled_waveforms(caller='re_plot_single_condition')
         
-        self.update_plot_sigle_condition(waterfall_waveform,selected,echoes_p, echoes_s)
-        self.widget.single_condition_waterfall.set_name ( self.cond)
-        self.widget.single_condition_waterfall.set_selected_name (selected_name_out)
+            selected_fname = self.selected_fname
+
+            waterfall_waveform, \
+                selected, \
+                    selected_name_out, \
+                        echoes_p, echoes_s = waterfall.prepare_waveforms_for_plot( selected_fname)
+
+            self.widget.single_condition_waterfall.clear_plot()
+            
+            self.update_plot_sigle_condition(waterfall_waveform,selected,echoes_p, echoes_s)
+            self.widget.single_condition_waterfall.set_name ( self.cond)
+            self.widget.single_condition_waterfall.set_selected_name (selected_name_out)
 
     
 

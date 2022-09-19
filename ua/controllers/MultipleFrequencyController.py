@@ -44,6 +44,10 @@ class MultipleFrequencyController(QObject):
         self.widget.frequency_sweep_widget.f_min_bx.valueChanged.connect(self.model.set_f_min_sweep)
         self.widget.frequency_sweep_widget.f_max_bx.valueChanged.connect(self.model.set_f_max_sweep)
 
+    def reset(self):
+        self.model.clear()
+        
+
     def do_all_frequencies_btn_callback(self):
 
         if len(self.model.files):

@@ -47,6 +47,10 @@ class OutputController(QObject):
         self.widget.output_tw.itemSelectionChanged.connect(self.option_tw_selection_changed_callback)
         self.widget.output_settings_widget.save_btn.clicked.connect(self.save_btn_callback)
 
+    def reset(self):
+        self.model.clear()
+        self.widget.clear_widget()
+
     def option_tw_selection_changed_callback(self, *args):
         row = self.widget.get_selected_output_row()
         conds = self.model.conds

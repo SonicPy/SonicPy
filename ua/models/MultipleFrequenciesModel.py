@@ -19,6 +19,9 @@ class MultipleFrequenciesModel():
         self.f_max_broadband = 70
         self.step_broadband = 2
 
+    def clear(self):
+        self.__init__(self.results_model)
+
     def set_condition(self, cond):
         self.cond = cond
 

@@ -67,6 +67,8 @@ class WaterfallWidget(QtWidgets.QWidget):
 
     def clear_plot(self,):
         self.plot([],[])
+        self.set_selected_name('')
+        self.set_name('')
 
     def set_selected_name (self, text):
         self. plot_widget.setText(text , 1)

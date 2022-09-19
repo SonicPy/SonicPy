@@ -69,6 +69,9 @@ class UltrasoundAnalysisController(QObject):
     def clear(self):
         self.display_window.clear()
         self.model.clear()
+
+    def reset(self):
+        self.clear()
         
 
     def connect_regions(self):

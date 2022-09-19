@@ -48,6 +48,8 @@ class MultipleFrequenciesWidget(QtWidgets.QWidget):
             
         """)
 
+        
+
 
 
     def raise_widget(self):

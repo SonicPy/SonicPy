@@ -103,9 +103,10 @@ class TimeOfFlightController(QObject):
     def new_project_act_callback(self):
         filename = save_file_dialog(None, "New project file", filter = 'Time of Flight Analysis Project (*.json;*.bz)', warn_overwrite=True)
         
-        if os.path.isfile(filename):
-            os.rename(filename, filename + '.bak')
-        self._open_project(filename)
+        if len(filename):
+            if os.path.isfile(filename):
+                os.rename(filename, filename + '.bak')
+            self._open_project(filename)
         
     def open_project_act_callback(self):
         filename = open_file_dialog(None, "Open project file", filter = 'Time of Flight Analysis Project (*.json;*.bz)')
@@ -130,11 +131,9 @@ class TimeOfFlightController(QObject):
                 self.overview_controller.set_US_folder(folder=folder)
 
     def close_project_act_callback(self):
-        print('close_project_act_callback')
         self.echoes_results_model.clear()
+        self.reset_controllers()
         self.project_menus_enabled(False)
-
-        ### needs more work to clear the other controllers
 
     def save_project_as_act_callback(self):
         new_filename = save_file_dialog(None, "New project file", filter = 'Time of Flight Analysis Project (*.json;*.bz)', warn_overwrite=True)
@@ -154,6 +153,14 @@ class TimeOfFlightController(QObject):
         self.widget.proj_save_as_act.setEnabled(state)
         self.widget.proj_close_act.setEnabled(state)
 
+    def reset_controllers(self):
+        
+        self.overview_controller.reset() 
+        self.correlation_controller.reset() 
+        self.output_controller.reset()
+        self.multiple_frequencies_controller.reset()
+        self.arrow_plot_controller.reset()  
+        
 
 
     ###

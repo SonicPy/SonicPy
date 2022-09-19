@@ -10,6 +10,9 @@ class OutputModel():
  
         self.conds = []
 
+    def clear(self):
+        self.__init__(self.results_model)
+
     def reset(self):
         self.__init__(self.results_model)
 

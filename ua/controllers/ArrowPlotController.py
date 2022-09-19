@@ -59,6 +59,10 @@ class ArrowPlotController(QObject):
         self.arrow_plot_window.win.cursor_changed_singal.connect(self.cursor_changed_singal_callback)
         self.arrow_plot_window.del_btn.clicked.connect(self. del_btn_callback)
 
+    def reset(self):
+        self.clear()
+        self.update_plot()
+
     def del_btn_callback(self):
         arrow_plot = self.model.get_arrow_plot(self.cond, self.wave_type)
         if arrow_plot != None:
@@ -234,6 +238,7 @@ class ArrowPlotController(QObject):
         self.model.clear()
         self.arrow_plot_window.set_selected_frequency('')
         self.arrow_plot_window.set_name('')
+        
 
     def refresh_model(self):
         self.model.refresh_all_freqs(self.cond, self.wave_type)

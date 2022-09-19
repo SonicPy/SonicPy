@@ -219,6 +219,10 @@ class OverViewWidget(QWidget):
 
         self.setLayout(self._layout)
 
+    def clear_widget(self):
+        self.single_frequency_waterfall.clear_plot()
+        self.single_condition_waterfall.clear_plot()
+
     def make_bottom_combo_widgets(self):
         
 
@@ -276,25 +280,7 @@ class OverViewWidget(QWidget):
         self.buttons_widget_bottom_single_condition.setLayout(self._buttons_layout_bottom_single_condition)
         self._single_condition_widget_layout.addWidget(self.buttons_widget_bottom_single_condition)
 
-    '''def set_freq_buttons(self, num):
 
-        for b in self.freq_btns_list:
-            self._freqs_widget_layout.removeWidget(b)
-            self.freq_btns.removeButton(b)
-            b.deleteLater()
-            b= None
-        self.freq_btns_list.clear()
-
-        for f in range(num):
-            btn = QtWidgets.QPushButton(str(f))
-            btn.setObjectName('freq_btn')
-            btn.setCheckable(True)
-            self.freq_btns_list.append(btn)
-            self.freq_btns.addButton(btn)
-            #self._freqs_widget_layout.addWidget(btn)
-
-        self.freq_btns_list[0].setObjectName('freq_btn_first')
-        self.freq_btns_list[-1].setObjectName('freq_btn_last')'''
         
     def set_cond_buttons(self, num):
 

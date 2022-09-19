@@ -144,15 +144,7 @@ class OverViewModel():
         return ind
 
         
-    '''def set_echoes(self, fname, wave_type, echoes_bounds):
-        # echoes_bounds = list, [[0.0,0.0],[0.0,0.0]] (values are in seconds)
-        # echoes_bounds[0]: P bounds
-        # echoes_bounds[0]: S bounds
-        if wave_type == 'P':
-            self.echoes_p[fname] = echoes_bounds
 
-        elif wave_type == 'S':
-            self.echoes_s[fname] = echoes_bounds'''
 
     def clear(self):
         self.__init__(self.results_model)

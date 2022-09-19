@@ -373,13 +373,16 @@ class EchoesResultsModel():
     def _delete_result_json(self, clear_info):
         wave_type = clear_info['wave_type']
         condition = clear_info['condition']
-        
-        basename = condition + '.' + wave_type + '.json'
-        filename = basename
-        exists = filename in self.project['datasets'][condition]['results']
-        if exists:
-            del self.project['datasets'][condition]['results'][filename]
-            
+        if condition != None and len(self.project):
+            if 'datasets' in self.project:
+                if condition in self.project['datasets']:
+                    if 'results' in self.project['datasets'][condition]:
+                        basename = condition + '.' + wave_type + '.json'
+                        filename = basename
+                        exists = filename in self.project['datasets'][condition]['results']
+                        if exists:
+                            del self.project['datasets'][condition]['results'][filename]
+                
 
     def _delete_result_fs(self, clear_info):
         wave_type = clear_info['wave_type']

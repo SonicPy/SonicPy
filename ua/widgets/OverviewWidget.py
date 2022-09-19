@@ -159,8 +159,8 @@ class OverViewWidget(QWidget):
         self.clip_cbx.setChecked(True)
         self.save_btn = QtWidgets.QPushButton('Save result')
        
-        self._buttons_layout_top.addWidget(self.open_btn)
-        self._buttons_layout_top.addWidget(self.sort_btn)
+        '''self._buttons_layout_top.addWidget(self.open_btn)
+        self._buttons_layout_top.addWidget(self.sort_btn)'''
         self._buttons_layout_top.addWidget(self.scale_lbl)
         self._buttons_layout_top.addWidget(self.scale_ebx)
         self._buttons_layout_top.addWidget(self.clip_cbx)

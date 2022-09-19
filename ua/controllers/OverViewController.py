@@ -13,6 +13,7 @@ import copy
 from pathlib import Path
 from numpy import arange
 from numpy.core.einsumfunc import _parse_possible_contraction
+from sqlalchemy import false
 #from pyrsistent import T
 from utilities.utilities import *
 from ua.widgets.UltrasoundAnalysisWidget import UltrasoundAnalysisWidget
@@ -26,7 +27,7 @@ from ua.models.OverViewModel import OverViewModel
 
 import utilities.hpMCAutilities as mcaUtil
 from utilities.HelperModule import increment_filename, increment_filename_extra
-from um.widgets.UtilityWidgets import open_file_dialog, open_files_dialog 
+from um.widgets.UtilityWidgets import open_file_dialog, open_files_dialog
 import glob
 from ua.models.EchoesResultsModel import EchoesResultsModel
 
@@ -157,15 +158,16 @@ class OverViewController(QObject):
 
     def single_frequency_cursor_y_signal_callback(self, y_pos):
 
-        # this is the inxed of the plot when user clicks on the waterfall plot
-        index = round(y_pos)
-        
-        fnames = list(self.model.waterfalls[self.freq].waveforms.keys())
-        if index >=0 and index < len(fnames):
+        if len(self.model.waterfalls):
+            # this is the inxed of the plot when user clicks on the waterfall plot
+            index = round(y_pos)
             
-            fname = fnames[index]
-            
-            self.select_fname(fname)
+            fnames = list(self.model.waterfalls[self.freq].waveforms.keys())
+            if index >=0 and index < len(fnames):
+                
+                fname = fnames[index]
+                
+                self.select_fname(fname)
 
     def get_data_by_filename(self, fname):
         data = {}
@@ -324,28 +326,33 @@ class OverViewController(QObject):
         else:
             folder = QtWidgets.QFileDialog.getExistingDirectory(self.widget, caption='Select US folder',
                                                      directory='')
+        done = False
+        while not done:
+            if os.path.isdir(folder):
 
-        if os.path.isdir(folder):
+                self.model.clear()
+                
+                self.model.set_folder_path(folder)
 
-            self.model.clear()
-            
-            self.model.set_folder_path(folder)
-
-            if self.model.mode == 'discrete_f':
-                self.sync_widget_controls_with_model_non_signaling()
-                folders = self.model.conditions_folders_sorted
-                self.folder_widget.set_folders(folders)
-                freqs = list(self.model.fps_Hz.keys())
-                conds = list(self.model.fps_cond.keys())
-                self.set_frequency(default_frequency_index)
-                self.widget.freq_scroll.setMaximum(len(freqs)-1)
-                self.set_condition(default_condition_index)
-                self.widget.cond_scroll.setMaximum(len(conds)-1)
-                self.folder_selected_signal.emit(folder)
-            elif self.model.mode == 'broadband':
-                print('broadband controllr not implemented')
-        
-    
+                if self.model.mode == 'discrete_f':
+                    self.sync_widget_controls_with_model_non_signaling()
+                    folders = self.model.conditions_folders_sorted
+                    self.folder_widget.set_folders(folders)
+                    freqs = list(self.model.fps_Hz.keys())
+                    conds = list(self.model.fps_cond.keys())
+                    self.set_frequency(default_frequency_index)
+                    self.widget.freq_scroll.setMaximum(len(freqs)-1)
+                    self.set_condition(default_condition_index)
+                    self.widget.cond_scroll.setMaximum(len(conds)-1)
+                    self.folder_selected_signal.emit(folder)
+                elif self.model.mode == 'broadband':
+                    print('broadband controllr not implemented')
+                done  = True
+            else:
+                folder = os.path.normpath( QtWidgets.QFileDialog.getExistingDirectory(self.widget, caption='Select US folder',
+                                                     directory=''))
+                if not len(folder):
+                    done = True
 
     def set_frequency_by_value(self, freq):
         str_ind = self.model. freq_val_to_ind(freq)

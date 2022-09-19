@@ -1,19 +1,16 @@
 #!/usr/bin/env python
 
 
-import os, os.path, sys, platform, copy
-from PyQt5 import uic, QtWidgets,QtCore
+import os, os.path
+from PyQt5 import uic, QtWidgets,QtCore, QtGui
 from PyQt5.QtWidgets import QMainWindow, QInputDialog, QMessageBox, QErrorMessage
 from PyQt5.QtCore import QObject, pyqtSignal, Qt
 
-import pyqtgraph as pg
 from pyqtgraph import QtCore, mkPen, mkColor, hsvColor, ViewBox
 from um.widgets.CustomWidgets import HorizontalSpacerItem, VerticalSpacerItem, FlatButton
-import numpy as np
 
-from functools import partial
 
-from ua.widgets.WaterfallWidget import WaterfallWidget
+from .. import style_path, icons_path
 
 class TimeOfFlightWidget(QMainWindow):
     
@@ -47,7 +44,7 @@ class TimeOfFlightWidget(QMainWindow):
 
         self.setWindowTitle('Time-of-flight analysis. (C) R. Hrubiak 2021')
 
-        self.resize(1900, 950)
+        #self.resize(1900, 950)
         
         self.make_widget()
 
@@ -55,6 +52,43 @@ class TimeOfFlightWidget(QMainWindow):
 
         self.create_menu()
         self.style_widgets()
+
+    def create_menu(self):
+        
+        menuBar = self.menuBar()
+        # Creating menus using a QMenu object
+        file_menu = QtWidgets.QMenu("&File", self)
+        menuBar.addMenu(file_menu)
+        # Creating menus using a title
+
+
+        self.proj_new_act = QtWidgets.QAction('&New project', self)        
+        file_menu.addAction(self.proj_new_act)
+        self.proj_open_act = QtWidgets.QAction('&Open project', self)        
+        file_menu.addAction(self.proj_open_act)
+        self.proj_save_act = QtWidgets.QAction('&Save project', self)  
+        self.proj_save_act.setEnabled(False)     
+        file_menu.addAction(self.proj_save_act)
+        self.proj_save_as_act = QtWidgets.QAction('Save project &as...', self)  
+        self.proj_save_as_act.setEnabled(False)
+        file_menu.addAction(self.proj_save_as_act)
+        self.proj_close_act = QtWidgets.QAction('&Close project', self)        
+        file_menu.addAction(self.proj_close_act)
+        self.proj_close_act.setEnabled(False)
+
+        file_menu.addSeparator()
+
+        self.import_menu_mnu = QtWidgets.QMenu("&Import ultrasound data", self)
+        self.import_menu_mnu.setEnabled(False)
+        file_menu.addMenu(self.import_menu_mnu)
+        self.import_multiple_freq_act = QtWidgets.QAction('&Discrete 𝑓', self)        
+        self.import_menu_mnu.addAction(self.import_multiple_freq_act)
+        self.import_broadband_act = QtWidgets.QAction('&Broadband', self)        
+        self.import_menu_mnu.addAction(self.import_broadband_act)
+        self.sort_data_act = QtWidgets.QAction('&Sort data points', self)        
+        file_menu.addAction(self.sort_data_act)
+        self.sort_data_act.setEnabled(False)
+
 
     def closeEvent(self, QCloseEvent, *event):
         self.app.closeAllWindows()
@@ -147,31 +181,85 @@ class TimeOfFlightWidget(QMainWindow):
             }
             
         """)
- 
- 
-    def create_menu(self):
 
-        self.menuBar = QtWidgets.QMenuBar(self)
-        self.menuBar.setGeometry(QtCore.QRect(0, 0, 793, 22))
-        #self.file_menu = self.menuBar.addMenu('Tools')
-        self.file_save_hdf5_act = QtWidgets.QAction('Save to HDF5', self)    
-        self.actionSave_next = QtWidgets.QAction("Save", self)
-        self.actionSave_As = QtWidgets.QAction("Save as...", self)
-        self.actionPreferences = QtWidgets.QAction("Preferences", self)
-        self.actionBG = QtWidgets.QAction("Overlay", self)
-        self.actionBGclose = QtWidgets.QAction("Close overlay", self)
-        self.actionCursors = QtWidgets.QAction("Phase", self)
-        self.actionArrowPlot = QtWidgets.QAction("Arrow Plot", self)
-        #self.file_menu.addAction(self.actionSave_As)    
-        #self.file_menu.addAction(self.actionPreferences)  
-        #self.file_menu.addAction(self.actionBG) 
-        #self.file_menu.addAction(self.actionCursors) 
-        #self.file_menu.addAction(self.actionArrowPlot) 
-        #self.opts_menu = self.menuBar.addMenu('Arb')
-        self.ActionRecallSetup = QtWidgets.QAction('Recall setup', self)        
-        self.ActionSaveSetup = QtWidgets.QAction('Save setup', self)   
-        self.ActionSetUserWaveform = QtWidgets.QAction('Edit user waveform', self)   
-        self.setMenuBar(self.menuBar)
+    
+ 
+ 
+    def create_menu_strip(self, orientation = "horizontal"):
+
+        self._menu_layout = None
+        if orientation == 'horizontal':
+            self._menu_layout = QtWidgets.QHBoxLayout()
+            spacer = QtWidgets.QSpacerItem(30, 10, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        elif orientation == 'vertical':
+            self._menu_layout = QtWidgets.QVBoxLayout()
+            spacer = QtWidgets.QSpacerItem(10, 30, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+
+        if self._menu_layout !=None:
+
+            self.save_as_btn = FlatButton()
+            self.save_as_btn.setEnabled(False)
+            self.save_btn = FlatButton()
+            self.save_btn.setEnabled(False)
+            self.load_btn = FlatButton()
+            self.undo_btn = FlatButton()
+            self.reset_btn = FlatButton()
+
+            self._menu_layout.setContentsMargins(5, 0, 3, 0)
+            self._menu_layout.setSpacing(5)
+
+            self._menu_layout.addSpacerItem(spacer)
+            self._menu_layout.addWidget(self.load_btn)
+            self._menu_layout.addWidget(self.save_btn)
+            self._menu_layout.addWidget(self.save_as_btn)
+            self._menu_layout.addSpacerItem(spacer)
+            self._menu_layout.addWidget(self.undo_btn)
+            self._menu_layout.addWidget(self.reset_btn)
+            self._menu_layout.addSpacerItem(spacer)
+
+            self.style_menu_buttons()
+
+    def style_menu_buttons(self):
+
+            
+        button_height = 32
+        button_width = 32
+
+        icon_size = QtCore.QSize(22, 22)
+        self.save_btn.setIcon(QtGui.QIcon(os.path.join(icons_path, 'save.ico')))
+        self.save_btn.setIconSize(icon_size)
+        self.save_btn.setMinimumHeight(button_height)
+        self.save_btn.setMaximumHeight(button_height)
+        self.save_btn.setMinimumWidth(button_width)
+        self.save_btn.setMaximumWidth(button_width)
+
+        self.save_as_btn.setIcon(QtGui.QIcon(os.path.join(icons_path, 'save_as.ico')))
+        self.save_as_btn.setIconSize(icon_size)
+        self.save_as_btn.setMinimumHeight(button_height)
+        self.save_as_btn.setMaximumHeight(button_height)
+        self.save_as_btn.setMinimumWidth(button_width)
+        self.save_as_btn.setMaximumWidth(button_width)
+
+        self.load_btn.setIcon(QtGui.QIcon(os.path.join(icons_path, 'open.ico')))
+        self.load_btn.setIconSize(icon_size)
+        self.load_btn.setMinimumHeight(button_height)
+        self.load_btn.setMaximumHeight(button_height)
+        self.load_btn.setMinimumWidth(button_width)
+        self.load_btn.setMaximumWidth(button_width)
+
+        self.undo_btn.setIcon(QtGui.QIcon(os.path.join(icons_path, 'undo.ico')))
+        self.undo_btn.setIconSize(icon_size)
+        self.undo_btn.setMinimumHeight(button_height)
+        self.undo_btn.setMaximumHeight(button_height)
+        self.undo_btn.setMinimumWidth(button_width)
+        self.undo_btn.setMaximumWidth(button_width)
+
+        self.reset_btn.setIcon(QtGui.QIcon(os.path.join(icons_path, 'restore.ico')))
+        self.reset_btn.setIconSize(icon_size)
+        self.reset_btn.setMinimumHeight(button_height)
+        self.reset_btn.setMaximumHeight(button_height)
+        self.reset_btn.setMinimumWidth(button_width)
+        self.reset_btn.setMaximumWidth(button_width)
 
     def preferences_module(self):
         self.preferences_signal.emit()

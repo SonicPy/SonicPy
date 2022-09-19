@@ -10,6 +10,10 @@
 # TODO plots/data output for publication
 # TODO selecting Vp/Vs in the results table
 # TODO save metadata in um, read metadata in ua
+#  json project file
+# TODO save sorted folders
+# TODO save settings in project file
+
 
 from ua import TOF
 

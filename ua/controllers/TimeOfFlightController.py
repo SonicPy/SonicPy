@@ -2,6 +2,7 @@
 
 
 import os.path, sys
+import shutil
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QObject, pyqtSignal
 import numpy as np
@@ -27,7 +28,7 @@ from ua.controllers.OutputController import OutputController
 
 import utilities.hpMCAutilities as mcaUtil
 from utilities.HelperModule import increment_filename, increment_filename_extra
-from um.widgets.UtilityWidgets import open_file_dialog, open_files_dialog 
+from um.widgets.UtilityWidgets import open_file_dialog, open_files_dialog, save_file_dialog
 import glob 
 
 from ua. models.EchoesResultsModel import EchoesResultsModel
@@ -60,7 +61,7 @@ class TimeOfFlightController(QObject):
 
 
         self.widget = TimeOfFlightWidget(app, overview_widget, multiple_frequencies_widget, analysis_widget, arrow_plot_widget, output_widget)
-        self.widget.setWindowTitle("Time-of-flight analysis. ver." + __version__ + "  © R. Hrubiak, 2022.")
+        self.widget.setWindowTitle("SonicPy: Time-of-flight analysis. ver." + __version__ + "  © R. Hrubiak, 2022.")
         
         if app is not None:
             self.setStyle(app)
@@ -68,6 +69,15 @@ class TimeOfFlightController(QObject):
         self.make_connections()
         
     def make_connections(self):  
+
+        self.widget.import_multiple_freq_act.triggered.connect(self.overview_controller.open_btn_callback)
+        self.widget.sort_data_act.triggered.connect(self.overview_controller.folder_widget.raise_widget)
+
+        self.widget.proj_close_act.triggered.connect(self.close_project_act_callback)
+        self.widget.proj_new_act.triggered.connect(self.new_project_act_callback)
+        self.widget.proj_save_act.triggered.connect(self.save_project_act_callback)   
+        self.widget.proj_save_as_act.triggered.connect(self.save_project_as_act_callback)
+        self.widget.proj_open_act.triggered.connect(self.open_project_act_callback)
 
         self.overview_controller.file_selected_signal.connect(self.file_selected_signal_callback)
         self.overview_controller.folder_selected_signal.connect(self.folder_selected_signal_callback)
@@ -86,10 +96,68 @@ class TimeOfFlightController(QObject):
 
         self.output_controller.condition_selected_signal.connect(self.condition_selected_signal_callback)
 
+    ###
+    # Project file callbacks
+    ###
+
+    def new_project_act_callback(self):
+        filename = save_file_dialog(None, "New project file", filter = 'Time of Flight Analysis Project (*.json)', warn_overwrite=True)
+        
+        if os.path.isfile(filename):
+            os.rename(filename, filename + '.bak')
+        self._open_project(filename)
+        
+    def open_project_act_callback(self):
+        filename = open_file_dialog(None, "Open project file", filter = 'Time of Flight Analysis Project (*.json)')
+        
+        if os.path.isfile(filename):
+            self._open_project(filename)
+        
+        
+
+    def _open_project(self, filename):
+        print(filename)
+        set_ok = self.echoes_results_model.open_project(filename)
+
+        self.project_menus_enabled(set_ok)
+        if not set_ok:
+            QtWidgets.QMessageBox(None,"Notice","Project file not selected")
+        else:
+            folder = self.echoes_results_model.folder
+            if os.path.isdir(folder) and len(folder):
+                self.overview_controller.set_US_folder(folder=folder)
+
+    def close_project_act_callback(self):
+        print('close_project_act_callback')
+        self.echoes_results_model.clear()
+        self.project_menus_enabled(False)
+
+        ### needs more work to clear the other controllers
+
+    def save_project_as_act_callback(self):
+        filename = self.echoes_results_model.get_project_file_name()
+        if os.path.isfile(filename):
+            new_filename = save_file_dialog(None, "New project file", filter = 'Time of Flight Analysis Project (*.json)', warn_overwrite=True)
+            shutil.copy(filename, new_filename)
+            set_ok = self.echoes_results_model.set_new_project_file_path(new_filename)
+           
+        
+
+    def save_project_act_callback(self):
+        self.echoes_results_model.save_project()
+
+    def project_menus_enabled(self, state):
+        self.widget.import_menu_mnu.setEnabled(state)
+        self.widget.sort_data_act.setEnabled(state)
+        self.widget.proj_save_act.setEnabled(state)
+        self.widget.proj_save_as_act.setEnabled(state)
+        self.widget.proj_close_act.setEnabled(state)
+
+
 
     ###
     # Overview controller callbacks
-    ##
+    ###
 
     def freq_settings_changed_signal_callback(self, freq):
         self.correlation_controller.display_window.freq_ebx.setValue(freq)
@@ -102,13 +170,8 @@ class TimeOfFlightController(QObject):
 
     
     def folder_selected_signal_callback(self, folder):
-        self.widget.setWindowTitle("Time-of-flight analysis. V." + __version__ + "  © R. Hrubiak, 2022. Folder: "+ os.path.abspath( folder))
+        self.widget.setWindowTitle("Time-of-flight analysis. V." + __version__ + "  © R. Hrubiak, 2022. Data folder: "+ os.path.abspath( folder))
         subfolders = copy.copy(self.overview_controller.model.conditions_folders_sorted)
-
-        
-        
-        project_file = os.path.join(folder,'mytestfile.hdf5') 
-        self.echoes_results_model.set_h5py(project_file)
         self.echoes_results_model.set_folder(folder)
         self.echoes_results_model.set_subfolders(subfolders)
         self.echoes_results_model.load_echoes_from_file()   
@@ -170,7 +233,7 @@ class TimeOfFlightController(QObject):
             self.overview_controller.echo_deleted(del_info)
 
     def arrow_plot_clear_clicked_signal_callback(self, clear_info):
-        cl = clear_info['clear_info']
+        
         cleared = self.echoes_results_model.delete_echoes(clear_info)
 
         if cleared:

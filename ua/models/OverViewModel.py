@@ -36,9 +36,11 @@ def Sort_Tuple(list, element = 1):
     return list
 
 class FileServer():
-    def __init__(self):
+    def __init__(self, results_model: EchoesResultsModel):
         
+        self.results_model = results_model
         self.files = {}
+        
     
     def get_waveforms(self, files):
         output = []
@@ -71,7 +73,7 @@ class OverViewModel():
 
         self.spectra = {}
 
-        self.file_server = FileServer()
+        self.file_server = FileServer(self.results_model)
 
         self.waveforms = None
         self.files = [[]]
@@ -279,9 +281,10 @@ class OverViewModel():
         update_data_dict_json(settings_file,self.settings)
 
     def set_folder_path(self, folder):
-        
+        folder = os.path.normpath(folder)
         exists = os.path.isdir(folder)
         if exists:
+            
             self.fp = folder
             self.restore_folder_settings(folder)
             self.understand_folder_structure()
@@ -380,6 +383,10 @@ class OverViewModel():
             
             conditions_search = os.path.join(folder,p,'*'+suffix_freq)
             res = natsorted(glob.glob(conditions_search)) [:len(freqs_sorted)]
+            res_norm = []
+            for r in res:
+                res_norm.append(os.path.normpath(r))
+            res = res_norm
 
             r_list = {}
             for i, r in enumerate(res):
@@ -402,6 +409,8 @@ class OverViewModel():
                 
                 p_list.append(r)
                 self.fps_Hz[f_num] = p_list
+        
+        
 
 
     def get_frequencies_sorted(self):
@@ -484,6 +493,14 @@ class OverViewModel():
 
         if len(self.conditions_folders_sorted):
             self.create_file_dicts()
+
+        
+    def read_all_files(self):
+        fd = self.file_dict
+
+        for f in fd:
+            fname = f
+            print(fname)
         
     
     def condition_index(self,condition):

@@ -67,23 +67,23 @@ def TOF():
     controller.show_window()
 
     if autoload:
-        folder = ''
-        mac_folder = '/Users/ross/Globus/s16bmb-20210717-e244302-Aihaiti/sam2/US'
-        win_folder = 'C:\\Users\\hrubiak\\Desktop\\US\\US'
-        mac_folder_2 = '/Users/hrubiak/Downloads/Ultrasound_XRD_datasets_for_dissemination/Ultrasound_data_for_dissemination_June_2018_Exp4/US'
+        fname = ''
+        mac_file = '/Users/ross/Globus/s16bmb-20210717-e244302-Aihaiti/sam2/US/mytestfile.tof'
+        win_file = 'C:\\Users\\hrubiak\\Desktop\\US\\myproject.json'
+        mac_file_2 = '/Users/hrubiak/Downloads/Ultrasound_XRD_datasets_for_dissemination/Ultrasound_data_for_dissemination_June_2018_Exp4/US/mytestfile.tof'
             
-        possible_folders = [mac_folder,
-                            win_folder,
-                            mac_folder_2]
-        for f in possible_folders:
+        possible_files = [mac_file,
+                            win_file,
+                            mac_file_2]
+        for f in possible_files:
 
-            if os.path.isdir(f):
-                folder = f
+            if os.path.isfile(f):
+                fname = f
                 break
         
-        if len(folder):
-            if os.path.isdir(folder):
-                controller.overview_controller.set_US_folder(folder=folder)
+        if len(fname):
+            if os.path.isfile(fname):
+                controller._open_project(filename=fname)
     
     
 

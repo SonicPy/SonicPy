@@ -102,7 +102,7 @@ class TimeOfFlightController(QObject):
     ###
 
     def new_project_act_callback(self):
-        filename = save_file_dialog(None, "New project file", filter = 'Time of Flight Analysis Project (*.json;*.bz)', warn_overwrite=True)
+        filename = save_file_dialog(None, "New project file", filter = 'Time of Flight Analysis Project (*.bz;*.json)', warn_overwrite=True)
         
         if len(filename):
             self.close_project_act_callback()
@@ -111,7 +111,7 @@ class TimeOfFlightController(QObject):
             self._open_project(filename)
         
     def open_project_act_callback(self):
-        filename = open_file_dialog(None, "Open project file", filter = 'Time of Flight Analysis Project (*.json;*.bz)')
+        filename = open_file_dialog(None, "Open project file", filter = 'Time of Flight Analysis Project (*.bz;*.json)')
         
         if os.path.isfile(filename):
 
@@ -140,7 +140,7 @@ class TimeOfFlightController(QObject):
         self.project_menus_enabled(False)
 
     def save_project_as_act_callback(self):
-        new_filename = save_file_dialog(None, "New project file", filter = 'Time of Flight Analysis Project (*.json;*.bz)', warn_overwrite=True)
+        new_filename = save_file_dialog(None, "New project file", filter = 'Time of Flight Analysis Project (*.bz;*.json)', warn_overwrite=True)
         if len(new_filename):
             QtWidgets.QApplication.processEvents()
             set_ok = self.echoes_results_model.save_project_as(new_filename)

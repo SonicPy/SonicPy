@@ -83,6 +83,7 @@ class TimeOfFlightController(QObject):
         self.overview_controller.folder_selected_signal.connect(self.folder_selected_signal_callback)
         self.overview_controller.freq_settings_changed_signal.connect(self.freq_settings_changed_signal_callback)
         self.overview_controller.cursor_position_signal.connect(self.correlation_controller.sync_cursors)
+        self.overview_controller.folders_sorted_signal.connect(self.output_controller.folders_sorted_signal_callback)
 
         self.correlation_controller.cursor_position_signal.connect(self.overview_controller.sync_cursors)
         self.correlation_controller.correlation_saved_signal.connect(self.correlation_saved_signal_callback)

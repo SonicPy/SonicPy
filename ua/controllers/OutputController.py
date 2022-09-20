@@ -51,6 +51,10 @@ class OutputController(QObject):
         self.model.clear()
         self.widget.clear_widget()
 
+    def folders_sorted_signal_callback(self, folders):
+        self.model.set_conds(folders)
+        self.widget.re_order_rows(folders)
+
     def option_tw_selection_changed_callback(self, *args):
         row = self.widget.get_selected_output_row()
         conds = self.model.conds

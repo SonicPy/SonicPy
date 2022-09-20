@@ -39,6 +39,7 @@ class OverViewController(QObject):
     folder_selected_signal = pyqtSignal(str)
     cursor_position_signal = pyqtSignal(float)
     freq_settings_changed_signal = pyqtSignal(float)
+    folders_sorted_signal = pyqtSignal(list)
 
     def __init__(self, app = None, results_model=EchoesResultsModel()):
         super().__init__()
@@ -92,6 +93,7 @@ class OverViewController(QObject):
     def list_changed_signal_callback(self, folders):
         
         self.model.results_model.set_folders_sorted(folders)
+        self.folders_sorted_signal.emit(folders)
         self.model.conditions_folders_sorted = folders
         self.model.load_multiple_files_by_frequency(self.freq)
         self.re_plot_single_frequency()

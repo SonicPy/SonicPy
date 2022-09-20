@@ -93,6 +93,25 @@ class OutputWidget(QtWidgets.QWidget):
         self.select_output(current_rows)
         self.output_tw.blockSignals(False)
 
+    def re_order_rows(self, sort_order):
+        table_data = self.get_table_data()
+        row_names = {}
+        for row in table_data:
+            row_names[row[0]] = row
+
+        for i, name in enumerate(sort_order):
+            row = row_names[name]
+            self.set_row(i,row)
+        
+    def set_row(self, ind, row):
+
+        self.set_name(ind, row[0])
+        self.set_output_tp(ind, row[1])
+        self.set_output_t_e_p(ind, row[2])
+        self.set_output_ts(ind, row[3])
+        self.set_output_t_e_s(ind, row[4])
+
+
     def select_output(self, ind):
         self.output_tw.blockSignals(True)
         self.output_tw.selectRow(ind)

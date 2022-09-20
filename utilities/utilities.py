@@ -2,7 +2,7 @@
 import numpy as np
 from scipy import signal
 from scipy import blackman, nanmean
-from scipy.signal import hilbert
+from scipy.signal import hilbert, tukey
 from scipy.fftpack import fft
 
 import json
@@ -203,6 +203,7 @@ def generate_source(del_x, freq, N=6, window=True):
     if window:
         
         w = blackman(samples)
+         
         source = source * w
     return xsource, source
 

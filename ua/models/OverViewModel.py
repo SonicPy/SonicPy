@@ -40,6 +40,7 @@ class FileServer():
         
         self.results_model = results_model
         self.files = {}
+     
         
     
     def get_waveforms(self, files):
@@ -57,6 +58,7 @@ class FileServer():
             for rf in read_files:
                 fname = rf['filename']
                 waveform = rf['waveform']
+                
                 self.files[fname]=waveform
         
         for f in files:

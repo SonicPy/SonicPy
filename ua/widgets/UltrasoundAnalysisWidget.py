@@ -170,6 +170,11 @@ class UltrasoundAnalysisWidget(QWidget):
         self._layout = QtWidgets.QVBoxLayout()
         self._layout.setContentsMargins(0, 0, 0, 0)
 
+        self.label = QtWidgets.QLabel("Echo correlation")
+        self.label.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        self.label.setStyleSheet('''font-size: 18pt;''')
+        self._layout.addWidget(self.label)
+
         self.detail_widget = QtWidgets.QTabWidget()
         
         '''self._detail_layout = QtWidgets.QTabWidget()
@@ -237,6 +242,7 @@ class UltrasoundAnalysisWidget(QWidget):
         self.buttons_widget_top.setLayout(self._buttons_layout_top)
         self._layout.addWidget(self.buttons_widget_top)
         params = "Ultrasound echo analysis", 'Amplitude', 'Time'
+
 
         self.splitter_vertical = QtWidgets.QSplitter(Qt.Vertical)
 

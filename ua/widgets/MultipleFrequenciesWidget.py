@@ -11,10 +11,15 @@ class MultipleFrequenciesWidget(QtWidgets.QWidget):
         super().__init__()
         
         self._layout = QtWidgets.QVBoxLayout()
-        self._layout.setSpacing(0)
+        #self._layout.setSpacing(5)
         self._layout.setContentsMargins(0, 0, 0, 0)
 
+        self.label = QtWidgets.QLabel("Multiple frequency batch processing")
+        self.label.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        self.label.setStyleSheet('''font-size: 18pt;''')
+        self._layout.addWidget(self.label)
 
+        
         
         '''self.lbl = QtWidgets.QLabel('MultipleFrequenciesWidget')
 

@@ -3,7 +3,7 @@
 
 import os.path, sys
 import shutil
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtCore import QObject, pyqtSignal
 import numpy as np
 from functools import partial
@@ -115,24 +115,43 @@ class TimeOfFlightController(QObject):
         
         if os.path.isfile(filename):
 
-            self.close_project_act_callback()
-            self._open_project(filename)
-        
+            
+            set_ok = self._open_project(filename)
+
         
 
     def _open_project(self, filename):
         #print(filename)
+        self.close_project_act_callback()
+
         set_ok = self.echoes_results_model.open_project(filename)
 
         self.project_menus_enabled(set_ok)
+        
         if not set_ok:
-            msg = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Information,"Notice","Project file not selected")
-            msg.exec()
+                msg = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Information,"Notice","Project file not selected")
+                msg.exec()
         else:
             folder = self.echoes_results_model.folder
             if os.path.isdir(folder) and len(folder):
                 QtWidgets.QApplication.processEvents()
                 self.overview_controller.set_US_folder(folder=folder)
+                return
+            if len(folder):
+                print('data folder not found')
+
+
+                ret = QtWidgets.QMessageBox.question(self.widget, 'Data folder question', "Data folder not found, select new location?", QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
+                yes = ret == QtWidgets.QMessageBox.Yes
+                
+
+                if yes:
+                    self.overview_controller.open_btn_callback()
+                else:
+                    self.close_project_act_callback()
+                    msg = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Information,"Notice","Project data not available.")
+                    msg.exec()
+            
 
     def close_project_act_callback(self):
         self.echoes_results_model.clear()

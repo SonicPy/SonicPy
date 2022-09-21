@@ -97,8 +97,14 @@ class ArrowPlotWidget(QWidget):
          
     def make_widget(self):
         my_widget = self
-        _layout = QtWidgets.QVBoxLayout()
-        _layout.setContentsMargins(8, 0, 0, 0)
+        _layout = QtWidgets.QVBoxLayout(self)
+        _layout.setContentsMargins(8, 5, 0, 0)
+
+        self.label = QtWidgets.QLabel("Inverse frequency plot")
+        self.label.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        self.label.setStyleSheet('''font-size: 18pt;''')
+        _layout.addWidget(self.label)
+
         detail_widget = QtWidgets.QWidget()
         _detail_layout = QtWidgets.QHBoxLayout()
         _detail_layout.setContentsMargins(0, 0, 0, 0)

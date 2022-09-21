@@ -43,6 +43,8 @@ class FolderListWidget(QWidget):
         self._buttons_layout_top = QtWidgets.QHBoxLayout()
         self._buttons_layout_top.setContentsMargins(0, 0, 0, 0)
 
+        
+
         # add top controls here
         self._up_btn = QtWidgets.QPushButton("Move up")
         self._down_btn = QtWidgets.QPushButton("Move down")
@@ -128,7 +130,7 @@ class OverViewWidget(QWidget):
 
         self.setWindowTitle('Time-of-flight analysis')
 
-        self.resize(800, 800)
+        #self.resize(800, 800)
         
         self.make_widget()
 
@@ -140,6 +142,11 @@ class OverViewWidget(QWidget):
         
         self._layout = QtWidgets.QVBoxLayout()
         self._layout.setContentsMargins(5, 5, 5, 5)
+
+        self.label = QtWidgets.QLabel("Overview")
+        self.label.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        self.label.setStyleSheet('''font-size: 18pt;''')
+        self._layout.addWidget(self.label)
         
         self.buttons_widget_top = QtWidgets.QWidget()
         self._buttons_layout_top = QtWidgets.QHBoxLayout()
@@ -282,7 +289,7 @@ class OverViewWidget(QWidget):
 
 
         
-    def set_cond_buttons(self, num):
+    '''def set_cond_buttons(self, num):
 
         for b in self.cond_btns_list:
             self._conds_widget_layout.removeWidget(b)
@@ -300,7 +307,7 @@ class OverViewWidget(QWidget):
             #self._conds_widget_layout.addWidget(btn)
 
         self.cond_btns_list[0].setObjectName('cond_btn_first')
-        self.cond_btns_list[-1].setObjectName('cond_btn_last')    
+        self.cond_btns_list[-1].setObjectName('cond_btn_last')    '''
         
 
     def raise_widget(self):

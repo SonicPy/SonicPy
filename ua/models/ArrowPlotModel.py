@@ -104,6 +104,7 @@ class optima():
             self.center_opt[opt] = None
             temp_other_opt = self.other_opt[opt]
             temp_other_opt.append(t)
+            temp_other_opt = [i for i in temp_other_opt if i is not None]
             self.other_opt[opt] = sorted(temp_other_opt)
         else:
             temp_opt = self.center_opt[opt]

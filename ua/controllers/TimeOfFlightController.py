@@ -70,7 +70,8 @@ class TimeOfFlightController(QObject):
         
     def make_connections(self):  
 
-        self.widget.import_multiple_freq_act.triggered.connect(self.overview_controller.open_btn_callback)
+        self.widget.import_multiple_freq_act.triggered.connect(partial( self.overview_controller.open_btn_callback, 'discrete_f'))
+        self.widget.import_broadband_act.triggered.connect(partial( self.overview_controller.open_btn_callback, 'broadband'))
         self.widget.sort_data_act.triggered.connect(self.overview_controller.folder_widget.raise_widget)
 
         self.widget.proj_close_act.triggered.connect(self.close_project_act_callback)
@@ -105,7 +106,7 @@ class TimeOfFlightController(QObject):
         filename = save_file_dialog(None, "New project file", filter = 'Time of Flight Analysis Project (*.bz;*.json)', warn_overwrite=True)
         
         if len(filename):
-            self.close_project_act_callback()
+            
             if os.path.isfile(filename):
                 os.rename(filename, filename + '.bak')
             self._open_project(filename)

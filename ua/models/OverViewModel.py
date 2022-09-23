@@ -70,7 +70,7 @@ class OverViewModel():
         
         self.results_model = results_model
 
-        self.mode = 'discrete_f'
+        
 
 
         self.spectra = {}
@@ -93,7 +93,8 @@ class OverViewModel():
         self.settings = {'scale':10,
                          'clip':True,
                          'f_start': 15,
-                         'f_step': 2}
+                         'f_step': 2,
+                         'mode': None}
 
         self.settings_fname = 'settings.json'
 
@@ -175,6 +176,8 @@ class OverViewModel():
             w = self.waterfalls[key]
             w.settings['clip']=clip
 
+   
+
     def load_multiple_files_by_frequency(self, freq):
         conditions = self.results_model.get_folders_sorted()  
         fnames = []
@@ -200,7 +203,7 @@ class OverViewModel():
                     path = loaded_fname['filename']
                     if path == '':
                         continue
-                    fldr = path.split(os.sep)[-2] # this is the pt condition name
+                    fldr = self.file_dict[path][0] #path.split(os.sep)[-2] # this is the pt condition name
                     if fldr == condition:
                         loaded_files[condition]= loaded_fname
                         break
@@ -270,17 +273,18 @@ class OverViewModel():
         self.results_model.update_settings(self.settings) 
         
 
-    def set_folder_path(self, folder):
-        folder = os.path.normpath(folder)
-        exists = os.path.isdir(folder)
-        if exists:
-            
-            self.fp = folder
-            self.restore_folder_settings(folder)
-            self.understand_folder_structure()
+    def set_folder_path(self, folder, mode):
         
+        self.clear()
+        self.settings['mode'] = mode
+        self.save_folder_settings()
+        self.fp = folder
+        self.restore_folder_settings(folder)
+        set_okay = self.understand_folder_structure()
+       
+        return set_okay
     
-    def _get_conditions_folders(self, folder):
+    def _get_conditions_folders(self, folder, mode):
         '''
         returns list of naturally sorted conditions folders in folder
         '''
@@ -288,33 +292,41 @@ class OverViewModel():
         subfolders = glob.glob(os.path.join(folder,'*/'), recursive = False)
         conditions_folders_sorted = []
 
-        if len(subfolders):
-            
-            folder_norm = []
+        if mode == 'discrete_f':
+            if len(subfolders):
+                
+                folder_norm = []
 
-            for subfolder in subfolders:
-                path = os.path.normpath(subfolder)
-                fldr = path.split(os.sep)[-1]
-                folder_norm.append(fldr)
-            conditions_folders_sorted = natsorted(folder_norm)
-        else:
+                for subfolder in subfolders:
+                    path = os.path.normpath(subfolder)
+                    fldr = path.split(os.sep)[-1]
+                    folder_norm.append(fldr)
+                conditions_folders_sorted = natsorted(folder_norm)
+
+        elif mode == 'broadband':
             
-            ext = self.get_extension(folder)
+            ext = self.get_extension_in_folder(folder)
             search_string = os.path.join(folder,'*'+ext)
 
             files = glob.glob(search_string, recursive = False)
             selected = self.select_files_by_extension(files, ext)
 
-            for file in selected:
-                self.copy_broadband_file_to_subfolder(file)
+            selected = natsorted(selected)
 
+
+            self.fps_Hz['000'] = selected
             folder_norm = []
-
-            for subfolder in subfolders:
-                path = os.path.normpath(subfolder)
-                fldr = path.split(os.sep)[-1]
-                folder_norm.append(fldr)
+            self.fps_cond = {}
+            self.file_dict = {}
+            for file in selected:
+                name, ext = self.get_extension_of_file(file)
+                self.fps_cond[name] = {'000':file}
+                folder_norm.append(name)
+                self.file_dict[file] = (name ,'000')
+                
             conditions_folders_sorted = natsorted(folder_norm)
+
+            
 
         
         return conditions_folders_sorted
@@ -332,81 +344,87 @@ class OverViewModel():
         selected = []
         
         for file in files:
-            fname = f_ext = os.path.split(file)[-1]
-            if '.' in fname:
-                f_ext = '.' + fname.split('.')[-1]
-
-            else:
-                f_ext = ''
+            name, f_ext = self.get_extension_of_file(file)
             
             if f_ext == ext:
                 selected.append(file)
 
         return selected
 
+    def get_extension_of_file(self, file):
+        fname = f_ext = os.path.split(file)[-1]
+        name = file
+        if '.' in fname:
+            s = ('.' + fname).split('.')
+            f_ext = s[-1]
+            name = s[-2]
+        else:
+            f_ext = ''
+            name = fname
+        return name, f_ext
+
     def create_file_dicts(self):
 
-        mode = self.mode
+        mode = self.settings['mode']
 
         conditions_folders_sorted = self.results_model.get_folders_sorted()
-        self.fps_cond = {}
-        self.file_dict = {}
-        self.fps_Hz = {}
+        
 
         start_time = time.time()
      
         folder = self.fp
         file_type = self.file_type
 
-        condition_0 = conditions_folders_sorted[0]
-        freq_search = os.path.join(folder,condition_0,'*'+file_type)
-        freqs = glob.glob(freq_search) 
+        if mode == "discrete_f":
+            self.fps_cond = {}
+            self.file_dict = {}
+            self.fps_Hz = {}
+            condition_0 = conditions_folders_sorted[0]
+            freq_search = os.path.join(folder,condition_0,'*'+file_type)
+            freqs = glob.glob(freq_search) 
+            suffix_freq = freqs[0].split('_')[-1][-4:]
 
-     
-        suffix_freq = freqs[0].split('_')[-1][-4:]
-        
-        freqs_sorted = self.frequencies_sorted
+            freqs_sorted = self.frequencies_sorted
+            start_time = time.time()
+            for p in conditions_folders_sorted:
+                
+                conditions_search = os.path.join(folder,p,'*'+suffix_freq)
+                res = natsorted(glob.glob(conditions_search)) [:len(freqs_sorted)]
+                res_norm = []
+                for r in res:
+                    res_norm.append(os.path.normpath(r))
+                res = res_norm
 
-
-        start_time = time.time()
-        for p in conditions_folders_sorted:
+                r_list = {}
+                for i, r in enumerate(res):
+                    f_num = f'{i:03d}' 
+                    r_list[f_num]= r
             
-            conditions_search = os.path.join(folder,p,'*'+suffix_freq)
-            res = natsorted(glob.glob(conditions_search)) [:len(freqs_sorted)]
-            res_norm = []
-            for r in res:
-                res_norm.append(os.path.normpath(r))
-            res = res_norm
+                self.fps_cond[p] = r_list
+                
+                for i, r in enumerate(res):
+                    
+                    f_num = f'{i:03d}' 
+                    
+                    self.file_dict[r]=(p,f_num)
 
-            r_list = {}
-            for i, r in enumerate(res):
-                f_num = f'{i:03d}' 
-                r_list[f_num]= r
+                    if f_num in self.fps_Hz:
+                        p_list = self.fps_Hz[f_num]
+                    else:
+                        p_list = []
+                    
+                    p_list.append(r)
+                    self.fps_Hz[f_num] = p_list
         
-            self.fps_cond[p] = r_list
+        
+        elif mode == 'boradband':
             
-            for i, r in enumerate(res):
-                
-                
-                f_num = f'{i:03d}' 
-                
-                self.file_dict[r]=(p,f_num)
-
-                if f_num in self.fps_Hz:
-                    p_list = self.fps_Hz[f_num]
-                else:
-                    p_list = []
-                
-                p_list.append(r)
-                self.fps_Hz[f_num] = p_list
-        
-        
-
+            pass
 
     def get_frequencies_sorted(self):
         conditions_folders_sorted = self.results_model.get_folders_sorted()
         folder = self.fp
-        mode = self.mode
+        mode = self.settings['mode']
 
         file_type = self.file_type
 
@@ -450,7 +468,7 @@ class OverViewModel():
          
         return types
 
-    def get_extension(self, folder):
+    def get_extension_in_folder(self, folder):
         '''
         get extension by searching the first folder and determining the most common file type: '.csv', '', etc..
         '''
@@ -468,11 +486,11 @@ class OverViewModel():
         
         folder = self.fp
 
-        mode = self.mode
+        mode = self.settings['mode']
         
         previous_folders_sorted = self.results_model.get_folders_sorted()
         
-        new_folders_sorted = self._get_conditions_folders(folder)
+        new_folders_sorted = self._get_conditions_folders(folder, mode)
 
         all_folders_found = True
         if len(previous_folders_sorted) == len(new_folders_sorted):
@@ -486,14 +504,28 @@ class OverViewModel():
         
         
         condition_0 = self.results_model.get_folders_sorted()[0]
-        first_folder = os.path.join(folder,condition_0)
         
-        self.file_type =  self.get_extension(first_folder)
+        if mode == 'discrete_f':
+            file_folder = os.path.join(folder,condition_0)
+        elif mode == 'broadband':
+            file_folder = folder
+            
+        self.file_type =  self.get_extension_in_folder(file_folder)
 
-        self.frequencies_sorted = self.get_frequencies_sorted()
+
+        if mode == 'discrete_f':
+            self.frequencies_sorted = self.get_frequencies_sorted()
+        elif mode == 'broadband':
+            self.frequencies_sorted = ['000']
 
         if len(self.results_model.get_folders_sorted()):
             self.create_file_dicts()
+
+        if len(self.fps_cond) and len(self.fps_Hz) and len(self.file_dict):
+            set_okay = True
+        else:
+            set_okay = False
+        return set_okay
 
         
     def read_all_files(self):

@@ -306,8 +306,8 @@ class OverViewController(QObject):
 
 
     ### opening a folder:
-    def open_btn_callback(self):
-        self.set_US_folder()
+    def open_btn_callback(self, mode ):
+        self.set_US_folder(mode = mode)
 
     def sync_widget_controls_with_model_non_signaling(self):
 
@@ -326,6 +326,12 @@ class OverViewController(QObject):
 
     def set_US_folder(self, *args, **kwargs):
         
+        if 'mode' in kwargs:
+            mode = kwargs['mode']
+        else:
+            mode = 'discrete_f'
+
+        self.model.mode = mode
         default_frequency_index = 0
         default_condition_index = 0
         if 'folder' in kwargs:
@@ -335,13 +341,14 @@ class OverViewController(QObject):
                                                      directory='')
         done = False
         
+        if len(folder):
+            folder = os.path.normpath(folder)
+        
         if os.path.isdir(folder):
-
-            self.model.clear()
             
-            self.model.set_folder_path(folder)
+            set_okay = self.model.set_folder_path(folder, mode)
 
-            if self.model.mode == 'discrete_f':
+            if set_okay : 
                 self.sync_widget_controls_with_model_non_signaling()
                 folders = self.model.results_model.get_folders_sorted()
                 self.folder_widget.set_folders(folders)
@@ -352,8 +359,6 @@ class OverViewController(QObject):
                 self.set_condition(default_condition_index)
                 self.widget.cond_scroll.setMaximum(len(conds)-1)
                 self.folder_selected_signal.emit(folder)
-            elif self.model.mode == 'broadband':
-                print('broadband controller not implemented')
           
 
     def set_frequency_by_value(self, freq):

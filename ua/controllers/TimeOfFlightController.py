@@ -326,8 +326,8 @@ class TimeOfFlightController(QObject):
             stylesheet = file.read()
 
 
-            down_arrow_url = self.relative_path("./ua/resources/style/angle-down.png").replace("\\", "/")
-            up_arrow_url = self.relative_path("./ua/resources/style/angle-up.png").replace("\\", "/")
+            down_arrow_url = self.relative_path("ua/resources/style/angle-down.png").replace("\\", "/")
+            up_arrow_url = self.relative_path("ua/resources/style/angle-up.png").replace("\\", "/")
 
             stylesheet = stylesheet.replace("down_arrow_url", down_arrow_url)
             stylesheet = stylesheet.replace("up_arrow_url", up_arrow_url)

@@ -307,6 +307,14 @@ class TimeOfFlightController(QObject):
     def show_window(self):
         self.widget.raise_widget()
 
+    def relative_path(self, relative_path):
+        try:
+            base_path = sys._MEIPASS
+        except Exception:
+            base_path = os.path.abspath(".")
+
+        return os.path.join(base_path, relative_path)
+
                 
     def setStyle(self, app):
         from .. import theme 
@@ -316,6 +324,15 @@ class TimeOfFlightController(QObject):
             WStyle = 'plastique'
             file = open(os.path.join(style_path, "stylesheet.qss"))
             stylesheet = file.read()
+
+
+            down_arrow_url = self.relative_path("./ua/resources/style/angle-down.png").replace("\\", "/")
+            up_arrow_url = self.relative_path("./ua/resources/style/angle-up.png").replace("\\", "/")
+
+            stylesheet = stylesheet.replace("down_arrow_url", down_arrow_url)
+            stylesheet = stylesheet.replace("up_arrow_url", up_arrow_url)
+            
+
             self.app.setStyleSheet(stylesheet)
             file.close()
             self.app.setStyle(WStyle)

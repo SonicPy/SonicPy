@@ -44,9 +44,9 @@ elif _platform == "darwin":
     platform = "Mac"
     extra_binaries=[ ]
     name = "run_TimeOfFlight"
+    sys.path.append("/Users/ross/GitHub/sonicPy")
     extra_datas = [
         ("ua/resources", "ua/resources"),
-        ("um/resources", "um/resources"),
         ("dask", "dask")
     ]
 

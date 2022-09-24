@@ -48,7 +48,7 @@ class OverViewController(QObject):
         if app is not None:
             self.setStyle(app)
         self.widget = OverViewWidget()
-        self.sync_widget_controls_with_model_non_signaling()
+        #self.sync_widget_controls_with_model_non_signaling()
         self.folder_widget = FolderListWidget()
 
         self.make_connections()
@@ -71,6 +71,9 @@ class OverViewController(QObject):
         self.widget.single_condition_waterfall.plot_widget. cursor_changed_singal.connect(self.sync_cursors)
         self.widget.single_frequency_waterfall.plot_widget. cursor_changed_singal.connect(self.emit_cursor)
         self.widget.single_condition_waterfall.plot_widget. cursor_changed_singal.connect(self.emit_cursor)
+
+        self.widget.single_condition_waterfall.scrollSignal.connect(self.scrollSignal_callback)
+        self.widget.single_frequency_waterfall.scrollSignal.connect(self.scrollSignal_callback)
 
         self.widget.freq_scroll.valueChanged .connect(self.freq_scroll_callback)
         self.widget.cond_scroll.valueChanged.connect(self.cond_scroll_callback)
@@ -97,6 +100,11 @@ class OverViewController(QObject):
         self.model.conditions_folders_sorted = folders
         self.model.load_multiple_files_by_frequency(self.freq)
         self.re_plot_single_frequency()
+
+    def scrollSignal_callback(self, delta):
+        value = self.widget.scale_ebx.value()
+        new_value = value + value * 0.1 * delta
+        self.widget.scale_ebx.setValue(new_value)
 
 
     def freq_start_step_callback(self, *args, **kwargs):
@@ -315,10 +323,10 @@ class OverViewController(QObject):
         self.widget.freq_start.blockSignals(True)
         self.widget.clip_cbx.blockSignals(True)
         self.widget.scale_ebx.blockSignals(True)
-        self.widget.freq_step.setValue(self.model.settings['f_step'])
-        self.widget.freq_start.setValue(self.model.settings['f_start'])
-        self.widget.clip_cbx.setChecked(self.model.settings['clip'])
-        self.widget.scale_ebx.setValue(self.model.settings['scale'])
+        self.widget.freq_step.setValue(self.model.results_model.project['settings']['f_step'])
+        self.widget.freq_start.setValue(self.model.results_model.project['settings']['f_start'])
+        self.widget.clip_cbx.setChecked(self.model.results_model.project['settings']['clip'])
+        self.widget.scale_ebx.setValue(self.model.results_model.project['settings']['scale'])
         self.widget.freq_step.blockSignals(False)
         self.widget.freq_start.blockSignals(False)
         self.widget.clip_cbx.blockSignals(False)

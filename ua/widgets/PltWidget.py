@@ -224,15 +224,7 @@ class CustomViewBox(pg.ViewBox):
         self.setAcceptDrops(True) 
         
         
-
-    '''
-    def cursor_dragged(self, cursor):
-        ind = self.cursors.index(cursor)
-        pos = cursor.getXPos()
-        
-        sig = self.cursor_signals[ind]
-        sig.emit(pos)    
-    '''
+    
 
     ## reimplement right-click to zoom out
     def mouseClickEvent(self, ev):
@@ -326,6 +318,9 @@ class PltWidget(pg.PlotWidget):
         self.set_log_mode(False,True)
         self.xAxis = None
         self.yData = None
+
+    def enable_mouse_zoom(self, state):
+        self.viewBox.setMouseEnabled(x=state, y=state )
 
         
     def set_cursorFast_pos(self, pos):

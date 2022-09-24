@@ -426,7 +426,8 @@ class EchoesResultsModel():
                 for echo in echo_f:
                     e = echo_f[echo]
                     #freq = echo['frequency']
-                    folder = os.path.split(os.path.split(fname)[0])[-1]
+                    folder = self.get_folder_of_file(fname)
+                    
                     if folder == condition:
                         echoes_out.append( e)
         return echoes_out
@@ -496,8 +497,7 @@ class EchoesResultsModel():
         filename_waveform = os.path.normpath( optimum['filename_waveform'])
         center = optimum['center_opt']
         freq = optimum['freq']
-        subfolder = os.path.split(filename_waveform)[0]
-        subfolder = os.path.split(subfolder)[-1]
+        subfolder = self.get_folder_of_file(filename_waveform)
         folder = subfolder + '/' + wave_type
         basename = os.path.basename(filename_waveform)+'.'+str(round(freq*1e-6,1))+'_MHz.json'
         filename = folder +'/'+basename
@@ -637,9 +637,12 @@ class EchoesResultsModel():
                 json.dump(package, json_file, indent = 2) 
                 json_file.close()
         except:
-            print('could not save file: '+ filename)                
+            print('could not save file: '+ filename)     
+
+            
  
     def save_result(self, correlation ):
+        self.add_echoe(correlation)   
         if 'filename_waveform' in correlation:
             filename_waveform = os.path.normpath(correlation['filename_waveform'])
             correlation['filename_waveform'] = filename_waveform
@@ -672,14 +675,34 @@ class EchoesResultsModel():
                     del h5file[path]
                 recursively_save_dict_contents_to_group(h5file, path, data)
 
+    def get_extension_of_file(self, file):
+        fname = f_ext = os.path.split(file)[-1]
+        name = file
+        if '.' in fname:
+            s = ('.' + fname).split('.')
+            f_ext = s[-1]
+            name = s[-2]
+        else:
+            f_ext = ''
+            name = fname
+        return name, f_ext
+
+    def get_folder_of_file(self, fname):
+        mode = self.project['settings']['mode']
+        if mode == 'discrete_f':
+            folder = os.path.split(fname)[:-1]
+            rel_folder = os.path.split(folder[0])[-1]
+        elif mode == 'broadband':
+            rel_folder, _ = self.get_extension_of_file(fname)
+        return rel_folder
+
     def _save_result_json(self, correlation ):
         wave_type = correlation['wave_type']
         if wave_type == 'P' or wave_type == 'S':
             echo = correlation
             fname = echo['filename_waveform']
             freq = echo['frequency']
-            folder = os.path.split(fname)[:-1]
-            rel_folder = os.path.split(folder[0])[-1]
+            rel_folder = self.get_folder_of_file(fname)
             rel_exists = wave_type in self.project['datasets'][rel_folder]
             if not rel_exists:
                 self.project['datasets'][rel_folder][wave_type]= {}
@@ -853,8 +876,13 @@ class EchoesResultsModel():
                     return
                 saved_path = os.path.normpath(saved_path)
                 file_split = os.path.split(saved_path)[-1]
-                base_folder = os.path.split(os.path.split(saved_path)[0])[-1]
-                updated_path = os.path.join(self.folder, base_folder, file_split)
+                
+                mode = self.project['settings']['mode']
+                if mode == 'discrete_f':
+                    base_folder = self.get_folder_of_file(saved_path)
+                    updated_path = os.path.join(self.folder, base_folder, file_split)
+                elif mode == 'broadband':
+                    updated_path = updated_path = os.path.join(self.folder, file_split)
                 correlation['filename_waveform'] = updated_path
                 self.add_echoe(correlation)
                             

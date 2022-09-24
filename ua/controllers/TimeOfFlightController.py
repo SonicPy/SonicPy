@@ -33,7 +33,7 @@ import glob
 
 from ua. models.EchoesResultsModel import EchoesResultsModel
 
-from .. import resources_path, __version__
+from .. import resources_path, __version__, title
 
 
 ############################################################
@@ -61,7 +61,7 @@ class TimeOfFlightController(QObject):
 
 
         self.widget = TimeOfFlightWidget(app, overview_widget, multiple_frequencies_widget, analysis_widget, arrow_plot_widget, output_widget)
-        self.widget.setWindowTitle("SonicPy: Time-of-flight analysis. ver." + __version__ + "  © R. Hrubiak, 2022.")
+        self.widget.setWindowTitle(title)
         
         if app is not None:
             self.setStyle(app)
@@ -134,10 +134,21 @@ class TimeOfFlightController(QObject):
                 msg.exec()
         else:
             folder = self.echoes_results_model.folder
+            if 'mode' in self.echoes_results_model.project['settings']:
+                    mode = self.echoes_results_model.project['settings']['mode']
+            else:
+                mode = 'discrete_f'
+            if mode == 'discrete_f':
+                index = 0
+            else:
+                index = 1
+            self.multiple_frequencies_controller.widget.mode_tab_widget.setCurrentIndex(index)
             if os.path.isdir(folder) and len(folder):
                 QtWidgets.QApplication.processEvents()
-                self.overview_controller.set_US_folder(folder=folder)
+                
+                self.overview_controller.set_US_folder(folder=folder, mode=mode)
                 return
+
             if len(folder):
                 print('data folder not found')
 
@@ -147,7 +158,7 @@ class TimeOfFlightController(QObject):
                 
 
                 if yes:
-                    self.overview_controller.open_btn_callback()
+                    self.overview_controller.open_btn_callback(mode = mode)
                 else:
                     self.close_project_act_callback()
                     msg = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Information,"Notice","Project data not available.")
@@ -155,6 +166,7 @@ class TimeOfFlightController(QObject):
             
 
     def close_project_act_callback(self):
+        self.widget.clear_title()
         self.echoes_results_model.clear()
         self.reset_controllers()
         self.project_menus_enabled(False)
@@ -202,7 +214,7 @@ class TimeOfFlightController(QObject):
 
     
     def folder_selected_signal_callback(self, folder):
-        self.widget.setWindowTitle("Time-of-flight analysis. V." + __version__ + "  © R. Hrubiak, 2022. Data folder: "+ os.path.abspath( folder))
+        self.widget.setWindowTitle( title + " Data folder: "+ os.path.abspath( folder))
         subfolders = copy.copy(self.echoes_results_model.get_folders_sorted())
         self.echoes_results_model.set_folder(folder)
         self.echoes_results_model.set_subfolders(subfolders)
@@ -240,7 +252,7 @@ class TimeOfFlightController(QObject):
         correlations = {correlation['filename_waveform']:[correlation]}
         
 
-        self.echoes_results_model.add_echoe(correlation)
+        
         self.echoes_results_model.save_result(correlation)
 
         self.overview_controller.correlation_echoes_added(correlations)

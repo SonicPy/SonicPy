@@ -1,5 +1,4 @@
 
-# TODO broadband pulse 
 # TODO work with single spectrum
 # TODO plots/data output for publication
 # TODO hdf5 (data measurement and analysis)

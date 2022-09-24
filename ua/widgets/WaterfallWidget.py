@@ -1,5 +1,5 @@
 import os, os.path, sys, platform, copy
-from PyQt5 import uic, QtWidgets,QtCore
+from PyQt5 import uic, QtWidgets,QtCore, QtGui
 from PyQt5.QtWidgets import QMainWindow, QInputDialog, QMessageBox, QErrorMessage
 from PyQt5.QtCore import QObject, pyqtSignal, Qt
 from um.widgets.PltWidget import SimpleDisplayWidget
@@ -10,6 +10,8 @@ import numpy as np
 
 class WaterfallWidget(QtWidgets.QWidget):
     panelClosedSignal = pyqtSignal()
+    
+   
     def __init__(self, ctrls = [],params=["Waterfall plot", 'Scan point', 'Time']):
         super().__init__()
         
@@ -18,6 +20,8 @@ class WaterfallWidget(QtWidgets.QWidget):
         self._layout.setContentsMargins(5, 0, 5, 0)
         
         self.plot_widget = SimpleDisplayWidget(params)
+        self.scrollSignal = self.plot_widget.fig.win.getViewBox().scrollModifierEnabled = True
+        self.scrollSignal = self.plot_widget.fig.win.getViewBox().viewBoxScrollSingal
         
         self.button_widget = QtWidgets.QWidget()
         
@@ -41,17 +45,12 @@ class WaterfallWidget(QtWidgets.QWidget):
         fig.set_colors({'rois_color': '#7AE7FF'})
         self._CH1_plot = fig.plotForeground
         self._plot_selected = fig.plotRoi
-      
+        self.key_control_pressed = False
 
-        self.setStyleSheet("""
-            #FlatButton {
-                min-width: 120;
-            }
-            #pvQPushButton {
-                min-width: 120;
-            }
-            
-        """)
+    def enable_mouse_zoom(self, state):
+        self.plot_widget.fig.win.enable_mouse_zoom(state)
+
+    
 
     def add_buttons(self, buttons):
         self.scope_controls = buttons

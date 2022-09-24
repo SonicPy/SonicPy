@@ -178,6 +178,8 @@ class ArrowPlotWidget(QWidget):
             event = 'down'
         if event is not None:
             self.up_down_signal.emit(event)
+        else:
+            super().keyPressEvent(e)
 
 
     def style_widgets(self):

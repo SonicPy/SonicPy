@@ -13,6 +13,7 @@ calibrants_path = os.path.join(resources_path, 'calibrants')
 icons_path = os.path.join(resources_path, 'icons')
 data_path = os.path.join(resources_path, 'data')
 style_path = os.path.join(resources_path, 'style')
+title = "SonicPy: Time-of-flight analysis. ver." + __version__ + "  © R. Hrubiak, 2022."
 
 from pathlib import Path
 home_path = str(Path.home())
@@ -69,7 +70,7 @@ def TOF():
     if autoload:
         fname = ''
         mac_file = '/Users/ross/Globus/s16bmb-20210717-e244302-Aihaiti/sam3/US/myproject.bz'
-        win_file = 'C:\\Users\\hrubiak\\Desktop\\US\\myproject.json'
+        win_file = "C:\\Users\\hrubiak\\Desktop\\Ultrasound_XRD_datasets_for_dissemination\\Ultrasound_data_for_dissemination_June_2018_Exp4\\Gaussian\\myproject.bz"
         mac_file_2 = '/Users/hrubiak/Downloads/Ultrasound_XRD_datasets_for_dissemination/Ultrasound_data_for_dissemination_June_2018_Exp4/Gaussian/myproject.bz'
             
         possible_files = [mac_file,

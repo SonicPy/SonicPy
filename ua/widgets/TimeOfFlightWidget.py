@@ -10,7 +10,7 @@ from pyqtgraph import QtCore, mkPen, mkColor, hsvColor, ViewBox
 from um.widgets.CustomWidgets import HorizontalSpacerItem, VerticalSpacerItem, FlatButton
 
 
-from .. import style_path, icons_path
+from .. import style_path, icons_path, title
 
 class TimeOfFlightWidget(QMainWindow):
     
@@ -39,11 +39,9 @@ class TimeOfFlightWidget(QMainWindow):
         self.right_widget.addWidget(self.arrow_plot_widget)
         self.right_widget.addWidget(self.output_widget)
    
+        
 
-        #self.analysis_widget.resize(800,800)
-
-
-        self.setWindowTitle('Time-of-flight analysis. (C) R. Hrubiak 2021')
+        self.setWindowTitle(title)
 
         self.resize(1440, 790)
         
@@ -53,6 +51,11 @@ class TimeOfFlightWidget(QMainWindow):
 
         self.create_menu()
         self.style_widgets()
+
+        self.key_control_pressed = False
+
+    def clear_title(self):
+        self.setWindowTitle(title)
 
     def create_menu(self):
         
@@ -89,6 +92,27 @@ class TimeOfFlightWidget(QMainWindow):
         self.sort_data_act = QtWidgets.QAction('&Sort data points', self)        
         file_menu.addAction(self.sort_data_act)
         self.sort_data_act.setEnabled(False)
+
+    def keyPressEvent(self, e):
+        
+        if e.key() == Qt.Key_Control:
+            pass
+            
+        elif e.key() == Qt.Key_Up:
+            event = 'up'
+        elif e.key() == Qt.Key_Down:
+            event = 'down'
+
+        else: 
+            super().keyPressEvent(e)
+
+    def keyReleaseEvent(self, e):
+        
+        if e.key() == Qt.Key_Control:
+            pass
+            
+        else:
+            super().keyReleaseEvent(e)
 
 
     def closeEvent(self, QCloseEvent, *event):
@@ -150,15 +174,6 @@ class TimeOfFlightWidget(QMainWindow):
     
 
         
-
-    def keyPressEvent(self, e):
-        event = None
-        if e.key() == Qt.Key_Up:
-            event = 'up'
-        if e.key() == Qt.Key_Down:
-            event = 'down'
-        if event is not None:
-            self.up_down_signal.emit(event)
 
 
     def style_widgets(self):

@@ -339,7 +339,8 @@ class OverViewController(QObject):
         else:
             mode = 'discrete_f'
 
-        self.model.mode = mode
+        self.model.settings['mode'] = mode
+        self.model.results_model.set_mode(mode)
         default_frequency_index = 0
         default_condition_index = 0
         if 'folder' in kwargs:

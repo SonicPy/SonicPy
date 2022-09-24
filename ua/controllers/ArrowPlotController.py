@@ -61,6 +61,7 @@ class ArrowPlotController(QObject):
 
     def reset(self):
         self.clear()
+        self.cond = None
         self.update_plot()
 
     def del_btn_callback(self):
@@ -186,7 +187,10 @@ class ArrowPlotController(QObject):
             self.arrow_plot_window.update_view(xData,yData)
             self.arrow_plot_window.update_maximums(np.asarray(xMax),np.asarray(yMax))
 
-            self.arrow_plot_window.set_name(str(self.cond))
+            cond = ''
+            if self.cond != None:
+                cond = copy.copy(self.cond)
+            self.arrow_plot_window.set_name(str(cond))
 
             if opt in arrow_plot.line_plots:
                 self.arrow_plot_window.update_max_line(*arrow_plot.line_plots[opt])
@@ -238,6 +242,7 @@ class ArrowPlotController(QObject):
         self.model.clear()
         self.arrow_plot_window.set_selected_frequency('')
         self.arrow_plot_window.set_name('')
+        self.arrow_plot_window.set_result('')
         
 
     def refresh_model(self):

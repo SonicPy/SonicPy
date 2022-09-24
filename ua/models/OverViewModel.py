@@ -277,7 +277,8 @@ class OverViewModel():
         
         self.clear()
         self.settings['mode'] = mode
-        self.results_model.project['settings']['mode']=mode
+        
+        self.results_model.set_mode(mode)
         #self.save_folder_settings()
         self.fp = folder
         self.restore_folder_settings(folder)

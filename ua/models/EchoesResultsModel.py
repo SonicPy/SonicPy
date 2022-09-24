@@ -32,10 +32,32 @@ class EchoesResultsModel():
 
         self.project = {}
         
-  
+    
 
     def clear(self, mode_ind =2):
         self.__init__(mode_ind=mode_ind)
+
+    def get_folder(self):
+        
+        if 'folder' in self.project:
+            folder = self.project['folder']
+        else:
+            folder = ''
+        return folder
+    
+    def get_mode(self):
+        mode = ''
+        if 'settings' in self.project:
+            if 'mode' in self.project['settings']:
+
+                mode = self.project['settings']['mode']
+        return mode
+
+    def set_mode(self, mode):
+        if not 'settings' in self.project:
+            self.project['settings']={}
+        
+        self.project['settings']['mode']=mode
 
     def update_settings(self, settings):
         if not 'settings' in self.project:

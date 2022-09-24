@@ -133,25 +133,17 @@ class TimeOfFlightController(QObject):
                 msg = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Information,"Notice","Project file not selected")
                 msg.exec()
         else:
-            folder = self.echoes_results_model.folder
-            if 'mode' in self.echoes_results_model.project['settings']:
-                    mode = self.echoes_results_model.project['settings']['mode']
-            else:
-                mode = 'discrete_f'
-            if mode == 'discrete_f':
-                index = 0
-            else:
-                index = 1
-            self.multiple_frequencies_controller.widget.mode_tab_widget.setCurrentIndex(index)
-            if os.path.isdir(folder) and len(folder):
+            folder = self.echoes_results_model.get_folder()
+            mode = self.echoes_results_model.get_mode()
+            
+            if os.path.isdir(folder) and len(folder) and len(mode):
                 QtWidgets.QApplication.processEvents()
                 
                 self.overview_controller.set_US_folder(folder=folder, mode=mode)
                 return
 
-            if len(folder):
-                print('data folder not found')
-
+            if len(folder) and len(mode):
+                
 
                 ret = QtWidgets.QMessageBox.question(self.widget, 'Data folder question', "Data folder not found, select new location?", QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
                 yes = ret == QtWidgets.QMessageBox.Yes
@@ -215,6 +207,9 @@ class TimeOfFlightController(QObject):
     
     def folder_selected_signal_callback(self, folder):
         self.widget.setWindowTitle( title + " Data folder: "+ os.path.abspath( folder))
+
+        
+
         subfolders = copy.copy(self.echoes_results_model.get_folders_sorted())
         self.echoes_results_model.set_folder(folder)
         self.echoes_results_model.set_subfolders(subfolders)
@@ -242,6 +237,13 @@ class TimeOfFlightController(QObject):
 
         self.output_controller.update_conditions()
         self.output_controller.update_tof_results()
+
+        mode = self.echoes_results_model.get_mode()
+        if mode == 'broadband':
+            index = 1
+        else:
+            index = 0
+        self.multiple_frequencies_controller.widget.mode_tab_widget.setCurrentIndex(index)
 
     ###
     # Ultrasound controller callbacks

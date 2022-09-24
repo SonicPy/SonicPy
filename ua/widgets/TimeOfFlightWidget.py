@@ -93,6 +93,20 @@ class TimeOfFlightWidget(QMainWindow):
         file_menu.addAction(self.sort_data_act)
         self.sort_data_act.setEnabled(False)
 
+        file_menu.addSeparator()
+
+        self.export_menu_mnu = QtWidgets.QMenu("&Export", self)
+        self.export_menu_mnu.setEnabled(False)
+        file_menu.addMenu(self.export_menu_mnu)
+        self.export_overview_act = QtWidgets.QAction('&Overview', self)        
+        self.export_menu_mnu.addAction(self.export_overview_act)
+        self.export_correlation_act = QtWidgets.QAction('&Correlation', self)        
+        self.export_menu_mnu.addAction(self.export_correlation_act)
+        self.export_arrow_plot_act = QtWidgets.QAction('&Inverse 𝑓', self)        
+        self.export_menu_mnu.addAction(self.export_arrow_plot_act)
+        self.export_results_act = QtWidgets.QAction(f'\N{GREEK SMALL LETTER TAU} results', self)        
+        self.export_menu_mnu.addAction(self.export_results_act)
+
     def keyPressEvent(self, e):
         
         if e.key() == Qt.Key_Control:

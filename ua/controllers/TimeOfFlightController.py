@@ -80,6 +80,12 @@ class TimeOfFlightController(QObject):
         self.widget.proj_save_as_act.triggered.connect(self.save_project_as_act_callback)
         self.widget.proj_open_act.triggered.connect(self.open_project_act_callback)
 
+        self.widget.export_overview_act.triggered.connect(self.export_overview_act_callback)    
+        self.widget.export_correlation_act.triggered.connect(self.export_correlation_act_callback)    
+        self.widget.export_arrow_plot_act.triggered.connect(self.export_arrow_plot_act_callback)  
+        self.widget.export_results_act.triggered.connect(self.export_results_act_callback)           
+   
+
         self.overview_controller.file_selected_signal.connect(self.file_selected_signal_callback)
         self.overview_controller.folder_selected_signal.connect(self.folder_selected_signal_callback)
         self.overview_controller.freq_settings_changed_signal.connect(self.freq_settings_changed_signal_callback)
@@ -174,8 +180,27 @@ class TimeOfFlightController(QObject):
     def save_project_act_callback(self):
         self.echoes_results_model.save_project()
 
+
+    def export_overview_act_callback(self):
+        msg = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Information,"Notice","export_overview not available.")
+        msg.exec()
+
+    def export_correlation_act_callback(self):
+        msg = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Information,"Notice","export_correlation not available.")
+        msg.exec()
+
+    def export_arrow_plot_act_callback(self):
+        msg = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Information,"Notice","export_arrow_plot not available.")
+        msg.exec()
+
+    def export_results_act_callback(self):
+        self.output_controller.save_btn_callback()
+
+
+
     def project_menus_enabled(self, state):
         self.widget.import_menu_mnu.setEnabled(state)
+        self.widget.export_menu_mnu.setEnabled(state)
         self.widget.sort_data_act.setEnabled(state)
         self.widget.proj_save_act.setEnabled(state)
         self.widget.proj_save_as_act.setEnabled(state)
@@ -188,6 +213,10 @@ class TimeOfFlightController(QObject):
         self.output_controller.reset()
         self.multiple_frequencies_controller.reset()
         self.arrow_plot_controller.reset()  
+
+
+
+
         
 
 

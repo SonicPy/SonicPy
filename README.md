@@ -9,7 +9,7 @@ pyqtgraph 0.10.0
 opencv-python 4.5.3.56
 natsort 8.1.0
 
-Executables
+Executables:
 
 Some of the probrams are provided as executable versions for Windows, Mac OS (all 64bit) and can be downloaded from:
 

@@ -127,8 +127,8 @@ from ua import __version__
 print('version ' + __version__)
 
 
-
-exe = EXE(pyz,
+if _platform == "win32" or _platform == "cygwin":
+    exe = EXE(pyz,
           a.scripts,
           a.binaries,
           a.zipfiles,
@@ -141,6 +141,16 @@ exe = EXE(pyz,
           console=False )
 
 if _platform == "darwin":
+    exe = EXE(pyz,
+          a.scripts,
+          [],
+          exclude_binaries=True,
+          name=name,
+          debug=False,
+          bootloader_ignore_signals=False,
+          strip=False,
+          upx=True,
+          console=False)
     coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,
@@ -148,7 +158,6 @@ if _platform == "darwin":
                strip=False,
                upx=True,
                upx_exclude=[],
-                onefile=True,
                name='TimeOfFlight_{}_{}'.format(platform, __version__))
 
     app = BUNDLE(coll,

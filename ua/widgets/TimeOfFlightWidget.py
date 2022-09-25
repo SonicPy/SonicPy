@@ -98,14 +98,30 @@ class TimeOfFlightWidget(QMainWindow):
         self.export_menu_mnu = QtWidgets.QMenu("&Export", self)
         self.export_menu_mnu.setEnabled(False)
         file_menu.addMenu(self.export_menu_mnu)
-        self.export_overview_act = QtWidgets.QAction('&Overview', self)        
-        #self.export_menu_mnu.addAction(self.export_overview_act)
-        self.export_correlation_act = QtWidgets.QAction('&Correlation', self)        
-        #self.export_menu_mnu.addAction(self.export_correlation_act)
-        self.export_arrow_plot_act = QtWidgets.QAction('&Inverse 𝑓', self)        
-        #self.export_menu_mnu.addAction(self.export_arrow_plot_act)
         self.export_results_act = QtWidgets.QAction(f'\N{GREEK SMALL LETTER TAU} results', self)        
         self.export_menu_mnu.addAction(self.export_results_act)
+        self.export_overview_mnu = QtWidgets.QMenu('&Overview', self)        
+        self.export_menu_mnu.addMenu(self.export_overview_mnu)
+
+        self.export_single_frequency_plot_act = QtWidgets.QAction('&Single 𝑓', self)        
+        self.export_overview_mnu.addAction(self.export_single_frequency_plot_act)
+        self.export_single_condition_plot_act = QtWidgets.QAction('&Single condition', self)        
+        self.export_overview_mnu.addAction(self.export_single_condition_plot_act)
+
+        self.export_correlation_mnu = QtWidgets.QMenu("&Correlation", self)  
+        self.export_menu_mnu.addMenu(self.export_correlation_mnu)
+
+        self.export_selected_waveform_plot_act = QtWidgets.QAction('&Selected waveform', self)        
+        self.export_correlation_mnu.addAction(self.export_selected_waveform_plot_act)
+        self.export_selected_ehcoes_plot_act = QtWidgets.QAction('&Selected echoes', self)        
+        self.export_correlation_mnu.addAction(self.export_selected_ehcoes_plot_act)
+        self.export_filtered_echoes_plot_act = QtWidgets.QAction('&Filtered', self)        
+        self.export_correlation_mnu.addAction(self.export_filtered_echoes_plot_act)
+        self.export_correlation_plot_act = QtWidgets.QAction('&Correlation', self)        
+        self.export_correlation_mnu.addAction(self.export_correlation_plot_act)
+
+        self.export_arrow_plot_act = QtWidgets.QAction('&Inverse 𝑓', self)        
+        self.export_menu_mnu.addAction(self.export_arrow_plot_act)
 
     def keyPressEvent(self, e):
         

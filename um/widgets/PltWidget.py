@@ -1,4 +1,5 @@
 import pyqtgraph as pg
+import pyqtgraph.exporters
 from pyqtgraph import QtCore, mkPen, mkColor, hsvColor, ViewBox
 from PyQt5.QtCore import QObject, pyqtSignal, Qt, QPoint
 
@@ -430,6 +431,25 @@ class PltWidget(pg.PlotWidget):
         exporter = pg.exporters.ImageExporter(self.plotItem)
         #exporter.parameters()['width']= 200
         exporter.export(filename)
+
+    def export_plot_png(self,filename):
+        self.vLine.hide()
+        self.vLineFast.hide()
+        exporter = pg.exporters.ImageExporter(self.plotItem)
+        exporter.params.param('width').setValue(1920, blockSignal=exporter.widthChanged)
+        exporter.params.param('height').setValue(1080, blockSignal=exporter.heightChanged)
+        exporter.export(filename)
+        self.vLine.show()
+        self.vLineFast.show()
+
+    def export_plot_csv(self,filename):
+        self.vLine.hide()
+        self.vLineFast.hide()
+        exporter = pg.exporters.CSVExporter(self.plotItem)
+
+        exporter.export(filename)
+        self.vLine.show()
+        self.vLineFast.show()
     
     def export_plot_svg(self,filename):
         exporter = pg.exporters.SVGExporter(self.plotItem)

@@ -323,9 +323,20 @@ class UltrasoundAnalysisController(QObject):
             new_ind = self.waveform_index - 1
         self.show_waveform(new_ind, update_cursor_pos=True)
                 
-    def show_latest_waveform(self):
-        pass
+    def export_plot(self,fname, tab):
+        plot = None
     
+        if tab == -1:
+            plot = self.display_window.plot_win
+        elif tab == 0:
+            plot = self.display_window.plot_win_detail0
+        elif tab == 1:
+            plot = self.display_window.plot_win_detail1
+        elif tab == 2:
+            plot = self.display_window.plot_win_detail2
+        
+        if plot != None and len(fname):
+            plot.export_plot_csv(fname)
 
     def setStyle(self, app):
         from .. import theme 

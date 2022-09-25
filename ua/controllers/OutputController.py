@@ -98,6 +98,7 @@ class OutputController(QObject):
         output_csv = filename
         with open(output_csv, "w", newline='') as csv_file:
             writer = csv.writer(csv_file, delimiter=',')
+            
             for line in data:
                 writer.writerow(line)
             csv_file.close()

@@ -23,7 +23,7 @@ class OutputWidget(QtWidgets.QWidget):
         self.label.setStyleSheet('''font-size: 18pt;''')
         self._layout.addWidget(self.label)
 
-        self.header_lbls = ['Folder', 
+        self.header_lbls = ['Condition', 
                                         f'\N{GREEK SMALL LETTER TAU} P (ns)', 
                                         f'\N{GREEK SMALL LETTER TAU} P  \N{GREEK SMALL LETTER SIGMA} (ns)', 
                                         f'\N{GREEK SMALL LETTER TAU} S (ns)',
@@ -154,6 +154,12 @@ class OutputWidget(QtWidgets.QWidget):
         
         rows = self.output_tw.rowCount()
         lines=[]
+        first_line = ['Condition', 
+                    f't P (ns)', 
+                    f't P st.dev (ns)', 
+                    f't S (ns)',
+                    f't S st.dev (ns)']
+        lines.append(first_line)
         for row in range(rows):
             name = self.get_name(row)
             tp = self.get_output_tp(row)

@@ -80,9 +80,16 @@ class TimeOfFlightController(QObject):
         self.widget.proj_save_as_act.triggered.connect(self.save_project_as_act_callback)
         self.widget.proj_open_act.triggered.connect(self.open_project_act_callback)
 
-        self.widget.export_overview_act.triggered.connect(self.export_overview_act_callback)    
-        self.widget.export_correlation_act.triggered.connect(self.export_correlation_act_callback)    
+        self.widget.export_single_frequency_plot_act.triggered.connect(partial( self.export_overview_act_callback, 0))     
+        self.widget.export_single_condition_plot_act.triggered.connect(partial( self.export_overview_act_callback, 1)) 
+
+        self.widget.export_selected_waveform_plot_act.triggered.connect(partial( self.export_correlation_act_callback, -1))  
+        self.widget.export_selected_ehcoes_plot_act.triggered.connect(partial( self.export_correlation_act_callback, 0))  
+        self.widget.export_filtered_echoes_plot_act.triggered.connect(partial( self.export_correlation_act_callback, 1))
+        self.widget.export_correlation_plot_act.triggered.connect(partial( self.export_correlation_act_callback, 2)) 
+
         self.widget.export_arrow_plot_act.triggered.connect(self.export_arrow_plot_act_callback)  
+        
         self.widget.export_results_act.triggered.connect(self.export_results_act_callback)           
    
 
@@ -167,17 +174,20 @@ class TimeOfFlightController(QObject):
         self.echoes_results_model.save_project()
 
 
-    def export_overview_act_callback(self):
-        msg = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Information,"Notice","export_overview not available.")
-        msg.exec()
+    def export_overview_act_callback(self, tab):
+        new_filename = save_file_dialog(None, "Export plot as csv", filter = 'Export as (*.csv)', warn_overwrite=True)
+        if len(new_filename):
+            self.overview_controller.export_plot(new_filename, tab)
 
-    def export_correlation_act_callback(self):
-        msg = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Information,"Notice","export_correlation not available.")
-        msg.exec()
+    def export_correlation_act_callback(self, tab):
+        new_filename = save_file_dialog(None, "Export plot as csv", filter = 'Export as (*.csv)', warn_overwrite=True)
+        if len(new_filename):
+            self.correlation_controller.export_plot(new_filename, tab)
 
     def export_arrow_plot_act_callback(self):
-        msg = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Information,"Notice","export_arrow_plot not available.")
-        msg.exec()
+        new_filename = save_file_dialog(None, "Export plot as csv", filter = 'Export as (*.csv)', warn_overwrite=True)
+        if len(new_filename):
+            self.arrow_plot_controller.export_plot(new_filename)
 
     def export_results_act_callback(self):
         self.output_controller.save_btn_callback()

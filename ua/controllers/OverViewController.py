@@ -91,6 +91,17 @@ class OverViewController(QObject):
     def reset(self):
         self.model.clear()
         self.widget.clear_widget()
+
+    def export_plot(self,fname, tab):
+        plot = None
+    
+        if tab == 0:
+            plot = self.widget.single_frequency_waterfall.plot_widget.fig.win
+        elif tab == 1:
+            plot = self.widget.single_condition_waterfall.plot_widget.fig.win
+        
+        if plot != None and len(fname):
+            plot.export_plot_csv(fname)
     
 
     def list_changed_signal_callback(self, folders):

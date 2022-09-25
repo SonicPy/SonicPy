@@ -286,6 +286,10 @@ class ArrowPlotController(QObject):
         if event == 'down':
             new_ind = self.waveform_index - 1
         self.show_waveform(new_ind, update_cursor_pos=True)
+
+
+    def export_plot(self,fname):
+        self.arrow_plot_window.win.fig .win.export_plot_csv(fname)
                 
     def setStyle(self, app):
         from .. import theme 

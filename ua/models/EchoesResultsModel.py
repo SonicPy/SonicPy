@@ -236,9 +236,8 @@ class EchoesResultsModel():
 
         #  delete in json
         saved_path = os.path.normpath(filename_waveform)
-        base_folder = os.path.split(os.path.split(saved_path)[0])[-1]
-            
-        folder = base_folder + '/' + wave_type
+
+        base_folder = self.get_folder_of_file(saved_path)
         
         exists = wave_type in self.project['datasets'][base_folder]
 

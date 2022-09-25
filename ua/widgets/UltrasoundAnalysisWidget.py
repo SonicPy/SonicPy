@@ -48,6 +48,9 @@ class UltrasoundAnalysisWidget(QWidget):
         self.lr1_s.setRegion([0, 0])
         self.lr2_s.setRegion([0, 0])
 
+        self.clear_detail_plots()
+
+    def clear_detail_plots(self):
         out = [[],[]]
         self.detail_plot0.setData(*out)
         self.detail_plot0_bg.setData(*out)

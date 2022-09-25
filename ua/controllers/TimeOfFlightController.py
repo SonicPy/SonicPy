@@ -302,8 +302,11 @@ class TimeOfFlightController(QObject):
         fname = cursor_info['filename_waveform']
         freq = cursor_info['frequency']
         
-        #self.overview_controller. set_frequency_by_value(freq)
-        self.overview_controller. select_fname(fname)
+        mode = self.echoes_results_model.get_mode()
+        if mode == 'discrete_f':
+            self.overview_controller. select_fname(fname, freq)
+        elif mode == 'broadband':
+            self.correlation_controller.set_freq(freq )
 
     def new_result_calculated_signal_callback(self, package):
         

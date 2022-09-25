@@ -90,10 +90,13 @@ class ArrowPlotController(QObject):
 
     def cursor_changed_singal_callback(self, *args):
         
+        mode = self.model.results_model.get_mode()
         arrow_plot = self.model.get_arrow_plot(self.cond, self.wave_type)
         if arrow_plot != None:
-            freqs = np.asarray(list(arrow_plot.optima.keys()))
+            freqs = np.asarray(sorted(list(arrow_plot.optima.keys())))
             freq = 1/args[0]
+
+            
             if len(freqs):
                 if freq <= np.amin(freqs): 
                     part_ind = 0
@@ -107,6 +110,12 @@ class ArrowPlotController(QObject):
                     optima = arrow_plot.optima[freq_out]
                     fname = os.path.normpath(optima.filename_waveform)
                     self.arrow_plot_freq_cursor_changed_signal.emit({'frequency':freq_out, 'filename_waveform':fname})
+                    
+                    freq_curosr = round(freq_out * 1e-6,1)
+                    
+                    self.set_frequency_cursor(freq_curosr)
+            
+            
 
     def calc_callback(self):
         self.calculate_data()

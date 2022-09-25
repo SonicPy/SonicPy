@@ -206,14 +206,18 @@ class OverViewController(QObject):
         conds = list(self.model.fps_cond.keys())
         return conds
 
-    def select_fname(self, fname):
+    def select_fname(self, fname, freq= -1.0):
         temp_fname = copy.copy(self.selected_fname)
         self.selected_fname = fname
         data = self.get_data_by_filename(fname)
         current_frequency = copy.copy(self.freq)
         current_condition = copy.copy(self.cond)
+        
         freq = data['freq']
         cond = data['cond']
+
+        freq_val = self.freq_str_ind_to_val(freq)
+        
         
         if freq != current_frequency:
             ind = list(self.model.fps_Hz.keys()).index(freq)

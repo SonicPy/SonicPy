@@ -119,6 +119,7 @@ class UltrasoundAnalysisController(QObject):
 
 
     def p_s_wave_btn_callback(self, wave_type):
+        self.display_window.clear_detail_plots()
         self.display_window.plot_win.removeItem(self.display_window.lr1_s)
         self.display_window.plot_win.removeItem(self.display_window.lr2_s)
         self.display_window.plot_win.removeItem(self.display_window.lr1_p)
@@ -208,6 +209,9 @@ class UltrasoundAnalysisController(QObject):
         bounds = [[l1, r1],[l2, r2]]
 
         return bounds
+
+    def set_freq(self, freq):
+        self.display_window.freq_ebx.setValue(round(float(freq * 1e-6),1))
 
     def get_freq(self):
         freq = self.display_window.freq_ebx.value()*1e6

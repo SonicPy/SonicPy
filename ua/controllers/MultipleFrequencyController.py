@@ -300,7 +300,7 @@ class MultipleFrequencyController(QObject):
         self.arrow_plot_controller.set_wave_type(echo_type)
         self.arrow_plot_controller.set_condition( cond) 
         self.arrow_plot_controller.refresh_model()
-        self.arrow_plot_controller.set_frequency_cursor(freq)
+        #self.arrow_plot_controller.set_frequency_cursor(freq)
 
 
     def setStyle(self, app):

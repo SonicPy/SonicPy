@@ -151,7 +151,7 @@ coll = COLLECT(exe,
 if _platform == "darwin":
     app = BUNDLE(coll,
                  name='TimeOfFlight_{}.app'.format(__version__),
-                 icon='ua/resources/icons/icon.icns',
+                 #icon='ua/resources/icons/icon.icns',
                  bundle_identifier=None,
                  info_plist={
                     'NSPrincipalClass': 'NSApplication',

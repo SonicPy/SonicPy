@@ -122,6 +122,7 @@ class BroadbandPulseWidget(QtWidgets.QWidget):
         self.f_min_bx.setMinimum(0)
         self.f_min_bx.setMinimumWidth(70)
         self.f_min_bx.setSingleStep(1)
+        self.f_min_bx.setValue(15)
         self._layout.addWidget(self.f_min_lbl)
         self._layout.addWidget(self.f_min_bx)
 
@@ -131,6 +132,7 @@ class BroadbandPulseWidget(QtWidgets.QWidget):
         self.f_max_bx.setMinimum(0)
         self.f_max_bx.setMinimumWidth(70)
         self.f_max_bx.setSingleStep(1)
+        self.f_max_bx.setValue(50)
         self._layout.addWidget(self.f_max_lbl)
         self._layout.addWidget(self.f_max_bx)
 

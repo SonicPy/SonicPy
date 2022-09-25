@@ -201,11 +201,6 @@ class TimeOfFlightController(QObject):
         self.arrow_plot_controller.reset()  
 
 
-
-
-        
-
-
     ###
     # Overview controller callbacks
     ###

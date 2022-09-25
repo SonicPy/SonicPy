@@ -110,19 +110,14 @@ class TimeOfFlightController(QObject):
 
     def new_project_act_callback(self):
         filename = save_file_dialog(None, "New project file", filter = 'Time of Flight Analysis Project (*.bz;*.json)', warn_overwrite=True)
-        
         if len(filename):
-            
             if os.path.isfile(filename):
                 os.rename(filename, filename + '.bak')
             self._open_project(filename)
         
     def open_project_act_callback(self):
         filename = open_file_dialog(None, "Open project file", filter = 'Time of Flight Analysis Project (*.bz;*.json)')
-        
         if os.path.isfile(filename):
-
-            
             set_ok = self._open_project(filename)
 
         
@@ -130,31 +125,23 @@ class TimeOfFlightController(QObject):
     def _open_project(self, filename):
         #print(filename)
         self.close_project_act_callback()
-
         set_ok = self.echoes_results_model.open_project(filename)
-
         self.project_menus_enabled(set_ok)
-        
         if not set_ok:
                 msg = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Information,"Notice","Project file not selected")
                 msg.exec()
         else:
             folder = self.echoes_results_model.get_folder()
             mode = self.echoes_results_model.get_mode()
-            
-            if os.path.isdir(folder) and len(folder) and len(mode):
+            if os.path.isdir(folder) and len(folder):
+                if not len(mode):
+                    mode = 'discrete_f'
                 QtWidgets.QApplication.processEvents()
-                
                 self.overview_controller.set_US_folder(folder=folder, mode=mode)
                 return
-
             if len(folder) and len(mode):
-                
-
                 ret = QtWidgets.QMessageBox.question(self.widget, 'Data folder question', "Data folder not found, select new location?", QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
                 yes = ret == QtWidgets.QMessageBox.Yes
-                
-
                 if yes:
                     self.overview_controller.open_btn_callback(mode = mode)
                 else:

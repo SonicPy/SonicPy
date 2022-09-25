@@ -123,7 +123,7 @@ class TimeOfFlightController(QObject):
         
 
     def _open_project(self, filename):
-        #print(filename)
+        
         self.close_project_act_callback()
         set_ok = self.echoes_results_model.open_project(filename)
         self.project_menus_enabled(set_ok)
@@ -133,9 +133,8 @@ class TimeOfFlightController(QObject):
         else:
             folder = self.echoes_results_model.get_folder()
             mode = self.echoes_results_model.get_mode()
-            if os.path.isdir(folder) and len(folder):
-                if not len(mode):
-                    mode = 'discrete_f'
+            if os.path.isdir(folder) and len(folder) and len(mode):
+                
                 QtWidgets.QApplication.processEvents()
                 self.overview_controller.set_US_folder(folder=folder, mode=mode)
                 return

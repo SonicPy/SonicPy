@@ -212,6 +212,8 @@ class UltrasoundWidget(QMainWindow):
             event = 'down'
         if event is not None:
             self.up_down_signal.emit(event)
+        else:
+            super().keyPressEvent(e)
 
     def create_status_bar(self):
         #sb = self.statusBar()

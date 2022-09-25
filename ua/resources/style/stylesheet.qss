@@ -221,14 +221,14 @@ QDoubleSpinBox::up-button {
     width: 14px;
 }
 
-QDoubleSpinBox::down-arrow {
-    image: url(um/resources/style/angle-down.png);
+DoubleSpinBoxAlignRight::down-arrow {
+    image: url(down_arrow_url);
     width: 12px;
     height: 12px;
 }
 
-QDoubleSpinBox::up-arrow {
-    image: url(um/resources/style/angle-up.png);
+DoubleSpinBoxAlignRight::up-arrow {
+    image: url(up_arrow_url);
     width: 12px;
     height: 12px;
 }

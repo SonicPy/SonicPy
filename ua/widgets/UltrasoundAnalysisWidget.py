@@ -30,14 +30,35 @@ class UltrasoundAnalysisWidget(QWidget):
 
         self.setWindowTitle('Ultrasound Analysis')
 
-        #self.resize(1250, 800)
         
         self.make_widget()
 
 
         self.create_plots()
     
- 
+     
+
+    def clear(self):
+        self.plot_widget.setText('',0)
+        self.update_view([],[],'')
+
+        self.lr1_p.setRegion([0, 0])
+        self.lr2_p.setRegion([0, 0])
+
+        self.lr1_s.setRegion([0, 0])
+        self.lr2_s.setRegion([0, 0])
+
+        self.clear_detail_plots()
+
+    def clear_detail_plots(self):
+        out = [[],[]]
+        self.detail_plot0.setData(*out)
+        self.detail_plot0_bg.setData(*out)
+        self.detail_plot1.setData(*out)
+        self.detail_plot1_bg.setData(*out)
+        self.detail_plot2.setData(*out)
+        self.detail_plot2_bg.setData(*out)
+
 
     def create_plots(self):
 
@@ -81,7 +102,7 @@ class UltrasoundAnalysisWidget(QWidget):
         self.detail_win1.setText('Echo 2' , 1)
 
         detail_plot2 = self.detail_win2.fig.win
-        detail_plot2.create_plots([],[],[],[],'Time')
+        detail_plot2.create_plots([],[],[],[],f'\N{GREEK SMALL LETTER TAU} (s)')
         detail_plot2.set_colors( { 
                         'data_color': (0,255,100),\
                         })
@@ -150,10 +171,17 @@ class UltrasoundAnalysisWidget(QWidget):
     def make_widget(self):
         
         self._layout = QtWidgets.QVBoxLayout()
-        self._layout.setContentsMargins(10, 10, 10, 10)
+        self._layout.setContentsMargins(0, 0, 0, 0)
+
+        self.label = QtWidgets.QLabel("Echo correlation")
+        self.label.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        self.label.setStyleSheet('''font-size: 18pt;''')
+        self._layout.addWidget(self.label)
+
         self.detail_widget = QtWidgets.QTabWidget()
-        self._detail_layout = QtWidgets.QTabWidget()
-        self._detail_layout.setContentsMargins(0, 0, 0, 0)
+        
+        '''self._detail_layout = QtWidgets.QTabWidget()
+        self._detail_layout.setContentsMargins(0, 0, 0, 0)'''
         self.buttons_widget_top = QWidget()
         self._buttons_layout_top = QtWidgets.QHBoxLayout()
         self._buttons_layout_top.setContentsMargins(0, 0, 0, 0)
@@ -164,24 +192,29 @@ class UltrasoundAnalysisWidget(QWidget):
         self.fname_lbl = QtWidgets.QLineEdit('')
         self.freq_lbl = QtWidgets.QLabel(' 𝑓')
         self.freq_ebx = DoubleSpinBoxAlignRight()
-        self.freq_ebx.setMaximum(100)
+        self.freq_ebx.setMaximum(1000)
         self.freq_ebx.setMinimum(1)
         self.freq_ebx.setValue(21)
         self.N_cbx = QtWidgets.QCheckBox('+/-')
         self.N_cbx.setChecked(True)
         self.save_btn = QtWidgets.QPushButton('Save')
         self.arrow_plt_btn = QtWidgets.QPushButton(u'Inverse 𝑓')
+        self.echo_width = DoubleSpinBoxAlignRight()
+        self.echo_width.setDecimals(0)
+        self.echo_width.setMaximum(10000)
+        self.echo_width_lbl = QtWidgets.QLabel('Width (ns)')
 
         self.echo1_cursor_btn = QtWidgets.QPushButton('Echo 1')
         self.echo2_cursor_btn = QtWidgets.QPushButton('Echo 2')
 
         
         
-        self._buttons_layout_top.addWidget(self.open_btn)
+        #self._buttons_layout_top.addWidget(self.open_btn)
         #self._buttons_layout_top.addWidget(self.fname_lbl)
         self._buttons_layout_top.addWidget(self.freq_lbl)
         self._buttons_layout_top.addWidget(self.freq_ebx)
-
+        #self._buttons_layout_top.addWidget(self.echo_width_lbl)
+        #self._buttons_layout_top.addWidget(self.echo_width)
         self._buttons_layout_top.addWidget(self.echo1_cursor_btn)
         self._buttons_layout_top.addWidget(self.echo2_cursor_btn)
         #self._buttons_layout_top.addWidget(self.N_cbx)
@@ -213,6 +246,7 @@ class UltrasoundAnalysisWidget(QWidget):
         self._layout.addWidget(self.buttons_widget_top)
         params = "Ultrasound echo analysis", 'Amplitude', 'Time'
 
+
         self.splitter_vertical = QtWidgets.QSplitter(Qt.Vertical)
 
 
@@ -223,7 +257,7 @@ class UltrasoundAnalysisWidget(QWidget):
         self.detail_win0 = SimpleDisplayWidget(self.detail0)
         self.detail1 = "Filtered echoes", 'Amplitude', 'Time'
         self.detail_win1 = SimpleDisplayWidget(self.detail1)
-        self.detail2 = "Correlation", 'Amplitude', 'Time'
+        self.detail2 = "Correlation", 'Amplitude', f'\N{GREEK SMALL LETTER TAU} (s)'
         self.detail_win2 = SimpleDisplayWidget(self.detail2)
 
         self.detail_widget.addTab(self.detail_win0, 'Selected')
@@ -231,7 +265,11 @@ class UltrasoundAnalysisWidget(QWidget):
         self.detail_widget.addTab(self.detail_win2, 'Correlation')
 
         #self.detail_widget.setLayout(self._detail_layout)
-        self.splitter_vertical.addWidget(self.detail_widget)
+        self._detail_widget = QtWidgets.QWidget()
+        self._detail_widget_layout = QtWidgets.QVBoxLayout(self._detail_widget)
+        self._detail_widget_layout.setContentsMargins(0,15,0,0)
+        self._detail_widget_layout.addWidget(self. detail_widget)
+        self.splitter_vertical.addWidget(self._detail_widget)
 
         self._layout.addWidget(self.splitter_vertical)
 

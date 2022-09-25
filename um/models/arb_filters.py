@@ -8,8 +8,6 @@ from pyqtgraph.Qt import QtGui, QtCore
 import pyqtgraph as pg
 import sys
 from functools import partial
-import json
-
 
 def no_filter(params):
     waveform_in = params['waveform_in']

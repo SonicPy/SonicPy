@@ -1,23 +1,20 @@
 import pyqtgraph as pg
+import pyqtgraph.exporters
 from pyqtgraph import QtCore, mkPen, mkColor, hsvColor, ViewBox
 from PyQt5.QtCore import QObject, pyqtSignal, Qt, QPoint
-from PyQt5.QtGui import QColor, QPen
-from  PyQt5.QtWidgets import QDesktopWidget, QMainWindow, QApplication, QInputDialog, QWidget, QLabel
+
+from  PyQt5.QtWidgets import QDesktopWidget, QMainWindow, QApplication, QInputDialog, QWidget, QLabel, QGraphicsView
 from um.widgets.CustomWidgets import FlatButton, DoubleSpinBoxAlignRight, VerticalSpacerItem, NoRectDelegate, \
     HorizontalSpacerItem, ListTableWidget, VerticalLine, DoubleMultiplySpinBoxAlignRight
 from utilities.HelperModule import calculate_color, get_partial_index, get_partial_value
 from um.widgets.ExLegendItem import LegendItem
 from um.widgets.PhasePlot import PhasePlot
-import pyqtgraph.exporters
-import unicodedata
+
 from numpy import argmax, nan, greater,less, append, sort, array, isnan
 
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtGui
 import copy
-from functools import partial
-
-from scipy.signal import argrelextrema
 
 
 class SimpleDisplayWidget(QtWidgets.QWidget):
@@ -111,6 +108,9 @@ class SimpleDisplayWidget(QtWidgets.QWidget):
     def setText(self, text, plot_ind):
         self.fig.set_plot_label(text,plot_ind)
 
+    def setColor(self, color, plot_ind):
+        self.fig.set_plot_label_color(color,plot_ind)
+
     def raise_widget(self):
         self.show()
         self.setWindowState(self.windowState() & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
@@ -164,20 +164,7 @@ class plotWindow(QtWidgets.QWidget):
     def set_cursor(self, pos):
         self.win.set_cursor_pos(pos)
 
-    '''def create_plots(self):
-        self.win.create_plots([],[],[],[],'Time (s)')
-        self.win.set_colors({'data_color':'FFFF00','rois_color': '#00b4ff'})'''
-        
-    '''
-    def add_line_plot(self, x=[],y=[],color = (0,0,0),Width = 1):
-        Pen=mkPen(color, width=Width)
-        Plot = self.win.plot(x,y, 
-                        pen= Pen, 
-                        antialias=True)
-        self.plots.append(Plot)
-
-        self.win.legend.addItem(self.plots[-1], '') # can display name in upper right corner in same color 
-    '''    
+  
 
     def add_line_plot(self, x=[],y=[],color = (0,0,0),Width = 1,title=""):
         Pen=mkPen(color, width=Width)
@@ -235,6 +222,7 @@ class myVLine(pg.InfiniteLine):
 class CustomViewBox(pg.ViewBox):  
     plotMouseCursorSignal = pyqtSignal(float)
     plotMouseCursor2Signal = pyqtSignal(float)  
+    viewBoxScrollSingal = pyqtSignal(float)
     cursor_y_signal = pyqtSignal(float)
     def __init__(self, *args, **kwds):
         super().__init__()
@@ -253,6 +241,7 @@ class CustomViewBox(pg.ViewBox):
         self.cursorPoint_y = 0
         # Enable dragging and dropping onto the GUI 
         self.setAcceptDrops(True) 
+        self.scrollModifierEnabled = False
         
         
 
@@ -282,6 +271,19 @@ class CustomViewBox(pg.ViewBox):
             self.plotMouseCursorSignal.emit(x)   
             self.cursor_y_signal.emit(y) 
         ev.accept()
+
+    def wheelEvent(self, ev, axis=None):
+
+        '''
+        don't scroll if control key is down
+        '''
+        if ev.modifiers() == Qt.ControlModifier and self.scrollModifierEnabled:
+            delta = ev.delta() / 120
+            self.viewBoxScrollSingal.emit(float(delta))
+        else:
+            
+            return super().wheelEvent(ev, axis)
+        
             
 
 class PltWidget(pg.PlotWidget):
@@ -361,6 +363,7 @@ class PltWidget(pg.PlotWidget):
 
         self.set_colors({'data_color':self.colors['data_color'],'rois_color': self.colors['rois_color']})
 
+
         
     def set_cursorFast_pos(self, pos):
         self.vLineFast.blockSignals(True)
@@ -428,6 +431,25 @@ class PltWidget(pg.PlotWidget):
         exporter = pg.exporters.ImageExporter(self.plotItem)
         #exporter.parameters()['width']= 200
         exporter.export(filename)
+
+    def export_plot_png(self,filename):
+        self.vLine.hide()
+        self.vLineFast.hide()
+        exporter = pg.exporters.ImageExporter(self.plotItem)
+        exporter.params.param('width').setValue(1920, blockSignal=exporter.widthChanged)
+        exporter.params.param('height').setValue(1080, blockSignal=exporter.heightChanged)
+        exporter.export(filename)
+        self.vLine.show()
+        self.vLineFast.show()
+
+    def export_plot_csv(self,filename):
+        self.vLine.hide()
+        self.vLineFast.hide()
+        exporter = pg.exporters.CSVExporter(self.plotItem)
+
+        exporter.export(filename)
+        self.vLine.show()
+        self.vLineFast.show()
     
     def export_plot_svg(self,filename):
         exporter = pg.exporters.SVGExporter(self.plotItem)

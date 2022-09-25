@@ -8,14 +8,11 @@ from um.widgets.CustomWidgets import FlatButton, DoubleSpinBoxAlignRight, Vertic
 from utilities.HelperModule import calculate_color, get_partial_index, get_partial_value
 from um.widgets.ExLegendItem import LegendItem
 from um.widgets.PhasePlot import PhasePlot
-import pyqtgraph.exporters
-import unicodedata
+
 from numpy import argmax, nan, greater,less, append, sort, array
 from PyQt5 import QtWidgets
 import copy
-from functools import partial
 
-from scipy.signal import argrelextrema
 
 
 
@@ -149,16 +146,7 @@ class plotWindow(QtWidgets.QWidget):
         self.win.create_plots([],[],[],[],'Time (s)')
         self.win.set_colors({'data_color':'FFFF00','rois_color': '#00b4ff'})
         
-    '''
-    def add_line_plot(self, x=[],y=[],color = (0,0,0),Width = 1):
-        Pen=mkPen(color, width=Width)
-        Plot = self.win.plot(x,y, 
-                        pen= Pen, 
-                        antialias=True)
-        self.plots.append(Plot)
-
-        self.win.legend.addItem(self.plots[-1], '') # can display name in upper right corner in same color 
-    '''    
+  
 
     def add_line_plot(self, x=[],y=[],color = (0,0,0),Width = 1,title=""):
         Pen=mkPen(color, width=Width)
@@ -236,15 +224,7 @@ class CustomViewBox(pg.ViewBox):
         self.setAcceptDrops(True) 
         
         
-
-    '''
-    def cursor_dragged(self, cursor):
-        ind = self.cursors.index(cursor)
-        pos = cursor.getXPos()
-        
-        sig = self.cursor_signals[ind]
-        sig.emit(pos)    
-    '''
+    
 
     ## reimplement right-click to zoom out
     def mouseClickEvent(self, ev):
@@ -290,7 +270,7 @@ class PltWidget(pg.PlotWidget):
         self.colors = { 'plot_background_color': '#ffffff',\
                         'data_color': '#2f2f2f',\
                         'rois_color': '#00b4ff', \
-                        'roi_cursor_color': '#ff0000', \
+                        'roi_cursor_color': '#969600', \
                         'xrf_lines_color': '#969600', \
                         'mouse_cursor_color': '#00cc00', \
                         'mouse_fast_cursor_color': '#323232'}
@@ -338,6 +318,9 @@ class PltWidget(pg.PlotWidget):
         self.set_log_mode(False,True)
         self.xAxis = None
         self.yData = None
+
+    def enable_mouse_zoom(self, state):
+        self.viewBox.setMouseEnabled(x=state, y=state )
 
         
     def set_cursorFast_pos(self, pos):

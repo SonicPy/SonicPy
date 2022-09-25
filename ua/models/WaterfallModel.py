@@ -76,10 +76,7 @@ class WaterfallModel( ):
         
         for d, p in enumerate(params):
 
-            '''if d % 2 == 0:
-                #update progress bar only every 10 files to save time
-                progress_dialog.setValue(d)
-                QtWidgets.QApplication.processEvents()'''
+            
             self. add_waveform(params[p])
 
         

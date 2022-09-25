@@ -34,6 +34,8 @@ class ArrowPlotController(QObject):
     arrow_plot_del_clicked_signal = pyqtSignal(dict)
     arrow_plot_clear_clicked_signal = pyqtSignal(dict) # contains list of del type dicts
 
+    new_result_calculated_signal = pyqtSignal(dict)
+
     def __init__(self, app = None, results_model= EchoesResultsModel()):
         super().__init__()
         
@@ -44,7 +46,7 @@ class ArrowPlotController(QObject):
             self.setStyle(app)
         self.arrow_plot_window = ArrowPlotWidget()
         self.make_connections()
-        self.line_plots = {}
+       
         
     def make_connections(self): 
         self.arrow_plot_window.open_btn.clicked.connect(self.update_data)
@@ -56,6 +58,11 @@ class ArrowPlotController(QObject):
         #self.arrow_plot_window.save_btn.clicked.connect(self.save_result)
         self.arrow_plot_window.win.cursor_changed_singal.connect(self.cursor_changed_singal_callback)
         self.arrow_plot_window.del_btn.clicked.connect(self. del_btn_callback)
+
+    def reset(self):
+        self.clear()
+        self.cond = None
+        self.update_plot()
 
     def del_btn_callback(self):
         arrow_plot = self.model.get_arrow_plot(self.cond, self.wave_type)
@@ -83,10 +90,13 @@ class ArrowPlotController(QObject):
 
     def cursor_changed_singal_callback(self, *args):
         
+        mode = self.model.results_model.get_mode()
         arrow_plot = self.model.get_arrow_plot(self.cond, self.wave_type)
         if arrow_plot != None:
-            freqs = np.asarray(list(arrow_plot.optima.keys()))
+            freqs = np.asarray(sorted(list(arrow_plot.optima.keys())))
             freq = 1/args[0]
+
+            
             if len(freqs):
                 if freq <= np.amin(freqs): 
                     part_ind = 0
@@ -98,8 +108,14 @@ class ArrowPlotController(QObject):
                 if ind < len(freqs):
                     freq_out = freqs[ind]
                     optima = arrow_plot.optima[freq_out]
-                    fname = optima.filename_waveform
+                    fname = os.path.normpath(optima.filename_waveform)
                     self.arrow_plot_freq_cursor_changed_signal.emit({'frequency':freq_out, 'filename_waveform':fname})
+                    
+                    freq_curosr = round(freq_out * 1e-6,1)
+                    
+                    self.set_frequency_cursor(freq_curosr)
+            
+            
 
     def calc_callback(self):
         self.calculate_data()
@@ -180,20 +196,23 @@ class ArrowPlotController(QObject):
             self.arrow_plot_window.update_view(xData,yData)
             self.arrow_plot_window.update_maximums(np.asarray(xMax),np.asarray(yMax))
 
-            self.arrow_plot_window.set_selected_folder(str(self.cond))
+            cond = ''
+            if self.cond != None:
+                cond = copy.copy(self.cond)
+            self.arrow_plot_window.set_name(str(cond))
 
             if opt in arrow_plot.line_plots:
                 self.arrow_plot_window.update_max_line(*arrow_plot.line_plots[opt])
                 
                 result = arrow_plot.result[opt]
-                out_str = 'Time delay = ' + \
-                            str(result['time_delay']) + \
-                                ' microseconds, st.dev. = ' + \
-                                    str(result['time_delay_std']) +' microseconds'
-                self.arrow_plot_window.output_ebx.setText(out_str)
+                out_str = f'\N{GREEK SMALL LETTER TAU} = ' + \
+                            str(round(result['time_delay']* 1000, 2)) + \
+                                f'(' + \
+                                    str(round(result['time_delay_std']* 1000, 2)) + f') ns'
+                self.arrow_plot_window.set_result(out_str)
             else:
                 self.arrow_plot_window.update_max_line([],[])
-                self.arrow_plot_window.output_ebx.setText('')
+                self.arrow_plot_window.set_result('')
             
           
             
@@ -208,13 +227,13 @@ class ArrowPlotController(QObject):
             opt = self.get_opt()
             arrow_plot.calculate_lines(opt)
             package = arrow_plot.package
-            
+            if len(package):
+
+                package['wave_type']= self.wave_type
+                self.new_result_calculated_signal.emit(package)
 
 
-    '''def load_file(self, filename):
-        t, spectrum = read_tek_csv(filename, subsample=4)
-        t, spectrum = zero_phase_highpass_filter([t,spectrum],1e4,1)
-        return t,spectrum, filename'''
+
         
     def update_data(self, *args, **kwargs):
         if self.cond != None:
@@ -228,7 +247,12 @@ class ArrowPlotController(QObject):
                 #self.auto_data()
                 self.update_plot()
 
-    
+    def clear(self):
+        self.model.clear()
+        self.arrow_plot_window.set_selected_frequency('')
+        self.arrow_plot_window.set_name('')
+        self.arrow_plot_window.set_result('')
+        
 
     def refresh_model(self):
         self.model.refresh_all_freqs(self.cond, self.wave_type)
@@ -262,6 +286,10 @@ class ArrowPlotController(QObject):
         if event == 'down':
             new_ind = self.waveform_index - 1
         self.show_waveform(new_ind, update_cursor_pos=True)
+
+
+    def export_plot(self,fname):
+        self.arrow_plot_window.win.fig .win.export_plot_csv(fname)
                 
     def setStyle(self, app):
         from .. import theme 

@@ -43,6 +43,8 @@ class FolderListWidget(QWidget):
         self._buttons_layout_top = QtWidgets.QHBoxLayout()
         self._buttons_layout_top.setContentsMargins(0, 0, 0, 0)
 
+        
+
         # add top controls here
         self._up_btn = QtWidgets.QPushButton("Move up")
         self._down_btn = QtWidgets.QPushButton("Move down")
@@ -128,7 +130,7 @@ class OverViewWidget(QWidget):
 
         self.setWindowTitle('Time-of-flight analysis')
 
-        self.resize(800, 800)
+        #self.resize(800, 800)
         
         self.make_widget()
 
@@ -139,7 +141,12 @@ class OverViewWidget(QWidget):
     def make_widget(self):
         
         self._layout = QtWidgets.QVBoxLayout()
-        self._layout.setContentsMargins(10, 10, 10, 10)
+        self._layout.setContentsMargins(5, 5, 5, 5)
+
+        self.label = QtWidgets.QLabel("Overview")
+        self.label.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        self.label.setStyleSheet('''font-size: 18pt;''')
+        self._layout.addWidget(self.label)
         
         self.buttons_widget_top = QtWidgets.QWidget()
         self._buttons_layout_top = QtWidgets.QHBoxLayout()
@@ -159,8 +166,8 @@ class OverViewWidget(QWidget):
         self.clip_cbx.setChecked(True)
         self.save_btn = QtWidgets.QPushButton('Save result')
        
-        self._buttons_layout_top.addWidget(self.open_btn)
-        self._buttons_layout_top.addWidget(self.sort_btn)
+        '''self._buttons_layout_top.addWidget(self.open_btn)
+        self._buttons_layout_top.addWidget(self.sort_btn)'''
         self._buttons_layout_top.addWidget(self.scale_lbl)
         self._buttons_layout_top.addWidget(self.scale_ebx)
         self._buttons_layout_top.addWidget(self.clip_cbx)
@@ -219,6 +226,10 @@ class OverViewWidget(QWidget):
 
         self.setLayout(self._layout)
 
+    def clear_widget(self):
+        self.single_frequency_waterfall.clear_plot()
+        self.single_condition_waterfall.clear_plot()
+
     def make_bottom_combo_widgets(self):
         
 
@@ -276,27 +287,9 @@ class OverViewWidget(QWidget):
         self.buttons_widget_bottom_single_condition.setLayout(self._buttons_layout_bottom_single_condition)
         self._single_condition_widget_layout.addWidget(self.buttons_widget_bottom_single_condition)
 
-    '''def set_freq_buttons(self, num):
 
-        for b in self.freq_btns_list:
-            self._freqs_widget_layout.removeWidget(b)
-            self.freq_btns.removeButton(b)
-            b.deleteLater()
-            b= None
-        self.freq_btns_list.clear()
-
-        for f in range(num):
-            btn = QtWidgets.QPushButton(str(f))
-            btn.setObjectName('freq_btn')
-            btn.setCheckable(True)
-            self.freq_btns_list.append(btn)
-            self.freq_btns.addButton(btn)
-            #self._freqs_widget_layout.addWidget(btn)
-
-        self.freq_btns_list[0].setObjectName('freq_btn_first')
-        self.freq_btns_list[-1].setObjectName('freq_btn_last')'''
         
-    def set_cond_buttons(self, num):
+    '''def set_cond_buttons(self, num):
 
         for b in self.cond_btns_list:
             self._conds_widget_layout.removeWidget(b)
@@ -314,7 +307,7 @@ class OverViewWidget(QWidget):
             #self._conds_widget_layout.addWidget(btn)
 
         self.cond_btns_list[0].setObjectName('cond_btn_first')
-        self.cond_btns_list[-1].setObjectName('cond_btn_last')    
+        self.cond_btns_list[-1].setObjectName('cond_btn_last')    '''
         
 
     def raise_widget(self):

@@ -1,17 +1,58 @@
-from binhex import getfileinfo
+
 import numpy as np
 from scipy import signal
 from scipy import blackman, nanmean
-from scipy.signal import hilbert
-from scipy.fftpack import rfft, irfft, fftfreq, fft
-import scipy.fftpack
-import csv
-from um.models.tek_fileIO import get_file_format, read_tek_csv, read_tek_csv_files_2d, read_ascii_scope_files_2d
+from scipy.signal import hilbert, tukey
+from scipy.fftpack import fft
+
+import json
+import os
+
 import math
-from PyQt5 import QtCore, QtWidgets
-import time, os
+import compress_json
 
 
+def write_data_dict_to_compressed_json(filename, data):
+    
+    
+    compress_json.dump(data, filename)
+
+
+
+
+def write_data_dict_to_json(filename, data):
+
+    with open(filename, 'w') as json_file:
+        json.dump(data, json_file,indent = 2)  
+        json_file.close()  
+
+def update_data_dict_json(filename, data):
+    
+    if os.path.isfile(filename):
+        with open(filename, 'r') as json_file:
+            old_data = json.load(json_file)
+            for key in data:
+                old_data[key] = data[key]
+            new_data = old_data
+            json_file.close()  
+    else:
+        new_data = data
+    with open(filename, 'w') as json_file:
+        
+        json.dump(new_data, json_file,indent = 2)  
+        json_file.close()  
+
+def read_result_file( filename):
+        with open(filename) as json_file:
+            data = json.load(json_file)
+            json_file.close()
+
+        return data
+
+def read_result_file_compressed( filename):
+        data = compress_json.load(filename)
+
+        return data
 
 
 def butter_bandstop_filter(data, lowcut, highcut, order):
@@ -162,6 +203,7 @@ def generate_source(del_x, freq, N=6, window=True):
     if window:
         
         w = blackman(samples)
+         
         source = source * w
     return xsource, source
 
@@ -206,3 +248,50 @@ def cross_correlate_sig(sig, source):
     length = len(source)
     corr = signal.correlate(sig, source, mode='same') / length
     return corr
+
+
+def save_dict_to_hdf5(dic, filename):
+    """
+    https://codereview.stackexchange.com/questions/120802/recursively-save-python-dictionaries-to-hdf5-files-using-h5py
+    """
+    with h5py.File(filename, 'a') as h5file:
+        recursively_save_dict_contents_to_group(h5file, '/', dic)
+
+def recursively_save_dict_contents_to_group(h5file, path, dic):
+    """
+    https://codereview.stackexchange.com/questions/120802/recursively-save-python-dictionaries-to-hdf5-files-using-h5py
+    """
+    for key, item in dic.items():
+        if isinstance(item, (float,int)):
+            item = np.float64(item)
+        if isinstance(item,(list)):
+            item = np.asarray(item, dtype=np.float64)
+        if isinstance(item, (np.ndarray, np.int64, np.float64, str, bytes)):
+            h5file[path + key] = item
+        elif isinstance(item, dict):
+            recursively_save_dict_contents_to_group(h5file, path + key + '/', item)
+        else:
+            print(item)
+            raise ValueError('Cannot save %s type'%type(item))
+
+def load_dict_from_hdf5(filename):
+    """
+    https://codereview.stackexchange.com/questions/120802/recursively-save-python-dictionaries-to-hdf5-files-using-h5py
+    """
+    with h5py.File(filename, 'r') as h5file:
+        return recursively_load_dict_contents_from_group(h5file, '/')
+
+def recursively_load_dict_contents_from_group(h5file, path):
+    """
+    https://codereview.stackexchange.com/questions/120802/recursively-save-python-dictionaries-to-hdf5-files-using-h5py
+    """
+    ans = {}
+    for key, item in h5file[path].items():
+        if isinstance(item, h5py._hl.dataset.Dataset):
+            val = item[()]
+            if isinstance(val,(np.ndarray)):
+                val = list(val)
+            ans[key] = val
+        elif isinstance(item, h5py._hl.group.Group):
+            ans[key] = recursively_load_dict_contents_from_group(h5file, path + key + '/')
+    return ans

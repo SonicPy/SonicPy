@@ -126,18 +126,22 @@ pyz = PYZ(a.pure, a.zipped_data,
 from ua import __version__
 print('version ' + __version__)
 
+
+
 exe = EXE(pyz,
           a.scripts,
-          [],
-          exclude_binaries=True,
-          name=name,
+          a.binaries,
+          a.zipfiles,
+          a.datas,
+          name='TimeOfFlight_{}_{}'.format(platform, __version__),
           debug=False,
-          bootloader_ignore_signals=False,
           strip=False,
           upx=True,
-          console=False,
-          onefile=True)
-coll = COLLECT(exe,
+          runtime_tmpdir=None,
+          console=False )
+
+if _platform == "darwin":
+    coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,
                a.datas,
@@ -147,11 +151,9 @@ coll = COLLECT(exe,
                 onefile=True,
                name='TimeOfFlight_{}_{}'.format(platform, __version__))
 
-
-if _platform == "darwin":
     app = BUNDLE(coll,
                  name='TimeOfFlight_{}.app'.format(__version__),
-                 icon='ua/resources/icons/icon.icns',
+                 #icon='ua/resources/icons/icon.icns',
                  bundle_identifier=None,
                  info_plist={
                     'NSPrincipalClass': 'NSApplication',

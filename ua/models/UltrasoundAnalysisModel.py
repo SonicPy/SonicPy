@@ -6,20 +6,18 @@ from posixpath import basename
 from utilities.utilities import *
 from utilities.HelperModule import move_window_relative_to_screen_center, get_partial_index, get_partial_value
 import numpy as np
-from numpy import argmax, nan, greater,less, append, sort, array
 
-from scipy import optimize
+
 from scipy.signal import argrelextrema, tukey
-from functools import partial
+
 from um.models.tek_fileIO import *
-from scipy import signal
+
 from scipy.signal import find_peaks
-import pyqtgraph as pg
+
 from utilities.utilities import zero_phase_bandpass_filter
-import json
+
 from utilities.CARSMath import fit_gaussian, polyfitw
 
-from .. models.SelectedEchoesModel import SelectedEchoesModel
 from ua.models.EchoesResultsModel import EchoesResultsModel
 
 class UltrasoundAnalysisModel():
@@ -37,12 +35,39 @@ class UltrasoundAnalysisModel():
         self.bounds = [[0,0],[0,0]]
         self.freq = 0
         self.wave_type = 'P' # or 'S'
-        self.settings = {'tukey_alpha':0.2}
+        self.settings = {'tukey_alpha':0.2,
+                        'echo_width':75.,
+                         'filter_order':3,
+                         'freq_range': 0.1}
 
-        
+        self.settings_fname = 'settings.json'
 
         self.minima = []
         self.maxima = []
+
+    def clear(self):
+        self.__init__(self.results_model)
+
+    def set_echo_width(self, value):
+        self.settings['echo_width'] = float(value)
+        folder = self.results_model.folder
+        self.save_folder_settings()
+
+    def save_folder_settings(self):
+        
+        self.results_model.update_settings(self.settings)
+
+    def restore_folder_settings(self, folder):
+        write_out = False
+        settings = self.results_model.get_settings() 
+        for key in self.settings:
+            if not key in settings:
+                settings[key] = self.settings[key]
+                write_out = True
+        self.settings = settings
+        
+        if write_out:
+            self.results_model.update_settings(self.settings)
 
     def fit_func(self, x, a, b,c,d):
         '''
@@ -73,8 +98,10 @@ class UltrasoundAnalysisModel():
         t = self.t
         spectrum = self.spectrum
         tukey_alpha = self.settings['tukey_alpha']
-        self.filtered1, self.echo_tk1 = self.filter_echo(t,spectrum,l1,r1,freq,tukey_alpha)
-        self.filtered2, self.echo_tk2 = self.filter_echo(t,spectrum,l2,r2,freq,tukey_alpha)
+        filter_order = self.settings['filter_order']
+        freq_range = self.settings['freq_range']
+        self.filtered1, self.echo_tk1 = self.filter_echo(t,spectrum,l1,r1,freq, freq_range=freq_range, order = filter_order, tukey_alpha=tukey_alpha)
+        self.filtered2, self.echo_tk2 = self.filter_echo(t,spectrum,l2,r2,freq, freq_range=freq_range, order = filter_order, tukey_alpha=tukey_alpha)
 
     def find_echo_bounds(self, echo, echo_bounds_cutoff = 0.05):
         '''
@@ -83,9 +110,13 @@ class UltrasoundAnalysisModel():
         the amplitude of the echo is more than echo_bounds_cutoff
         '''
         m = max(abs(echo))
-        echo_norm = abs(echo/m)
-        lb = np.argmax(echo_norm> echo_bounds_cutoff)
-        rb = len(echo)- np.argmax(np.flip(echo_norm)>echo_bounds_cutoff)
+        if m !=0:
+            echo_norm = abs(echo/m)
+            lb = np.argmax(echo_norm> echo_bounds_cutoff)
+            rb = len(echo)- np.argmax(np.flip(echo_norm)>echo_bounds_cutoff)
+        else:
+            lb = 0
+            rb = 0
         return lb, rb
 
     def cross_correlate(self):
@@ -103,7 +134,7 @@ class UltrasoundAnalysisModel():
         echo2_sub = echo2[lb2:rb2]
         distance = max(max1_ind, max2_ind) - min(max1_ind, max2_ind)
 
-        shift_range = int((rb1-lb1)/2)*2
+        shift_range = int((rb1-lb1)/2)
         cross_corr = []
         shifts =[]
         for shift in range(shift_range):

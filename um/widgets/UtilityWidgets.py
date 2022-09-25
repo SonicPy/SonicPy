@@ -327,8 +327,8 @@ def open_file_dialog(parent_widget, caption, directory=None, filter=None):
                                                      directory=directory,
                                                      filter=filter)
     if isinstance(filename, tuple):  # PyQt5 returns a tuple...
-        return str(filename[0])
-    return str(filename)
+        return os.path.normpath(str(filename[0]))
+    return os.path.normpath(str(filename))
 
 
 def open_files_dialog(parent_widget, caption, directory=None, filter=None):
@@ -352,5 +352,5 @@ def save_file_dialog(parent_widget, caption, directory=None, filter=None, warn_o
                                                      directory=directory,
                                                      filter=filter)
     if isinstance(filename, tuple):  # PyQt5 returns a tuple...
-        return str(filename[0])
-    return str(filename)
+        return os.path.normpath(str(filename[0]))
+    return os.path.normpath(str(filename))

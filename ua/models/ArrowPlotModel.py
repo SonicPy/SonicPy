@@ -1,24 +1,22 @@
 
-import os.path, sys
 from this import d
 from ua.models.OverViewModel import Sort_Tuple
 from utilities.utilities import *
 from utilities.HelperModule import move_window_relative_to_screen_center, get_partial_index, get_partial_value
 import numpy as np
-from numpy import argmax, nan, greater,less, append, sort, array, argmin
+from numpy import argmax, isin, nan, greater,less, append, sort, array, argmin
 
-from scipy import optimize
-from scipy.signal import argrelextrema, tukey
-from functools import partial
+
+from scipy.signal import argrelextrema
+
 from um.models.tek_fileIO import *
-from scipy import signal
-import pyqtgraph as pg
+
 from utilities.utilities import zero_phase_bandpass_filter
-import json
+import json, copy
 from ua.models.EchoesResultsModel import EchoesResultsModel
 
 class optima():
-    def __init__(self, data, frequency, filename_waveform, wave_type, init = True):
+    def __init__(self, data, frequency, filename_waveform, wave_type, centers, init = True):
         
         self.filename_waveform = filename_waveform
         self.wave_type = wave_type
@@ -30,16 +28,18 @@ class optima():
 
         self.num_opt = {}
         self.all_optima = {}
-        self.center_opt = {}
+        self.center_opt = centers
         
         if init:
             self.init_optima()
 
     def package_for_saving(self):
         package = {} 
+        package['filename_waveform'] = self.filename_waveform
         package['num_opt'] = self.num_opt
         package['all_optima'] = self.all_optima
         package['center_opt'] = self.center_opt
+        package['freq']= self.freq
         return package
 
     def restore_from_package(self, package):
@@ -48,10 +48,11 @@ class optima():
         self.center_opt = package['center_opt']
         
     def init_optima(self):
-        self.center_opt={}
+        
         self.other_opt={}
-        self.center_opt['min'] = self.minima_t[argmin(self.minima)]
-        self.center_opt['max'] = self.maxima_t[argmax(self.maxima)]
+        if self.center_opt == {}:
+            self.center_opt['min'] = self.minima_t[argmin(self.minima)]
+            self.center_opt['max'] = self.maxima_t[argmax(self.maxima)]
         self.num_opt['min'] = len(self.minima)
         self.num_opt['max'] = len(self.maxima)
         self.all_optima['max'] = self.maxima_t
@@ -72,6 +73,8 @@ class optima():
         return self.num_opt[opt]
         
     def get_optimum(self, opt, ind):
+        # ind = center optimum
+        # ind < or > 0, index above or below the center optimum
         if self.center_opt[opt] is None:
             return None
         if ind == 0:
@@ -101,6 +104,7 @@ class optima():
             self.center_opt[opt] = None
             temp_other_opt = self.other_opt[opt]
             temp_other_opt.append(t)
+            temp_other_opt = [i for i in temp_other_opt if i is not None]
             self.other_opt[opt] = sorted(temp_other_opt)
         else:
             temp_opt = self.center_opt[opt]
@@ -127,8 +131,13 @@ class ArrowPlotsModel():
         self.results_model = results_model
         self.package_p = {}
         self.package_s = {}
+
+    def clear(self):
+
+        self.__init__(self.results_model)
         
-    
+    def restore_tof_results(self, package):
+        print(package)
 
     def get_arrow_plot(self, cond, wave_type):
 
@@ -150,7 +159,15 @@ class ArrowPlotsModel():
     def refresh_all_freqs(self, condition,wave_type):
         arrow_plot = self.get_arrow_plot(condition, wave_type)
 
-        echoes_by_condition = self.results_model.get_echoes_by_condition(condition, wave_type)
+        em = self.results_model
+
+        echoes_by_condition = em.get_echoes_by_condition(condition, wave_type)
+
+        results = em.get_results_by_condition(condition, wave_type)
+
+        if len(results):
+            arrow_plot.restore_results( copy.deepcopy(results))
+
         freqs = []
         for correlation in echoes_by_condition:
             freq = correlation['frequency']
@@ -177,10 +194,7 @@ class ArrowPlotsModel():
         condition = clear_info['condition']
 
         arrow_plot = self.get_arrow_plot(condition, wave_type)
-
-        freqs = list(arrow_plot.optima.keys())
-        for freq in  freqs:
-            del arrow_plot.optima[freq]
+        arrow_plot.clear()
             
 
 class ArrowPlot():
@@ -196,7 +210,11 @@ class ArrowPlot():
         self.package = {}
 
     def clear(self):
-        self.__init__(self.results_model)
+        self.optima = {}
+        self.line_plots = {}
+        self.result = {}
+
+        self.package = {}
 
     def package_optima(self):
         package = {}
@@ -206,17 +224,44 @@ class ArrowPlot():
 
         package['condition'] = self.condition
         package['optima']=_optima
-        package['line_plots']=self.line_plots
+
+        output_line_plots = {}
+        for key in self.line_plots:
+            plot = self.line_plots[key]
+
+            line_plots_x = plot[0].tolist()
+            # every third element is a NaN, remove NaNs before packaging
+            del line_plots_x[3-1::3]
+            line_plots_y = plot[1].tolist()
+            # every third element is a NaN, remove NaNs before packaging
+            del line_plots_y[3-1::3]
+            output_line_plots[key] = [line_plots_x, line_plots_y]
+        package['line_plots']= output_line_plots
         package['result']=self.result
+        
         return package
 
-    def restore_optima(self, package):
-        self.condition = package['condition']
-        _optima= package['optima']
-        self.line_plots = package['line_plots']
+    def restore_results(self, package):
+        
+        restored_plots = {}
+        for key in package['line_plots']:
+            plot = package['line_plots'][key]
+            line_plots_x = plot[0] 
+            line_plots_y = plot[1]
+            lp_len = len(line_plots_x)
+            nan_list_x = [np.nan]*lp_len
+            nan_list_y = [np.nan]*lp_len
+
+            line_plots_x = interleave_lists(line_plots_x, nan_list_x)
+            line_plots_y = interleave_lists(line_plots_y, nan_list_y)
+
+            plots = [np.asarray(line_plots_x), np.asarray(line_plots_y)]
+
+            restored_plots[key] = plots
+
+        self.line_plots = restored_plots
         self.result = package['result']
-        for opt in _optima:
-            self.optima[opt].restore_from_package(_optima[opt])
+       
 
             
     def add_freq(self, data):
@@ -225,21 +270,27 @@ class ArrowPlot():
         filename_waveform = data['filename_waveform']
         wave_type = data['wave_type']
         correlation_optima = data['correlation']
+        centers_in_data = 'centers' in data
+        if centers_in_data:
+            centers = data['centers']
+        else:
+            centers = {}
 
         if not freq in self.optima:
-            data_pt = optima(correlation_optima, freq, filename_waveform, wave_type)
+            data_pt = optima(correlation_optima, freq, filename_waveform, wave_type, centers)
             self.optima[freq]=data_pt
         else:
             data_pt = self.optima[freq]
             stored_filename_waveform = data_pt.filename_waveform
             stored_wave_type = data_pt.wave_type
-            
+            stored_centers = data_pt.center_opt
             
             same = stored_filename_waveform == filename_waveform and \
                            stored_wave_type == wave_type and \
-                           self.compare_optima(correlation_optima, data_pt)
+                           self.compare_optima(correlation_optima, data_pt) and \
+                            centers == stored_centers
             if not same:
-                data_pt = optima(correlation_optima, freq, filename_waveform, wave_type)
+                data_pt = optima(correlation_optima, freq, filename_waveform, wave_type, centers)
                 self.optima[freq]=data_pt
 
     def compare_optima(self, opt1, opt2):
@@ -293,8 +344,15 @@ class ArrowPlot():
         '''
         freqs = list(self.optima.keys())
         
-        self.optima[freqs[0]].reset_optimum()
-        t = self.optima[freqs[0]].get_optimum(opt,0)
+        self.optima[freqs[0]] .reset_optimum() 
+
+        # use for loop to find lowest frequency with a selected optimum, 
+        # frequencies with all optima deselected will return t as None
+        # then use that frequency as the starting t 
+        for ind in range(len(freqs)):
+            t = self.optima[freqs[ind]].get_optimum(opt,0)
+            if t != None:
+                break
 
         for freq in freqs:
             if not self.optima[freq].get_optimum(opt,0) is None:
@@ -355,7 +413,7 @@ class ArrowPlot():
             
             self.result[opt] = result
 
-            self.package_optima()
+            self.package = self.package_optima()
         else:
             self.error_not_enough_datapoints()
 
@@ -387,7 +445,19 @@ class ArrowPlot():
     def error_not_enough_datapoints(self):
         pass
    
-
+def interleave_lists(a_list, b_list):
+    if isinstance(a_list, np.ndarray):
+        a_list = list(a_list)
+    if isinstance(b_list, np.ndarray):
+        b_list = list(b_list)
+    result = []
+    while a_list and b_list:
+        result.append(a_list.pop(0))
+        result.append(a_list.pop(0))
+        result.append(b_list.pop(0))
+    result.extend(a_list)
+    result.extend(b_list)
+    return result
     
 
 def read_result_file( filename):

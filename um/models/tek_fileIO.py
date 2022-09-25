@@ -115,65 +115,66 @@ def get_file_format( fname):
     returns: tuple with file format number 1-n, or -1 if not recognised, and the file format name
     '''
 
-    
-    file_text = open(fname, "r")
-    
-    file_line = file_text.readline()
-    separator = None
-    formats = [ (-1, ''),
-                (1, 'hpcat'),
-                (2, 'lanl'),
-                (4, 'stonybrook'),
-                (5, 'gsecars')
-                ]
-    fformat = 0
-
-    if '\t' in file_line:
-        # tab separated
-        # LANL format
-        #separator = '\t'
-        #tokens = file_line.split(separator)
-        fformat = 2
-
-    elif ',' in file_line:
-        header = {}
-        # coma separated
-        separator = ','    
-        tokens = file_line.split(separator)
-        
-        if len(tokens) == 5:
-            # hpcat format
-            fformat =  1
-
-        elif len(tokens) == 2:
-
-            if tokens[0].strip() == 's' and tokens[1].strip() == 'Volts':
-                # stonybrook wavestar format
-                fformat =  3
+    if len(fname):
+        if os.path.isfile(fname):
+            file_text = open(fname, "r")
             
-            # Check if there is a multiline 2-column header (GSECARS)
-            header = {}
-            a = True
-            if len(tokens[0]):
-                    header[tokens[0].strip('"').strip()]=(tokens[1].strip())
-            else:
-                a = False
-            row = 1
+            file_line = file_text.readline()
+            separator = None
+            formats = [ (-1, ''),
+                        (1, 'hpcat'),
+                        (2, 'lanl'),
+                        (4, 'stonybrook'),
+                        (5, 'gsecars')
+                        ]
+            fformat = 0
 
-            while a:
-                file_line = file_text.readline()
+            if '\t' in file_line:
+                # tab separated
+                # LANL format
+                #separator = '\t'
+                #tokens = file_line.split(separator)
+                fformat = 2
+
+            elif ',' in file_line:
+                header = {}
+                # coma separated
+                separator = ','    
                 tokens = file_line.split(separator)
-                if len(tokens[0])>1:
-                    header[tokens[0].strip('"').strip()]=(tokens[1].strip())
-                else:
-                    a = False
-                row +=1
-            
-            if "Model" in header:
-                # gsecars format
-                fformat =  4
+                
+                if len(tokens) == 5:
+                    # hpcat format
+                    fformat =  1
 
-    file_text.close()
+                elif len(tokens) == 2:
+
+                    if tokens[0].strip() == 's' and tokens[1].strip() == 'Volts':
+                        # stonybrook wavestar format
+                        fformat =  3
+                    
+                    # Check if there is a multiline 2-column header (GSECARS)
+                    header = {}
+                    a = True
+                    if len(tokens[0]):
+                            header[tokens[0].strip('"').strip()]=(tokens[1].strip())
+                    else:
+                        a = False
+                    row = 1
+
+                    while a:
+                        file_line = file_text.readline()
+                        tokens = file_line.split(separator)
+                        if len(tokens[0])>1:
+                            header[tokens[0].strip('"').strip()]=(tokens[1].strip())
+                        else:
+                            a = False
+                        row +=1
+                    
+                    if "Model" in header:
+                        # gsecars format
+                        fformat =  4
+
+            file_text.close()
 
     return formats[fformat]
 

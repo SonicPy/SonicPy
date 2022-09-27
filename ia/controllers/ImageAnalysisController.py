@@ -2,6 +2,7 @@
 
 
 
+from functools import partial
 import os.path
 
 from PyQt5.QtCore import QObject
@@ -53,6 +54,7 @@ class ImageAnalysisController(QObject):
         self.update_data(filename=filename)'''
 
     def make_connections(self): 
+        self.display_window.file_widget.file_selected_signal.connect(self.update_data)
         self.display_window.open_btn.clicked.connect(self.update_data)
         self.display_window.compute_btn.clicked.connect(self.update_cropped)
         self.display_window.save_btn.clicked.connect(self.save_result)
@@ -181,9 +183,15 @@ class ImageAnalysisController(QObject):
         self.update_roi()
         
     def update_data(self, *args, **kwargs):
-        filename = kwargs.get('filename', None)
+        
+        if len(args):
+            filename = args[0]
+        else:
+            filename = kwargs.get('filename', None)
+
         if filename is None:
             filename = open_file_dialog(None, "Load File(s).",filter='*.png;*.tif;*.bmp')
+            
         if len(filename):
             
             self.model.load_file(filename)

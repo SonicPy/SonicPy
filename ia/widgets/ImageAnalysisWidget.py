@@ -9,7 +9,7 @@ from PyQt5.QtCore import QObject, pyqtSignal, Qt
 import pyqtgraph as pg
 from pyqtgraph import QtCore 
 from um.widgets.CustomWidgets import HorizontalSpacerItem, VerticalSpacerItem, FlatButton, NumberTextField
-
+from ia.widgets.FileViewWidget import FileViewWidget
 
 # Interpret image data as row-major instead of col-major
 pg.setConfigOptions(imageAxisOrder='row-major')
@@ -37,7 +37,7 @@ class ImageAnalysisWidget(QMainWindow):
         self.make_widget()
 
 
-        self.setCentralWidget(self.my_widget)
+        self.setCentralWidget(self.splitter_widget)
 
         self.create_plots()
         self.create_menu()
@@ -56,9 +56,22 @@ class ImageAnalysisWidget(QMainWindow):
 
 
     def make_widget(self):
-        self.my_widget = QtWidgets.QWidget()
+
+
+        self.splitter_widget = QtWidgets.QSplitter(Qt.Horizontal)
+
+        self.file_widget = FileViewWidget()
+        self.file_widget.setMaximumWidth(300)
+        self.splitter_widget .addWidget(self.file_widget)
+
+        self.analysis_widget = QtWidgets.QWidget()
+
+        self.splitter_widget .addWidget(self.analysis_widget)
         self._layout = QtWidgets.QVBoxLayout()
         self._layout.setContentsMargins(10, 10, 10, 10)
+
+        
+
         self.detail_widget = QtWidgets.QWidget()
         self._detail_layout = QtWidgets.QHBoxLayout()
         self._detail_layout.setContentsMargins(0, 0, 0, 0)
@@ -94,7 +107,7 @@ class ImageAnalysisWidget(QMainWindow):
         self._layout.addWidget(self.buttons_widget_top)
 
 
-        self.menu_bar = QtWidgets.QWidget(self.my_widget)
+        self.menu_bar = QtWidgets.QWidget(self.analysis_widget)
         self._menu_bar_layout = QtWidgets.QHBoxLayout(self.menu_bar)
         self._menu_bar_layout.setContentsMargins(0,0,0,0)
 
@@ -102,7 +115,7 @@ class ImageAnalysisWidget(QMainWindow):
 
         self._menu_bar_layout.addWidget(QtWidgets.QLabel('      Sample type'))
 
-        self.edge_options_widget = QtWidgets.QWidget(self.my_widget)
+        self.edge_options_widget = QtWidgets.QWidget(self.analysis_widget)
         self._edge_options_widget_layout = QtWidgets.QHBoxLayout(self.edge_options_widget)
         self._edge_options_widget_layout.setSpacing(0)
         self.edge_options = QtWidgets.QButtonGroup(self.edge_options_widget)
@@ -144,8 +157,8 @@ class ImageAnalysisWidget(QMainWindow):
         
 
 
-        self.order_options = QtWidgets.QButtonGroup(self.my_widget)
-        self.order_btns_widget = QtWidgets.QWidget(self.my_widget)
+        self.order_options = QtWidgets.QButtonGroup(self.analysis_widget)
+        self.order_btns_widget = QtWidgets.QWidget(self.analysis_widget)
         self._order_btns_widget_layout = QtWidgets.QHBoxLayout(self.order_btns_widget)
         self._order_btns_widget_layout.setSpacing(0)
         self.order_1_btn = QtWidgets.QPushButton('1')
@@ -184,7 +197,7 @@ class ImageAnalysisWidget(QMainWindow):
 
         self._layout.addWidget(self.menu_bar)
 
-        self.plot_grid = pg.GraphicsLayoutWidget(self.my_widget)
+        self.plot_grid = pg.GraphicsLayoutWidget(self.analysis_widget)
         
         self.plot_grid.setBackground((255,255,255))
         #self._plot_grid_layout = QtWidgets.QGridLayout(self.plot_grid)
@@ -245,7 +258,7 @@ class ImageAnalysisWidget(QMainWindow):
         self._buttons_layout_bottom.addSpacerItem(HorizontalSpacerItem())
         self.buttons_widget_bottom.setLayout(self._buttons_layout_bottom)
         self._layout.addWidget(self.buttons_widget_bottom)
-        self.my_widget.setLayout(self._layout)
+        self.analysis_widget.setLayout(self._layout)
 
     
 

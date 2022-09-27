@@ -505,7 +505,10 @@ class OverViewModel():
             self.results_model.set_folders_sorted(new_folders_sorted)
         
         
-        condition_0 = self.results_model.get_folders_sorted()[0]
+        fldrs = self.results_model.get_folders_sorted()
+        if not len(fldrs):
+            return False
+        condition_0 = fldrs[0]
         
         if mode == 'discrete_f':
             file_folder = os.path.join(folder,condition_0)

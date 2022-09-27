@@ -135,8 +135,7 @@ exe = EXE(pyz,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
-          console=False,
-          onefile=True)
+          console=False)
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,
@@ -144,7 +143,6 @@ coll = COLLECT(exe,
                strip=False,
                upx=True,
                upx_exclude=[],
-                onefile=True,
                name='TimeOfFlight_{}_{}'.format(platform, __version__))
 
 

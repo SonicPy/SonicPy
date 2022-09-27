@@ -3,6 +3,11 @@
 __version__ = "0.5.0"
 
 import os
+from pathlib import Path
+import platform
+from PyQt5 import QtWidgets
+from PyQt5 import QtCore
+import pyqtgraph
 
 theme = 1
 
@@ -11,13 +16,10 @@ calibrants_path = os.path.join(resources_path, 'calibrants')
 icons_path = os.path.join(resources_path, 'icons')
 data_path = os.path.join(resources_path, 'data')
 style_path = os.path.join(resources_path, 'style')
-from pathlib import Path
+title = "SonicPy: Time-of-flight analysis. ver." + __version__ + "  © R. Hrubiak, 2022."
 home_path = str(Path.home())
 
-import platform
-from PyQt5 import QtWidgets
-from PyQt5 import QtCore
-import pyqtgraph
+
 
 def main():
     from ia.controllers.ImageAnalysisController import ImageAnalysisController
@@ -46,5 +48,3 @@ def main():
     
     app.exec_()
 
-
-   

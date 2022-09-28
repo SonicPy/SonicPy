@@ -38,8 +38,9 @@ class OverViewController(QObject):
     file_selected_signal = pyqtSignal(dict)
     folder_selected_signal = pyqtSignal(str)
     cursor_position_signal = pyqtSignal(float)
-    freq_settings_changed_signal = pyqtSignal(float)
+    freq_settings_changed_signal = pyqtSignal(dict)
     folders_sorted_signal = pyqtSignal(list)
+    
 
     def __init__(self, app = None, results_model=EchoesResultsModel()):
         super().__init__()
@@ -124,11 +125,14 @@ class OverViewController(QObject):
         f_start = self.widget.freq_start.value()
         f_step = self.widget.freq_step.value()
 
+        n_freqs = len(list(self.model.fps_Hz.keys()))
+        f_end = f_start + (n_freqs-1) * f_step
+
         self.model.set_freq_start_step(f_start, f_step)
 
         display_freq = f_start + int(self.freq) * f_step
         self.widget.single_frequency_waterfall.set_name ( str(display_freq) + ' MHz')
-        #self.freq_settings_changed_signal.emit(display_freq)
+        self.freq_settings_changed_signal.emit({'f_start':f_start,'f_step':f_step, 'f_end':f_end, 'f_selected': display_freq})
 
     def freq_str_ind_to_val(self, str_ind):
         f_start = self.widget.freq_start.value()

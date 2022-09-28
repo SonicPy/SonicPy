@@ -21,12 +21,12 @@ project = 'sonicPy'
 copyright = 'Argonne National Laboratory'
 author = 'R. Hrubiak'
 
-# The full version, including alpha/beta/rc tags
+# The full version, including alpha/beta/rc tags 
 release = '0.5.5'
-master_doc = 'index'
+master_doc = 'index' 
 
 # -- General configuration ---------------------------------------------------
-
+ 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.

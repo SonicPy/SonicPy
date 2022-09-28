@@ -4,10 +4,11 @@ Welcome to sonicPy's user guide!
 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: User guide:
    
-   beforeyoubegin
-   imageanalysis
-   tof_analysis
-   references
+   intro
+   ia
+   tof
+   references   
+     

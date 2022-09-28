@@ -1,0 +1,20 @@
+
+Download the latest release at https://github.com/hrubiak/sonicpy/releases
+
+Windows:
+Download and unzip "TimeOfFlight_Win64_#.#.#.zip" 
+
+running the 
+"TimeOfFlight.exe" in the "TimeOfFlight_Win64_#.#.#" folder.
+Mac:
+Download the "TimeOfFlight_#.#.#.app.zip", run the unzipped TimeOfFlight_#.#.#.app
+
+
+
+In the File menu select New project, select any suitable location for the project file and save the project file with a file extension .bz
+
+In the File menu, Import ultrasound data, discrete f 
+
+Navigate to and select the "US" folder containing subfolders with ultrasound frequency scans. 
+
+Avoid placing any extraneous files in the US folder. The subfolders with frequency scans should each contain the same number of waveform files sortable alha-numericaly from lowest to highest frequency. E.g. "Exp4_25_C_2000_psi_29000_khz", "Sam1_001.csv"

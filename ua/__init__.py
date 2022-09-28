@@ -121,5 +121,6 @@ def TOF():
         pact.setMenuRole(QtWidgets.QAction.PreferencesRole)
         pmenu = QtWidgets.QMenu('Preferences')
         pmenu.addAction(pact)
-    return app.exec_()
+    app.exec_()
+    del app
 

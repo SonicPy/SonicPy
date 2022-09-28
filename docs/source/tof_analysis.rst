@@ -6,8 +6,8 @@ Time of flight analysis
 This section describes Time of flight analysis
 
 
-Workflow Jonathan
------------------
+Workflow 1
+----------
 
 1. First, enter information about Ultrasonic measurements so the program knows which frequency you started and ended at (enter in upper top middle left boxes)
 2. Then click "open folder" in the upper left. Find and select folder with ultrasound data
@@ -131,8 +131,8 @@ Now copy these values to the spreadsheet to keep track of them
     - It is reccomended to keep a copy at Argonne in case your personal data is lost
     - Our specific experiment folder can be resynced for Globus if original data is needed
 
-Workflow Anne
--------------
+Workflow 2
+----------
 
 * Time – of – flight analysis software:
 

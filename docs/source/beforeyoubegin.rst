@@ -6,7 +6,7 @@ Introduction
 About  
 -----
 
-Sound velocity (\ :math:`v`) in a material can be estimated by an experimental measurements of the 
+Sound velocity (\ :math:`v`) in a material can be estimated using measurements of the 
 wave travel distance (\ :math:`d`) and the wave travel time (\ :math:`{\tau}`) 
 
 \ :math:`v = d/{\tau}`	 

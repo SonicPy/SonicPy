@@ -15,11 +15,11 @@ A LiNbO\ :sub:`3` transducer, which generates and receives both compressional an
    Ultrasound cell schematic
 
 .. figure:: /images/intro/echoes_schematic.png
-   :alt: Ultrasound waveforms  
+   :alt: Elastic wave singnals
    :width: 500px
    :align: center
 
-   Ultrasound waveforms 
+   Elastic wave singnals
 
 .. figure:: /images/intro/radiography_schematic.png
    :alt: Radiography image 

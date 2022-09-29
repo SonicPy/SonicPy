@@ -1,5 +1,5 @@
 import imp
-import sys
+import sys, os
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 
@@ -9,13 +9,25 @@ class YourSystemModel(QtWidgets.QFileSystemModel):
         QtWidgets.QFileSystemModel.__init__(self, *args, **kwargs)
 
         self.fnames = {}
+        self.fldr_path = ''
 
     def set_fname_status(self, fname, status):
         
-        self.fnames[fname] = str(status)
+        self.fnames[fname]['status'] = str(status)
 
-    def get_files (self):
-        return sorted(list(self.fnames.keys()))
+    def set_fname_result(self, fname, result):
+        
+        self.fnames[fname]['result'] = result
+
+    def get_file_results(self):
+        return self.fnames 
+
+    def get_file_paths (self):
+        f_out = {}
+        for f in sorted(list(self.fnames.keys())):
+            file = os.path.join(self.fldr_path, f)
+            f_out[f] = file
+        return f_out
 
     def columnCount(self, parent = QtCore.QModelIndex()):
         return super(YourSystemModel, self).columnCount()+1
@@ -31,7 +43,8 @@ class YourSystemModel(QtWidgets.QFileSystemModel):
                 child = idx.child(index.row(), idx.column())
                 fname =  model.fileName(self, child)
                 if fname in self.fnames:
-                    f = self.fnames [fname] 
+                    
+                    f = self.fnames [fname] ['status']
                 else :
                     f = ''
                 
@@ -42,6 +55,7 @@ class YourSystemModel(QtWidgets.QFileSystemModel):
         return super(YourSystemModel, self).data(index, role)
 
     def setRootPath(self, path):
+        self.fldr_path = path
         self.fnames = {}
         ans = QtWidgets.QFileSystemModel.setRootPath(self, path)
         QtWidgets.QApplication.processEvents()
@@ -50,7 +64,7 @@ class YourSystemModel(QtWidgets.QFileSystemModel):
         for i in range(0, model.rowCount(self, idx)):
             child = idx.child(i, idx.column())
             fname =  model.fileName(self, child)
-            self.fnames [fname] = ''
+            self.fnames [fname] = {'status':'', 'result':{}}
 
         return ans
         
@@ -103,12 +117,12 @@ class FileViewWidget(QtWidgets.QWidget):
 
     def on_clicked(self, index):
 
-        self.path = QtWidgets.QFileDialog.getExistingDirectory(self, caption='Select US folder',
+        path = QtWidgets.QFileDialog.getExistingDirectory(self, caption='Select US folder',
                                                      directory='')
         if len(self.path):
-            self.listview.setRootIndex(self.fileModel.setRootPath(self.path))
+            self.listview.setRootIndex(self.fileModel.setRootPath(self))
 
-            self.files = self.fileModel.get_files()
+            files = self.fileModel.get_file_paths()
             
 
     def on_selection_changed(self, index):

@@ -32,7 +32,7 @@ class ImageAnalysisWidget(QMainWindow):
 
         self.setWindowTitle('Sample thickness analysis')
 
-        self.resize(1500, 1000)
+        self.resize(1400, 870)
         
         self.make_widget()
 
@@ -61,7 +61,7 @@ class ImageAnalysisWidget(QMainWindow):
         self.splitter_widget = QtWidgets.QSplitter(Qt.Horizontal)
 
         self.file_widget = FileViewWidget()
-        self.file_widget.setMaximumWidth(300)
+        #self.file_widget.setMaximumWidth(250)
         self.splitter_widget .addWidget(self.file_widget)
 
         self.analysis_widget = QtWidgets.QWidget()
@@ -86,6 +86,7 @@ class ImageAnalysisWidget(QMainWindow):
         self.crop_btn.setCheckable(True)
         self.crop_btn.setChecked(True)
         self.compute_btn = QtWidgets.QPushButton("Compute")
+        self.compute_btn.setCheckable(True)
         self.fname_lbl = QtWidgets.QLineEdit('')
         
         self.save_btn = QtWidgets.QPushButton('Save result')

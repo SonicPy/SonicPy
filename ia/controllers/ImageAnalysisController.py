@@ -56,7 +56,7 @@ class ImageAnalysisController(QObject):
     def make_connections(self): 
         self.display_window.file_widget.file_selected_signal.connect(self.update_data)
         self.display_window.open_btn.clicked.connect(self.update_data)
-        self.display_window.compute_btn.clicked.connect(self.update_cropped)
+        self.display_window.compute_btn.clicked .connect(self.update_cropped)
         self.display_window.save_btn.clicked.connect(self.save_result)
 
         self.display_window.crop_btn.clicked.connect(self.autocrop_btn_callback)
@@ -98,7 +98,8 @@ class ImageAnalysisController(QObject):
             self.set_edge_types(edges)
 
     def update_cropped(self):
-        if self.model.src is not None :
+       
+        if self.model.src is not None and self.display_window.compute_btn.isChecked() :
         
             thresholds = self.model.settings['edge_fit_threshold']
             orders = self.model.settings['edge_polynomial_order']
@@ -201,6 +202,7 @@ class ImageAnalysisController(QObject):
             self.update_crop()
             self.model.filter_image()
             self.update_frame()
+            self.update_cropped()
 
     def update_crop(self, *args, **kwargs):
         

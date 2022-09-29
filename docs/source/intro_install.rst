@@ -6,12 +6,12 @@ The latest release of the executable version of **sonicPy** can be downloaded fr
 
 Windows:
 ~~~~~~~~
-Download and unzip ``TimeOfFlight_Win64_#.#.#.zip`` 
+Download and unzip ``TimeOfFlight_Win64_#.#.#.zip`` and ``TravelDistance_Win64_#.#.#.zip``.
 
-Run ``TimeOfFlight.exe`` in the unzipped ``TimeOfFlight_Win64_#.#.#`` folder.
+Run the executable is located in the unzipped folder.
 
 Mac: 
 ~~~~ 
-Download the ``TimeOfFlight_#.#.#.app.zip``, run the unzipped ``TimeOfFlight_#.#.#.app``
+Download the ``TimeOfFlight_#.#.#.app.zip`` and ``TravelDistance_#.#.#.app.zip``, run the unzipped app.
 
  

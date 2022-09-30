@@ -41,6 +41,7 @@ elif _platform == "win32" or _platform == "cygwin":
 elif _platform == "darwin":
     platform = "Mac"
     extra_binaries=[ ]
+    folder = '/Users/ross/anaconda3/lib/python3.7/site-packages/cv2/'
     name = "run_TravelDistance"
 
 # checking whether the platform is 64 or 32 bit

@@ -14,7 +14,7 @@ from ia.widgets.FileViewWidget import FileViewWidget
 # Interpret image data as row-major instead of col-major
 pg.setConfigOptions(imageAxisOrder='row-major')
 
-from .. import style_path, icons_path
+from .. import style_path, icons_path,title
 
 class ImageAnalysisWidget(QMainWindow):
     
@@ -30,7 +30,7 @@ class ImageAnalysisWidget(QMainWindow):
         self.spectrum = None
 
 
-        self.setWindowTitle('Sample thickness analysis')
+        self.setWindowTitle(title)
 
         self.resize(1400, 870)
         

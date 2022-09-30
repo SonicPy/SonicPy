@@ -44,7 +44,7 @@ class YourSystemModel(QtWidgets.QFileSystemModel):
                 fname =  model.fileName(self, child)
                 if fname in self.fnames:
                     
-                    f = self.fnames [fname] ['status']
+                    f = self.fnames [fname] ['result']['mean']
                 else :
                     f = ''
                 
@@ -113,20 +113,20 @@ class FileViewWidget(QtWidgets.QWidget):
         self.listview.setRootIndex(self.fileModel.index(path))
 
         self.open_btn.clicked.connect(self.on_clicked)
-        self.listview.clicked.connect(self.on_selection_changed)
+        self.listview.selectionModel().selectionChanged.connect(self.on_selection_changed)
 
     def on_clicked(self, index):
 
         path = QtWidgets.QFileDialog.getExistingDirectory(self, caption='Select US folder',
                                                      directory='')
-        if len(self.path):
-            self.listview.setRootIndex(self.fileModel.setRootPath(self))
+        if len(path):
+            self.listview.setRootIndex(self.fileModel.setRootPath(path))
 
             files = self.fileModel.get_file_paths()
             
 
-    def on_selection_changed(self, index):
-
+    def on_selection_changed(self, index: QtCore.QItemSelection):
+        index = index.indexes()[0]
         path = self.fileModel.fileInfo(index).absoluteFilePath()
         if '.'in path:
             ext = path.split('.')[-1]

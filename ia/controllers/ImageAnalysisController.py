@@ -147,6 +147,8 @@ class ImageAnalysisController(QObject):
             data_y = np.append(np.append(edge1_y,np.nan),edge2_y)
                 
             abs_plot.setData(data_x, data_y)
+            fname = self.display_window.fname_lbl.text()
+            self.display_window.file_widget.fileModel.set_fname_result(fname, {'mean':str(round(y_diff,1)), 'std.dev':str(round(std_dev,1))})
 
     def update_frame(self):
         image = self.model.image
@@ -196,7 +198,7 @@ class ImageAnalysisController(QObject):
         if len(filename):
             
             self.model.load_file(filename)
-            self.display_window.fname_lbl.setText(filename)
+            self.display_window.fname_lbl.setText(os.path.split( filename)[-1])
             self.display_window.imgs['src'].setImage(self.model.src)
 
             self.update_crop()

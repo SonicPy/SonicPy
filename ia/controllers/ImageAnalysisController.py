@@ -192,9 +192,11 @@ class ImageAnalysisController(QObject):
         else:
             filename = kwargs.get('filename', None)
 
-        if filename is None:
+        if not filename:
             filename = open_file_dialog(None, "Load File(s).",filter='*.png;*.tif;*.bmp')
-            
+            if len(filename):
+                path = os.path.split(filename)[0]
+                self.display_window.file_widget.listview.setRootIndex(self.display_window.file_widget. fileModel.setRootPath(path))
         if len(filename):
             
             self.model.load_file(filename)

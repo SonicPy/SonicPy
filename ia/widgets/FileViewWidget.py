@@ -3,6 +3,8 @@ import sys, os
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 
+from um.widgets.CustomWidgets import HorizontalLine, HorizontalSpacerItem
+
 class YourSystemModel(QtWidgets.QFileSystemModel):
 
     def __init__(self, *args, **kwargs):
@@ -77,12 +79,18 @@ class FileViewWidget(QtWidgets.QWidget):
         self.hlay = QtWidgets.QVBoxLayout(self)
         '''self.treeview = QtWidgets.QTreeView()'''
 
+        btn_layout = QtWidgets.QHBoxLayout()
         self.open_btn = QtWidgets.QPushButton('Open folder')
-        self.hlay.addWidget(self.open_btn)
+        btn_layout.addWidget(self.open_btn)
+        self.export_btn = QtWidgets.QPushButton('Save results')
+        btn_layout.addWidget(self.export_btn)
+        btn_layout.addSpacerItem(HorizontalSpacerItem())
+        self.hlay.addLayout(btn_layout)
         self.listview = QtWidgets.QTreeView()
         self.listview.setColumnHidden(1, True)
         self.listview.setColumnHidden(2, True)
         self.listview.setColumnHidden(3, True)
+        
         '''hlay.addWidget(self.treeview)'''
         self.hlay.addWidget(self.listview)
 

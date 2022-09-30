@@ -99,7 +99,7 @@ class ImageAnalysisWidget(QMainWindow):
         self._buttons_layout_top.addWidget(self.fname_lbl)
        
         
-        self._buttons_layout_top.addWidget(QtWidgets.QLabel("   Thickness"))
+        self._buttons_layout_top.addWidget(QtWidgets.QLabel("   Distance"))
         self._buttons_layout_top.addWidget(self.result_lbl)
         #self._buttons_layout_top.addWidget(self.save_btn)
         self._buttons_layout_top.addSpacerItem(HorizontalSpacerItem())

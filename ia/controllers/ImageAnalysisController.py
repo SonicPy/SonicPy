@@ -172,7 +172,7 @@ class ImageAnalysisController(QObject):
             data_y = np.append(np.append(edge1_y,np.nan),edge2_y)
                 
             abs_plot.setData(data_x, data_y)
-            fname = self.display_window.fname_lbl.text()
+            fname = self.model.filename
             self.display_window.file_widget.fileModel.set_fname_result(fname, {'mean':str(round(y_diff,1)), 'std.dev':str(round(std_dev,1))})
             self.display_window.file_widget.repaint()
 
@@ -214,7 +214,11 @@ class ImageAnalysisController(QObject):
     def set_folder_path(self, folder):
         self.folder_path = folder
         self.display_window.file_widget. folder_lbl.setText(folder)
-        self.display_window.file_widget.listview.setRootIndex(self.display_window.file_widget. fileModel.setRootPath(folder))
+        if os.path.isdir(folder):
+            if not self.display_window.file_widget.initialized :
+                self.display_window.file_widget.init_listview(folder)
+            else:
+                self.display_window.file_widget.listview.setRootIndex(self.display_window.file_widget. fileModel.setRootPath(folder))
 
     def on_foler_clicked(self, index):
 

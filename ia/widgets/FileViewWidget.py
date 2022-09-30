@@ -2,7 +2,7 @@ import imp
 import sys, os
 
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt 
 from um.widgets.CustomWidgets import HorizontalLine, HorizontalSpacerItem, VerticalLine, VerticalSpacerItem
 from ia.widgets.collapsible_widget import CollapsibleBox, EliderLabel
 
@@ -30,24 +30,22 @@ class YourSystemModel(QtWidgets.QFileSystemModel):
 
     def get_table_data(self):
         
-        rows = len(self.fnames)
+       
         lines=[]
         first_line = ['File', 
                     'Distance (pixels)', 
                     'st.dev (pixesl)']
         lines.append(first_line)
-        model = QtWidgets.QFileSystemModel
-        idx = model.index(self, model.rootPath(self))
-        for row in range(rows):
-            child = idx.child(row, 0)
-            fname =  model.fileName(self, child)
+       
+        for fname in self.fnames:
+            
             mean = ''
             stddev = ''
-            if fname in self.fnames:
-                if 'mean' in self.fnames [fname] ['result']:
-                    mean = self.fnames [fname] ['result']['mean']
-                if 'std.dev' in self.fnames [fname] ['result']:
-                    stddev = self.fnames [fname] ['result']['std.dev']
+            
+            if 'mean' in self.fnames [fname] ['result']:
+                mean = self.fnames [fname] ['result']['mean']
+            if 'std.dev' in self.fnames [fname] ['result']:
+                stddev = self.fnames [fname] ['result']['std.dev']
             line = [fname, mean, stddev]
             lines.append(line)
         return lines
@@ -56,8 +54,11 @@ class YourSystemModel(QtWidgets.QFileSystemModel):
         QtWidgets.QApplication.processEvents()
 
     def set_fname_result(self, fname, result):
-        
-        self.fnames[fname]['result'] = result
+       
+        fpath = os.path.normpath(fname)
+        '''if not fpath in self.fnames:
+            self.fnames[fpath] = {'result':{}}'''
+        self.fnames[fpath]['result'] = result
 
     def get_file_results(self):
         return self.fnames 
@@ -65,7 +66,7 @@ class YourSystemModel(QtWidgets.QFileSystemModel):
     def get_file_paths (self):
         f_out = {}
         for f in sorted(list(self.fnames.keys())):
-            file = os.path.join(self.fldr_path, f)
+            file = os.path.normpath(os.path.join(self.fldr_path, f))
             f_out[f] = file
         return f_out
 
@@ -76,26 +77,26 @@ class YourSystemModel(QtWidgets.QFileSystemModel):
         if index.column() == self.columnCount() - 2:
             if role == QtCore.Qt.DisplayRole:
                 model = QtWidgets.QFileSystemModel
-                idx = model.index(self, model.rootPath(self))
-                child = idx.child(index.row(), idx.column())
-                fname =  model.fileName(self, child)
+                
+                absp = model.fileInfo(self, index).absoluteFilePath()
+                fpath = os.path.normpath(absp)
                 f = ''
-                if fname in self.fnames:
-                    if 'mean' in self.fnames [fname] ['result']:
-                        f = self.fnames [fname] ['result']['mean']
+                if fpath in self.fnames:
+                    if 'mean' in self.fnames [fpath] ['result']:
+                        f = self.fnames [fpath] ['result']['mean']
                 return f
             if role == QtCore.Qt.TextAlignmentRole:
                 return QtCore.Qt.AlignHCenter
         if index.column() == self.columnCount() - 1:
             if role == QtCore.Qt.DisplayRole:
                 model = QtWidgets.QFileSystemModel
-                idx = model.index(self, model.rootPath(self))
-                child = idx.child(index.row(), idx.column())
-                fname =  model.fileName(self, child)
+               
+                absp = model.fileInfo(self, index).absoluteFilePath()
+                fpath = os.path.normpath(absp)
                 f = ''
-                if fname in self.fnames:
-                    if 'std.dev' in self.fnames [fname] ['result']:
-                        f = self.fnames [fname] ['result']['std.dev']
+                if fpath in self.fnames:
+                    if 'std.dev' in self.fnames [fpath] ['result']:
+                        f = self.fnames [fpath] ['result']['std.dev']
                 return f
             if role == QtCore.Qt.TextAlignmentRole:
                 return QtCore.Qt.AlignHCenter
@@ -104,24 +105,35 @@ class YourSystemModel(QtWidgets.QFileSystemModel):
 
     def setRootPath(self, path):
         self.fldr_path = path
-        self.fnames = {}
+        
         ans = QtWidgets.QFileSystemModel.setRootPath(self, path)
-        QtWidgets.QApplication.processEvents()
+        
+        self.directoryLoaded.connect(self.loaded_callback)
+        self.process_events()
+
+        return ans
+        
+
+    def loaded_callback(self, *args, **kwargs):
         model = QtWidgets.QFileSystemModel
+        root = model.rootPath(self)
+        
         idx = model.index(self, model.rootPath(self))
         files = []
-        
-        for i in range(0, model.rowCount(self, idx)):
+        rows = model.rowCount(self, idx)
+        for i in range(0, rows):
             child = idx.child(i, idx.column())
             fname =  model.fileName(self, child)
-            files.append(fname)
+            if '.tif' in fname or ".bmp" in fname:
+                files.append(os.path.normpath(os.path.join(root, fname)))
 
         files = natsort.natsorted(files)
        
         for f in files:
-            self.fnames[f] = {'result':{}}
+            if not f in self.fnames:
+                self.fnames[f] = {'result':{}}
 
-        return ans
+        self.directoryLoaded.disconnect(self.loaded_callback)
     
     def setHeaderData(self, section, orientation, data, role=Qt.EditRole):
         if orientation == Qt.Horizontal and role in (Qt.DisplayRole, Qt.EditRole):
@@ -174,32 +186,22 @@ class FileViewWidget(QtWidgets.QWidget):
         self.listview.setColumnHidden(2, True)
         self.listview.setColumnHidden(3, True)
         
-        '''hlay.addWidget(self.treeview)'''
+
         self.hlay.addWidget(self.listview)
-        #self.hlay.addSpacerItem(VerticalSpacerItem())
 
         path = QtCore.QDir.homePath()
-
-        '''self.dirModel = QtWidgets.QFileSystemModel()
-        self.dirModel.setRootPath(QtCore.QDir.rootPath())
-        self.dirModel.setFilter(QtCore.QDir.NoDotAndDotDot | QtCore.QDir.AllDirs)'''
-        
 
         self.fileModel = YourSystemModel()
         
         self.fileModel.setFilter(QtCore.QDir.NoDotAndDotDot |  QtCore.QDir.Files)
 
-        self.filters = ["*.tif", '*.tiff', "*.bmp", "*.png", "*.jpg"]
+        self.filters = ["*.tif", '*.tiff', "*.bmp"]
+        self.initialized = False
+ 
+    def init_listview(self, folder):
         self.fileModel.setNameFilters(self.filters)
-        
-
-        '''self.treeview.setModel(self.dirModel)
-        for i in  range( self.dirModel.columnCount()-1):
-            self.treeview.hideColumn(i +1)'''
-        
         self.listview.setModel(self.fileModel)
-        
-        
+    
         self.listview.setColumnHidden(1, True)
         self.listview.setColumnHidden(2, True)
         self.listview.setColumnHidden(3, True)
@@ -211,8 +213,10 @@ class FileViewWidget(QtWidgets.QWidget):
         self.fileModel.setHeaderData(4, Qt.Horizontal, "Distance")
         self.fileModel.setHeaderData(5, Qt.Horizontal, f'\N{GREEK SMALL LETTER SIGMA}')
 
-
         self.listview.selectionModel().selectionChanged.connect(self.on_selection_changed)
+        self.listview.setRootIndex(self. fileModel.setRootPath(folder))
+        self.initialized = True
+ 
 
     def select_fname(self, fname):
         model =  QtWidgets.QFileSystemModel
@@ -224,7 +228,7 @@ class FileViewWidget(QtWidgets.QWidget):
         self.listview.setCurrentIndex( child)
 
     
-            
+   
 
     def on_selection_changed(self, index: QtCore.QItemSelection):
         index = index.indexes()[0]
@@ -235,3 +239,4 @@ class FileViewWidget(QtWidgets.QWidget):
             ext = ""
         if '*.'+ext in self.filters:
             self.file_selected_signal.emit(path)
+

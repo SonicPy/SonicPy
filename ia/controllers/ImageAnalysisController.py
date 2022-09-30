@@ -49,8 +49,8 @@ class ImageAnalysisController(QObject):
         self.make_connections()
         self.display_window.raise_widget()
 
-        path = '/Users/hrubiak/Globus/hpcat/16BMB/2021-2/s16bmb-20210717-e244302-Aihaiti/sam2/images'
-        self.set_folder_path(path)
+        #path = '/Users/hrubiak/Globus/hpcat/16BMB/2021-2/s16bmb-20210717-e244302-Aihaiti/sam2/images'
+        #self.set_folder_path(path)
 
         #fname = os.path.join(resources_path, '6031psi_049.tif')
         #self.update_data(filename=fname)

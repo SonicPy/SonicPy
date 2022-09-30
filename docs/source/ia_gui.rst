@@ -1,9 +1,14 @@
 
 
-.. _gui_im:
+.. _ia_gui_im:
 
 GUI basics
 ----------
+
+- :ref:`Control panel <ia_control_panel>`
+- :ref:`File list <ia_file_list>`
+- :ref:`Plot panels  <ia_plot_panels>`
+
 
 .. figure:: /images/ia/ia_start.png
    :alt: image_analysis_start_screen 
@@ -12,20 +17,37 @@ GUI basics
     
    Image analysis window
 
+.. _ia_control_panel:
+
 Control panel 
 ^^^^^^^^^^^^^
 
-- :ref:`Open <open>`
-- :ref:`Compute  <compute>`
-- :ref:`File  <opened_file>`
-- :ref:`Thickness <thickness>`
-- :ref:`Auto crop <autocrop>`
-- :ref:`Sample type <sample_type>`
-- :ref:`Polynomial order <poly_order>`
-- :ref:`Fit threshold <fit_theshold>`
+- :ref:`Open folder <ia_open_folder>`
+- :ref:`Save results  <ia_save_results>`
+- :ref:`Open <ia_open>`
+- :ref:`Compute  <ia_compute>`
+- :ref:`File  <ia_opened_file>`
+- :ref:`Thickness <ia_thickness>`
+- :ref:`Auto crop <ia_autocrop>`
+- :ref:`Sample type <ia_sample_type>`
+- :ref:`Polynomial order <ia_poly_order>`
+- :ref:`Fit threshold <ia_fit_theshold>`
 
+.. _ia_open_folder:
 
-.. _open:
+Open folder
+***********
+
+Click :guilabel:`Open folder` button to navigate to and select the ``Images`` folder. The folder should contain radiography images with an extension ``*.tif``.
+
+.. _ia_save_results:
+
+Save results
+************
+
+Click :guilabel:`Save results` button to write out the results to a csv spreadsheet.
+
+.. _ia_open:
 
 Open
 ****
@@ -34,7 +56,7 @@ Click :guilabel:`Open` button to navigate to and select an radiography image fil
 radiography files are saved in the ``Images`` folder
 and have an extension ``*.tif``.
 
-.. _opened_file:
+.. _ia_opened_file:
 
 Opened file
 ***********
@@ -43,14 +65,14 @@ Displays the file name of the opened image.
 
 .. hint:: The file name can be copied by ``ctrl+C`` and pasted into a spreadsheet program, e.g. Excel.
 
-.. _compute:
+.. _ia_compute:
 
 Compute
 *******
 
-The program extracts positions of the lower (Edge 1) and upper (Edge 2) edges by fitting a polynomial to edge pixel positions weighted by the the pixel intensities. 
+The :guilabel:`Compute` button is a checkable button. When clicked the button will be in a checked state and highlighted orange. Clicking again unchecks the button. While in checked state the distances will be calculated automatically after selecting a file. The program extracts positions of the lower (Edge 1) and upper (Edge 2) edges by fitting a polynomial to edge pixel positions weighted by the the pixel intensities. 
 
-.. _thickness:
+.. _ia_thickness:
 
 Thickness
 *********
@@ -61,7 +83,7 @@ The thickness of the sample and standard deviation are displayed in units of nub
       \ :math:`{\mu}m / pixel` resolution for your camera to calculate the thickness 
       The relolution can be found in your calibration folder, typically in a file :file:`manta_resolution.docx`.
 
-.. _autocrop:
+.. _ia_autocrop:
 
 Auto crop
 *********
@@ -75,7 +97,7 @@ If you have manually adjusted the red box position and would like to go back to 
 select the :guilabel:`Auto crop` button. 
    
 
-.. _sample_type:
+.. _ia_sample_type:
 
 Sample type
 ***********
@@ -93,7 +115,7 @@ For exaple, the image below has two thin gold foils as edges, in this case we se
       :width: 250px
       :align: center
 
-.. _poly_order:
+.. _ia_poly_order:
 
 Polynomial order
 ****************
@@ -106,7 +128,7 @@ If an edge is very deformed try to use the option of polynomial order 3.
    standard deviation will reflect the thickness uncertainty and 
    can be propagated to the sound velocity uncertainty.
 
-.. _fit_theshold:
+.. _ia_fit_theshold:
 
 Fit threshold
 *************
@@ -114,10 +136,20 @@ Fit threshold
 Choose the highest pixel threshold for the fit. The smaller it is, the brightest the pixels considered.
 
 
+.. _ia_file_list:
+
+File list
+^^^^^^^^^
+The file list panel displays the files in the currently opened folder. Clicking on a file selects it for processing. Calculated distance and uncertainty will be displayed next to a selected file.
+
+
+
+.. _ia_plot_panels:
+
 Plot panels
 ^^^^^^^^^^^
 
-.. _source_image:
+.. _ia_source_image:
 
 Source image 
 ************
@@ -126,7 +158,7 @@ Source image
 
    The red box delimits the relevant part of the image that will be used for finding the edges.
 
-.. _crop:   
+.. _ia_crop:   
 
    .. note:: The red box can be adjusted by dragging the 
              diamond handles using a mouse. The region-of-interest selected by the red box
@@ -137,17 +169,17 @@ Source image
       :width: 500px
       :align: center
       
-.. _absorbance:
+.. _ia_absorbance:
 
 Edge selection
 **************
 
    The bottom left panel displays the computed absorbance, (A) = -log\ :sub:`10` (I/I\ :sub:`0`), taken 
-   from the part of the image selected by the red box in the :ref:`Source image <source_image>`. 
+   from the part of the image selected by the red box in the :ref:`Source image <ia_source_image>`. 
 
    The program will automatically locate the top and the bottom edges and overlay each edge with a green box.
 
-.. _edge_selection:  
+.. _ia_edge_selection:  
 
    .. note:: 
       If the automatic edge finding fails, please select the edges manually. 
@@ -159,7 +191,7 @@ Edge selection
       :width: 500px
       :align: center
 
-.. _edge_result:
+.. _ia_edge_result:
 
 Edge 1 (bottom edge) and Edge 2 (top edge)
 ******************************************
@@ -168,9 +200,9 @@ The top right and the bottom right panels will display the edge fit results (red
 the observed edges. Check that the fit is good by checking that the red dashed lines match well the positions of the edges. 
 If the fit is not good, it may help to adjust the following:
 
-   *  :ref:`Edge selection <edge_selection>`
-   *  :ref:`Fit threshold <fit_theshold>`
-   *  :ref:`Polynomial order <poly_order>`
+   *  :ref:`Edge selection <ia_edge_selection>`
+   *  :ref:`Fit threshold <ia_fit_theshold>`
+   *  :ref:`Polynomial order <ia_poly_order>`
  
    .. figure:: /images/ia/edges_fitted.png
       :alt: edges_fitted

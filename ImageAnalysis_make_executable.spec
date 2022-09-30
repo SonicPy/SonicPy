@@ -140,7 +140,7 @@ coll = COLLECT(exe,
 if _platform == "darwin":
     app = BUNDLE(coll,
                  name='TravelDistance_{}.app'.format(__version__),
-                 icon='ia/resources/icons/icon.icns',
+                 #icon='ia/resources/icons/icon.icns',
                  bundle_identifier=None,
                  info_plist={
                     'NSPrincipalClass': 'NSApplication',

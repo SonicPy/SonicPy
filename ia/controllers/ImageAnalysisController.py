@@ -6,15 +6,17 @@ from functools import partial
 import os.path
 
 from PyQt5.QtCore import QObject
+from PyQt5 import QtWidgets
 import numpy as np
 
 #from utilities.utilities import *
 from ia.widgets.ImageAnalysisWidget import ImageAnalysisWidget
 
 from ia.models.ImageAnalysisModel import  ImageAnalysisModel
+from um.widgets.UtilityWidgets import open_file_dialog, open_files_dialog, save_file_dialog
 
-from um.widgets.UtilityWidgets import open_file_dialog
 import pyqtgraph as pg
+import csv
 from .. import resources_path
 
 
@@ -26,7 +28,7 @@ class ImageAnalysisController(QObject):
         self.model = ImageAnalysisModel()
 
         self.fname = None
-    
+        self.folder_path = ''
         if app is not None:
             self.setStyle(app)
         self.display_window = ImageAnalysisWidget()
@@ -47,6 +49,9 @@ class ImageAnalysisController(QObject):
         self.make_connections()
         self.display_window.raise_widget()
 
+        path = '/Users/hrubiak/Globus/hpcat/16BMB/2021-2/s16bmb-20210717-e244302-Aihaiti/sam2/images'
+        self.set_folder_path(path)
+
         #fname = os.path.join(resources_path, '6031psi_049.tif')
         #self.update_data(filename=fname)
         
@@ -55,9 +60,10 @@ class ImageAnalysisController(QObject):
 
     def make_connections(self): 
         self.display_window.file_widget.file_selected_signal.connect(self.update_data)
-        self.display_window.open_btn.clicked.connect(self.update_data)
+        self.display_window.open_btn.clicked.connect(self.open_btn_callback)
+        self.display_window.file_widget.open_btn.clicked.connect(self.on_foler_clicked)
         self.display_window.compute_btn.clicked .connect(self.update_cropped)
-        self.display_window.save_btn.clicked.connect(self.save_result)
+        
 
         self.display_window.crop_btn.clicked.connect(self.autocrop_btn_callback)
       
@@ -69,6 +75,25 @@ class ImageAnalysisController(QObject):
         self.display_window.order_options.buttonClicked.connect(self.order_options_callback)
 
         self.display_window.threshold_num.editingFinished.connect(self.threshold_num_callback)
+
+        self.display_window.file_widget.export_btn.clicked.connect(self.save_btn_callback )
+
+    def save_btn_callback(self):
+        filename = save_file_dialog(self.display_window, 'Save as...', self.folder_path, '*.csv', True)
+        if len(filename):
+            self.export_table(filename)
+        
+    def export_table(self, filename):
+        data = self.display_window.file_widget.fileModel.get_table_data()
+        output_csv = filename
+        with open(output_csv, "w", newline='') as csv_file:
+            writer = csv.writer(csv_file, delimiter=',')
+            
+            for line in data:
+                writer.writerow(line)
+            csv_file.close()    
+
+
 
     def threshold_num_callback(self):
         num = self.display_window.threshold_num.value()
@@ -149,6 +174,7 @@ class ImageAnalysisController(QObject):
             abs_plot.setData(data_x, data_y)
             fname = self.display_window.fname_lbl.text()
             self.display_window.file_widget.fileModel.set_fname_result(fname, {'mean':str(round(y_diff,1)), 'std.dev':str(round(std_dev,1))})
+            self.display_window.file_widget.repaint()
 
     def update_frame(self):
         image = self.model.image
@@ -184,6 +210,28 @@ class ImageAnalysisController(QObject):
             self.model.add_ROI(selected, roi.pos(), roi.size())
 
         self.update_roi()
+
+    def set_folder_path(self, folder):
+        self.folder_path = folder
+        self.display_window.file_widget. folder_lbl.setText(folder)
+        self.display_window.file_widget.listview.setRootIndex(self.display_window.file_widget. fileModel.setRootPath(folder))
+
+    def on_foler_clicked(self, index):
+
+        path = QtWidgets.QFileDialog.getExistingDirectory(self.display_window, caption='Select Images folder',
+                                                     directory='')
+        if len(path):
+            self.set_folder_path(path)
+
+    def open_btn_callback(self, *args, **kwargs):
+        
+        filename = open_file_dialog(None, "Select Image File.",filter='*.png;*.tif;*.bmp')
+        if len(filename):
+            path = os.path.split(filename)[0]
+            self.set_folder_path(path)
+
+
+            self.display_window.file_widget.select_fname(os.path.split(filename)[-1])
         
     def update_data(self, *args, **kwargs):
         
@@ -192,21 +240,19 @@ class ImageAnalysisController(QObject):
         else:
             filename = kwargs.get('filename', None)
 
-        if not filename:
-            filename = open_file_dialog(None, "Load File(s).",filter='*.png;*.tif;*.bmp')
-            if len(filename):
-                path = os.path.split(filename)[0]
-                self.display_window.file_widget.listview.setRootIndex(self.display_window.file_widget. fileModel.setRootPath(path))
-        if len(filename):
-            
-            self.model.load_file(filename)
-            self.display_window.fname_lbl.setText(os.path.split( filename)[-1])
-            self.display_window.imgs['src'].setImage(self.model.src)
+        self.load_file(filename)
 
-            self.update_crop()
-            self.model.filter_image()
-            self.update_frame()
-            self.update_cropped()
+    def load_file(self, filename):
+        
+            
+        self.model.load_file(filename)
+        self.display_window.fname_lbl.setText(os.path.split( filename)[-1])
+        self.display_window.imgs['src'].setImage(self.model.src)
+
+        self.update_crop()
+        self.model.filter_image()
+        self.update_frame()
+        self.update_cropped()
 
     def update_crop(self, *args, **kwargs):
         
@@ -274,24 +320,6 @@ class ImageAnalysisController(QObject):
         for i, roi in enumerate(rois):
             roi.edge_type = edges[i]
             
-    def up_down_signal_callback(self, event):
-        new_ind = self.waveform_index
-        if event == 'up':
-            new_ind = self.waveform_index + 1
-        if event == 'down':
-            new_ind = self.waveform_index - 1
-        self.show_waveform(new_ind, update_cursor_pos=True)
-
-    def save_result(self):
-        if self.fname is not None:
-            filename = self.fname + '.json'
-            self.model.save_result(filename)
-
-    def RecallSetupCallback(self):
-        print('RecallSetupCallback')
-
-    def SaveSetupCallback(self):
-        print('SaveSetupCallback')
 
     def preferences_module(self, *args, **kwargs):
         pass

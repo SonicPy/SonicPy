@@ -7,6 +7,9 @@ import sys
 
 sys.setrecursionlimit(5000)
 
+#import cv2
+#cvlibs = os.path.join(os.path.dirname(cv2.__file__), '.libs')
+
 folder = os.getcwd()
 site_packages_path = get_python_lib()
 print(folder)
@@ -24,7 +27,7 @@ platform = ''
 extra_binaries=[]
 
 
-folder = 'C:\Users\hrubiak\anaconda3\lib\site-packages\cv2\'
+folder = ''
 
 if _platform == "linux" or _platform == "linux2":
     platform = "Linux"
@@ -32,6 +35,8 @@ if _platform == "linux" or _platform == "linux2":
 elif _platform == "win32" or _platform == "cygwin":
     platform = "Win"
     name = "TravelDistance.exe"
+    sys.path.append("C:\\Users\\hrubiak\\Documents\\GitHub\\sonicPy")
+    folder = 'C:\\Users\\hrubiak\\anaconda3\\lib\\site-packages\\cv2'
  
 elif _platform == "darwin":
     platform = "Mac"
@@ -54,7 +59,7 @@ a = Analysis(['ImageAnalysis.py'],
              pathex=[folder],
              binaries=extra_binaries,
              datas=extra_datas,
-             hiddenimports=['cv2'
+             hiddenimports=['cv2', "ia"
                             ],
              hookspath=[],
              runtime_hooks=[],

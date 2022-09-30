@@ -8,6 +8,7 @@ import platform
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 import pyqtgraph
+import cv2
 
 theme = 1
 

@@ -12,6 +12,7 @@ import json
 import cv2
 import numpy as np
 
+print(cv2.__file__)
 
 from skimage.transform import resize
 from scipy import interpolate

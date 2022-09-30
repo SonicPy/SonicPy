@@ -215,8 +215,10 @@ class TimeOfFlightController(QObject):
     # Overview controller callbacks
     ###
 
-    def freq_settings_changed_signal_callback(self, freq):
-        self.correlation_controller.display_window.freq_ebx.setValue(freq)
+    def freq_settings_changed_signal_callback(self, freq_settings):
+        selected_freq = freq_settings['f_selected']
+        self.correlation_controller.display_window.freq_ebx.setValue(selected_freq)
+        self.multiple_frequencies_controller.update_freq_settings(freq_settings)
 
     def file_selected_signal_callback(self, data):
 

@@ -47,6 +47,11 @@ class MultipleFrequencyController(QObject):
     def reset(self):
         self.model.clear()
         
+    def update_freq_settings(self, f_settings):
+        
+        min_f = f_settings['f_start']
+        max_f = f_settings['f_end']
+        self.set_f_start_end(min_f, max_f)
 
     def do_all_frequencies_btn_callback(self):
 
@@ -197,33 +202,36 @@ class MultipleFrequencyController(QObject):
             min_f = min(all_freqs)
             count = len(all_freqs)\
 
-            self.widget.frequency_sweep_widget.f_min_bx.blockSignals(True)
-            self.widget.frequency_sweep_widget.f_max_bx.blockSignals(True)
-
-            self.widget.frequency_sweep_widget.f_min_bx.setMinimum(min_f)
-            self.widget.frequency_sweep_widget.f_min_bx.setMaximum(max_f)
-            self.widget.frequency_sweep_widget.f_max_bx.setMinimum(min_f)
-            self.widget.frequency_sweep_widget.f_max_bx.setMaximum(max_f)
-
-            max_f_model = self.model.f_max_sweep
-            min_f_model = self.model.f_min_sweep
-
-            if min_f_model != None:
-                min_f = min_f_model
-
-            if max_f_model != None:
-                max_f = max_f_model
-
-            self.widget.frequency_sweep_widget.f_min_bx.setValue(min_f)
-            self.widget.frequency_sweep_widget.f_max_bx.setValue(max_f)
-
-            self.widget.frequency_sweep_widget.f_min_bx.blockSignals(False)
-            self.widget.frequency_sweep_widget.f_max_bx.blockSignals(False)
+            self.set_f_start_end(min_f, max_f)
 
         
         self.recover_selected_regions(fname, freq_val_base)
         self.update_analysis(data)
         self.update_arrow_plot(data)
+
+    def set_f_start_end(self, min_f, max_f):
+        self.widget.frequency_sweep_widget.f_min_bx.blockSignals(True)
+        self.widget.frequency_sweep_widget.f_max_bx.blockSignals(True)
+
+        self.widget.frequency_sweep_widget.f_min_bx.setMinimum(min_f)
+        self.widget.frequency_sweep_widget.f_min_bx.setMaximum(max_f)
+        self.widget.frequency_sweep_widget.f_max_bx.setMinimum(min_f)
+        self.widget.frequency_sweep_widget.f_max_bx.setMaximum(max_f)
+
+        max_f_model = self.model.f_max_sweep
+        min_f_model = self.model.f_min_sweep
+
+        if min_f_model != None:
+            min_f = min_f_model
+
+        if max_f_model != None:
+            max_f = max_f_model
+
+        self.widget.frequency_sweep_widget.f_min_bx.setValue(min_f)
+        self.widget.frequency_sweep_widget.f_max_bx.setValue(max_f)
+
+        self.widget.frequency_sweep_widget.f_min_bx.blockSignals(False)
+        self.widget.frequency_sweep_widget.f_max_bx.blockSignals(False)
 
     def recover_selected_regions(self, fname, freq_val):
         

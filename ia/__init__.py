@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 #
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 
 import os
 from pathlib import Path
@@ -16,7 +16,7 @@ calibrants_path = os.path.join(resources_path, 'calibrants')
 icons_path = os.path.join(resources_path, 'icons')
 data_path = os.path.join(resources_path, 'data')
 style_path = os.path.join(resources_path, 'style')
-title = "SonicPy: Time-of-flight analysis. ver." + __version__ + "  © R. Hrubiak, 2022."
+title = "SonicPy: Travel-distance analysis. ver." + __version__ + "  © R. Hrubiak, 2022."
 home_path = str(Path.home())
 
 

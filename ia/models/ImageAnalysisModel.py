@@ -104,6 +104,7 @@ class ImageROI():
 class ImageAnalysisModel():
     def __init__(self):
         self.image = None
+        self.filename =''
         self.src = None
         self.cropped = None
         self.cropped_resized = None
@@ -160,6 +161,7 @@ class ImageAnalysisModel():
         self.image = image # - self.base_surface
 
     def load_file(self, fname, autocrop=False):
+        self.filename = fname
         src = np.flip(np.asarray(cv2.imread(fname,0),dtype=np.float),axis=0)
         self.src = src
         

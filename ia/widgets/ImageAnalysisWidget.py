@@ -14,7 +14,7 @@ from ia.widgets.FileViewWidget import FileViewWidget
 # Interpret image data as row-major instead of col-major
 pg.setConfigOptions(imageAxisOrder='row-major')
 
-from .. import style_path, icons_path
+from .. import style_path, icons_path,title
 
 class ImageAnalysisWidget(QMainWindow):
     
@@ -30,9 +30,9 @@ class ImageAnalysisWidget(QMainWindow):
         self.spectrum = None
 
 
-        self.setWindowTitle('Sample thickness analysis')
+        self.setWindowTitle(title)
 
-        self.resize(1500, 1000)
+        self.resize(1100, 770)
         
         self.make_widget()
 
@@ -61,7 +61,7 @@ class ImageAnalysisWidget(QMainWindow):
         self.splitter_widget = QtWidgets.QSplitter(Qt.Horizontal)
 
         self.file_widget = FileViewWidget()
-        self.file_widget.setMaximumWidth(300)
+        self.file_widget.setMinimumWidth(330)
         self.splitter_widget .addWidget(self.file_widget)
 
         self.analysis_widget = QtWidgets.QWidget()
@@ -86,6 +86,7 @@ class ImageAnalysisWidget(QMainWindow):
         self.crop_btn.setCheckable(True)
         self.crop_btn.setChecked(True)
         self.compute_btn = QtWidgets.QPushButton("Compute")
+        self.compute_btn.setCheckable(True)
         self.fname_lbl = QtWidgets.QLineEdit('')
         
         self.save_btn = QtWidgets.QPushButton('Save result')
@@ -98,7 +99,7 @@ class ImageAnalysisWidget(QMainWindow):
         self._buttons_layout_top.addWidget(self.fname_lbl)
        
         
-        self._buttons_layout_top.addWidget(QtWidgets.QLabel("   Thickness"))
+        self._buttons_layout_top.addWidget(QtWidgets.QLabel("   Distance"))
         self._buttons_layout_top.addWidget(self.result_lbl)
         #self._buttons_layout_top.addWidget(self.save_btn)
         self._buttons_layout_top.addSpacerItem(HorizontalSpacerItem())

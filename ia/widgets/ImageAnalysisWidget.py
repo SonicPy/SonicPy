@@ -32,7 +32,7 @@ class ImageAnalysisWidget(QMainWindow):
 
         self.setWindowTitle(title)
 
-        self.resize(1400, 870)
+        self.resize(1100, 770)
         
         self.make_widget()
 
@@ -61,7 +61,7 @@ class ImageAnalysisWidget(QMainWindow):
         self.splitter_widget = QtWidgets.QSplitter(Qt.Horizontal)
 
         self.file_widget = FileViewWidget()
-        #self.file_widget.setMaximumWidth(250)
+        self.file_widget.setMinimumWidth(330)
         self.splitter_widget .addWidget(self.file_widget)
 
         self.analysis_widget = QtWidgets.QWidget()

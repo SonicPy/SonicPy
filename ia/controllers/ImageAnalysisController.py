@@ -230,13 +230,21 @@ class ImageAnalysisController(QObject):
     def open_btn_callback(self, *args, **kwargs):
         
         filename = open_file_dialog(None, "Select Image File.",filter='*.png;*.tif;*.bmp')
+        
         if len(filename):
             path = os.path.split(filename)[0]
+            self.display_window.file_widget.fileModel.folder_loaded.connect(self.loaded_callback)
+            self.dialog_filename = filename
             self.set_folder_path(path)
+            
+            
+            
+            
+    
+    def loaded_callback(self, *args, **kwargs):
+        self.display_window.file_widget.select_fname(os.path.split(self.dialog_filename)[-1])
+        self.display_window.file_widget.fileModel.folder_loaded.disconnect(self.loaded_callback)
 
-
-            self.display_window.file_widget.select_fname(os.path.split(filename)[-1])
-        
     def update_data(self, *args, **kwargs):
         
         if len(args):

@@ -9,7 +9,7 @@ from ia.widgets.collapsible_widget import CollapsibleBox, EliderLabel
 import natsort
 
 class YourSystemModel(QtWidgets.QFileSystemModel):
-
+    folder_loaded = QtCore.pyqtSignal(str)
     def __init__(self):
         super(QtWidgets.QFileSystemModel, self).__init__()
  
@@ -19,7 +19,8 @@ class YourSystemModel(QtWidgets.QFileSystemModel):
 
     def get_fnames(self):
         model = QtWidgets.QFileSystemModel
-        idx = model.index(self, model.rootPath(self))
+        root = model.rootPath(self)
+        idx = model.index(self, root)
         rows = len(self.fnames)
         names = []
         for r in range(rows):
@@ -105,10 +106,10 @@ class YourSystemModel(QtWidgets.QFileSystemModel):
 
     def setRootPath(self, path):
         self.fldr_path = path
-        
+        self.directoryLoaded.connect(self.loaded_callback)
         ans = QtWidgets.QFileSystemModel.setRootPath(self, path)
         
-        self.directoryLoaded.connect(self.loaded_callback)
+        
         self.process_events()
 
         return ans
@@ -134,6 +135,7 @@ class YourSystemModel(QtWidgets.QFileSystemModel):
                 self.fnames[f] = {'result':{}}
 
         self.directoryLoaded.disconnect(self.loaded_callback)
+        self.folder_loaded.emit('')
     
     def setHeaderData(self, section, orientation, data, role=Qt.EditRole):
         if orientation == Qt.Horizontal and role in (Qt.DisplayRole, Qt.EditRole):
@@ -220,7 +222,8 @@ class FileViewWidget(QtWidgets.QWidget):
 
     def select_fname(self, fname):
         model =  QtWidgets.QFileSystemModel
-        idx = model.index(self.fileModel, model.rootPath(self.fileModel))
+        root = model.rootPath(self.fileModel)
+        idx = model.index(self.fileModel, root)
         files = self.fileModel.get_fnames()
         row = files.index(fname)
         child = idx.child(row, 0)

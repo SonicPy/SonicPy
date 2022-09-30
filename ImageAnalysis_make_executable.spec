@@ -22,7 +22,9 @@ extra_datas = [
 
 platform = ''
 extra_binaries=[]
-folder = ''
+
+
+folder = 'C:\Users\hrubiak\anaconda3\lib\site-packages\cv2\'
 
 if _platform == "linux" or _platform == "linux2":
     platform = "Linux"
@@ -52,7 +54,8 @@ a = Analysis(['ImageAnalysis.py'],
              pathex=[folder],
              binaries=extra_binaries,
              datas=extra_datas,
-             hiddenimports=[],
+             hiddenimports=['cv2'
+                            ],
              hookspath=[],
              runtime_hooks=[],
              excludes=excl,

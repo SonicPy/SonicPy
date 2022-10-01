@@ -1,7 +1,7 @@
 .. _tof:
 
 
-Time of flight analysis
+Time-of-flight analysis
 =======================
 
 The program relies on the multiple frequency method to obtain the couplant-corrected wave travel times (`Pantea et al. Rev. Sci. Instr. 2005 <https://aip.scitation.org/doi/full/10.1063/1.2130715>`_, `Sturtevant et al. Rev. Sci. Instr. 2020 <https://aip.scitation.org/doi/full/10.1063/5.0010475>`_). 

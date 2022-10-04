@@ -17,6 +17,7 @@ print(folder)
 block_cipher = None
 from sys import platform as _platform
 
+print(_platform)
 
 extra_datas = [
     ("ia/resources", "ia/resources"),
@@ -36,7 +37,8 @@ elif _platform == "win32" or _platform == "cygwin":
     platform = "Win"
     name = "TravelDistance.exe"
     sys.path.append("C:\\Users\\hrubiak\\Documents\\GitHub\\sonicPy")
-    folder = 'C:\\Users\\hrubiak\\anaconda3\\lib\\site-packages\\cv2'
+    folder = 'C:\\Users\\hrubiak\\Anaconda3\\lib\\site-packages\\cv2'
+    
  
 elif _platform == "darwin":
     platform = "Mac"
@@ -60,7 +62,7 @@ a = Analysis(['ImageAnalysis.py'],
              pathex=[folder],
              binaries=extra_binaries,
              datas=extra_datas,
-             hiddenimports=['cv2', "ia"
+             hiddenimports=['cv2', "ia", 'setuptools'
                             ],
              hookspath=[],
              runtime_hooks=[],
@@ -126,7 +128,7 @@ exe = EXE(pyz,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
-          console=True)
+          console=False)
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,

@@ -14,6 +14,6 @@ Executables:
 
 Some of the probrams are provided as executable versions for Windows, Mac OS (all 64bit) and can be downloaded from:
 
-https://github.com/hrubiak/sonicpy/releases
+https://github.com/sonicpy/sonicpy/releases
 
 The executable versions are self-contained and do not need a python installation.

@@ -62,7 +62,7 @@ class scopeWidget(QtWidgets.QWidget):
 
     def plot(self, x,y,sel_x=[],sel_y=[], xLabel='Time', dataLabel=''):
         fig = self.plot_widget.fig.win 
-        fig.plotData(x,y,sel_x,sel_y, xLabel, dataLabel)
+        fig.plotData(x,y,sel_x,sel_y, xLabel=xLabel, dataLabel=dataLabel)
 
     def clear_plot(self,):
         self.plot([],[])

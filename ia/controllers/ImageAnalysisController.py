@@ -180,7 +180,7 @@ class ImageAnalysisController(QObject):
         image = self.model.image
         img_shape = image.shape
 
-        filtered = self.model.compute_sobel()
+        #filtered = self.model.compute_sobel()
         
         self.display_window.imgs['absorbance'].setImage(image)
 

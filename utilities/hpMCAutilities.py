@@ -7,6 +7,7 @@ from um.widgets.CustomWidgets import FlatButton, DoubleSpinBoxAlignRight, Vertic
     HorizontalSpacerItem, ListTableWidget, VerticalLine, DoubleMultiplySpinBoxAlignRight
 from pathlib import Path
 import numpy as np
+import os
 
 def compare_lists(a,b):
    if len(a) !=len(b):
@@ -211,21 +212,21 @@ class mcaFilePreferences(QtWidgets.QDialog):
 def restore(file, obj):
 
    attributes  = [key for key, value in obj.__dict__.items() if not key.startswith("__")]
+   if os.path.isfile(file):
+      try:
+         with open(file) as f:
+            openned_file = json.load(f)
+         ok = True
+         
+      except:
+         ok = False
+         displayErrorMessage( 'opt_read') 
 
-   try:
-      with open(file) as f:
-         openned_file = json.load(f)
-      ok = True
       
-   except:
-      ok = False
-      displayErrorMessage( 'opt_read') 
-
-   
-   if ok:
-      for Opt in attributes:
-         if Opt in openned_file: 
-            setattr(obj, Opt, openned_file[Opt])
+      if ok:
+         for Opt in attributes:
+            if Opt in openned_file: 
+               setattr(obj, Opt, openned_file[Opt])
          
    return obj
 

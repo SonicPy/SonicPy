@@ -11,8 +11,8 @@ from um.models.pvServer import pvServer
 
 from .. import offline
 
-if not offline:
-    from epics import PV as epics_PV
+'''if not offline:
+    from epics import PV as epics_PV'''
 
 class PV(QObject):
     
@@ -66,7 +66,7 @@ class PV(QObject):
         else: self._unit = ''
 
         
-        if 'epics_PV_out' in settings and not offline:
+        '''if 'epics_PV_out' in settings and not offline:
             try:
                 self._epics_PV_out_name = settings['epics_PV_out']  
                 self._epics_PV_out = epics_PV(self._epics_PV_out_name)
@@ -74,7 +74,7 @@ class PV(QObject):
             except:
                 self._epics_PV_out = None
         else:
-            self._epics_PV_out = None
+            self._epics_PV_out = None'''
         self._epics_PV_in_monitor = None
         self._epics_monitor_on = False
 
@@ -83,8 +83,9 @@ class PV(QObject):
     
 
     def connect_epics_monitor(self):
-        
-        if 'epics_PV_in' in self.settings and not offline:
+        pass
+
+        '''if #'epics_PV_in' in self.settings and not offline:
             try:
                 self._epics_PV_in_name = self.settings['epics_PV_in']  
                 self._epics_PV_in = epics_PV(self._epics_PV_in_name)
@@ -92,7 +93,7 @@ class PV(QObject):
                 self._epics_PV_in_monitor = epicsMonitor(self._epics_PV_in, self.handle_epics_pv_callback, autostart=True)
                 #print(self._epics_PV_in)
             except:
-                self._epics_PV_in_monitor=None
+                self._epics_PV_in_monitor=None'''
 
 
     def handle_epics_pv_callback(self, Status):
@@ -111,7 +112,7 @@ class PV(QObject):
         
 
     
-class epicsMonitor(QtCore.QObject):
+'''class epicsMonitor(QtCore.QObject):
     callback_triggered = QtCore.pyqtSignal(str)
 
     def __init__(self, pv, callback, debounce_time=None, autostart=False):
@@ -132,7 +133,7 @@ class epicsMonitor(QtCore.QObject):
         self.monitor_On = False
 
     def onPVChange(self, pvname=None, char_value=None, **kws):
-        self.callback_triggered.emit(char_value)    
+        self.callback_triggered.emit(char_value)    '''
 
 class pvModel(QThread):
 
@@ -204,7 +205,7 @@ class pvModel(QThread):
             
             task = tasks[tag]
             self.create_pv(tag, task)
-            self.pvs[tag].connect_epics_monitor()
+            #self.pvs[tag].connect_epics_monitor()
    
     def create_pv(self, tag, task):
         pv_name = self.instrument + ':'+tag
@@ -310,7 +311,7 @@ class pvModel(QThread):
         
     def run(self):
         self.go= True
-        epics_wait = 0.05
+        #epics_wait = 0.05
         # do stuff
         while self.go:
             task = self.my_queue.get()
@@ -332,33 +333,33 @@ class pvModel(QThread):
                             param = task['param']
                             
                             # param must be validated prior to here !
-                            try:
-                                func(param)
-                            except:
-                                print('set failed: '+task_name)
+                            
+                            func(param)
+                            
+                            #print('set failed: '+task_name)
                             param_new = param == pv._val
                             pv._val = param
                             
-                            if param_new:
+                            '''if param_new:
                                 #print('set : '+task_name + ' '+ str(param))
                                 if pv._epics_PV_out is not None:
-                                    try:
-                                        e_param = param
-                                        if pv._epics_PV_in_monitor is not None:
-                                            pv._epics_PV_in_monitor.unSetPVmonitor()
-                                        time.sleep(epics_wait)
-                                        if type(e_param) == bool:
-                                            e_param = str(int(e_param))
-                                        #print ('write to epics ' + e_param)
-                                        pv._epics_PV_out.put(e_param)
-                                        time.sleep(epics_wait)
-                                        if pv._epics_PV_in_monitor is not None:
-                                            pv._epics_PV_in_monitor.SetPVmonitor()
-                                    except:
+                                    
+                                    e_param = param
+                                    if pv._epics_PV_in_monitor is not None:
+                                        pv._epics_PV_in_monitor.unSetPVmonitor()
+                                    time.sleep(epics_wait)
+                                    if type(e_param) == bool:
+                                        e_param = str(int(e_param))
+                                    #print ('write to epics ' + e_param)
+                                    pv._epics_PV_out.put(e_param)
+                                    time.sleep(epics_wait)
+                                    if pv._epics_PV_in_monitor is not None:
+                                        pv._epics_PV_in_monitor.SetPVmonitor()'''
+                            '''except:
                                         pass
                                         if pv._epics_PV_out is not None:
                                             print('could not put epics pv ' + pv._epics_PV_out_name)
-                                            #print(param)
+                                            #print(param)'''
                             
                             pv.value_changed_signal.emit(task_name,[param])
                             #print('emit '+ str(task_name) + ', '+ str(param))

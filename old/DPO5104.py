@@ -1,5 +1,6 @@
 
 import os.path, sys
+import wave
 import numpy as np
 from models.ScopeModel import Scope
 from utilities.utilities import *
@@ -54,6 +55,7 @@ class Scope_DPO5104(Scope, QThread):
                         ch = param
                         booster = i>0    # booster saves time
                         waveform = self._get_waveform(ch=ch, booster=booster)
+                        print(len(waveform))
                         i=i+1
                         self.waveform_updated_signal.emit(waveform)
 
@@ -156,6 +158,7 @@ class Scope_DPO5104(Scope, QThread):
         
     def _get_waveform(self, ch=1, x_axis_out=True, booster=False): 
         start = time.time()
+        print('_get_waveform')
         waveform  = self.DPO5000.read_data_one_channel( ch,
                                                         data_start=1, 
                                                         booster=booster, 

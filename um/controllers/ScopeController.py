@@ -5,7 +5,7 @@ import copy
 from PyQt5.QtCore import QThread, pyqtSignal
 import time
 from um.models.ScopeModel import Scope
-from um.models.DPO5104 import Scope_DPO5104
+
 import json
 
 
@@ -23,9 +23,16 @@ class ScopeController(pvController):
     #dataBGUpdatedSignal = pyqtSignal(dict)
     #runStateSignal = pyqtSignal(bool)
 
-    def __init__(self, parent, isMain = False, offline = False):
-        visa_hostname = '143'
-        model = Scope_DPO5104(parent, visa_hostname=visa_hostname, offline = offline)
+    def __init__(self, parent, isMain = False, offline = False, scope='DPO'):
+        visa_hostname = '54'
+        if scope == 'DPO':
+            from um.models.DPO5104 import Scope_DPO5104
+            model = Scope_DPO5104(parent, visa_hostname=visa_hostname, offline = offline)
+        elif scope == 'MSO':
+            from um.models.MSO54 import Scope_MSO54
+            model = Scope_MSO54(parent, visa_hostname=visa_hostname, offline = offline)
+        
+        
         super().__init__(parent, model, isMain) 
         
         self.panel_items =[ 'instrument',

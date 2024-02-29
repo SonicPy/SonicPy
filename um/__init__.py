@@ -25,7 +25,7 @@ import pyqtgraph as pg
 offline = False
 
 
-def main():
+def main(scope = 'DPO'):
     from um.controllers.UltrasoundController import UltrasoundController
     if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
         QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
@@ -37,7 +37,7 @@ def main():
     Theme = 1
     app = QtWidgets.QApplication([])
     #app.aboutToQuit.connect(app.deleteLater)
-    controller = UltrasoundController(app, _platform, Theme, offline= offline )
+    controller = UltrasoundController(app, _platform, Theme, offline= offline, scope = scope)
     controller.show_window()
 
     if _platform == "Darwin":    #macOs has a 'special' way of handling preferences menu

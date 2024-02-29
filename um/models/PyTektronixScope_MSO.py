@@ -88,6 +88,7 @@ class TektronixScope(object):
                 self.instrument = ID
                 self._inst = instrument
                 self.connected = True
+                print(instrument, ' connected')
                 
                 return True
             else:
@@ -410,11 +411,11 @@ class TektronixScope(object):
         if data_start is None:
             data_start = 1
         data_start = int(data_start)
-        self.write('DATA:START %i'%data_start)
+        self.write('data:start %i'%data_start)
         self.booster = False
 
     def get_data_start(self):
-        return int(self.ask('DATA:START?'))
+        return int(self.ask('data:start?'))
 
     def get_horizontal_record_length(self):
         return int(self.ask("horizontal:recordlength?"))
@@ -527,7 +528,7 @@ class TektronixScope(object):
             self.X = self.x_0 + np.arange(self.data_start-1, self.data_stop)*self.delta_x
             self.booster = True
 
-        buffer = self.ask_raw('CURVE?')
+        buffer = self.ask_raw('DATA:CURVE?')
         self.num_acq = self.ask('ACQuire:NUMACq?')
         
         header = buffer[1:2]
@@ -563,7 +564,7 @@ class TektronixScope(object):
 # should print the device ID and number of point in returned waveform (100000)
 
 def main():
-    hostname = '143'
+    hostname = '54'
     rm = visa.ResourceManager()
     resources = rm.list_resources()
     #print(resources)
@@ -578,10 +579,11 @@ def main():
         #print(ID)
         
         DPO5000 = TektronixScope(hostname)
+        DPO5000.connect()
         ADC_wave = DPO5000.read_data_one_channel('CH1',1,100000)
 
         count_y = ADC_wave.size
-        #print(count_y)
+        print(count_y)
 
 if __name__ == '__main__':
     main()

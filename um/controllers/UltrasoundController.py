@@ -45,7 +45,7 @@ from um.widgets.panel import Panel
 ############################################################
 
 class UltrasoundController(QObject):
-    def __init__(self, app, _platform, theme, offline = False):
+    def __init__(self, app, _platform, theme, offline = False, scope = 'DPO'):
         super().__init__()
     
         self.scope_file_options_file='scope_file_settings.json'
@@ -64,12 +64,12 @@ class UltrasoundController(QObject):
         
         self.arb_controller = ArbController(self)
         self.arb_filter_controller = ArbFilterController(self)
-        self.afg_controller = AFGController(self, arb_controller = self.arb_controller, arb_filter_controller= self.arb_filter_controller,  offline = offline)
+        self.afg_controller = AFGController(self, arb_controller = self.arb_controller, arb_filter_controller= self.arb_filter_controller,  offline = True)
         
         self.save_data_controller = SaveDataController(self)
         self.scan_pv = self.arb_controller.scan_pv
         
-        self.scope_controller = ScopeController(self, offline = offline)
+        self.scope_controller = ScopeController(self, offline = offline, scope=scope)
 
         scope_waveform_widget = self.display_window.scope_widget
         self.scope_plot_controller = ScopePlotController(scope_controller = self.scope_controller,

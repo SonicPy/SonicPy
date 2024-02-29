@@ -133,6 +133,7 @@ class TektronixScope(object):
                 return self._inst.query(c)[:-1]
             else:
                 self._inst.write(cmd)
+                sleep(0.1)
                 return self._inst.read_raw()
         else:
             return None
@@ -513,7 +514,7 @@ class TektronixScope(object):
 
         if not booster:
         
-            self.write("DATA:ENCdg SFPbinary")
+            self.write("DATA:ENC SFPbinary")
             self.write("DATA:WIDTH 2")
             
 
@@ -528,7 +529,7 @@ class TektronixScope(object):
             self.X = self.x_0 + np.arange(self.data_start-1, self.data_stop)*self.delta_x
             self.booster = True
 
-        buffer = self.ask_raw('DATA:CURVE?')
+        buffer = self.ask_raw('CURVe?')
         self.num_acq = self.ask('ACQuire:NUMACq?')
         
         header = buffer[1:2]

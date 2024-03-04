@@ -23,7 +23,7 @@ import pyvisa as visa # https://pyvisa.readthedocs.io/en/latest/
 import numpy as np # https://numpy.org/
 
 # Modify the following line with the VISA resource address of your instrument
-visaResourceAddr = 'TCPIP0::<ip address>::inst0::INSTR'
+visaResourceAddr = 'TCPIP0::10.54.105.174::INSTR'
 
 rm = visa.ResourceManager()
 scope = rm.open_resource(visaResourceAddr)

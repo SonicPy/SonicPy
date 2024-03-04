@@ -133,7 +133,7 @@ class TektronixScope(object):
                 return self._inst.query(c)[:-1]
             else:
                 self._inst.write(cmd)
-                sleep(0.1)
+
                 return self._inst.read_raw()
         else:
             return None
@@ -475,87 +475,53 @@ class TektronixScope(object):
         # detect if the setting of the scope are change
         # To be safe, booster is set to False by default.  
         booster = self.booster
-        if booster:  
-            if not hasattr(self, 'first_read'): 
-                booster=False
-                self.booster = False
-            else: 
-                if self.first_read: 
-                    booster=False
-                    self.booster = False
-        self.first_read=False
-        if not booster:
-            # Set data_start and data_stop according to parameters
-            if t0 is not None or DeltaT is not None:
-                if data_stop is None and data_start is None:
-                    x_0 = self.get_out_waveform_horizontal_zero()
-                    delta_x = self.get_out_waveform_horizontal_sampling_interval()
-                    data_start = int((t0 - x_0)/delta_x)+1
-                    data_stop = int((t0+DeltaT - x_0)/delta_x)
-                else: # data_stop is not None or data_start is not None 
-                    raise TektronixScopeError("Error in read_data_one_channel, t0, DeltaT and data_start, data_stop args are mutually exculsive")
-            if data_start is not None:
-                self.set_data_start(data_start)
-            if data_stop is not None:
-                self.set_data_stop(data_stop) 
-            self.data_start = self.get_data_start()
-            self.data_stop = self.get_data_stop()
-        # Set the channel
-        if not booster:
-            
-            channel = self.get_data_source()
 
-            self.ch_ind = int(self.channel_name(channel)[2:])-1    
-        if not booster:
-            if not self.is_channel_selected(channel):
-                raise TektronixScopeError("Try to read channel %s which is not selectecd"%(str(channel)))
-
-         
-
-        if not booster:
+        scope = self._inst
+       
         
-            self.write("DATA:ENC SFPbinary")
-            self.write("DATA:WIDTH 2")
-            
-
-
-            self.offset = self.get_out_waveform_vertical_position()
-            self.scale = self.get_out_waveform_vertical_scale_factor()
-            
-            self.yzero = float(self.ask('WFMPRE:YZERO?'))
-            self.x_0 = self.get_out_waveform_horizontal_zero()
-            self.delta_x = self.get_out_waveform_horizontal_sampling_interval()
-
-            self.X = self.x_0 + np.arange(self.data_start-1, self.data_stop)*self.delta_x
-            self.booster = True
-
-        buffer = self.ask_raw('CURVe?')
-        self.num_acq = self.ask('ACQuire:NUMACq?')
         
-        header = buffer[1:2]
-        header_offset = buffer[2:3]
-        N = int(header)
-        N_offset = int(header_offset)
+        scope.write("HEADER 0")
+        scope.write("DATA:SOUR CH1")
+        scope.write("DAT:ENC SRI")   # Signed Binary Format, LSB order
+        scope.write("DAT:WIDTH 1")
 
-        ADC_wave = buffer[N+N_offset:-1]
-        
-        count_x = self.X.size
-        try:
-            ADC_wave = np.frombuffer(ADC_wave, dtype=np.dtype('int16').newbyteorder('>'),count=count_x)
-        except:
-            return None
+        scope.write("DAT:START 1")
+        scope.write("DAT:STOP 1e10") # Set data stop to max
+        recordLength = int(scope.query("WFMO:NR_P?"))  # Query how many points are actually available
+        scope.write("DAT:STOP {0}".format(recordLength)) # Set data stop to match points available
 
-        count_y = ADC_wave.size
-        #print(count_y)
+        # Fetch horizontal scaling factors
+        xinc = float(scope.query("WFMO:XINCR?"))
+        xzero = float(scope.query("WFMO:XZERO?"))
+        pt_off = int(scope.query("WFMO:PT_OFF?"))
+
+        # Fetch vertical scaling factors
+        ymult = float(scope.query("WFMO:YMULT?"))
+        yzero = float(scope.query("WFMO:YZERO?"))
+        yoff = float(scope.query("WFMO:YOFF?"))
         
-        # The output of CURVE? is scaled to the display of the scope
-        # The following converts the data to the right scale
-        Y = (ADC_wave - self.offset) *self.scale  + self.yzero
-        #Y = (res - self.offset)*self.scale
+        #buffer = self.ask_raw('CURVe?')
+        # Fetch waveform data
+        self._inst.write("curve?")
+
+        # Data is sent back with ieee defined header.  ie. #41000<binary data bytes>\n
+        # PyVISA read_binary_values() method will automatically read and parse the ieee block header so you don't have to.
+        rawData = self._inst.read_binary_values(datatype='b', is_big_endian=False, container=np.ndarray, header_fmt='ieee', expect_termination=True)
+        dataLen = len(rawData)
+
+        # Create numpy arrays of floating point values for the X and Y axis
+        t0 = (-pt_off * xinc) + xzero
+        xvalues = np.ndarray(dataLen, np.float)
+        yvalues = np.ndarray(dataLen, np.float)
+        for i in range(0,dataLen):
+            xvalues[i] = t0 + xinc * i # Create timestamp for the data point
+            yvalues[i] = float(rawData[i] - yoff) * ymult + yzero # Convert raw ADC value into a floating point value
+
+
         if x_axis_out:
-            return self.X, Y
+            return xvalues, yvalues
         else:
-            return Y
+            return yvalues
 
     #Zoom Command Group
 

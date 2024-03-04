@@ -578,7 +578,7 @@ def main():
         #print(ID)
         
         DPO5000 = TektronixScope(hostname)
-        ADC_wave = DPO5000.read_data_one_channel('CH1',1,100000)
+        ADC_wave = DPO5000.read_data_one_channel('CH1',1,10000)
 
         count_y = ADC_wave.size
         #print(count_y)

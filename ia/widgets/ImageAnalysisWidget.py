@@ -85,6 +85,9 @@ class ImageAnalysisWidget(QMainWindow):
         self.crop_btn = QtWidgets.QPushButton("Auto crop")
         self.crop_btn.setCheckable(True)
         self.crop_btn.setChecked(True)
+        self.rot90_btn = QtWidgets.QPushButton("Rotate 90")
+        self.rot90_btn.setCheckable(True)
+        self.rot90_btn.setChecked(False)
         self.compute_btn = QtWidgets.QPushButton("Compute")
         self.compute_btn.setCheckable(True)
         self.fname_lbl = QtWidgets.QLineEdit('')
@@ -113,6 +116,7 @@ class ImageAnalysisWidget(QMainWindow):
         self._menu_bar_layout.setContentsMargins(0,0,0,0)
 
         self._menu_bar_layout.addWidget(self.crop_btn)
+        self._menu_bar_layout.addWidget(self.rot90_btn)
 
         self._menu_bar_layout.addWidget(QtWidgets.QLabel('      Sample type'))
 

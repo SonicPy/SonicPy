@@ -13,7 +13,7 @@ class YourSystemModel(QtWidgets.QFileSystemModel):
     def __init__(self):
         super(QtWidgets.QFileSystemModel, self).__init__()
  
-        self.horizontalHeaders = [''] * 6
+        self.horizontalHeaders = [''] * 8
         self.fnames = {}
         self.fldr_path = ''
 
@@ -31,23 +31,32 @@ class YourSystemModel(QtWidgets.QFileSystemModel):
 
     def get_table_data(self):
         
+        cols = {4:'mean',
+                5:'std.dev',
+                6:'edge1',
+                7:'edge2'}
        
         lines=[]
         first_line = ['File', 
                     'Distance (pixels)', 
-                    'st.dev (pixesl)']
+                    'st.dev (pixesl)',
+                    'Edge 1',
+                    'Edge 2']
         lines.append(first_line)
        
         for fname in self.fnames:
             
             mean = ''
             stddev = ''
+            edge1 = ''
+            edge2 = ''
+            line = [fname,'','','','',]
+            for col in cols:
             
-            if 'mean' in self.fnames [fname] ['result']:
-                mean = self.fnames [fname] ['result']['mean']
-            if 'std.dev' in self.fnames [fname] ['result']:
-                stddev = self.fnames [fname] ['result']['std.dev']
-            line = [fname, mean, stddev]
+                if cols[col] in self.fnames [fname] ['result']:
+                    line[col-3] = self.fnames [fname] ['result'][cols[col]]
+           
+            #line = [fname, mean, stddev, edge1, edge2]
             lines.append(line)
         return lines
 
@@ -72,35 +81,30 @@ class YourSystemModel(QtWidgets.QFileSystemModel):
         return f_out
 
     def columnCount(self, parent = QtCore.QModelIndex()):
-        return super(YourSystemModel, self).columnCount()+2
+        return super(YourSystemModel, self).columnCount()+4
 
     def data(self, index, role):
-        if index.column() == self.columnCount() - 2:
-            if role == QtCore.Qt.DisplayRole:
-                model = QtWidgets.QFileSystemModel
-                
-                absp = model.fileInfo(self, index).absoluteFilePath()
-                fpath = os.path.normpath(absp)
-                f = ''
-                if fpath in self.fnames:
-                    if 'mean' in self.fnames [fpath] ['result']:
-                        f = self.fnames [fpath] ['result']['mean']
-                return f
-            if role == QtCore.Qt.TextAlignmentRole:
-                return QtCore.Qt.AlignHCenter
-        if index.column() == self.columnCount() - 1:
-            if role == QtCore.Qt.DisplayRole:
-                model = QtWidgets.QFileSystemModel
-               
-                absp = model.fileInfo(self, index).absoluteFilePath()
-                fpath = os.path.normpath(absp)
-                f = ''
-                if fpath in self.fnames:
-                    if 'std.dev' in self.fnames [fpath] ['result']:
-                        f = self.fnames [fpath] ['result']['std.dev']
-                return f
-            if role == QtCore.Qt.TextAlignmentRole:
-                return QtCore.Qt.AlignHCenter
+
+        cols = {4:'mean',
+                5:'std.dev',
+                6:'edge1',
+                7:'edge2'}
+        for col in cols:
+            
+            if index.column() == col:
+                if role == QtCore.Qt.DisplayRole:
+                    model = QtWidgets.QFileSystemModel
+                    
+                    absp = model.fileInfo(self, index).absoluteFilePath()
+                    fpath = os.path.normpath(absp)
+                    f = ''
+                    if fpath in self.fnames:
+                        if cols[col] in self.fnames [fpath] ['result']:
+                            f = self.fnames [fpath] ['result'][cols[col]]
+                    return f
+                if role == QtCore.Qt.TextAlignmentRole:
+                    return QtCore.Qt.AlignHCenter
+   
 
         return super(YourSystemModel, self).data(index, role)
 
@@ -125,7 +129,7 @@ class YourSystemModel(QtWidgets.QFileSystemModel):
         for i in range(0, rows):
             child = idx.child(i, idx.column())
             fname =  model.fileName(self, child)
-            if '.tif' in fname or ".bmp" in fname:
+            if '.tif' in fname or ".bmp" in fname or ".jpg" in fname:
                 files.append(os.path.normpath(os.path.join(root, fname)))
 
         files = natsort.natsorted(files)
@@ -197,7 +201,7 @@ class FileViewWidget(QtWidgets.QWidget):
         
         self.fileModel.setFilter(QtCore.QDir.NoDotAndDotDot |  QtCore.QDir.Files)
 
-        self.filters = ["*.tif", '*.tiff', "*.bmp"]
+        self.filters = ["*.tif", '*.tiff', "*.bmp", "*.jpg"]
         self.initialized = False
  
     def init_listview(self, folder):
@@ -214,6 +218,8 @@ class FileViewWidget(QtWidgets.QWidget):
         self.fileModel.setHeaderData(0, Qt.Horizontal, "File")
         self.fileModel.setHeaderData(4, Qt.Horizontal, "Distance")
         self.fileModel.setHeaderData(5, Qt.Horizontal, f'\N{GREEK SMALL LETTER SIGMA}')
+        self.fileModel.setHeaderData(6, Qt.Horizontal, "Edge 1")
+        self.fileModel.setHeaderData(7, Qt.Horizontal, "Edge 2")
 
         self.listview.selectionModel().selectionChanged.connect(self.on_selection_changed)
         self.listview.setRootIndex(self. fileModel.setRootPath(folder))

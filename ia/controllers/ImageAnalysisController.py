@@ -66,6 +66,7 @@ class ImageAnalysisController(QObject):
         
 
         self.display_window.crop_btn.clicked.connect(self.autocrop_btn_callback)
+        self.display_window.rot90_btn.clicked.connect(self.rot90_btn_callback)
       
         self.display_window.edge_roi_1.sigRegionChangeFinished.connect(self.roi_changed_callback)
         self.display_window.edge_roi_2.sigRegionChangeFinished.connect(self.roi_changed_callback) 
@@ -134,6 +135,8 @@ class ImageAnalysisController(QObject):
             abs_plot = self.display_window.abs_plt
             
             abs_datas = []
+
+            
             #legends = [self.display_window.edge1_plt_legend, self.display_window.edge2_plt_legend]
         
             for i, roi in enumerate(self.model.rois):
@@ -173,7 +176,13 @@ class ImageAnalysisController(QObject):
                 
             abs_plot.setData(data_x, data_y)
             fname = self.model.filename
-            self.display_window.file_widget.fileModel.set_fname_result(fname, {'mean':str(round(y_diff,1)), 'std.dev':str(round(std_dev,1))})
+
+            y_0 = self.model.settings['crop_limits'][0][1]
+
+            self.display_window.file_widget.fileModel.set_fname_result(fname, {'mean':str(round(y_diff,1)), 
+                                                                               'std.dev':str(round(std_dev,1)),
+                                                                               'edge1':str(round(np.mean(edge1_y)+y_0,1)),
+                                                                               'edge2':str(round(np.mean(edge2_y)+y_0,1))})
             self.display_window.file_widget.repaint()
 
     def update_frame(self):
@@ -229,7 +238,7 @@ class ImageAnalysisController(QObject):
 
     def open_btn_callback(self, *args, **kwargs):
         
-        filename = open_file_dialog(None, "Select Image File.",filter='*.png;*.tif;*.bmp')
+        filename = open_file_dialog(None, "Select Image File.",filter='*.png;*.tif;*.bmp;*.jpg')
         
         if len(filename):
             path = os.path.split(filename)[0]
@@ -285,6 +294,21 @@ class ImageAnalysisController(QObject):
             self.update_crop()
             self.model.filter_image()
             self.update_frame()
+
+    def rot90_btn_callback(self, btn):
+        filename = self.model.filename
+        rot90 = self.display_window.rot90_btn.isChecked()
+        self.model.settings['rot90']= rot90
+        if filename != '':
+            self.model.load_file(filename)
+            self.display_window.fname_lbl.setText(os.path.split( filename)[-1])
+            self.display_window.imgs['src'].setImage(self.model.src)
+
+            self.update_crop()
+            self.model.filter_image()
+            self.update_frame()
+            self.update_cropped()
+         
 
     def crop_roi_changed_callback(self, roi:pg.graphicsItems.ROI.ROI):
         self.display_window.crop_btn.setChecked(False)

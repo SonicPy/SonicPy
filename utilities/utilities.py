@@ -1,7 +1,8 @@
 
 import numpy as np
 from scipy import signal
-from scipy import blackman, nanmean
+from numpy import nanmean
+from scipy.signal.windows import blackman#, nanmean
 from scipy.signal import hilbert, tukey
 from scipy.fftpack import fft
 
@@ -263,10 +264,10 @@ def recursively_save_dict_contents_to_group(h5file, path, dic):
     """
     for key, item in dic.items():
         if isinstance(item, (float,int)):
-            item = np.float64(item)
+            item = float(item)
         if isinstance(item,(list)):
-            item = np.asarray(item, dtype=np.float64)
-        if isinstance(item, (np.ndarray, np.int64, np.float64, str, bytes)):
+            item = np.asarray(item, dtype=float)
+        if isinstance(item, (np.ndarray, np.int64, float, str, bytes)):
             h5file[path + key] = item
         elif isinstance(item, dict):
             recursively_save_dict_contents_to_group(h5file, path + key + '/', item)

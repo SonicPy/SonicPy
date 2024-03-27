@@ -164,7 +164,7 @@ class ImageAnalysisModel():
 
     def load_file(self, fname, autocrop=False):
         self.filename = fname
-        src = np.flip(np.asarray(cv2.imread(fname,0),dtype=np.float),axis=0)
+        src = np.flip(np.asarray(cv2.imread(fname,0),dtype=float),axis=0)
         if self.settings['rot90']:
             src = np.rot90(src)
         self.src = src

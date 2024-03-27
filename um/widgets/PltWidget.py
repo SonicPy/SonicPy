@@ -231,7 +231,7 @@ class CustomViewBox(pg.ViewBox):
         self.vLine = myVLine(movable=False, pen=pg.mkPen(color=(0, 255, 0), width=2 , style=QtCore.Qt.DashLine))
         
         #self.vLine.sigPositionChanged.connect(self.cursor_dragged)
-        self.vLineFast = myVLine(movable=False,pen=mkPen({'color': '808080', 'width': 2, 'style':QtCore.Qt.DashLine}))
+        self.vLineFast = myVLine(movable=False,pen=mkPen({'color': '#808080', 'width': 2, 'style':QtCore.Qt.DashLine}))
         self.cursors = [self.vLine, self.vLineFast]
         self.setMouseMode(self.RectMode)
         self.addItem(self.vLine, ignoreBounds=True)

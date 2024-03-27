@@ -59,8 +59,8 @@ dataLen = len(rawData)
 
 # Create numpy arrays of floating point values for the X and Y axis
 t0 = (-pt_off * xinc) + xzero
-xvalues = np.ndarray(dataLen, np.float)
-yvalues = np.ndarray(dataLen, np.float)
+xvalues = np.ndarray(dataLen, float)
+yvalues = np.ndarray(dataLen, float)
 for i in range(0,dataLen):
     xvalues[i] = t0 + xinc * i # Create timestamp for the data point
     yvalues[i] = float(rawData[i] - yoff) * ymult + yzero # Convert raw ADC value into a floating point value

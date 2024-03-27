@@ -22,7 +22,7 @@ from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 import pyqtgraph as pg
 
-offline = False
+offline = True
 
 
 def main(scope = 'DPO'):

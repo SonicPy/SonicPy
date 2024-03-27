@@ -7,9 +7,9 @@ from pathlib import Path
 import platform
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
-import pyqtgraph
+#import pyqtgraph
 import cv2
-import setuptools
+#import setuptools
 
 
 theme = 1

@@ -1,5 +1,5 @@
 
-from um.models.arb_filters import my_filter, no_filter, tukey_filter
+from um.models.arb_filters import my_filter, no_filter, tukey_filter, nuttall_filter
 
 from PyQt5.QtCore import QThread, pyqtSignal
 from um.models.pv_model import pvModel
@@ -52,6 +52,54 @@ class no_filter_model(pvModel):
         output_channel = self.pv_server.get_pv(self.pvs['output_channel']._val)
         output_channel.set(ans)
        
+
+    def _set_apply(self, val):
+        if val:
+            self.compute_waveform()
+            self.pvs['apply'].set(False)
+
+class nuttall_filter_controller(pvController):
+    def __init__(self, parent, isMain = False):
+        model = nuttall_filter_model(parent)
+        super().__init__(parent, model, isMain)
+        self.panel_items =[
+                      'apply']
+        self.init_panel("Nuttall", self.panel_items)
+        if isMain:
+            self.show_widget()
+
+class nuttall_filter_model(pvModel):
+    model_value_changed_signal = pyqtSignal(dict)
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.pv_server = pvServer()
+        self.offline = True
+        ## model speficic:
+        self.instrument = 'nuttall_filter'
+        self.param = {  'name': 'Nuttall',
+                        'reference':'',
+                        'comment':''}
+
+        self.tasks = {  'output_channel':
+                                {'desc': ';Output channel', 'val':'',
+                                'param':{ 'type':'s'}},
+                        'waveform_in':
+                                {'desc': 'Waveform IN', 'val':{},
+                                'param':{ 'type':'dict'}},
+                        'apply':
+                                {'desc': ';Apply', 'val':False,
+                                'param':{ 'type':'b'}},
+                                }
+
+        self.create_pvs(self.tasks)
+
+    def compute_waveform(self):
+        func = nuttall_filter
+        settings = self.get_settings(['waveform_in'])[self.settings_file_tag]
+        ans = func(settings)
+        output_channel = self.pv_server.get_pv(self.pvs['output_channel']._val)
+        output_channel.set(ans)
+
 
     def _set_apply(self, val):
         if val:

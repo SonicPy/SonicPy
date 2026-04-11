@@ -19,12 +19,20 @@ def tukey_filter(params):
     waveform_in = params['waveform_in']
     t = waveform_in['t']
     waveform = waveform_in['waveform']
-    #tk = tukey(len(waveform), alpha)
+    tk = tukey(len(waveform), alpha)
+    waveform = waveform * tk
+    waveform_out = {'t':t,'waveform':waveform}
+
+
+    return waveform_out
+
+def nuttall_filter(params):
+    waveform_in = params['waveform_in']
+    t = waveform_in['t']
+    waveform = waveform_in['waveform']
     tk = windows.nuttall(len(waveform))
     waveform = waveform * tk
     waveform_out = {'t':t,'waveform':waveform}
-    
-
     return waveform_out
 
 

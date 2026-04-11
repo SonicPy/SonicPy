@@ -17,17 +17,19 @@ def no_filter(params):
 def tukey_filter(params):
     alpha = params['alpha']
     waveform_in = params['waveform_in']
+    if 't' not in waveform_in or 'waveform' not in waveform_in:
+        return waveform_in
     t = waveform_in['t']
     waveform = waveform_in['waveform']
     tk = tukey(len(waveform), alpha)
     waveform = waveform * tk
     waveform_out = {'t':t,'waveform':waveform}
-
-
     return waveform_out
 
 def nuttall_filter(params):
     waveform_in = params['waveform_in']
+    if 't' not in waveform_in or 'waveform' not in waveform_in:
+        return waveform_in
     t = waveform_in['t']
     waveform = waveform_in['waveform']
     tk = windows.nuttall(len(waveform))

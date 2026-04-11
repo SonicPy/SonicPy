@@ -109,8 +109,17 @@ class ArbFilterController(pvController):
 
     def filter_type_signal_callback(self, pv_name, data):
         data = data[0]
-        
+
         self.arb_filter_edit_controller.widget.set_selected_choice(data)
+
+        # Forward the current source waveform to the newly selected filter
+        # so its Apply has data to operate on (and refresh the AFG plot now).
+        current_waveform = self.model.pvs['waveform_in']._val
+        if current_waveform:
+            index = self.f_types.index(data)
+            filter_controller = self.arb_filter_edit_controller.controllers[index]
+            filter_controller.model.pvs['waveform_in'].set(current_waveform)
+            filter_controller.model.pvs['apply'].set(True)
 
     
 
